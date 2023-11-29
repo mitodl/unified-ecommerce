@@ -1,0 +1,10 @@
+FROM mit-open-web
+
+USER root
+
+WORKDIR /tmp
+
+RUN pip install --force-reinstall jupyter
+
+USER mitodl
+WORKDIR /src

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>mitodl/.github:renovate-config"],
+  "packageRules": [
+    {
+      "matchFiles": ["frontends/unifiedecommerce/package.json"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "matchSourceUrls": ["https://github.com/ckeditor/ckeditor5"]
+    }
+  ]
+}

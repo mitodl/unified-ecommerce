@@ -1,0 +1,99 @@
+version: "3.7"
+
+x-environment: &py-environment
+  DEBUG: ${DEBUG:-True}
+  DEV_ENV: "True" # necessary to have nginx connect to web container
+  NODE_ENV: ${NODE_ENV:-development}
+  DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
+  MITOL_UE_SECURE_SSL_REDIRECT: "False"
+  MITOL_UE_DB_DISABLE_SSL: "True"
+  MITOL_UE_FEATURES_DEFAULT: ${MITOPEN_FEATURES_DEFAULT:-True}
+  CELERY_TASK_ALWAYS_EAGER: "False"
+  CELERY_BROKER_URL: redis://redis:6379/4
+  CELERY_RESULT_BACKEND: redis://redis:6379/4
+  DOCKER_HOST: ${DOCKER_HOST:-missing}
+
+services:
+  db:
+    image: postgres:16
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=postgres
+
+  redis:
+    image: redis:5.0.14
+    ports:
+      - "6379"
+
+  nginx:
+    image: nginx:1.25
+    ports:
+      - "8073:8073"
+    links:
+      - web
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/conf.d/web.conf
+      - ./:/src
+      - django_media:/app/django_media
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      <<: *py-environment
+      PORT: 8071
+    env_file: .env
+    command: ./scripts/run-django-dev.sh
+    stdin_open: true
+    tty: true
+    ports:
+      - "8071:8071"
+    links:
+      - db
+      - redis
+    volumes:
+      - .:/src
+      - django_media:/var/media
+
+  # watch:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile-node
+  #   working_dir: /src
+  #   command: ./scripts/run-watch-dev.sh
+  #   ports:
+  #     - "8052:8052"
+  #     - "8062:8062"
+  #   environment:
+  #     DOCKER_HOST: ${DOCKER_HOST:-missing}
+  #     NODE_ENV: ${NODE_ENV:-development}
+  #     CONTAINER_NAME: "watch"
+  #     WEBPACK_PORT_MITOPEN: 8062
+  #   env_file: .env
+  #   volumes:
+  #     - .:/src
+  #     - yarn-cache:/home/mitodl/.cache/yarn
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment: *py-environment
+    env_file: .env
+    command: >
+      /bin/bash -c '
+      sleep 3;
+      celery -A unifiedecommerce.celery:app worker -Q default -B -l ${MITOPEN_LOG_LEVEL:-INFO} &
+      celery -A unifiedecommerce.celery:app worker -Q edx_content,default -l ${MITOPEN_LOG_LEVEL:-INFO}'
+    links:
+      - db
+      - redis
+    volumes:
+      - .:/src
+      - django_media:/var/media
+
+volumes:
+  django_media:
+  yarn-cache:

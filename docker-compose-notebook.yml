@@ -1,0 +1,36 @@
+version: "3.7"
+
+x-environment: &py-environment
+  DEBUG: "False"
+  DEV_ENV: "True" # necessary to have nginx connect to web container
+  NODE_ENV: "production"
+  DATABASE_URL: postgres://postgres:postgres@db:5432/postgres # pragma: allowlist secret
+  MITOL_UE_SECURE_SSL_REDIRECT: "False"
+  MITOL_UE_DB_DISABLE_SSL: "True"
+  MITOL_UE_FEATURES_DEFAULT: "True"
+  CELERY_TASK_ALWAYS_EAGER: "False"
+  CELERY_BROKER_URL: redis://redis:6379/4
+  CELERY_RESULT_BACKEND: redis://redis:6379/4
+  DOCKER_HOST: ${DOCKER_HOST:-missing}
+  WEBPACK_DEV_SERVER_HOST: ${WEBPACK_DEV_SERVER_HOST:-localhost}
+
+services:
+  notebook:
+    build:
+      context: .
+      dockerfile: Dockerfile-nb
+    volumes:
+      - .:/src
+    environment:
+      <<: *py-environment
+      BASE_DJANGO_APP_NAME: unifiedecommerce
+      # See https://docs.djangoproject.com/en/4.1/topics/async/#async-safety
+      # Do no use this outside the notebook
+      DJANGO_ALLOW_ASYNC_UNSAFE: true
+    env_file: .env
+    command: >
+      /bin/bash -c '
+      sleep 3 &&
+      jupyter notebook --no-browser --ip=0.0.0.0 --port=8080'
+    ports:
+      - "8080:8080"
