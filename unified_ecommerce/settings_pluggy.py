@@ -1,4 +1,4 @@
-from unifiedecommerce.envs import get_string
+from unified_ecommerce.envs import get_string
 
 # MITOPEN_AUTHENTICATION_PLUGINS = get_string(
 #     "MITOPEN_AUTHENTICATION_PLUGINS",

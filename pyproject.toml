@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "unifiedecommerce"
+name = "unified_ecommerce"
 version = "0.0.0"
 description = "Unified Ecommerce middleware for OL applications."
 license = "BSD-3"

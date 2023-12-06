@@ -33,10 +33,10 @@ class TestSettings(TestCase):
         Returns:
             dict: dictionary of the newly reloaded settings ``vars``
         """
-        importlib.reload(sys.modules["open_discussions.settings"])
+        importlib.reload(sys.modules["unified_ecommerce.settings"])
         # Restore settings to original settings after test
-        self.addCleanup(importlib.reload, sys.modules["open_discussions.settings"])
-        return vars(sys.modules["open_discussions.settings"])
+        self.addCleanup(importlib.reload, sys.modules["unified_ecommerce.settings"])
+        return vars(sys.modules["unified_ecommerce.settings"])
 
     def test_s3_settings(self):
         """Verify that we enable and configure S3 with a variable"""

@@ -3,7 +3,7 @@ branch = True
 source = .
 data_file=/tmp/coverage
 omit =
-    unifiedecommerce/wsgi.py
+    unified_ecommerce/wsgi.py
     manage.py
     ./.tox/*
     */migrations/*

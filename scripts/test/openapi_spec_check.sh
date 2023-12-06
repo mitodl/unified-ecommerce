@@ -2,7 +2,7 @@
 TMPFILE=$(mktemp)
 
 ./manage.py spectacular \
-	--urlconf=open_discussions.urls_spectacular \
+	--urlconf=unified_ecommerce.urls_spectacular \
 	--file $TMPFILE
 
 diff $TMPFILE ./openapi.yaml

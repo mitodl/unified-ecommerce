@@ -11,7 +11,7 @@ fi
 ##################################################
 docker compose run --no-deps --rm web \
 	./manage.py spectacular \
-	--urlconf unifiedecommerce.urls_spectacular \
+	--urlconf unified_ecommerce.urls_spectacular \
 	--file ./openapi.yaml \
 	--validate
 

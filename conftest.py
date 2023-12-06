@@ -7,7 +7,7 @@ from fixtures.aws import *  # noqa: F403
 from fixtures.common import *  # noqa: F403
 from fixtures.opensearch import *  # noqa: F403
 from fixtures.users import *  # noqa: F403
-from unifiedecommerce.exceptions import DoNotUseRequestException
+from unified_ecommerce.exceptions import DoNotUseRequestException
 
 
 @pytest.fixture(autouse=True)

@@ -9,6 +9,7 @@ COPY apt.txt /tmp/apt.txt
 RUN apt-get update
 RUN apt-get install -y $(grep -vE "^\s*#" apt.txt  | tr "\n" " ")
 RUN apt-get update && apt-get install libpq-dev postgresql-client -y
+RUN apt-get clean && apt-get purge
 
 # pip
 RUN curl --silent --location https://bootstrap.pypa.io/get-pip.py | python3 -
@@ -30,7 +31,7 @@ RUN pip install "poetry==$POETRY_VERSION"
 
 # Install project packages
 COPY pyproject.toml /src
-# COPY poetry.lock /src
+COPY poetry.lock /src
 WORKDIR /src
 RUN poetry install
 
@@ -39,7 +40,6 @@ COPY . /src
 WORKDIR /src
 RUN chown -R mitodl:mitodl /src
 
-RUN apt-get clean && apt-get purge
 USER mitodl
 
 EXPOSE 8073
