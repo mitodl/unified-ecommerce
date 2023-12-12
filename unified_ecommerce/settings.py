@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     # Application modules
     "unified_ecommerce",
     "authentication",
+    "system_meta",
 ]
 
 MIDDLEWARE = [
@@ -494,3 +495,5 @@ REST_FRAMEWORK_EXTENSIONS = {
     "DEFAULT_PARENT_LOOKUP_KWARG_NAME_PREFIX": DRF_NESTED_PARENT_LOOKUP_PREFIX
 }
 
+# ecommerce settings
+MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string("MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitxonline-")
