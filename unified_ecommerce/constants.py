@@ -1,4 +1,5 @@
 """Constants for ecommerce."""
+# ruff: noqa: ERA001
 
 DISCOUNT_TYPE_PERCENT_OFF = "percent-off"
 DISCOUNT_TYPE_DOLLARS_OFF = "dollars-off"

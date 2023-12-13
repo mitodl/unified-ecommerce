@@ -14,22 +14,15 @@ import datetime
 import logging
 import os
 import platform
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 
-from unified_ecommerce.envs import (
-    get_any,
-    get_bool,
-    get_int,
-    get_list_of_str,
-    get_string,
-)
+from unified_ecommerce.envs import get_bool, get_int, get_list_of_str, get_string
 from unified_ecommerce.sentry import init_sentry
 from unified_ecommerce.settings_celery import *  # noqa: F403
 from unified_ecommerce.settings_pluggy import *  # noqa: F403
-from unified_ecommerce.settings_spectacular import open_spectacular_settings
 
 VERSION = "0.0.0"
 
@@ -70,7 +63,6 @@ if not SITE_BASE_URL:
 MITOL_UE_TITLE = get_string("MITOL_UE_TITLE", "MIT Ecommerce")
 
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -80,7 +72,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "social_django",
     "server_status",
     "rest_framework",
     "corsheaders",
@@ -95,7 +86,6 @@ INSTALLED_APPS = [
     "drf_spectacular",
     # Application modules
     "unified_ecommerce",
-    "authentication",
     "system_meta",
 ]
 
@@ -108,8 +98,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "authentication.middleware.BlockedIPMiddleware",
-    "authentication.middleware.SocialAuthExceptionRedirectMiddleware",
     "hijack.middleware.HijackUserMiddleware",
 ]
 
@@ -496,4 +484,6 @@ REST_FRAMEWORK_EXTENSIONS = {
 }
 
 # ecommerce settings
-MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string("MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitxonline-")
+MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string(
+    "MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitxonline-"
+)

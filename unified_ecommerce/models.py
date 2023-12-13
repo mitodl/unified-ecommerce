@@ -34,6 +34,8 @@ class TimestampedModel(Model):
     updated_on = DateTimeField(auto_now=True)  # UTC
 
     class Meta:
+        """Meta options for TimestampedModel"""
+
         abstract = True
 
 
@@ -51,4 +53,6 @@ class NoDefaultTimestampedModel(TimestampedModel):
     updated_on = DateTimeField(default=now_in_utc)
 
     class Meta:
+        """Meta options for NoDefaultTimestampedModel"""
+
         abstract = True

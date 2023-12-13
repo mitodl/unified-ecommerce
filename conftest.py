@@ -2,11 +2,11 @@
 
 # pylint: disable=wildcard-import, unused-wildcard-import
 import pytest
-
 from fixtures.aws import *  # noqa: F403
 from fixtures.common import *  # noqa: F403
 from fixtures.opensearch import *  # noqa: F403
 from fixtures.users import *  # noqa: F403
+
 from unified_ecommerce.exceptions import DoNotUseRequestException
 
 

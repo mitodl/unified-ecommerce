@@ -1,17 +1,10 @@
-""" System metadata models - integrated systems and the data surrounding them """
+"""System metadata models - integrated systems and the data surrounding them"""
 
 import logging
-import uuid
-from datetime import datetime
-from decimal import Decimal
-from typing import List
 
-import pytz
 import reversion
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -21,15 +14,15 @@ class ProductsQuerySet(models.QuerySet):
     """Queryset to block delete and instead mark the items in_active"""
 
     def delete(self):
+        """Mark items inactive instead of deleting them"""
         self.update(is_active=False)
 
 
 class ActiveProducsUndeleteManager(models.Manager):
     """Query manager for products"""
 
-    # This can be used generally, for the models that have `is_active` field
     def get_queryset(self):
-        """Getting the active queryset for manager"""
+        """Get the active queryset for manager"""
         return ProductsQuerySet(self.model, using=self._db).filter(is_active=True)
 
 
@@ -37,18 +30,20 @@ class IntegratedSystem(models.Model):
     """Represents an integrated system"""
 
     name = models.CharField(max_length=255, unique=True)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
-    api_key = models.TextField(blank=True, null=True)
+    api_key = models.TextField(blank=True)
 
     def __str__(self):
+        """Return string representation of the system"""
         return f"{self.name} ({self.id})"
+
 
 @reversion.register(exclude=("created_on", "updated_on"))
 class Product(models.Model):
     """
     Represents a purchasable product in the system. These include a blob of JSON
-    containing system-specific information for the product. 
+    containing system-specific information for the product.
 
     TODO: this should be a TimestampedModel when ol-django is ready for Django 4
     """
@@ -61,24 +56,31 @@ class Product(models.Model):
         null=False,
         help_text="Controls visibility of the product in the app.",
     )
+    system = models.ForeignKey(
+        IntegratedSystem, on_delete=models.DO_NOTHING, related_name="products"
+    )
 
-    system = models.ForeignKey(IntegratedSystem, on_delete=models.DO_NOTHING, related_name="products")
-
-    objects = ActiveProducsUndeleteManager()
     all_objects = models.Manager()
+    objects = ActiveProducsUndeleteManager()
 
     class Meta:
+        """Meta class for Product"""
+
         constraints = [
             models.UniqueConstraint(
-                fields=["object_id", "is_active", "content_type"],
+                fields=["sku", "system"],
                 condition=models.Q(is_active=True),
-                name="unique_purchasable_object",
+                name="unique_purchasable_sku_per_system",
             )
         ]
 
+    def __str__(self):
+        """Return string representation of the product"""
+
+        return f"#{self.id} {self.description} {self.price}"
+
     def delete(self):
+        """Mark the product inactive instead of deleting it"""
+
         self.is_active = False
         self.save(update_fields=("is_active",))
-
-    def __str__(self):
-        return f"#{self.id} {self.description} {self.price}"

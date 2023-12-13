@@ -1,3 +1,8 @@
+"""Django Admin for system_meta app"""
+
 from django.contrib import admin
 
-# Register your models here.
+from system_meta.models import IntegratedSystem, Product
+
+admin.site.register(IntegratedSystem)
+admin.site.register(Product)
