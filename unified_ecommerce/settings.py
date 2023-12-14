@@ -14,7 +14,7 @@ import datetime
 import logging
 import os
 import platform
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -265,6 +265,9 @@ AUTHORIZATION_URL = get_string(
 
 # Serve static files with dj-static
 STATIC_URL = "/static/"
+CLOUDFRONT_DIST = get_string("CLOUDFRONT_DIST", None)
+if CLOUDFRONT_DIST:
+    STATIC_URL = urljoin(f"https://{CLOUDFRONT_DIST}.cloudfront.net", STATIC_URL)
 
 STATIC_ROOT = "staticfiles"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]  # noqa: PTH118
@@ -285,13 +288,7 @@ EMAIL_SUPPORT = get_string("MITOL_UE_SUPPORT_EMAIL", "support@example.com")
 DEFAULT_FROM_EMAIL = get_string("MITOL_UE_FROM_EMAIL", "webmaster@localhost")
 
 MAILGUN_SENDER_DOMAIN = get_string("MAILGUN_SENDER_DOMAIN", None)
-if not MAILGUN_SENDER_DOMAIN:
-    msg = "MAILGUN_SENDER_DOMAIN not set"
-    raise ImproperlyConfigured(msg)
 MAILGUN_KEY = get_string("MAILGUN_KEY", None)
-if not MAILGUN_KEY:
-    msg = "MAILGUN_KEY not set"
-    raise ImproperlyConfigured(msg)
 MAILGUN_RECIPIENT_OVERRIDE = get_string("MAILGUN_RECIPIENT_OVERRIDE", None)
 MAILGUN_FROM_EMAIL = get_string("MAILGUN_FROM_EMAIL", "no-reply@example.com")
 MAILGUN_BCC_TO_EMAIL = get_string("MAILGUN_BCC_TO_EMAIL", None)
@@ -392,6 +389,23 @@ HEALTH_CHECK = ["CELERY", "REDIS", "POSTGRES"]
 
 MEDIA_ROOT = get_string("MEDIA_ROOT", "/var/media/")
 MEDIA_URL = "/media/"
+MITOL_UE_USE_S3 = get_bool("MITOL_UE_USE_S3", False)  # noqa: FBT003
+AWS_ACCESS_KEY_ID = get_string("AWS_ACCESS_KEY_ID", False)  # noqa: FBT003
+AWS_SECRET_ACCESS_KEY = get_string("AWS_SECRET_ACCESS_KEY", False)  # noqa: FBT003
+AWS_STORAGE_BUCKET_NAME = get_string("AWS_STORAGE_BUCKET_NAME", False)  # noqa: FBT003
+AWS_QUERYSTRING_AUTH = get_string("AWS_QUERYSTRING_AUTH", False)  # noqa: FBT003
+# Provide nice validation of the configuration
+if MITOL_UE_USE_S3 and (
+    not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_STORAGE_BUCKET_NAME
+):
+    msg = "You have enabled S3 support, but are missing one of AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, or AWS_STORAGE_BUCKET_NAME"  # noqa: E501
+    raise ImproperlyConfigured(msg)
+if MITOL_UE_USE_S3:
+    # Configure Django Storages to use Cloudfront distribution for S3 assets
+    if CLOUDFRONT_DIST:
+        AWS_S3_CUSTOM_DOMAIN = f"{CLOUDFRONT_DIST}.cloudfront.net"
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    AWS_DEFAULT_ACL = "public-read"
 
 # django cache back-ends
 CACHES = {
