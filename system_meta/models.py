@@ -48,16 +48,29 @@ class Product(models.Model):
     TODO: this should be a TimestampedModel when ol-django is ready for Django 4
     """
 
-    sku = models.CharField(max_length=255)
-    price = models.DecimalField(max_digits=7, decimal_places=2, help_text="")
-    description = models.TextField()
+    sku = models.CharField(max_length=255, help_text="SKU of the product.")
+    name = models.CharField(
+        max_length=255, help_text="Short name of the product, displayed in carts/etc."
+    )
+    price = models.DecimalField(
+        max_digits=7, decimal_places=2, help_text="Price (decimal to two places)"
+    )
+    description = models.TextField(help_text="Long description of the product.")
     is_active = models.BooleanField(
         default=True,
         null=False,
         help_text="Controls visibility of the product in the app.",
     )
     system = models.ForeignKey(
-        IntegratedSystem, on_delete=models.DO_NOTHING, related_name="products"
+        IntegratedSystem,
+        on_delete=models.DO_NOTHING,
+        related_name="products",
+        help_text="Owner system of the product.",
+    )
+    system_data = models.JSONField(
+        blank=True,
+        null=True,
+        help_text="System-specific data for the product (in JSON).",
     )
 
     all_objects = models.Manager()
@@ -77,7 +90,7 @@ class Product(models.Model):
     def __str__(self):
         """Return string representation of the product"""
 
-        return f"#{self.id} {self.description} {self.price}"
+        return f"{self.sku} - {self.system.name} - {self.name} {self.price}"
 
     def delete(self):
         """Mark the product inactive instead of deleting it"""
