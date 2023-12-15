@@ -17,7 +17,7 @@ def test_add_system(withDescription, withDeactivate):
     """Tests that add_system adds a system"""
     out = StringIO()
 
-    desc = str(fuzzy.FuzzyText()) if withDescription else None
+    desc = str(fuzzy.FuzzyText()) if withDescription else ""
 
     call_command(
         "add_system",
