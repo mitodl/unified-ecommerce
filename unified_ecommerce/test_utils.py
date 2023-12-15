@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from unittest.mock import Mock
 
 import pytest
+from django.forms.models import model_to_dict
 from django.http.response import HttpResponse
 from rest_framework.renderers import JSONRenderer
 
@@ -138,3 +139,74 @@ class PickleableMock(Mock):
     def __reduce__(self):
         """Required method for being pickleable"""  # noqa: D401
         return (Mock, ())
+
+
+class BaseSerializerTest:
+    """Base class for serializer tests."""
+
+    serializer_class = None
+    factory_class = None
+
+    def test_serialize(self):
+        """Test that the serializer can serialize an instance."""
+        instance = self.factory_class()
+        serializer = self.serializer_class(instance)
+        assert_json_equal(serializer.data, model_to_dict(instance))
+
+
+class BaseViewSetTest:
+    """Base class for viewset tests."""
+
+    viewset_class = None
+    factory_class = None
+
+    def test_get_queryset(self):
+        """Test that the viewset returns the correct queryset."""
+        queryset = self.viewset_class().get_queryset()
+        assert queryset.count() == self.factory_class._meta.model.objects.count()
+
+    def test_get_serializer_class(self):
+        """Test that the viewset returns the correct serializer class."""
+        serializer_class = self.viewset_class().get_serializer_class()
+        assert serializer_class == self.viewset_class.serializer_class
+
+    def test_list(self):
+        """Test that the viewset can list objects."""
+        response = self.viewset_class().list(Mock())
+        assert response.status_code == 200
+        assert len(response.data) == self.factory_class._meta.model.objects.count()
+
+    def test_retrieve(self):
+        """Test that the viewset can retrieve an object."""
+        instance = self.factory_class()
+        response = self.viewset_class().retrieve(Mock(), pk=instance.pk)
+        assert response.status_code == 200
+        assert response.data == model_to_dict(instance)
+
+    def test_update(self):
+        """Test that the viewset can update an object."""
+        instance = self.factory_class()
+        data = model_to_dict(instance)
+        data["name"] = "new name"
+        response = self.viewset_class().update(Mock(), pk=instance.pk, data=data)
+        assert response.status_code == 200
+        assert response.data == data
+
+    def test_delete(self):
+        """Test that the viewset can delete an object."""
+        instance = self.factory_class()
+        response = self.viewset_class().destroy(Mock(), pk=instance.pk)
+        assert response.status_code == 204
+        assert not self.factory_class._meta.model.objects.filter(
+            pk=instance.pk
+        ).exists()
+
+    def test_create(self):
+        """Test that the viewset can create an object."""
+        data = model_to_dict(self.factory_class())
+        response = self.viewset_class().create(Mock(), data=data)
+        assert response.status_code == 201
+        assert response.data == data
+        assert self.factory_class._meta.model.objects.filter(
+            pk=response.data["id"]
+        ).exists()
