@@ -3384,12 +3384,12 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
 name = "static3"
-version = "0.5.1"
+version = "0.7.0"
 description = "A really simple WSGI way to serve static (or mixed) content."
 optional = false
 python-versions = "*"
 files = [
-    {file = "static3-0.5.1.tar.gz", hash = "sha256:78393983482d8f41e6fcf91f3fd99c979ced088c4740c9f22835b96e6712897c"},
+    {file = "static3-0.7.0.tar.gz", hash = "sha256:674641c64bc75507af2eb20bef7e7e3593dca993dec6674be108fa15b42f47c8"},
 ]
 
 [package.extras]
@@ -3727,4 +3727,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.1"
-content-hash = "164818fa78012a1635ac69351d6a20552f947031b0eb585bad0ea8394c7df244"
+content-hash = "55f2b936d78589b818a42465b0d6d9b44f187eff9dc68cdfa73eea5feafdd265"
