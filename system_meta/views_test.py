@@ -3,7 +3,9 @@
 import pytest
 
 from system_meta.factories import (
+    ActiveIntegratedSystemFactory,
     ActiveProductFactory,
+    InactiveIntegratedSystemFactory,
     InactiveProductFactory,
     IntegratedSystemFactory,
 )
@@ -18,11 +20,87 @@ class TestIntegratedSystemViewSet(BaseViewSetTest):
     """Tests for the IntegratedSystemViewSet."""
 
     viewset_class = IntegratedSystemViewSet
-    factory_class = IntegratedSystemFactory
+    factory_class = ActiveIntegratedSystemFactory
     queryset = IntegratedSystem.objects.all()
 
     list_url = "/api/meta/v0/integrated_system/"
-    detail_url = "/api/meta/v0/integrated_system/{}/"
+    object_url = "/api/meta/v0/integrated_system/{}/"
+
+    @pytest.mark.parametrize("isLoggedIn", [True, False])
+    @pytest.mark.parametrize("isActiveSystem", [True, False])
+    def test_retrieve(self, isLoggedIn, isActiveSystem, client, user_client):
+        """
+        Test that the viewset can retrieve an object that is either active or possibly
+        inactive.
+        """
+
+        self.factory_class = (
+            ActiveIntegratedSystemFactory
+            if isActiveSystem
+            else InactiveIntegratedSystemFactory
+        )
+
+        super().test_retrieve(isLoggedIn, client, user_client)
+
+    @pytest.mark.parametrize("isActiveSystem", [True, False])
+    @pytest.mark.parametrize("isLoggedIn", [True, False])
+    def test_update(self, isActiveSystem, isLoggedIn, client, user_client):
+        """Test that the viewset can update an object."""
+        self.factory_class = (
+            ActiveIntegratedSystemFactory
+            if isActiveSystem
+            else InactiveIntegratedSystemFactory
+        )
+        update_data = {"name": "Updated Name"}
+
+        (instance, response) = super().test_update(
+            update_data, isLoggedIn, client, user_client
+        )
+
+        if isLoggedIn:
+            if not isActiveSystem:
+                assert instance.name != update_data["name"]
+                assert response.status_code == 404
+                return
+
+            instance.refresh_from_db()
+            assert instance.name == update_data["name"]
+        else:
+            assert instance.name != update_data["name"]
+
+    @pytest.mark.parametrize("isLoggedIn", [True, False])
+    def test_delete(self, isLoggedIn, client, user_client):
+        """Test that the viewset can delete an object."""
+        (instance, response) = super().test_delete(isLoggedIn, client, user_client)
+
+        if isLoggedIn:
+            instance.refresh_from_db()
+            assert response.status_code == 204
+            assert instance.is_active is False
+        else:
+            assert instance.is_active is True
+
+    @pytest.mark.parametrize("isLoggedIn", [True, False])
+    @pytest.mark.parametrize("withBadData", [True, False])
+    def test_create(self, withBadData, isLoggedIn, client, user_client):
+        """Test that the viewset can create an object."""
+        create_data = {
+            "description": "a description",
+            "is_active": True,
+            "api_key": "123456",
+        }
+
+        if not withBadData:
+            create_data["name"] = "System Name"
+
+        response = super().test_create(create_data, isLoggedIn, client, user_client)
+
+        if isLoggedIn:
+            assert response.status_code == 201 if not withBadData else 400
+            assert (
+                IntegratedSystem.objects.filter(name="System Name").exists()
+                is not withBadData
+            )
 
 
 class TestProductViewSet(BaseViewSetTest):

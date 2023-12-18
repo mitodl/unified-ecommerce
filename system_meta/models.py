@@ -10,7 +10,7 @@ User = get_user_model()
 log = logging.getLogger(__name__)
 
 
-class ProductsQuerySet(models.QuerySet):
+class SoftDeleteQuerySet(models.QuerySet):
     """Queryset to block delete and instead mark the items in_active"""
 
     def delete(self):
@@ -18,12 +18,12 @@ class ProductsQuerySet(models.QuerySet):
         self.update(is_active=False)
 
 
-class ActiveProducsUndeleteManager(models.Manager):
+class ActiveUndeleteManager(models.Manager):
     """Query manager for products"""
 
     def get_queryset(self):
         """Get the active queryset for manager"""
-        return ProductsQuerySet(self.model, using=self._db).filter(is_active=True)
+        return SoftDeleteQuerySet(self.model, using=self._db).filter(is_active=True)
 
 
 class IntegratedSystem(models.Model):
@@ -34,9 +34,18 @@ class IntegratedSystem(models.Model):
     is_active = models.BooleanField(default=True)
     api_key = models.TextField(blank=True)
 
+    all_objects = models.Manager()
+    objects = ActiveUndeleteManager()
+
     def __str__(self):
         """Return string representation of the system"""
         return f"{self.name} ({self.id})"
+
+    def delete(self):
+        """Mark the product inactive instead of deleting it"""
+
+        self.is_active = False
+        self.save(update_fields=("is_active",))
 
 
 @reversion.register(exclude=("created_on", "updated_on"))
@@ -74,7 +83,7 @@ class Product(models.Model):
     )
 
     all_objects = models.Manager()
-    objects = ActiveProducsUndeleteManager()
+    objects = ActiveUndeleteManager()
 
     class Meta:
         """Meta class for Product"""

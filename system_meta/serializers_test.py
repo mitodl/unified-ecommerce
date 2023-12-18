@@ -16,6 +16,7 @@ class TestIntegratedSystemSerializer(BaseSerializerTest):
     serializer_class = IntegratedSystemSerializer
     factory_class = IntegratedSystemFactory
     model_class = IntegratedSystem
+    queryset = IntegratedSystem.all_objects
 
 
 class TestProductSerializer(BaseSerializerTest):

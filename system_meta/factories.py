@@ -18,6 +18,18 @@ class IntegratedSystemFactory(DjangoModelFactory):
     api_key = Faker("md5")
 
 
+class ActiveIntegratedSystemFactory(IntegratedSystemFactory):
+    """Factory for IntegratedSystem model, but always returns an active object."""
+
+    is_active = True
+
+
+class InactiveIntegratedSystemFactory(IntegratedSystemFactory):
+    """Factory for IntegratedSystem model, but always returns an inactive object."""
+
+    is_active = False
+
+
 class ProductFactory(DjangoModelFactory):
     """Factory for Product model."""
 
