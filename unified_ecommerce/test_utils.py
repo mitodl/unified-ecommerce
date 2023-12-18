@@ -9,7 +9,6 @@ from unittest.mock import Mock
 import pytest
 from django.core.serializers import serialize
 from django.core.serializers.json import DjangoJSONEncoder
-from django.forms.models import model_to_dict
 from django.http.response import HttpResponse
 from rest_framework.renderers import JSONRenderer
 
@@ -202,7 +201,19 @@ class BaseSerializerTest:
 
 
 class BaseViewSetTest:
-    """Base class for viewset tests."""
+    """
+    Base class for viewset tests.
+
+    Set viewset_class, factory_class and queryset to the appropriate values for your
+    viewset. `list_url` should be the root URL for the list view, and the `object_url` should
+    be contain a format string for individual objects in the viewset. DRF convention is that
+    the URLs remains the same but will get used with different HTTP verbs according
+    to the test being run (i.e. update sends a PATCH, etc.).
+
+    The tests that perform writes to the dataset require subclassing. They're more
+    abstractions of the HTTP request than an actual test; you'll need to provide some
+    logic for the test to check the operation succeeded with the model you're using.
+    """
 
     viewset_class = None
     factory_class = None
@@ -210,10 +221,7 @@ class BaseViewSetTest:
 
     # URLs for these actions
     list_url = None
-    detail_url = None
-    create_url = None
-    update_url = None
-    delete_url = None
+    object_url = None
 
     def _test_retrieval(self, api_client, url, url_name, **kwargs):
         """
@@ -250,7 +258,14 @@ class BaseViewSetTest:
 
     @pytest.mark.parametrize("isLoggedIn", [True, False])
     def test_list(self, isLoggedIn, client, user_client):
-        """Test that the viewset can list objects."""
+        """
+        Test that the viewset can list objects.
+
+        Args:
+        - isLoggedIn (bool): whether or not the client is logged in
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in requests
+        """
 
         response = self._test_retrieval(
             user_client if isLoggedIn else client,
@@ -264,14 +279,21 @@ class BaseViewSetTest:
 
     @pytest.mark.parametrize("isLoggedIn", [True, False])
     def test_retrieve(self, isLoggedIn, client, user_client):
-        """Test that the viewset can retrieve an object."""
+        """
+        Test that the viewset can retrieve an object.
+
+        Args:
+        - isLoggedIn (bool): whether or not the client is logged in
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in requests
+        """
         instance = self.factory_class()
         instance_qs = self.queryset.filter(pk=instance.pk)
 
         response = self._test_retrieval(
             user_client if isLoggedIn else client,
-            self.detail_url.format(instance.pk),
-            "detail_url",
+            self.object_url.format(instance.pk),
+            "object_url",
             test_non_authenticated=not isLoggedIn,
         )
 
@@ -279,26 +301,71 @@ class BaseViewSetTest:
             dj_serializer = queryset_to_json(instance_qs)
             assert_json_equal(response.data, dj_serializer)
 
-    def test_update(self):
-        """Test that the viewset can update an object."""
-        instance = self.factory_class()
-        data = model_to_dict(instance)
-        data["name"] = "new name"
-        response = self.viewset_class().update(Mock(), pk=instance.pk, data=data)
-        assert response.status_code == 200
-        assert response.data == data
+    def test_update(self, update_data, isLoggedIn, client, user_client):
+        """
+        Test that the viewset can update an object.
 
-    def test_delete(self):
-        """Test that the viewset can delete an object."""
-        instance = self.factory_class()
-        response = self.viewset_class().destroy(Mock(), pk=instance.pk)
-        assert response.status_code == 204
-        assert not self.queryset.filter(pk=instance.pk).exists()
+        Args:
+        - update_data (dict): the data to use for the update
+        - isLoggedIn (bool): whether or not the client is logged in
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in requests
 
-    def test_create(self):
-        """Test that the viewset can create an object."""
-        data = model_to_dict(self.factory_class())
-        response = self.viewset_class().create(Mock(), data=data)
-        assert response.status_code == 201
-        assert response.data == data
-        assert self.queryset.filter(pk=response.data["id"]).exists()
+        Returns:
+        - tuple of (instance, response): the instance that was updated and the response
+        """
+        instance = self.factory_class()
+
+        use_client = user_client if isLoggedIn else client
+        response = use_client.patch(
+            self.object_url.format(instance.pk), data=update_data
+        )
+
+        if not isLoggedIn:
+            assert response.status_code == 403
+        return (instance, response)
+
+    def test_delete(self, isLoggedIn, client, user_client):
+        """
+        Test that the viewset can delete an object. Note that this will actually test
+        deletion.
+
+        Args:
+        - isLoggedIn (bool): whether or not the client is logged in
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in requests
+
+        Returns:
+        - tuple of (instance, response): the instance that was deleted and the response
+        """
+        instance = self.factory_class()
+
+        use_client = user_client if isLoggedIn else client
+        response = use_client.delete(self.object_url.format(instance.pk))
+
+        assert response.status_code == 403 if not isLoggedIn else 204
+
+        if isLoggedIn:
+            assert self.queryset.filter(pk=instance.pk).count() == 0
+
+        return (instance, response)
+
+    def test_create(self, create_data, isLoggedIn, client, user_client):
+        """
+        Test that the viewset can create an object.
+
+        Args:
+        - create_data (dict): the data to use for the update
+        - isLoggedIn (bool): whether or not the client is logged in
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in requests
+
+        Returns:
+        - response (Response): the response from the API
+        """
+        use_client = user_client if isLoggedIn else client
+        response = use_client.post(self.list_url, data=create_data)
+
+        if not isLoggedIn:
+            assert response.status_code == 403
+        return response

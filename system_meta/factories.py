@@ -39,3 +39,9 @@ class ActiveProductFactory(ProductFactory):
     """Factory for Product model, but always returns an active product."""
 
     is_active = True
+
+
+class InactiveProductFactory(ProductFactory):
+    """Factory for Product model, but always returns an inactive product."""
+
+    is_active = False
