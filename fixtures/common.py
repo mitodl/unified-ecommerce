@@ -11,8 +11,6 @@ import responses
 from pytest_mock import PytestMockWarning
 from urllib3.exceptions import InsecureRequestWarning
 
-from unified_ecommerce.factories import UserFactory
-
 
 @pytest.fixture(autouse=True)
 def silence_factory_logging():  # noqa: PT004
@@ -57,17 +55,6 @@ def randomness():  # noqa: PT004
 
 
 @pytest.fixture()
-def indexing_decorator(session_indexing_decorator):
-    """
-    Fixture that resets the indexing function mock and returns the indexing decorator fixture.
-    This can be used if there is a need to test whether or not a function is wrapped in the
-    indexing decorator.
-    """  # noqa: E501
-    session_indexing_decorator.mock_persist_func.reset_mock()
-    return session_indexing_decorator
-
-
-@pytest.fixture()
 def mocked_celery(mocker):
     """Mock object that patches certain celery functions"""
     exception_class = TabError
@@ -86,17 +73,9 @@ def mocked_celery(mocker):
 
 
 @pytest.fixture()
-def mock_search_tasks(mocker):
-    """Patch search tasks so they no-op"""
-    return mocker.patch("search.search_index_helpers")
-
-
-@pytest.fixture()
-def indexing_user(settings):
-    """Sets and returns the indexing user"""  # noqa: D401
-    user = UserFactory.create()
-    settings.INDEXING_API_USERNAME = user.username
-    return user
+def mock_context(mocker, user):
+    """Mock context for serializers"""
+    return {"request": mocker.Mock(user=user)}
 
 
 @pytest.fixture()

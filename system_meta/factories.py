@@ -33,3 +33,9 @@ class ProductFactory(DjangoModelFactory):
     is_active = Faker("boolean")
     system = SubFactory(IntegratedSystemFactory)
     system_data = Faker("json")
+
+
+class ActiveProductFactory(ProductFactory):
+    """Factory for Product model, but always returns an active product."""
+
+    is_active = True

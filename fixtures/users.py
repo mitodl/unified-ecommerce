@@ -65,15 +65,17 @@ def client(db):  # noqa: ARG001
 
 
 @pytest.fixture()
-def user_client(client, user):
+def user_client(user):
     """Version of the client that is authenticated with the user"""
+    client = APIClient()
     client.force_login(user)
     return client
 
 
 @pytest.fixture()
-def staff_client(client, staff_user):
+def staff_client(staff_user):
     """Version of the client that is authenticated with the staff_user"""
+    client = APIClient()
     client.force_login(staff_user)
     return client
 
