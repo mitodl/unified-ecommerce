@@ -146,7 +146,7 @@ def queryset_to_json(queryset):
     return dj_serializer[0]["fields"]
 
 
-def assert_json_equal(obj1, obj2, sort=False):  # noqa: FBT002
+def assert_json_equal(obj1, obj2, sort=False, **kwargs):  # noqa: FBT002
     """
     Asserts that two objects are equal after a round trip through JSON serialization/deserialization.
     Particularly helpful when testing DRF serializers where you may get back OrderedDict and other such objects.
@@ -155,10 +155,20 @@ def assert_json_equal(obj1, obj2, sort=False):  # noqa: FBT002
         obj1 (object): the first object
         obj2 (object): the second object
         sort (bool): If true, sort items which are iterable before comparing
+
+    Keyword Args:
+        ignore_timestamps: If true, ignore timestamps in the comparison
     """  # noqa: D401
     renderer = JSONRenderer()
     converted1 = json.loads(renderer.render(obj1))
     converted2 = json.loads(renderer.render(obj2))
+
+    if kwargs.get("ignore_timestamps"):
+        converted1.pop("created_on", None)
+        converted1.pop("updated_on", None)
+        converted2.pop("created_on", None)
+        converted2.pop("updated_on", None)
+
     if sort:
         converted1 = _sort_values_for_testing(converted1)
         converted2 = _sort_values_for_testing(converted2)
@@ -197,7 +207,7 @@ class BaseSerializerTest:
         serializer = self.serializer_class(instance)
         dj_serializer = queryset_to_json(instance_qs)
 
-        assert_json_equal(serializer.data, dj_serializer)
+        assert_json_equal(serializer.data, dj_serializer, ignore_timestamps=True)
 
 
 class BaseViewSetTest:
@@ -299,7 +309,7 @@ class BaseViewSetTest:
 
         if isLoggedIn and instance.is_active:
             dj_serializer = queryset_to_json(instance_qs)
-            assert_json_equal(response.data, dj_serializer)
+            assert_json_equal(response.data, dj_serializer, ignore_timestamps=True)
 
     def test_update(self, update_data, isLoggedIn, client, user_client):
         """

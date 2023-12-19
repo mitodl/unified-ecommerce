@@ -5,6 +5,7 @@ import logging
 import reversion
 from django.contrib.auth import get_user_model
 from django.db import models
+from mitol.common.models import TimestampedModel
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ class ActiveUndeleteManager(models.Manager):
         return SoftDeleteQuerySet(self.model, using=self._db).filter(is_active=True)
 
 
-class IntegratedSystem(models.Model):
+class IntegratedSystem(TimestampedModel):
     """Represents an integrated system"""
 
     name = models.CharField(max_length=255, unique=True)
@@ -49,12 +50,10 @@ class IntegratedSystem(models.Model):
 
 
 @reversion.register(exclude=("created_on", "updated_on"))
-class Product(models.Model):
+class Product(TimestampedModel):
     """
     Represents a purchasable product in the system. These include a blob of JSON
     containing system-specific information for the product.
-
-    TODO: this should be a TimestampedModel when ol-django is ready for Django 4
     """
 
     sku = models.CharField(max_length=255, help_text="SKU of the product.")

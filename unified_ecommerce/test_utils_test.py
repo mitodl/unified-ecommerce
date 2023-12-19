@@ -66,3 +66,24 @@ def test_assert_json_equal():
     assert_json_equal({"a": 1}, {"a": 1})
     assert_json_equal(2, 2)
     assert_json_equal([2], [2])
+
+
+def test_assert_json_equal_with_timestamps():
+    """Assert that objects that have timestamps are equal, outside of their timestamps"""
+
+    obj1 = {
+        "a": 1,
+        "created_on": "2020-01-01T00:00:00Z",
+        "updated_on": "2020-01-01T00:00:00Z",
+    }
+    obj2 = {
+        "a": 1,
+        "created_on": "2021-01-01T00:00:00Z",
+        "updated_on": "2021-01-01T00:00:00Z",
+    }
+
+    assert_json_equal(obj1, obj2, ignore_timestamps=True)
+
+    obj2 = obj1
+
+    assert_json_equal(obj1, obj2, ignore_timestamps=True)
