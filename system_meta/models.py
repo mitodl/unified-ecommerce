@@ -74,3 +74,38 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
         """Return string representation of the product"""
 
         return f"{self.sku} - {self.system.name} - {self.name} ${self.price}"
+
+    def delete(self):
+        """Mark the product inactive instead of deleting it"""
+
+        self.is_active = False
+        self.save(update_fields=("is_active",))
+
+    @staticmethod
+    def resolve_product_version(product, product_version=None):
+        """
+        Resolve the specified version of the product. Specify None to indicate the
+        current version.
+
+        Returns: Product; either the product you passed in or the version of the product
+        you requested.
+        """
+        if product_version is None:
+            return product
+
+        versions = reversion.Version.objects.get_for_object(product)
+
+        if versions.count() == 0:
+            return product
+
+        for test_version in versions.all():
+            if test_version == product_version:
+                return Product(
+                    id=test_version.field_dict["id"],
+                    price=test_version.field_dict["price"],
+                    description=test_version.field_dict["description"],
+                    is_active=test_version.field_dict["is_active"],
+                )
+
+        exception_message = "Invalid product version specified"
+        raise TypeError(exception_message)

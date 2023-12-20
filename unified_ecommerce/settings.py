@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     # Application modules
     "unified_ecommerce",
     "system_meta",
+    "payments",
 ]
 
 MIDDLEWARE = [
