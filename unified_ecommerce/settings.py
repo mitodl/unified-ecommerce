@@ -18,8 +18,9 @@ from urllib.parse import urljoin, urlparse
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
+from mitol.common.envs import get_bool, get_int, get_string
 
-from unified_ecommerce.envs import get_bool, get_int, get_list_of_str, get_string
+from unified_ecommerce.envs import get_list_of_str
 from unified_ecommerce.sentry import init_sentry
 from unified_ecommerce.settings_celery import *  # noqa: F403
 from unified_ecommerce.settings_pluggy import *  # noqa: F403
@@ -85,6 +86,9 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "safedelete",
+    "reversion",
+    "django_fsm",
+    "fsm_admin",
     # Application modules
     "unified_ecommerce",
     "system_meta",
