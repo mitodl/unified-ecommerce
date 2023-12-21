@@ -18,7 +18,7 @@ from urllib.parse import urljoin, urlparse
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
-from mitol.common.envs import get_bool, get_int, get_string
+from mitol.common.envs import get_bool, get_int, get_string, import_settings_modules
 
 from unified_ecommerce.envs import get_list_of_str
 from unified_ecommerce.sentry import init_sentry
@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     "unified_ecommerce",
     "system_meta",
     "payments",
+    "mitol.payment_gateway.apps.PaymentGatewayApp",
 ]
 
 MIDDLEWARE = [
@@ -506,3 +507,4 @@ REST_FRAMEWORK_EXTENSIONS = {
 MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string(
     "MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitxonline-"
 )
+import_settings_modules("mitol.payment_gateway.settings.cybersource")
