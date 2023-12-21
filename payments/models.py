@@ -77,6 +77,7 @@ class BasketItem(TimestampedModel):
 
         TODO: we don't have discounts yet, so this needs to be filled out when we do.
         """
+        return self.base_price
 
     @cached_property
     def base_price(self):
@@ -538,12 +539,12 @@ class Line(TimestampedModel):
         return models.Q()
 
     order = models.ForeignKey(
-        "ecommerce.Order",
+        "payments.Order",
         on_delete=models.CASCADE,
         related_name="lines",
     )
     product_version = models.ForeignKey(
-        "reversion.Version",
+        Version,
         limit_choices_to=_order_line_product_versions,
         on_delete=models.CASCADE,
     )
@@ -599,7 +600,7 @@ class Transaction(TimestampedModel):
     transaction_id = models.CharField(max_length=255, unique=True)
 
     order = models.ForeignKey(
-        "ecommerce.Order", on_delete=models.CASCADE, related_name="transactions"
+        "payments.Order", on_delete=models.CASCADE, related_name="transactions"
     )
     amount = models.DecimalField(
         decimal_places=5,
