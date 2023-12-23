@@ -1005,14 +1005,17 @@ async-rq = ["django-rq (>=0.6.0)"]
 
 [[package]]
 name = "django-ipware"
-version = "3.0.7"
+version = "6.0.3"
 description = "A Django application to retrieve user's IP address"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
+python-versions = ">=3.8"
 files = [
-    {file = "django-ipware-3.0.7.tar.gz", hash = "sha256:753f8214a16ccaac54ea977349a96e37b582a28a54065e00c1c46d530862c85e"},
-    {file = "django_ipware-3.0.7-py2.py3-none-any.whl", hash = "sha256:a18820ea2b98ff3f87b7530eb6346f5feb65d18e89397606aacc098fa7b93db2"},
+    {file = "django-ipware-6.0.3.tar.gz", hash = "sha256:0f682dd4f3afef7909bb3dd396949c355982539bd4392d4e9df0b0b31604484d"},
+    {file = "django_ipware-6.0.3-py2.py3-none-any.whl", hash = "sha256:e54b6050af037406f05327890e742f99451dce96951223dea9cdd824e95859b6"},
 ]
+
+[package.dependencies]
+python-ipware = ">=2.0.0"
 
 [[package]]
 name = "django-json-widget"
@@ -2629,6 +2632,20 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-ipware"
+version = "2.0.1"
+description = "A Python package to retrieve user's IP address"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "python-ipware-2.0.1.tar.gz", hash = "sha256:9ba4805152ebb85ad5b53797185cd1ce6231e1db60155834f326c8cd61e8af34"},
+    {file = "python_ipware-2.0.1-py3-none-any.whl", hash = "sha256:1992920ef553165dfa35e6ea5a90762f64f3b943cc22ee6b4ec02e2c86d31178"},
+]
+
+[package.extras]
+dev = ["coverage[toml]", "coveralls (>=3.3,<4.0)", "ruff", "twine"]
+
+[[package]]
 name = "python-rapidjson"
 version = "1.14"
 description = "Python wrapper around rapidjson"
@@ -3729,4 +3746,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.1"
-content-hash = "191968d78a6f648ad06f44266cf72a4beed0c49e648808d2e302e61b15bea5d3"
+content-hash = "ee96b29c7f79efb3b6f26ce35c411b513f7a8bf297bb0ef2a7a5a1b7d58e4a7b"
