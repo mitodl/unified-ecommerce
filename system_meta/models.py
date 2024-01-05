@@ -6,6 +6,7 @@ import reversion
 from django.contrib.auth import get_user_model
 from django.db import models
 from mitol.common.models import TimestampedModel
+from slugify import slugify
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class IntegratedSystem(TimestampedModel):
     """Represents an integrated system"""
 
     name = models.CharField(max_length=255, unique=True)
+    slug = models.CharField(max_length=80, unique=True, blank=True, null=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     api_key = models.TextField(blank=True)
@@ -47,6 +49,12 @@ class IntegratedSystem(TimestampedModel):
 
         self.is_active = False
         self.save(update_fields=("is_active",))
+
+    def save(self, *args, **kwargs):
+        """Save the product. Create a slug if it doesn't already exist."""
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
 
 @reversion.register(exclude=("created_on", "updated_on"))

@@ -37,6 +37,15 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
+            "--slug",
+            "-s",
+            nargs="?",
+            type=str,
+            help="The system's slug (used in the API).",
+            metavar="slug",
+        )
+
+        parser.add_argument(
             "--deactivate",
             action="store_true",
             help="Deactivate the system after creation.",
@@ -48,6 +57,7 @@ class Command(BaseCommand):
         name = options["system_name"]
         description = options["description"]
         deactivate = options["deactivate"]
+        slug = options["slug"]
 
         if IntegratedSystem.objects.filter(name=name).exists():
             self.stdout.write(
@@ -59,6 +69,10 @@ class Command(BaseCommand):
 
         if deactivate:
             system.is_active = False
+            system.save()
+
+        if slug:
+            system.slug = slug
             system.save()
 
         self.stdout.write(

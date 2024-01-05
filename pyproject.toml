@@ -75,6 +75,7 @@ mitol-django-common = "^2023.12.19"
 mitol-django-payment-gateway = "^2023.12.19"
 django-fsm = "^2.8.1"
 django-fsm-admin-django-4 = {git = "https://github.com/7tg/django-fsm-admin-django-4.git"}
+python-slugify = "^8.0.1"
 
 [tool.poetry.group.dev.dependencies]
 bpython = "^0.24"
