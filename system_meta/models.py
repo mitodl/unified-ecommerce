@@ -8,6 +8,7 @@ from django.db import models
 from mitol.common.models import TimestampedModel
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
+from slugify import slugify
 
 from unified_ecommerce.utils import SoftDeleteActiveModel
 
@@ -19,6 +20,7 @@ class IntegratedSystem(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel)
     """Represents an integrated system"""
 
     name = models.CharField(max_length=255, unique=True)
+    slug = models.CharField(max_length=80, unique=True, blank=True, null=True)
     description = models.TextField(blank=True)
     api_key = models.TextField(blank=True)
 
@@ -28,6 +30,18 @@ class IntegratedSystem(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel)
     def __str__(self):
         """Return string representation of the system"""
         return f"{self.name} ({self.id})"
+
+    def delete(self):
+        """Mark the product inactive instead of deleting it"""
+
+        self.is_active = False
+        self.save(update_fields=("is_active",))
+
+    def save(self, *args, **kwargs):
+        """Save the product. Create a slug if it doesn't already exist."""
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
 
 @reversion.register(exclude=("created_on", "updated_on"))

@@ -42,6 +42,15 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
+            "--slug",
+            "-s",
+            nargs="?",
+            type=str,
+            help="The system's slug (used in the API).",
+            metavar="slug",
+        )
+
+        parser.add_argument(
             "--deactivate",
             action="store_true",
             help="Deactivate the system after creation.",
@@ -53,6 +62,7 @@ class Command(BaseCommand):
         name = options["system_name"]
         description = options["description"]
         deactivate = options["deactivate"]
+        slug = options["slug"]
 
         if IntegratedSystem.all_objects.filter(name=name).exists():
             exception_message = f"Integrated system {name} already exists."
@@ -65,6 +75,9 @@ class Command(BaseCommand):
 
         if deactivate:
             system.delete()
+        if slug:
+            system.slug = slug
+            system.save()
 
         self.stdout.write(
             self.style.SUCCESS(f"Successfully created integrated system {system.name}.")
