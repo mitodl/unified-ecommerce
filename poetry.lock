@@ -819,6 +819,24 @@ files = [
 ]
 
 [[package]]
+name = "deepdiff"
+version = "6.7.1"
+description = "Deep Difference and Search of any Python object/data. Recreate objects by adding adding deltas to each other."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "deepdiff-6.7.1-py3-none-any.whl", hash = "sha256:58396bb7a863cbb4ed5193f548c56f18218060362311aa1dc36397b2f25108bd"},
+    {file = "deepdiff-6.7.1.tar.gz", hash = "sha256:b367e6fa6caac1c9f500adc79ada1b5b1242c50d5f716a1a4362030197847d30"},
+]
+
+[package.dependencies]
+ordered-set = ">=4.0.2,<4.2.0"
+
+[package.extras]
+cli = ["click (==8.1.3)", "pyyaml (==6.0.1)"]
+optimize = ["orjson"]
+
+[[package]]
 name = "defusedxml"
 version = "0.7.1"
 description = "XML bomb protection for Python stdlib modules"
@@ -1110,17 +1128,24 @@ django = ">=3.2"
 
 [[package]]
 name = "django-server-status"
-version = "0.7.3"
-description = "Monitor server status with a healthcheck."
+version = "0.5.0"
+description = "Monitor server status with a healthcheck.\n"
 optional = false
 python-versions = "*"
 files = [
-    {file = "django-server-status-0.7.3.tar.gz", hash = "sha256:9126e20d78c88f62ffe382c1a5c73f1206ba8dca07a8039e81e3f35f1f75941a"},
-    {file = "django_server_status-0.7.3-py3-none-any.whl", hash = "sha256:2a018c731504a3c82d45717bca011c4f6b1d547f5384c9b0a04b439e9e5c3552"},
+    {file = "django-server-status-0.5.0.tar.gz", hash = "sha256:c0e7853f65208fa8596baa6916e4e85e30811fb13839c91bfa95de4c6eeb869d"},
 ]
 
 [package.dependencies]
-django = "*"
+celery = "*"
+elasticsearch = "*"
+kombu = "*"
+psycopg2 = "*"
+redis = "*"
+six = "*"
+
+[package.extras]
+dev = ["flake8"]
 
 [[package]]
 name = "django-storages"
@@ -2112,29 +2137,29 @@ werkzeug = ">=0.5,<2.2.0 || >2.2.0,<2.2.1 || >2.2.1"
 xmltodict = "*"
 
 [package.extras]
-all = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.40.0)", "docker (>=3.0.0)", "ecdsa (!=0.15)", "graphql-core", "jsondiff (>=1.1.2)", "multipart", "openapi-spec-validator (>=0.5.0)", "py-partiql-parser (==0.5.0)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
+all = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.40.0)", "docker (>=3.0.0)", "ecdsa (!=0.15)", "graphql-core", "jsondiff (>=1.1.2)", "multipart", "openapi-spec-validator (>=0.5.0)", "py-partiql-parser (==0.4.2)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
 apigateway = ["PyYAML (>=5.1)", "ecdsa (!=0.15)", "openapi-spec-validator (>=0.5.0)", "python-jose[cryptography] (>=3.1.0,<4.0.0)"]
 apigatewayv2 = ["PyYAML (>=5.1)"]
 appsync = ["graphql-core"]
 awslambda = ["docker (>=3.0.0)"]
 batch = ["docker (>=3.0.0)"]
-cloudformation = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.40.0)", "docker (>=3.0.0)", "ecdsa (!=0.15)", "graphql-core", "jsondiff (>=1.1.2)", "openapi-spec-validator (>=0.5.0)", "py-partiql-parser (==0.5.0)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
+cloudformation = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.40.0)", "docker (>=3.0.0)", "ecdsa (!=0.15)", "graphql-core", "jsondiff (>=1.1.2)", "openapi-spec-validator (>=0.5.0)", "py-partiql-parser (==0.4.2)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
 cognitoidp = ["ecdsa (!=0.15)", "python-jose[cryptography] (>=3.1.0,<4.0.0)"]
 ds = ["sshpubkeys (>=3.1.0)"]
-dynamodb = ["docker (>=3.0.0)", "py-partiql-parser (==0.5.0)"]
-dynamodbstreams = ["docker (>=3.0.0)", "py-partiql-parser (==0.5.0)"]
+dynamodb = ["docker (>=3.0.0)", "py-partiql-parser (==0.4.2)"]
+dynamodbstreams = ["docker (>=3.0.0)", "py-partiql-parser (==0.4.2)"]
 ebs = ["sshpubkeys (>=3.1.0)"]
 ec2 = ["sshpubkeys (>=3.1.0)"]
 efs = ["sshpubkeys (>=3.1.0)"]
 eks = ["sshpubkeys (>=3.1.0)"]
 glue = ["pyparsing (>=3.0.7)"]
 iotdata = ["jsondiff (>=1.1.2)"]
-proxy = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.40.0)", "docker (>=2.5.1)", "ecdsa (!=0.15)", "graphql-core", "jsondiff (>=1.1.2)", "multipart", "openapi-spec-validator (>=0.5.0)", "py-partiql-parser (==0.5.0)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
-resourcegroupstaggingapi = ["PyYAML (>=5.1)", "cfn-lint (>=0.40.0)", "docker (>=3.0.0)", "ecdsa (!=0.15)", "graphql-core", "jsondiff (>=1.1.2)", "openapi-spec-validator (>=0.5.0)", "py-partiql-parser (==0.5.0)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "sshpubkeys (>=3.1.0)"]
+proxy = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.40.0)", "docker (>=2.5.1)", "ecdsa (!=0.15)", "graphql-core", "jsondiff (>=1.1.2)", "multipart", "openapi-spec-validator (>=0.5.0)", "py-partiql-parser (==0.4.2)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
+resourcegroupstaggingapi = ["PyYAML (>=5.1)", "cfn-lint (>=0.40.0)", "docker (>=3.0.0)", "ecdsa (!=0.15)", "graphql-core", "jsondiff (>=1.1.2)", "openapi-spec-validator (>=0.5.0)", "py-partiql-parser (==0.4.2)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "sshpubkeys (>=3.1.0)"]
 route53resolver = ["sshpubkeys (>=3.1.0)"]
-s3 = ["PyYAML (>=5.1)", "py-partiql-parser (==0.5.0)"]
-s3crc32c = ["PyYAML (>=5.1)", "crc32c", "py-partiql-parser (==0.5.0)"]
-server = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.40.0)", "docker (>=3.0.0)", "ecdsa (!=0.15)", "flask (!=2.2.0,!=2.2.1)", "flask-cors", "graphql-core", "jsondiff (>=1.1.2)", "openapi-spec-validator (>=0.5.0)", "py-partiql-parser (==0.5.0)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
+s3 = ["PyYAML (>=5.1)", "py-partiql-parser (==0.4.2)"]
+s3crc32c = ["PyYAML (>=5.1)", "crc32c", "py-partiql-parser (==0.4.2)"]
+server = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.40.0)", "docker (>=3.0.0)", "ecdsa (!=0.15)", "flask (!=2.2.0,!=2.2.1)", "flask-cors", "graphql-core", "jsondiff (>=1.1.2)", "openapi-spec-validator (>=0.5.0)", "py-partiql-parser (==0.4.2)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
 ssm = ["PyYAML (>=5.1)"]
 xray = ["aws-xray-sdk (>=0.93,!=0.96)", "setuptools"]
 
@@ -2244,6 +2269,20 @@ files = [
 rsa = ["cryptography (>=3.0.0)"]
 signals = ["blinker (>=1.4.0)"]
 signedtoken = ["cryptography (>=3.0.0)", "pyjwt (>=2.0.0,<3)"]
+
+[[package]]
+name = "ordered-set"
+version = "4.1.0"
+description = "An OrderedSet is a custom MutableSet that remembers its order, so that every"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "ordered-set-4.1.0.tar.gz", hash = "sha256:694a8e44c87657c59292ede72891eb91d34131f6531463aab3009191c77364a8"},
+    {file = "ordered_set-4.1.0-py3-none-any.whl", hash = "sha256:046e1132c71fcf3330438a539928932caf51ddbc582496833e23de611de14562"},
+]
+
+[package.extras]
+dev = ["black", "mypy", "pytest"]
 
 [[package]]
 name = "packaging"
@@ -3535,12 +3574,12 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
 name = "static3"
-version = "0.7.0"
+version = "0.5.1"
 description = "A really simple WSGI way to serve static (or mixed) content."
 optional = false
 python-versions = "*"
 files = [
-    {file = "static3-0.7.0.tar.gz", hash = "sha256:674641c64bc75507af2eb20bef7e7e3593dca993dec6674be108fa15b42f47c8"},
+    {file = "static3-0.5.1.tar.gz", hash = "sha256:78393983482d8f41e6fcf91f3fd99c979ced088c4740c9f22835b96e6712897c"},
 ]
 
 [package.extras]
@@ -3587,13 +3626,12 @@ testing = ["black", "mypy", "pytest", "pytest-gitignore", "pytest-mock", "respon
 
 [[package]]
 name = "toolz"
-version = "0.12.0"
+version = "0.10.0"
 description = "List processing tools and functional utilities"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
-    {file = "toolz-0.12.0-py3-none-any.whl", hash = "sha256:2059bd4148deb1884bb0eb770a3cde70e7f954cfbbdc2285f1f2de01fd21eb6f"},
-    {file = "toolz-0.12.0.tar.gz", hash = "sha256:88c570861c440ee3f2f6037c4654613228ff40c93a6c25e0eba70d17282c6194"},
+    {file = "toolz-0.10.0.tar.gz", hash = "sha256:08fdd5ef7c96480ad11c12d472de21acd32359996f69a5259299b540feba4560"},
 ]
 
 [[package]]
@@ -3909,4 +3947,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11.0"
-content-hash = "071ead3c0e36951e7d49ad3bef398673b9b19a0a9a35942ee6dd05da8d6e3efc"
+content-hash = "b73e17c8135017b6ccc25a6b73b5eaee6cc4c54e7b19dc949722405a2810185c"

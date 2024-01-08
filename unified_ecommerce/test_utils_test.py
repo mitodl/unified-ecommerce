@@ -10,6 +10,7 @@ from unified_ecommerce.test_utils import (
     any_instance_of,
     assert_json_equal,
     assert_not_raises,
+    make_timestamps_matchable,
 )
 
 
@@ -82,8 +83,8 @@ def test_assert_json_equal_with_timestamps():
         "updated_on": "2021-01-01T00:00:00Z",
     }
 
-    assert_json_equal(obj1, obj2, ignore_timestamps=True)
+    assert_json_equal(*make_timestamps_matchable([obj1, obj2]))
 
     obj2 = obj1
 
-    assert_json_equal(obj1, obj2, ignore_timestamps=True)
+    assert_json_equal(*make_timestamps_matchable([obj1, obj2]))

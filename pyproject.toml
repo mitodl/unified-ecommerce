@@ -73,6 +73,7 @@ django-reversion = "^5.0.8"
 prettytable = "^3.9.0"
 mitol-django-common = "^2023.12.19"
 mitol-django-payment-gateway = "^2023.12.19"
+deepdiff = "^6.7.1"
 
 [tool.poetry.group.dev.dependencies]
 bpython = "^0.24"

@@ -11,12 +11,20 @@ User = get_user_model()
 log = logging.getLogger(__name__)
 
 
-class SoftDeleteQuerySet(models.QuerySet):
-    """Queryset to block delete and instead mark the items in_active"""
+class SoftDeleteTimestampedModel(TimestampedModel):
+    """Model that blocks delete and instead marks the items is_active flag as false"""
+
+    is_active = models.BooleanField(default=True)
 
     def delete(self):
         """Mark items inactive instead of deleting them"""
-        self.update(is_active=False)
+        self.is_active = False
+        self.save(update_fields=["is_active"])
+
+    class Meta:
+        """Meta options for SoftDeleteTimestampModel"""
+
+        abstract = True
 
 
 class ActiveUndeleteManager(models.Manager):
@@ -24,15 +32,14 @@ class ActiveUndeleteManager(models.Manager):
 
     def get_queryset(self):
         """Get the active queryset for manager"""
-        return SoftDeleteQuerySet(self.model, using=self._db).filter(is_active=True)
+        return models.QuerySet(self.model, using=self._db).filter(is_active=True)
 
 
-class IntegratedSystem(TimestampedModel):
+class IntegratedSystem(SoftDeleteTimestampedModel):
     """Represents an integrated system"""
 
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
-    is_active = models.BooleanField(default=True)
     api_key = models.TextField(blank=True)
 
     all_objects = models.Manager()
@@ -42,15 +49,9 @@ class IntegratedSystem(TimestampedModel):
         """Return string representation of the system"""
         return f"{self.name} ({self.id})"
 
-    def delete(self):
-        """Mark the product inactive instead of deleting it"""
-
-        self.is_active = False
-        self.save(update_fields=("is_active",))
-
 
 @reversion.register(exclude=("created_on", "updated_on"))
-class Product(TimestampedModel):
+class Product(SoftDeleteTimestampedModel):
     """
     Represents a purchasable product in the system. These include a blob of JSON
     containing system-specific information for the product.
@@ -64,11 +65,6 @@ class Product(TimestampedModel):
         max_digits=7, decimal_places=2, help_text="Price (decimal to two places)"
     )
     description = models.TextField(help_text="Long description of the product.")
-    is_active = models.BooleanField(
-        default=True,
-        null=False,
-        help_text="Controls visibility of the product in the app.",
-    )
     system = models.ForeignKey(
         IntegratedSystem,
         on_delete=models.DO_NOTHING,
@@ -90,7 +86,6 @@ class Product(TimestampedModel):
         constraints = [
             models.UniqueConstraint(
                 fields=["sku", "system"],
-                condition=models.Q(is_active=True),
                 name="unique_purchasable_sku_per_system",
             )
         ]
@@ -99,9 +94,3 @@ class Product(TimestampedModel):
         """Return string representation of the product"""
 
         return f"{self.sku} - {self.system.name} - {self.name} {self.price}"
-
-    def delete(self):
-        """Mark the product inactive instead of deleting it"""
-
-        self.is_active = False
-        self.save(update_fields=("is_active",))

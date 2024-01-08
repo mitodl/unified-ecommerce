@@ -2,6 +2,8 @@
 
 from datetime import datetime, timedelta
 
+import pytz
+from django.conf import settings
 from rest_framework_jwt.settings import api_settings
 
 from unified_ecommerce.auth_utils import get_encoded_and_signed_subscription_token
@@ -74,7 +76,9 @@ def test_ignore_expired_jwt_authentication_valid(rf, user):
 def test_ignore_expired_jwt_authentication_expired(rf, user):
     """Tests that IgnoreExpiredJwtAuthentication returns None if token is expired"""
     payload = jwt_payload_handler(user)
-    payload["exp"] = datetime.utcnow() - timedelta(seconds=100)  # noqa: DTZ003
+    payload["exp"] = datetime.now(tz=pytz.timezone(settings.TIME_ZONE)) - timedelta(
+        seconds=100
+    )
     token = jwt_encode_handler(payload)
     request = rf.get("index", HTTP_AUTHORIZATION=f"Bearer {token}")
     authentication = IgnoreExpiredJwtAuthentication()

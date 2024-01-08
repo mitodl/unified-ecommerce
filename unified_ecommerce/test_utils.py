@@ -1,12 +1,16 @@
 """Testing utils"""
 
 import abc
+import datetime
 import json
 import traceback
 from contextlib import contextmanager
 from unittest.mock import Mock
 
 import pytest
+import pytz
+from deepdiff import DeepDiff
+from django.conf import settings
 from django.core.serializers import serialize
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http.response import HttpResponse
@@ -146,33 +150,67 @@ def queryset_to_json(queryset):
     return dj_serializer[0]["fields"]
 
 
-def assert_json_equal(obj1, obj2, sort=False, **kwargs):  # noqa: FBT002
+def assert_json_equal(obj1, obj2, ignore_order=False):  # noqa: FBT002
     """
-    Asserts that two objects are equal after a round trip through JSON serialization/deserialization.
-    Particularly helpful when testing DRF serializers where you may get back OrderedDict and other such objects.
+    Assert that two objects are equal after a round trip through JSON
+    serialization/deserialization. Particularly helpful when testing DRF serializers
+    where you may get back OrderedDict and other such objects.
 
     Args:
         obj1 (object): the first object
         obj2 (object): the second object
-        sort (bool): If true, sort items which are iterable before comparing
+        ignore_order (bool): Boolean to ignore the order in the result
+    """
+    json_renderer = JSONRenderer()
+    converted1 = json.loads(json_renderer.render(obj1))
+    converted2 = json.loads(json_renderer.render(obj2))
+    if ignore_order:
+        assert DeepDiff(converted1, converted2, ignore_order=ignore_order) == {}
+    else:
+        assert converted1 == converted2
+
+
+def make_timestamps_matchable(objs, **kwargs):
+    """
+    Convert the standard timestamp datetimes that are usually in a model object to
+    a set equivalent, so the object can be compared to another more easily. For
+    a TimestampedModel, this is created_on and updated_on. Optionally, you can specify
+    the fields to set, or skip the standard timestamp fields.
+
+    This generates an aware timestamp at the start, which is used for all the dicts
+    that have been passed in.
+
+    Args:
+    - objs (list of dict): the objects to modify
 
     Keyword Args:
-        ignore_timestamps: If true, ignore timestamps in the comparison
-    """  # noqa: D401
-    renderer = JSONRenderer()
-    converted1 = json.loads(renderer.render(obj1))
-    converted2 = json.loads(renderer.render(obj2))
+    - fields (list): additional fields to convert
+    - skip_timestamps (bool): skip the regular timestamps (so, just what you specify in
+      fields)
 
-    if kwargs.get("ignore_timestamps"):
-        converted1.pop("created_on", None)
-        converted1.pop("updated_on", None)
-        converted2.pop("created_on", None)
-        converted2.pop("updated_on", None)
+    Returns:
+    - list of dict: the passed in dicts, with the created_on and updated_on timestamps
+      converted to anys equivalents
+    """
 
-    if sort:
-        converted1 = _sort_values_for_testing(converted1)
-        converted2 = _sort_values_for_testing(converted2)
-    assert converted1 == converted2
+    time_data = datetime.datetime.now(tz=pytz.timezone(settings.TIME_ZONE))
+    fields = kwargs.get("fields", [])
+
+    if not kwargs.get("skip_timestamps", False):
+        fields = [*fields, "created_on", "updated_on"]
+
+    timestamps = {}
+
+    for field in fields:
+        timestamps[field] = time_data
+
+    return [
+        {
+            **obj,
+            **timestamps,
+        }
+        for obj in objs
+    ]
 
 
 class PickleableMock(Mock):
@@ -185,6 +223,12 @@ class PickleableMock(Mock):
     def __reduce__(self):
         """Required method for being pickleable"""  # noqa: D401
         return (Mock, ())
+
+
+class ViewSetNotConfiguredError(Exception):
+    """
+    Raised when a viewset is not configured correctly.
+    """
 
 
 class BaseSerializerTest:
@@ -207,7 +251,7 @@ class BaseSerializerTest:
         serializer = self.serializer_class(instance)
         dj_serializer = queryset_to_json(instance_qs)
 
-        assert_json_equal(serializer.data, dj_serializer, ignore_timestamps=True)
+        assert_json_equal(*make_timestamps_matchable([serializer.data, dj_serializer]))
 
 
 class BaseViewSetTest:
@@ -250,7 +294,7 @@ class BaseViewSetTest:
         """
         if not url:
             exception_string = f"{url_name} is not defined"
-            pytest.skip(exception_string)
+            raise ViewSetNotConfiguredError(exception_string)
 
         response = api_client.get(url)
         assert response.status_code == 403 if kwargs["test_non_authenticated"] else 200
@@ -309,7 +353,9 @@ class BaseViewSetTest:
 
         if isLoggedIn and instance.is_active:
             dj_serializer = queryset_to_json(instance_qs)
-            assert_json_equal(response.data, dj_serializer, ignore_timestamps=True)
+            assert_json_equal(
+                *make_timestamps_matchable([response.data, dj_serializer])
+            )
 
     def test_update(self, update_data, isLoggedIn, client, user_client):
         """

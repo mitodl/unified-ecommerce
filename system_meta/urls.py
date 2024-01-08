@@ -10,4 +10,4 @@ router = routers.DefaultRouter()
 router.register(r"integrated_system", IntegratedSystemViewSet)
 router.register(r"product", ProductViewSet)
 
-urlpatterns = [re_path("^v0/", include(router.urls))]
+urlpatterns = [re_path("^", include(router.urls))]
