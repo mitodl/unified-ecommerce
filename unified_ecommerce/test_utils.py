@@ -329,7 +329,8 @@ class BaseViewSetTest:
         )
 
         if isLoggedIn:
-            assert len(response.data) == self.queryset.count()
+            assert "count" in response.data
+            assert response.data["count"] == self.queryset.count()
 
     @pytest.mark.parametrize("isLoggedIn", [True, False])
     def test_retrieve(self, isLoggedIn, client, user_client):

@@ -101,6 +101,9 @@ class TestIntegratedSystemViewSet(BaseViewSetTest):
                 IntegratedSystem.objects.filter(name="System Name").exists()
                 is not with_bad_data
             )
+        else:
+            assert response.data["detail"].code == "not_authenticated"
+            assert response.status_code == 403
 
 
 class TestProductViewSet(BaseViewSetTest):
@@ -184,3 +187,6 @@ class TestProductViewSet(BaseViewSetTest):
         if is_logged_in:
             assert response.status_code == 201 if not with_bad_data else 400
             assert Product.objects.filter(name="New Name").exists() is not with_bad_data
+        else:
+            assert response.data["detail"].code == "not_authenticated"
+            assert response.status_code == 403

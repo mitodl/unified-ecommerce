@@ -466,6 +466,8 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
         "unified_ecommerce.authentication.IgnoreExpiredJwtAuthentication",
     ),
+    "PAGE_SIZE": 10,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "EXCEPTION_HANDLER": "unified_ecommerce.exceptions.api_exception_handler",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
     "TEST_REQUEST_RENDERER_CLASSES": [
