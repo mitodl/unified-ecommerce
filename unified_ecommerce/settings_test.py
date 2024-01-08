@@ -14,12 +14,9 @@ from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 
 REQUIRED_SETTINGS = {
-    "MAILGUN_SENDER_DOMAIN": "mailgun.fake.domain",
-    "MAILGUN_KEY": "fake_mailgun_key",
     "MITOL_UE_COOKIE_NAME": "cookie_monster",
     "MITOL_UE_COOKIE_DOMAIN": "od.fake.domain",
     "MITOL_UE_BASE_URL": "http:localhost:8073/",
-    "INDEXING_API_USERNAME": "mitodl",
 }
 
 
@@ -128,20 +125,6 @@ class TestSettings(TestCase):
             assert settings_vars["DATABASES"]["default"]["OPTIONS"] == {
                 "sslmode": "require"
             }
-
-    def test_opensearch_index_pr_build(self):
-        """For PR builds we will use the heroku app name instead of the given OPENSEARCH_INDEX"""
-        index_name = "heroku_app_name_as_index"
-        with mock.patch.dict(
-            "os.environ",
-            {
-                **REQUIRED_SETTINGS,
-                "HEROKU_APP_NAME": index_name,
-                "HEROKU_PARENT_APP_NAME": "some_name",
-            },
-        ):
-            settings_vars = self.reload_settings()
-            assert settings_vars["OPENSEARCH_INDEX"] == index_name
 
     @staticmethod
     def test_semantic_version():

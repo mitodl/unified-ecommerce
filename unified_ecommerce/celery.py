@@ -16,5 +16,4 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 app.conf.task_default_queue = "default"
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)  # pragma: no cover
 
-app.conf.task_routes = {
-}
+app.conf.task_routes = {}

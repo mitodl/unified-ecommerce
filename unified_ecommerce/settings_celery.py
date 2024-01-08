@@ -2,7 +2,6 @@
 Django settings for celery.
 """
 
-from celery.schedules import crontab
 
 from unified_ecommerce.envs import get_bool, get_int, get_string
 
@@ -20,8 +19,7 @@ CELERY_WORKER_MAX_MEMORY_PER_CHILD = get_int(
     "CELERY_WORKER_MAX_MEMORY_PER_CHILD", 250_000
 )
 
-CELERY_BEAT_SCHEDULE = {
-}
+CELERY_BEAT_SCHEDULE = {}
 
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"

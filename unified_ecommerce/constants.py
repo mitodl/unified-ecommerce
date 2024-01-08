@@ -1,7 +1,5 @@
 """Constants for ecommerce."""
-from mitol.payment_gateway.api import ProcessorResponse
-
-REFERENCE_NUMBER_PREFIX = "mitxonline-"
+# ruff: noqa: ERA001
 
 DISCOUNT_TYPE_PERCENT_OFF = "percent-off"
 DISCOUNT_TYPE_DOLLARS_OFF = "dollars-off"
@@ -77,9 +75,9 @@ CYBERSOURCE_CARD_TYPES = {
     "062": "China UnionPay",
 }
 
-REFUND_SUCCESS_STATES = [
-    ProcessorResponse.STATE_ACCEPTED,
-    ProcessorResponse.STATE_PENDING,
-]
+# REFUND_SUCCESS_STATES = [
+#     ProcessorResponse.STATE_ACCEPTED,
+#     ProcessorResponse.STATE_PENDING,
+# ]
 
 ZERO_PAYMENT_DATA = {"amount": 0, "data": {"reason": "No payment required"}}
