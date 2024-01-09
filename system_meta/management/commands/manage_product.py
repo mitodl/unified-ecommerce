@@ -238,8 +238,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"Product {sku} does not exist."))
             return
 
-        product.is_active = False
-        product.save()
+        product.delete()
 
         self.stdout.write(
             self.style.SUCCESS(

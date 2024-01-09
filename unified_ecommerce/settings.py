@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     "django_json_widget",
     "django_filters",
     "drf_spectacular",
+    "safedelete",
     # Application modules
     "unified_ecommerce",
     "system_meta",
@@ -164,6 +165,9 @@ else:
     DEFAULT_DATABASE_CONFIG["OPTIONS"] = {"sslmode": "require"}
 
 DATABASES = {"default": DEFAULT_DATABASE_CONFIG}
+
+SAFE_DELETE_INTERPRET_UNDELETED_OBJECTS_AS_CREATED = True
+SAFE_DELETE_FIELD_NAME = "is_active"
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

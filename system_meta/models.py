@@ -6,44 +6,22 @@ import reversion
 from django.contrib.auth import get_user_model
 from django.db import models
 from mitol.common.models import TimestampedModel
+from safedelete.managers import SafeDeleteManager
+from safedelete.models import SafeDeleteModel
 
 User = get_user_model()
 log = logging.getLogger(__name__)
 
 
-class SoftDeleteTimestampedModel(TimestampedModel):
-    """Model that blocks delete and instead marks the items is_active flag as false"""
-
-    is_active = models.BooleanField(default=True)
-
-    def delete(self):
-        """Mark items inactive instead of deleting them"""
-        self.is_active = False
-        self.save(update_fields=["is_active"])
-
-    class Meta:
-        """Meta options for SoftDeleteTimestampModel"""
-
-        abstract = True
-
-
-class ActiveUndeleteManager(models.Manager):
-    """Query manager for products"""
-
-    def get_queryset(self):
-        """Get the active queryset for manager"""
-        return models.QuerySet(self.model, using=self._db).filter(is_active=True)
-
-
-class IntegratedSystem(SoftDeleteTimestampedModel):
+class IntegratedSystem(SafeDeleteModel, TimestampedModel):
     """Represents an integrated system"""
 
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     api_key = models.TextField(blank=True)
 
+    objects = SafeDeleteManager()
     all_objects = models.Manager()
-    objects = ActiveUndeleteManager()
 
     def __str__(self):
         """Return string representation of the system"""
@@ -51,7 +29,7 @@ class IntegratedSystem(SoftDeleteTimestampedModel):
 
 
 @reversion.register(exclude=("created_on", "updated_on"))
-class Product(SoftDeleteTimestampedModel):
+class Product(SafeDeleteModel, TimestampedModel):
     """
     Represents a purchasable product in the system. These include a blob of JSON
     containing system-specific information for the product.
@@ -77,8 +55,8 @@ class Product(SoftDeleteTimestampedModel):
         help_text="System-specific data for the product (in JSON).",
     )
 
+    objects = SafeDeleteManager()
     all_objects = models.Manager()
-    objects = ActiveUndeleteManager()
 
     class Meta:
         """Meta class for Product"""

@@ -1,8 +1,10 @@
 """Factories for the system_meta app."""
+
 from factory import Faker, SubFactory
 from factory.django import DjangoModelFactory
 
 from system_meta.models import IntegratedSystem, Product
+from unified_ecommerce.factories import InactiveDjangoModelFactory
 
 
 class IntegratedSystemFactory(DjangoModelFactory):
@@ -16,18 +18,17 @@ class IntegratedSystemFactory(DjangoModelFactory):
     name = Faker("company")
     description = Faker("text")
     api_key = Faker("md5")
+    is_active = None
 
 
 class ActiveIntegratedSystemFactory(IntegratedSystemFactory):
     """Factory for IntegratedSystem model, but always returns an active object."""
 
-    is_active = True
 
-
-class InactiveIntegratedSystemFactory(IntegratedSystemFactory):
+class InactiveIntegratedSystemFactory(
+    IntegratedSystemFactory, InactiveDjangoModelFactory
+):
     """Factory for IntegratedSystem model, but always returns an inactive object."""
-
-    is_active = False
 
 
 class ProductFactory(DjangoModelFactory):
@@ -42,7 +43,7 @@ class ProductFactory(DjangoModelFactory):
     price = Faker("pydecimal", left_digits=3, right_digits=2, positive=True)
     sku = Faker("ean", length=13)
     description = Faker("text")
-    is_active = Faker("boolean")
+    is_active = None
     system = SubFactory(IntegratedSystemFactory)
     system_data = Faker("json")
 
@@ -50,10 +51,6 @@ class ProductFactory(DjangoModelFactory):
 class ActiveProductFactory(ProductFactory):
     """Factory for Product model, but always returns an active product."""
 
-    is_active = True
 
-
-class InactiveProductFactory(ProductFactory):
+class InactiveProductFactory(ProductFactory, InactiveDjangoModelFactory):
     """Factory for Product model, but always returns an inactive product."""
-
-    is_active = False

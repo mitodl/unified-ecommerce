@@ -352,11 +352,16 @@ class BaseViewSetTest:
             test_non_authenticated=not isLoggedIn,
         )
 
-        if isLoggedIn and instance.is_active:
+        if isLoggedIn and instance.is_active is None:
             dj_serializer = queryset_to_json(instance_qs)
             assert_json_equal(
                 *make_timestamps_matchable([response.data, dj_serializer])
             )
+
+        if isLoggedIn and instance.is_active is not None:
+            # Deleted items should return a 404. (is_active is None if it's active;
+            # otherwise it has a timestamp of when it was deleted.)
+            assert response.status_code == 404
 
     def test_update(self, update_data, isLoggedIn, client, user_client):
         """

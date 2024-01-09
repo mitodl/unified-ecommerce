@@ -76,9 +76,9 @@ class TestIntegratedSystemViewSet(BaseViewSetTest):
         if is_logged_in:
             instance.refresh_from_db()
             assert response.status_code == 204
-            assert instance.is_active is False
+            assert instance.is_active is not None
         else:
-            assert instance.is_active is True
+            assert instance.is_active is None
 
     @pytest.mark.parametrize("is_logged_in", [True, False])
     @pytest.mark.parametrize("with_bad_data", [True, False])
@@ -162,9 +162,9 @@ class TestProductViewSet(BaseViewSetTest):
         if is_logged_in:
             instance.refresh_from_db()
             assert response.status_code == 204
-            assert instance.is_active is False
+            assert instance.is_active is not None
         else:
-            assert instance.is_active is True
+            assert instance.is_active is None
 
     @pytest.mark.parametrize("is_logged_in", [True, False])
     @pytest.mark.parametrize("with_bad_data", [True, False])

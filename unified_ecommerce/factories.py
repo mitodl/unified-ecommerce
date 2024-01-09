@@ -38,3 +38,19 @@ class GroupFactory(DjangoModelFactory):
         """Meta options for GroupFactory"""
 
         model = Group
+
+
+class InactiveDjangoModelFactory(DjangoModelFactory):
+    """Meta factory for deleted objects."""
+
+    class Meta:
+        """Meta options for InactiveDjangoModelFactory."""
+
+        abstract = True
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        """Create the object, but then delete it."""
+        obj = super()._create(model_class, *args, **kwargs)
+        obj.delete()
+        return obj
