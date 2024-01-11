@@ -43,6 +43,7 @@ urlpatterns = [
     ),
     # App Paths
     re_path(r"^api/v0/meta/", include("system_meta.urls")),
+    re_path(r"^api/v0/payments/", include("payments.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

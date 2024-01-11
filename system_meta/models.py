@@ -31,12 +31,6 @@ class IntegratedSystem(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel)
         """Return string representation of the system"""
         return f"{self.name} ({self.id})"
 
-    def delete(self):
-        """Mark the product inactive instead of deleting it"""
-
-        self.is_active = False
-        self.save(update_fields=("is_active",))
-
     def save(self, *args, **kwargs):
         """Save the product. Create a slug if it doesn't already exist."""
         if not self.slug:
