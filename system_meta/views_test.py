@@ -76,9 +76,9 @@ class TestIntegratedSystemViewSet(BaseViewSetTest):
         if is_logged_in:
             instance.refresh_from_db()
             assert response.status_code == 204
-            assert instance.is_active is not None
+            assert not instance.is_active
         else:
-            assert instance.is_active is None
+            assert instance.is_active
 
     @pytest.mark.parametrize("is_logged_in", [True, False])
     @pytest.mark.parametrize("with_bad_data", [True, False])
@@ -86,7 +86,6 @@ class TestIntegratedSystemViewSet(BaseViewSetTest):
         """Test that the viewset can create an object."""
         create_data = {
             "description": "a description",
-            "is_active": True,
             "api_key": "123456",
         }
 
@@ -162,9 +161,9 @@ class TestProductViewSet(BaseViewSetTest):
         if is_logged_in:
             instance.refresh_from_db()
             assert response.status_code == 204
-            assert instance.is_active is not None
+            assert not instance.is_active
         else:
-            assert instance.is_active is None
+            assert instance.is_active
 
     @pytest.mark.parametrize("is_logged_in", [True, False])
     @pytest.mark.parametrize("with_bad_data", [True, False])
@@ -176,7 +175,6 @@ class TestProductViewSet(BaseViewSetTest):
             "price": 10.00,
             "sku": "1234567890123",
             "system": system.id,
-            "is_active": True,
         }
 
         if not with_bad_data:

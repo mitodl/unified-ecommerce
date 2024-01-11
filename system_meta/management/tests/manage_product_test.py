@@ -20,7 +20,7 @@ def test_add_product():
     system = IntegratedSystemFactory()
 
     params = [
-        "-a",
+        "add",
         "--name",
         "test_product",
         "--sku",
@@ -51,11 +51,11 @@ def test_list_products():
     out = StringIO()
 
     system = IntegratedSystemFactory()
-    ProductFactory.create_batch(3, system=system, is_active=True)
+    ProductFactory.create_batch(3, system=system)
 
     call_command(
         "manage_product",
-        "--list",
+        "list",
         stdout=out,
     )
 
@@ -71,7 +71,7 @@ def test_update_product():
     product = ProductFactory(system=system)
 
     params = [
-        "-u",
+        "update",
         "--sku",
         product.sku,
         "--system",
@@ -103,10 +103,10 @@ def test_deactivate_product():
     out = StringIO()
 
     system = IntegratedSystemFactory()
-    product = ProductFactory(system=system, is_active=True)
+    product = ProductFactory(system=system)
 
     params = [
-        "-r",
+        "remove",
         "--sku",
         product.sku,
         "--system",
@@ -131,10 +131,10 @@ def test_display_product():
     out = StringIO()
 
     system = IntegratedSystemFactory()
-    product = ProductFactory(system=system, is_active=True)
+    product = ProductFactory(system=system)
 
     params = [
-        "--display",
+        "display",
         "--sku",
         product.sku,
         "--system",

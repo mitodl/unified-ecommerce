@@ -166,8 +166,12 @@ else:
 
 DATABASES = {"default": DEFAULT_DATABASE_CONFIG}
 
+# Safe delete fields
+# Note field name is changed from default for consistency with the other timestamp
+# fields.
+
 SAFE_DELETE_INTERPRET_UNDELETED_OBJECTS_AS_CREATED = True
-SAFE_DELETE_FIELD_NAME = "is_active"
+SAFE_DELETE_FIELD_NAME = "deleted_on"
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

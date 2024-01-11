@@ -9,8 +9,10 @@ Return codes:
 Ignoring A003 because "help" is valid for argparse.
 """
 # ruff: noqa: A003, PLR0913, FBT002
+import argparse
 
 from django.core.management import BaseCommand, CommandError
+from mitol.common.utils.datetime import now_in_utc
 from prettytable import PrettyTable
 
 from system_meta.models import IntegratedSystem, Product
@@ -26,92 +28,102 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         """Parse arguments provided to the command."""
 
-        action_group = parser.add_argument_group(
-            title="Action", description="Action to perform. Required."
-        )
-        action_group = action_group.add_mutually_exclusive_group(required=True)
-        action_group.add_argument(
-            "--add",
-            "-a",
-            action="store_true",
-            help="Add a new product.",
-        )
-        action_group.add_argument(
-            "--update",
-            "-u",
-            action="store_true",
-            help="Update an existing product.",
-        )
-        action_group.add_argument(
-            "--remove",
-            "-r",
-            action="store_true",
-            help="Remove a product.",
-        )
-        action_group.add_argument(
-            "--list",
-            "-l",
-            action="store_true",
-            help="List all products.",
-        )
-        action_group.add_argument(
-            "--display",
-            "-d",
-            action="store_true",
-            help="Activate a product.",
-        )
-
-        crud_group = parser.add_argument_group(
-            title="CRUD", description="Arguments for add, remove, and display."
-        )
-        crud_group.add_argument(
+        sku_system_args = argparse.ArgumentParser(add_help=False)
+        sku_system_args.add_argument(
             "--sku",
             type=str,
+            required=True,
             help="The product's SKU.",
             metavar="sku",
         )
-        crud_group.add_argument(
+        sku_system_args.add_argument(
+            "--system",
+            "-s",
+            type=str,
+            required=True,
+            help="The system to add the product to.",
+            metavar="system",
+        )
+
+        crud_args = argparse.ArgumentParser(add_help=False)
+        crud_args.add_argument(
             "--price",
             type=float,
+            required=True,
             help="The product's price.",
             metavar="price",
         )
-        crud_group.add_argument(
+        crud_args.add_argument(
             "--name",
             "-n",
             type=str,
             help="The product's name.",
             metavar="name",
         )
-        crud_group.add_argument(
-            "--system",
-            "-s",
-            type=str,
-            help="The system to add the product to.",
-            metavar="system",
-        )
-        crud_group.add_argument(
+        crud_args.add_argument(
             "--system-data",
             type=str,
             help="The system-specific data for the product.",
             metavar="system_data",
         )
-        crud_group.add_argument(
+        crud_args.add_argument(
             "--description",
             type=str,
+            default="",
             help="The product's description.",
             metavar="description",
         )
-        crud_group.add_argument(
+
+        subparsers = parser.add_subparsers(dest="subcommand", required=True)
+
+        add_cmd = subparsers.add_parser(
+            "add",
+            help="Add a new product.",
+            parents=[sku_system_args, crud_args],
+        )
+        add_cmd.add_argument(
             "--deactivate",
+            dest="is_active",
+            default=True,
             action="store_true",
             help="Deactivate the product.",
         )
 
-        parser.add_argument(
+        update_cmd = subparsers.add_parser(
+            "update",
+            help="Update an existing product.",
+            parents=[sku_system_args, crud_args],
+        )
+        is_active_args = update_cmd.add_mutually_exclusive_group()
+        is_active_args.add_argument(
+            "--deactivate",
+            dest="is_active",
+            action="store_false",
+            help="Deactivate the product.",
+        )
+        is_active_args.add_argument(
             "--activate",
+            dest="is_active",
+            default=True,
             action="store_true",
             help="Activate the product. Only for Update.",
+        )
+
+        subparsers.add_parser(
+            "remove",
+            help="Remove a product.",
+            parents=[sku_system_args],
+        )
+
+        subparsers.add_parser(
+            "list",
+            help="List all products.",
+        )
+
+        subparsers.add_parser(
+            "display",
+            help="Display a product.",
+            parents=[sku_system_args],
         )
 
     def _list_products(self):
@@ -183,7 +195,7 @@ class Command(BaseCommand):
             description=description,
             system=system,
             system_data=system_data,
-            is_active=not deactivate,
+            deleted_on=None if not deactivate else now_in_utc(),
         )
 
         self.stdout.write(
@@ -219,7 +231,8 @@ class Command(BaseCommand):
             product.description = description
         if system_data:
             product.system_data = system_data
-        product.is_active = active
+
+        product.deleted_on = None if active else now_in_utc()
 
         product.save()
 
@@ -251,11 +264,13 @@ class Command(BaseCommand):
     def handle(self, **options) -> None:
         """Handle the command."""
 
-        if options["list"]:
+        subcommand = options["subcommand"]
+
+        if subcommand == "list":
             self._list_products()
             return
 
-        [sku, price, name, system_name, description, deactivate, system_data] = [
+        [sku, price, name, system_name, description, is_active, system_data] = [
             options.get(arg)
             for arg in [
                 "sku",
@@ -268,21 +283,21 @@ class Command(BaseCommand):
             ]
         ]
 
-        if options["add"]:
+        if subcommand == "add":
             self._add_product(
-                sku, price, name, system_name, description, deactivate, system_data
+                sku, price, name, system_name, description, is_active, system_data
             )
             return
 
-        if options["display"]:
+        if subcommand == "display":
             self._display_product(sku, system_name)
             return
 
-        if options["remove"]:
+        if subcommand == "remove":
             self._deactivate_product(sku, system_name)
             return
 
-        if options["update"]:
+        if subcommand == "update":
             self._update_product(
                 sku,
                 system_name,
@@ -290,6 +305,6 @@ class Command(BaseCommand):
                 name,
                 description,
                 system_data,
-                options["activate"] and not deactivate,
+                is_active,
             )
             return

@@ -7,6 +7,7 @@ from enum import Flag, auto
 import markdown2
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.db import models
 from mitol.common.utils.datetime import now_in_utc
 
 log = logging.getLogger(__name__)
@@ -251,3 +252,18 @@ def write_x509_files():
     """Write the x509 certificate and key to files"""
     write_to_file(settings.MIT_WS_CERTIFICATE_FILE, settings.MIT_WS_CERTIFICATE)
     write_to_file(settings.MIT_WS_PRIVATE_KEY_FILE, settings.MIT_WS_PRIVATE_KEY)
+
+
+class SoftDeleteActiveModel(models.Model):
+    """Provides a truthy is_active field for soft-deletable models"""
+
+    class Meta:
+        """Meta options for SoftDeleteActiveModel"""
+
+        abstract = True
+
+    @property
+    def is_active(self):
+        """Return True if the object is active, False otherwise."""
+
+        return self.deleted_on is None

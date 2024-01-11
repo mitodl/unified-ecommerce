@@ -31,6 +31,8 @@ def test_add_system(with_description, with_deactivate):
     created_system = IntegratedSystem.all_objects.get(name="test_system")
     assert created_system.description == desc
     if with_deactivate:
-        assert created_system.is_active is not None
+        assert not created_system.is_active
+        assert created_system.deleted_on is not None
     else:
-        assert created_system.is_active is None
+        assert created_system.is_active
+        assert created_system.deleted_on is None

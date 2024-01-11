@@ -9,11 +9,13 @@ from mitol.common.models import TimestampedModel
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 
+from unified_ecommerce.utils import SoftDeleteActiveModel
+
 User = get_user_model()
 log = logging.getLogger(__name__)
 
 
-class IntegratedSystem(SafeDeleteModel, TimestampedModel):
+class IntegratedSystem(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
     """Represents an integrated system"""
 
     name = models.CharField(max_length=255, unique=True)
@@ -29,7 +31,7 @@ class IntegratedSystem(SafeDeleteModel, TimestampedModel):
 
 
 @reversion.register(exclude=("created_on", "updated_on"))
-class Product(SafeDeleteModel, TimestampedModel):
+class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
     """
     Represents a purchasable product in the system. These include a blob of JSON
     containing system-specific information for the product.
