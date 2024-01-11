@@ -1,10 +1,16 @@
 """
 Manages products within the app.
+
+Return codes:
+0: Success
+1: Product does not exist
+2: Product already exists
+
 Ignoring A003 because "help" is valid for argparse.
 """
 # ruff: noqa: A003, PLR0913, FBT002
 
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, CommandError
 from prettytable import PrettyTable
 
 from system_meta.models import IntegratedSystem, Product
@@ -134,9 +140,9 @@ class Command(BaseCommand):
 
         try:
             product = Product.all_objects.get(sku=sku, system__name=system_name)
-        except Product.DoesNotExist:
-            self.stdout.write(self.style.ERROR(f"Product {sku} does not exist."))
-            return
+        except Product.DoesNotExist as err:
+            exception_message = f"Product {sku} does not exist."
+            raise CommandError(exception_message, returncode=1) from err
 
         table = PrettyTable()
         table.align = "l"
@@ -152,7 +158,6 @@ class Command(BaseCommand):
         table.add_row(["System Data", product.system_data])
 
         self.stdout.write(table.get_string())
-        return
 
     def _add_product(
         self,
@@ -167,12 +172,8 @@ class Command(BaseCommand):
         """Create a product."""
 
         if Product.objects.filter(sku=sku, system__name=system_name).exists():
-            self.stdout.write(
-                self.style.ERROR(
-                    f"Product {sku} already exists in system {system_name}."
-                )
-            )
-            return
+            exception_message = "Product {sku} already exists in system {system_name}."
+            raise CommandError(exception_message, returncode=2)
 
         system = IntegratedSystem.objects.get(name=system_name)
         product = Product.objects.create(
@@ -206,9 +207,9 @@ class Command(BaseCommand):
 
         try:
             product = Product.all_objects.get(sku=sku, system__name=system_name)
-        except Product.DoesNotExist:
-            self.stdout.write(self.style.ERROR(f"Product {sku} does not exist."))
-            return
+        except Product.DoesNotExist as err:
+            exception_message = f"Product {sku} does not exist."
+            raise CommandError(exception_message, returncode=1) from err
 
         if price:
             product.price = price
@@ -234,9 +235,9 @@ class Command(BaseCommand):
 
         try:
             product = Product.objects.get(sku=sku, system__name=system_name)
-        except Product.DoesNotExist:
-            self.stdout.write(self.style.ERROR(f"Product {sku} does not exist."))
-            return
+        except Product.DoesNotExist as err:
+            exception_message = f"Product {sku} does not exist."
+            raise CommandError(exception_message, returncode=1) from err
 
         product.delete()
 

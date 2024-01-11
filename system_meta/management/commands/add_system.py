@@ -2,12 +2,15 @@
 Adds a new integrated system to the application. This allows a system to access data
 tied to it through the API.
 
+Return codes:
+0: Success
+1: System already exists
+
 Ignoring A003 because "help" is valid for argparse.
 """
 # ruff: noqa: A003
 
-from django.core.management import BaseCommand
-from mitol.common.utils.datetime import now_in_utc
+from django.core.management import BaseCommand, CommandError
 
 from system_meta.models import IntegratedSystem
 
@@ -35,6 +38,7 @@ class Command(BaseCommand):
             type=str,
             help="The system's description.",
             metavar="description",
+            default="",
         )
 
         parser.add_argument(
@@ -50,17 +54,17 @@ class Command(BaseCommand):
         description = options["description"]
         deactivate = options["deactivate"]
 
-        if IntegratedSystem.objects.filter(name=name).exists():
-            self.stdout.write(
-                self.style.ERROR(f"Integrated system {name} already exists.")
-            )
-            return 1
+        if IntegratedSystem.all_objects.filter(name=name).exists():
+            exception_message = f"Integrated system {name} already exists."
+            raise CommandError(exception_message, returncode=1)
 
         system = IntegratedSystem.objects.create(
             name=name,
             description=description,
-            is_active=now_in_utc() if deactivate else None,
         )
+
+        if deactivate:
+            system.delete()
 
         self.stdout.write(
             self.style.SUCCESS(f"Successfully created integrated system {system.name}.")
