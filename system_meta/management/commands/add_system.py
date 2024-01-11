@@ -7,6 +7,7 @@ Ignoring A003 because "help" is valid for argparse.
 # ruff: noqa: A003
 
 from django.core.management import BaseCommand
+from mitol.common.utils.datetime import now_in_utc
 
 from system_meta.models import IntegratedSystem
 
@@ -53,14 +54,16 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.ERROR(f"Integrated system {name} already exists.")
             )
-            return
+            return 1
 
-        system = IntegratedSystem.objects.create(name=name, description=description)
-
-        if deactivate:
-            system.is_active = False
-            system.save()
+        system = IntegratedSystem.objects.create(
+            name=name,
+            description=description,
+            is_active=now_in_utc() if deactivate else None,
+        )
 
         self.stdout.write(
-            self.style.SUCCESS(f"Successfully created integrated system {name}.")
+            self.style.SUCCESS(f"Successfully created integrated system {system.name}.")
         )
+
+        return 0

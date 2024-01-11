@@ -117,25 +117,25 @@ class TestProductViewSet(BaseViewSetTest):
     object_url = "/api/v0/meta/product/{}/"
 
     @pytest.mark.parametrize("is_logged_in", [True, False])
-    @pytest.mark.parametrize("isActiveProduct", [True, False])
-    def test_retrieve(self, is_logged_in, isActiveProduct, client, user_client):
+    @pytest.mark.parametrize("is_active_product", [True, False])
+    def test_retrieve(self, is_logged_in, is_active_product, client, user_client):
         """
         Test that the viewset can retrieve an object that is either active or possibly
         inactive.
         """
 
         self.factory_class = (
-            ActiveProductFactory if isActiveProduct else InactiveProductFactory
+            ActiveProductFactory if is_active_product else InactiveProductFactory
         )
 
         super().test_retrieve(is_logged_in, client, user_client)
 
-    @pytest.mark.parametrize("isActiveProduct", [True, False])
+    @pytest.mark.parametrize("is_active_product", [True, False])
     @pytest.mark.parametrize("is_logged_in", [True, False])
-    def test_update(self, isActiveProduct, is_logged_in, client, user_client):
+    def test_update(self, is_active_product, is_logged_in, client, user_client):
         """Test that the viewset can update an object."""
         self.factory_class = (
-            ActiveProductFactory if isActiveProduct else InactiveProductFactory
+            ActiveProductFactory if is_active_product else InactiveProductFactory
         )
         update_data = {"name": "Updated Name"}
 
@@ -144,7 +144,7 @@ class TestProductViewSet(BaseViewSetTest):
         )
 
         if is_logged_in:
-            if not isActiveProduct:
+            if not is_active_product:
                 assert instance.name != update_data["name"]
                 assert response.status_code == 404
                 return

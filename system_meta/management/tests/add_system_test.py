@@ -11,23 +11,23 @@ from system_meta.models import IntegratedSystem
 pytestmark = pytest.mark.django_db
 
 
-@pytest.mark.parametrize("withDescription", [True, False])
-@pytest.mark.parametrize("withDeactivate", [True, False])
-def test_add_system(withDescription, withDeactivate):
+@pytest.mark.parametrize("with_description", [True, False])
+@pytest.mark.parametrize("with_deactivate", [True, False])
+def test_add_system(with_description, with_deactivate):
     """Tests that add_system adds a system"""
     out = StringIO()
 
-    desc = str(fuzzy.FuzzyText()) if withDescription else ""
+    desc = str(fuzzy.FuzzyText()) if with_description else ""
 
     call_command(
         "add_system",
         "test_system",
         description=desc,
-        deactivate=withDeactivate,
+        deactivate=with_deactivate,
         stdout=out,
     )
     assert "Successfully created integrated system test_system" in out.getvalue()
 
     created_system = IntegratedSystem.all_objects.get(name="test_system")
     assert created_system.description == desc
-    assert created_system.is_active != withDeactivate
+    assert created_system.is_active != with_deactivate

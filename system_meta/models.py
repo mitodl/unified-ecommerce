@@ -71,4 +71,4 @@ class Product(SafeDeleteModel, TimestampedModel):
     def __str__(self):
         """Return string representation of the product"""
 
-        return f"{self.sku} - {self.system.name} - {self.name} {self.price}"
+        return f"{self.sku} - {self.system.name} - {self.name} ${self.price}"
