@@ -47,13 +47,6 @@ class Command(BaseCommand):
 
         crud_args = argparse.ArgumentParser(add_help=False)
         crud_args.add_argument(
-            "--price",
-            type=float,
-            required=True,
-            help="The product's price.",
-            metavar="price",
-        )
-        crud_args.add_argument(
             "--name",
             "-n",
             type=str,
@@ -88,12 +81,26 @@ class Command(BaseCommand):
             action="store_true",
             help="Deactivate the product.",
         )
+        add_cmd.add_argument(
+            "--price",
+            type=float,
+            required=True,
+            help="The product's price.",
+            metavar="price",
+        )
 
         update_cmd = subparsers.add_parser(
             "update",
             help="Update an existing product.",
             parents=[sku_system_args, crud_args],
         )
+        update_cmd.add_argument(
+            "--price",
+            type=float,
+            help="The product's price.",
+            metavar="price",
+        )
+
         is_active_args = update_cmd.add_mutually_exclusive_group()
         is_active_args.add_argument(
             "--deactivate",
@@ -106,7 +113,7 @@ class Command(BaseCommand):
             dest="is_active",
             default=True,
             action="store_true",
-            help="Activate the product. Only for Update.",
+            help="Activate the product.",
         )
 
         subparsers.add_parser(
