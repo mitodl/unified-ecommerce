@@ -4,10 +4,9 @@ Factory for Users
 
 import ulid
 from django.contrib.auth.models import Group, User
-from factory import LazyFunction, RelatedFactory, SubFactory, Trait
+from factory import LazyFunction, Trait
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
-from social_django.models import UserSocialAuth
 
 
 class UserFactory(DjangoModelFactory):
@@ -18,13 +17,15 @@ class UserFactory(DjangoModelFactory):
     first_name = FuzzyText()
     last_name = FuzzyText()
 
-    profile = RelatedFactory("profiles.factories.ProfileFactory", "user")
-
     class Meta:
+        """Meta options for UserFactory"""
+
         model = User
         skip_postgeneration_save = True
 
     class Params:
+        """Params for UserFactory"""
+
         no_profile = Trait(profile=None)
 
 
@@ -34,15 +35,22 @@ class GroupFactory(DjangoModelFactory):
     name = FuzzyText()
 
     class Meta:
+        """Meta options for GroupFactory"""
+
         model = Group
 
 
-class UserSocialAuthFactory(DjangoModelFactory):
-    """Factory for UserSocialAuth"""
-
-    provider = FuzzyText()
-    user = SubFactory(UserFactory)
-    uid = FuzzyText()
+class InactiveDjangoModelFactory(DjangoModelFactory):
+    """Meta factory for deleted objects."""
 
     class Meta:
-        model = UserSocialAuth
+        """Meta options for InactiveDjangoModelFactory."""
+
+        abstract = True
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        """Create the object, but then delete it."""
+        obj = super()._create(model_class, *args, **kwargs)
+        obj.delete()
+        return obj

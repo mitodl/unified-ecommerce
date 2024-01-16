@@ -1,15 +1,14 @@
 """Unified Ecommerce utilities"""
 
-import datetime
 import logging
 import os
 from enum import Flag, auto
-from itertools import islice
 
 import markdown2
-import pytz
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.db import models
+from mitol.common.utils.datetime import now_in_utc
 
 log = logging.getLogger(__name__)
 
@@ -28,30 +27,6 @@ class FeatureFlag(Flag):
     EXAMPLE_FEATURE = auto()
 
 
-def is_near_now(time):
-    """
-    Returns true if time is within five seconds or so of now
-    Args:
-        time (datetime.datetime):
-            The time to test
-    Returns:
-        bool:
-            True if near now, false otherwise
-    """  # noqa: D401
-    now = datetime.datetime.now(tz=pytz.UTC)
-    five_seconds = datetime.timedelta(0, 5)
-    return now - five_seconds < time < now + five_seconds
-
-
-def now_in_utc():
-    """
-    Get the current time in UTC
-    Returns:
-        datetime.datetime: A datetime object for the current time
-    """
-    return datetime.datetime.now(tz=pytz.UTC)
-
-
 def normalize_to_start_of_day(dt):
     """
     Normalizes a datetime value to the start of it's day
@@ -63,26 +38,6 @@ def normalize_to_start_of_day(dt):
         datetime.datetime: the normalized datetime
     """  # noqa: D401
     return dt.replace(hour=0, minute=0, second=0, microsecond=0)
-
-
-def chunks(iterable, *, chunk_size=20):
-    """
-    Yields chunks of an iterable as sub lists each of max size chunk_size.
-
-    Args:
-        iterable (iterable): iterable of elements to chunk
-        chunk_size (int): Max size of each sublist
-
-    Yields:
-        list: List containing a slice of list_to_chunk
-    """  # noqa: D401
-    chunk_size = max(1, chunk_size)
-    iterable = iter(iterable)
-    chunk = list(islice(iterable, chunk_size))
-
-    while len(chunk) > 0:
-        yield chunk
-        chunk = list(islice(iterable, chunk_size))
 
 
 def merge_strings(list_or_str):
@@ -297,3 +252,18 @@ def write_x509_files():
     """Write the x509 certificate and key to files"""
     write_to_file(settings.MIT_WS_CERTIFICATE_FILE, settings.MIT_WS_CERTIFICATE)
     write_to_file(settings.MIT_WS_PRIVATE_KEY_FILE, settings.MIT_WS_PRIVATE_KEY)
+
+
+class SoftDeleteActiveModel(models.Model):
+    """Provides a truthy is_active field for soft-deletable models"""
+
+    class Meta:
+        """Meta options for SoftDeleteActiveModel"""
+
+        abstract = True
+
+    @property
+    def is_active(self):
+        """Return True if the object is active, False otherwise."""
+
+        return self.deleted_on is None

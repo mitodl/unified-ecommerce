@@ -1,12 +1,18 @@
 """Testing utils"""
 
 import abc
+import datetime
 import json
 import traceback
 from contextlib import contextmanager
 from unittest.mock import Mock
 
 import pytest
+import pytz
+from deepdiff import DeepDiff
+from django.conf import settings
+from django.core.serializers import serialize
+from django.core.serializers.json import DjangoJSONEncoder
 from django.http.response import HttpResponse
 from rest_framework.renderers import JSONRenderer
 
@@ -109,23 +115,102 @@ def _sort_values_for_testing(obj):
         return obj
 
 
-def assert_json_equal(obj1, obj2, sort=False):  # noqa: FBT002
+def queryset_to_json(queryset):
     """
-    Asserts that two objects are equal after a round trip through JSON serialization/deserialization.
-    Particularly helpful when testing DRF serializers where you may get back OrderedDict and other such objects.
+    Convert a queryset to JSON using the Django JSON serializer.
+
+    The Django JSON serializer renders some things (notably Decimal) as strings, which is
+    useful for testing with assert_json_equal. This does some reformatting of the serialized
+    object as well as the serializer includes some extra info and doesn't put the primary
+    key in the right spot for our purposes.
+
+    The queryset should be for the individual item that we're looking for. If there's more
+    than one, this will throw an exception. (If there's zero, it'll return an empty dict.)
+
+    Args:
+    - queryset (QuerySet): the queryset to serialize
+
+    Returns:
+    - dict of the fields in the retrieved model object (plus the PK) in a JSON-friendly format
+
+    Raises:
+    - AssertionError: if there's more than one object in the queryset
+    """
+    dj_serializer = serialize("json", queryset, cls=DjangoJSONEncoder)
+    dj_serializer = json.loads(dj_serializer)
+
+    if len(dj_serializer) < 1:
+        return []
+
+    if len(dj_serializer) > 1:
+        exception_string = "queryset_to_json only works for single objects"
+        raise AssertionError(exception_string)
+
+    dj_serializer[0]["fields"]["id"] = dj_serializer[0]["pk"]
+    return dj_serializer[0]["fields"]
+
+
+def assert_json_equal(obj1, obj2, ignore_order=False):  # noqa: FBT002
+    """
+    Assert that two objects are equal after a round trip through JSON
+    serialization/deserialization. Particularly helpful when testing DRF serializers
+    where you may get back OrderedDict and other such objects.
 
     Args:
         obj1 (object): the first object
         obj2 (object): the second object
-        sort (bool): If true, sort items which are iterable before comparing
-    """  # noqa: D401
-    renderer = JSONRenderer()
-    converted1 = json.loads(renderer.render(obj1))
-    converted2 = json.loads(renderer.render(obj2))
-    if sort:
-        converted1 = _sort_values_for_testing(converted1)
-        converted2 = _sort_values_for_testing(converted2)
-    assert converted1 == converted2
+        ignore_order (bool): Boolean to ignore the order in the result
+    """
+    json_renderer = JSONRenderer()
+    converted1 = json.loads(json_renderer.render(obj1))
+    converted2 = json.loads(json_renderer.render(obj2))
+    if ignore_order:
+        assert DeepDiff(converted1, converted2, ignore_order=ignore_order) == {}
+    else:
+        assert converted1 == converted2
+
+
+def make_timestamps_matchable(objs, **kwargs):
+    """
+    Convert the standard timestamp datetimes that are usually in a model object to
+    a set equivalent, so the object can be compared to another more easily. For
+    a TimestampedModel, this is created_on and updated_on. Optionally, you can specify
+    the fields to set, or skip the standard timestamp fields.
+
+    This generates an aware timestamp at the start, which is used for all the dicts
+    that have been passed in.
+
+    Args:
+    - objs (list of dict): the objects to modify
+
+    Keyword Args:
+    - fields (list): additional fields to convert
+    - skip_timestamps (bool): skip the regular timestamps (so, just what you specify in
+      fields)
+
+    Returns:
+    - list of dict: the passed in dicts, with the created_on and updated_on timestamps
+      converted to anys equivalents
+    """
+
+    time_data = datetime.datetime.now(tz=pytz.timezone(settings.TIME_ZONE))
+    fields = kwargs.get("fields", [])
+
+    if not kwargs.get("skip_timestamps", False):
+        fields = [*fields, "created_on", "updated_on", "deleted_on"]
+
+    timestamps = {}
+
+    for field in fields:
+        timestamps[field] = time_data
+
+    return [
+        {
+            **obj,
+            **timestamps,
+        }
+        for obj in objs
+    ]
 
 
 class PickleableMock(Mock):
@@ -138,3 +223,221 @@ class PickleableMock(Mock):
     def __reduce__(self):
         """Required method for being pickleable"""  # noqa: D401
         return (Mock, ())
+
+
+class ViewSetNotConfiguredError(Exception):
+    """
+    Raised when a viewset is not configured correctly.
+    """
+
+
+class BaseSerializerTest:
+    """Base class for serializer tests."""
+
+    model_class = None
+    serializer_class = None
+    factory_class = None
+    queryset = None
+
+    def test_serialize(self):
+        """Test that the serializer can serialize an instance."""
+        instance = self.factory_class()
+
+        if self.queryset:
+            instance_qs = self.queryset.filter(pk=instance.pk)
+        else:
+            instance_qs = self.model_class.objects.filter(pk=instance.pk)
+
+        serializer = self.serializer_class(instance)
+        dj_serializer = queryset_to_json(instance_qs)
+
+        assert_json_equal(*make_timestamps_matchable([serializer.data, dj_serializer]))
+
+
+class BaseViewSetTest:
+    """
+    Base class for viewset tests.
+
+    Set viewset_class, factory_class and queryset to the appropriate values for your
+    viewset. `list_url` should be the root URL for the list view, and the `object_url` should
+    be contain a format string for individual objects in the viewset. DRF convention is that
+    the URLs remains the same but will get used with different HTTP verbs according
+    to the test being run (i.e. update sends a PATCH, etc.).
+
+    The tests that perform writes to the dataset require subclassing. They're more
+    abstractions of the HTTP request than an actual test; you'll need to provide some
+    logic for the test to check the operation succeeded with the model you're using.
+    """
+
+    viewset_class = None
+    factory_class = None
+    queryset = None
+
+    # URLs for these actions
+    list_url = None
+    object_url = None
+
+    def _test_retrieval(self, api_client, url, url_name, **kwargs):
+        """
+        Test that hitting the specified URL works with the specified client.
+
+        Args:
+        - api_client (APIClient): the client to use
+        - url (str): the URL to test with
+        - url_name (str): the name of the URL (used for the skip message if it's not defined)
+
+        Keyword Args:
+        - test_non_authenticated (bool): whether or not this should expect a 403
+
+        Returns:
+        - response (Response): the response from the API
+        """
+        if not url:
+            exception_string = f"{url_name} is not defined"
+            raise ViewSetNotConfiguredError(exception_string)
+
+        response = api_client.get(url)
+        assert response.status_code < 500
+        assert response.status_code == 403 if kwargs["test_non_authenticated"] else 200
+        return response
+
+    def test_get_queryset(self):
+        """Test that the viewset returns the correct queryset."""
+        queryset = self.viewset_class().get_queryset()
+        assert queryset.count() == self.queryset.count()
+
+    def test_get_serializer_class(self):
+        """Test that the viewset returns the correct serializer class."""
+        serializer_class = self.viewset_class().get_serializer_class()
+        assert serializer_class == self.viewset_class.serializer_class
+
+    @pytest.mark.parametrize("is_logged_in", [True, False])
+    def test_list(self, is_logged_in, client, user_client):
+        """
+        Test that the viewset can list objects.
+
+        Args:
+        - is_logged_in (bool): whether or not the client is logged in
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in requests
+        """
+
+        response = self._test_retrieval(
+            user_client if is_logged_in else client,
+            self.list_url,
+            "list_url",
+            test_non_authenticated=not is_logged_in,
+        )
+
+        if is_logged_in:
+            assert "count" in response.data
+            assert response.data["count"] == self.queryset.count()
+
+    @pytest.mark.parametrize("is_logged_in", [True, False])
+    def test_retrieve(self, is_logged_in, client, user_client):
+        """
+        Test that the viewset can retrieve an object.
+
+        Args:
+        - is_logged_in (bool): whether or not the client is logged in
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in requests
+        """
+        instance = self.factory_class()
+        instance_qs = self.queryset.filter(pk=instance.pk)
+
+        response = self._test_retrieval(
+            user_client if is_logged_in else client,
+            self.object_url.format(instance.pk),
+            "object_url",
+            test_non_authenticated=not is_logged_in,
+        )
+
+        if is_logged_in and instance.is_active:
+            dj_serializer = queryset_to_json(instance_qs)
+            assert_json_equal(
+                *make_timestamps_matchable([response.data, dj_serializer])
+            )
+
+        if is_logged_in and not instance.is_active:
+            # Deleted items should return a 404.
+            assert response.status_code == 404
+
+    def test_update(self, update_data, is_logged_in, client, user_client):
+        """
+        Test that the viewset can update an object.
+
+        Args:
+        - update_data (dict): the data to use for the update
+        - is_logged_in (bool): whether or not the client is logged in
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in requests
+
+        Returns:
+        - tuple of (instance, response): the instance that was updated and the response
+        """
+        instance = self.factory_class()
+
+        use_client = user_client if is_logged_in else client
+        response = use_client.patch(
+            self.object_url.format(instance.pk), data=update_data
+        )
+
+        assert response.status_code < 500
+
+        if not is_logged_in:
+            assert response.status_code == 403
+
+        return (instance, response)
+
+    def test_delete(self, is_logged_in, client, user_client):
+        """
+        Test that the viewset can delete an object. Note that this will actually test
+        deletion.
+
+        Args:
+        - is_logged_in (bool): whether or not the client is logged in
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in requests
+
+        Returns:
+        - tuple of (instance, response): the instance that was deleted and the response
+        """
+        instance = self.factory_class()
+
+        before_count = self.queryset.count()
+
+        use_client = user_client if is_logged_in else client
+        response = use_client.delete(self.object_url.format(instance.pk))
+
+        assert response.status_code < 500
+        assert response.status_code == 403 if not is_logged_in else 204
+
+        assert (
+            self.queryset.count() == before_count - 1 if is_logged_in else before_count
+        )
+
+        return (instance, response)
+
+    def test_create(self, create_data, is_logged_in, client, user_client):
+        """
+        Test that the viewset can create an object.
+
+        Args:
+        - create_data (dict): the data to use for the update
+        - is_logged_in (bool): whether or not the client is logged in
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in requests
+
+        Returns:
+        - response (Response): the response from the API
+        """
+        use_client = user_client if is_logged_in else client
+        response = use_client.post(self.list_url, data=create_data)
+
+        assert response.status_code < 500
+
+        if not is_logged_in:
+            assert response.status_code == 403
+
+        return response

@@ -1,0 +1,416 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /v0/integrated_system/:
+    get:
+      operationId: integrated_system_list
+      description: Viewset for IntegratedSystem model.
+      tags:
+      - integrated_system
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IntegratedSystem'
+          description: ''
+    post:
+      operationId: integrated_system_create
+      description: Viewset for IntegratedSystem model.
+      tags:
+      - integrated_system
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntegratedSystem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IntegratedSystem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IntegratedSystem'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegratedSystem'
+          description: ''
+  /v0/integrated_system/{id}/:
+    get:
+      operationId: integrated_system_retrieve
+      description: Viewset for IntegratedSystem model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this integrated system.
+        required: true
+      tags:
+      - integrated_system
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegratedSystem'
+          description: ''
+    put:
+      operationId: integrated_system_update
+      description: Viewset for IntegratedSystem model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this integrated system.
+        required: true
+      tags:
+      - integrated_system
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntegratedSystem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/IntegratedSystem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/IntegratedSystem'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegratedSystem'
+          description: ''
+    patch:
+      operationId: integrated_system_partial_update
+      description: Viewset for IntegratedSystem model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this integrated system.
+        required: true
+      tags:
+      - integrated_system
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedIntegratedSystem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedIntegratedSystem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedIntegratedSystem'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegratedSystem'
+          description: ''
+    delete:
+      operationId: integrated_system_destroy
+      description: Viewset for IntegratedSystem model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this integrated system.
+        required: true
+      tags:
+      - integrated_system
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v0/product/:
+    get:
+      operationId: product_list
+      description: Viewset for Product model.
+      tags:
+      - product
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+          description: ''
+    post:
+      operationId: product_create
+      description: Viewset for Product model.
+      tags:
+      - product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Product'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Product'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+  /v0/product/{id}/:
+    get:
+      operationId: product_retrieve
+      description: Viewset for Product model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product.
+        required: true
+      tags:
+      - product
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+    put:
+      operationId: product_update
+      description: Viewset for Product model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product.
+        required: true
+      tags:
+      - product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Product'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Product'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+    patch:
+      operationId: product_partial_update
+      description: Viewset for Product model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product.
+        required: true
+      tags:
+      - product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProduct'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProduct'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProduct'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
+    delete:
+      operationId: product_destroy
+      description: Viewset for Product model.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product.
+        required: true
+      tags:
+      - product
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    IntegratedSystem:
+      type: object
+      description: Serializer for IntegratedSystem model.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        is_active:
+          type: boolean
+        api_key:
+          type: string
+      required:
+      - id
+      - name
+    PatchedIntegratedSystem:
+      type: object
+      description: Serializer for IntegratedSystem model.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        is_active:
+          type: boolean
+        api_key:
+          type: string
+    PatchedProduct:
+      type: object
+      description: Serializer for Product model.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sku:
+          type: string
+          description: SKU of the product.
+          maxLength: 255
+        name:
+          type: string
+          description: Short name of the product, displayed in carts/etc.
+          maxLength: 255
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          description: Price (decimal to two places)
+        description:
+          type: string
+          description: Long description of the product.
+        is_active:
+          type: boolean
+          description: Controls visibility of the product in the app.
+        system_data:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          description: System-specific data for the product (in JSON).
+        system:
+          type: integer
+          description: Owner system of the product.
+    Product:
+      type: object
+      description: Serializer for Product model.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sku:
+          type: string
+          description: SKU of the product.
+          maxLength: 255
+        name:
+          type: string
+          description: Short name of the product, displayed in carts/etc.
+          maxLength: 255
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          description: Price (decimal to two places)
+        description:
+          type: string
+          description: Long description of the product.
+        is_active:
+          type: boolean
+          description: Controls visibility of the product in the app.
+        system_data:
+          type: object
+          additionalProperties: {}
+          nullable: true
+          description: System-specific data for the product (in JSON).
+        system:
+          type: integer
+          description: Owner system of the product.
+      required:
+      - description
+      - id
+      - name
+      - price
+      - sku
+      - system
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
