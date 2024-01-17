@@ -83,12 +83,6 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
 
         return f"{self.sku} - {self.system.name} - {self.name} ${self.price}"
 
-    def delete(self):
-        """Mark the product inactive instead of deleting it"""
-
-        self.is_active = False
-        self.save(update_fields=("is_active",))
-
     @staticmethod
     def resolve_product_version(product, product_version=None):
         """

@@ -58,6 +58,19 @@ class Basket(TimestampedModel):
 
         return [item.product for item in self.basket_items.all()]
 
+    @staticmethod
+    def establish_basket(request):
+        """
+        Get or create the user's basket.
+        """
+        user = request.user
+        (basket, is_new) = Basket.objects.filter(user=user).get_or_create()
+
+        if is_new:
+            basket.save()
+
+        return basket
+
 
 class BasketItem(TimestampedModel):
     """Represents one or more products in a user's basket."""
