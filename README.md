@@ -7,11 +7,10 @@ This application provides a central system to handle ecommerce activities across
 - [MIT OL Unified Ecommerce](#mit-ol-unified-ecommerce)
   - [Initial Setup](#initial-setup)
     - [Configure required `.env` settings](#configure-required-env-settings)
-    - [Loading Data](#loading-data)
+    - [Loading and Accessing Data](#loading-and-accessing-data)
   - [Code Generation](#code-generation)
   - [Committing \& Formatting](#committing--formatting)
   - [Optional Setup](#optional-setup)
-    - [Enabling email](#enabling-email)
     - [Running the app in a notebook](#running-the-app-in-a-notebook)
 
 ## Initial Setup
@@ -24,24 +23,33 @@ Run through those steps **including the addition of `/etc/hosts` aliases and the
 
 The following settings must be configured before running the app:
 
-- `MAILGUN_KEY` and `MAILGUN_SENDER_DOMAIN`
-
-  You can set these values to any non-empty string value if email-sending functionality
-  is not needed. It's recommended that you eventually configure the site to be able
-  to send emails. Those configuration steps can be found [below](#enabling-email).
-
 - `MITOL_UE_HOSTNAME`
 
   Sets the hostname required by webpack for building the frontend. Should likely be whatever you set
-  the host to in your /etc/hosts or the hostname that you're accessing it from. Likely `oe.odl.local`.
+  the host to in your /etc/hosts or the hostname that you're accessing it from. Likely `ue.odl.local`.
 
 - `SECRET_KEY`
 
   Sets the Django secret for the application. This just needs to be a random string.
 
-### Loading Data
+### Loading and Accessing Data
 
-_TBD_
+You'll need an integrated system and product for that system to be able to do much of anything. Once you've done initial setup, run these commands:
+
+* Create an integrated system: `./manage.py add_system <name> -d <description>`
+* Create a product: `./manage.py manage_product add -s <system name> --sku <an SKU> --name <name> --description <description> --price <price>`
+
+The `add_system` command will generate an API key for the system's use. You can add as many systems as you wish.
+
+> Alternatively, you can create these records through the Django Admin, but be advised that it won't create the API key for you. The management command uses a UUID for the key but any value will do, as long as it's unique.
+
+You can interact with the API directly through the Swagger interface: `<root url>/api/schema/swagger-ui/`
+
+The system also exposes a Redoc version of the API at `<root url>/api/schema/redoc/`
+
+Navigating to an API endpoint in the browser should also get you the normal DRF interface as well.
+
+> At this point we don't have API auth outside of Django sessions, so generated API keys don't do anything yet. There's no other frontend to this application at this point either.
 
 ## Code Generation
 
@@ -76,21 +84,6 @@ pre-commit init-templatedir ~/.git-template
 ## Optional Setup
 
 Described below are some setup steps that are not strictly necessary for running Unified Ecommerce.
-
-### Enabling email
-
-The app is usable without email-sending capability, but there is a lot of app functionality
-that depends on it. The following variables will need to be set in your `.env` file -
-please reach out to a fellow developer or devops for the correct values.
-
-```
-MAILGUN_SENDER_DOMAIN
-MAILGUN_URL
-MAILGUN_KEY
-```
-
-Additionally, you'll need to set `MAILGUN_RECIPIENT_OVERRIDE` to your own email address so
-any emails sent from the app will be delivered to you.
 
 ### Running the app in a notebook
 
