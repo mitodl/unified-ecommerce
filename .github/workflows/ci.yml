@@ -72,6 +72,7 @@ jobs:
           MITOL_UE_HOSTNAME: "ue.odl.local"
           MITOL_UE_JWT_SECRET: ""
           MITOL_UE_USE_S3: "False"
+          MITOL_UE_DB_DISABLE_SSL: "True"
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@v3.1.4
@@ -100,8 +101,6 @@ jobs:
             --output $GENERATOR_OUTPUT_DIR_CI \
             --ignore-file-override $GENERATOR_IGNORE_FILE \
             -c scripts/openapi-configs/typescript-axios.yaml
-      - name: Format freshly generated client
-        run: npx prettier $GENERATOR_OUTPUT_DIR_CI/**/*.ts --no-semi --write
       - name: Check VC client is up-to-date
         run: |
           diff $GENERATOR_OUTPUT_DIR_CI $GENERATOR_OUTPUT_DIR_VC \
