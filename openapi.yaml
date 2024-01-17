@@ -3,10 +3,23 @@ info:
   title: ''
   version: 0.0.0
 paths:
-  /v0/integrated_system/:
+  /integrated_system/:
     get:
       operationId: integrated_system_list
       description: Viewset for IntegratedSystem model.
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
       - integrated_system
       security:
@@ -16,9 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/IntegratedSystem'
+                $ref: '#/components/schemas/PaginatedIntegratedSystemList'
           description: ''
     post:
       operationId: integrated_system_create
@@ -46,7 +57,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/IntegratedSystem'
           description: ''
-  /v0/integrated_system/{id}/:
+  /integrated_system/{id}/:
     get:
       operationId: integrated_system_retrieve
       description: Viewset for IntegratedSystem model.
@@ -150,10 +161,23 @@ paths:
       responses:
         '204':
           description: No response body
-  /v0/product/:
+  /product/:
     get:
       operationId: product_list
       description: Viewset for Product model.
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
       - product
       security:
@@ -163,9 +187,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Product'
+                $ref: '#/components/schemas/PaginatedProductList'
           description: ''
     post:
       operationId: product_create
@@ -193,7 +215,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Product'
           description: ''
-  /v0/product/{id}/:
+  /product/{id}/:
     get:
       operationId: product_retrieve
       description: Viewset for Product model.
@@ -306,18 +328,76 @@ components:
         id:
           type: integer
           readOnly: true
+        deleted_on:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        deleted_by_cascade:
+          type: boolean
+          readOnly: true
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_on:
+          type: string
+          format: date-time
+          readOnly: true
         name:
           type: string
           maxLength: 255
         description:
           type: string
-        is_active:
-          type: boolean
         api_key:
           type: string
       required:
+      - created_on
+      - deleted_by_cascade
+      - deleted_on
       - id
       - name
+      - updated_on
+    PaginatedIntegratedSystemList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegratedSystem'
+    PaginatedProductList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
     PatchedIntegratedSystem:
       type: object
       description: Serializer for IntegratedSystem model.
@@ -325,13 +405,27 @@ components:
         id:
           type: integer
           readOnly: true
+        deleted_on:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        deleted_by_cascade:
+          type: boolean
+          readOnly: true
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_on:
+          type: string
+          format: date-time
+          readOnly: true
         name:
           type: string
           maxLength: 255
         description:
           type: string
-        is_active:
-          type: boolean
         api_key:
           type: string
     PatchedProduct:
@@ -340,6 +434,22 @@ components:
       properties:
         id:
           type: integer
+          readOnly: true
+        deleted_on:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        deleted_by_cascade:
+          type: boolean
+          readOnly: true
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_on:
+          type: string
+          format: date-time
           readOnly: true
         sku:
           type: string
@@ -357,12 +467,7 @@ components:
         description:
           type: string
           description: Long description of the product.
-        is_active:
-          type: boolean
-          description: Controls visibility of the product in the app.
         system_data:
-          type: object
-          additionalProperties: {}
           nullable: true
           description: System-specific data for the product (in JSON).
         system:
@@ -375,6 +480,22 @@ components:
         id:
           type: integer
           readOnly: true
+        deleted_on:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        deleted_by_cascade:
+          type: boolean
+          readOnly: true
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_on:
+          type: string
+          format: date-time
+          readOnly: true
         sku:
           type: string
           description: SKU of the product.
@@ -391,24 +512,23 @@ components:
         description:
           type: string
           description: Long description of the product.
-        is_active:
-          type: boolean
-          description: Controls visibility of the product in the app.
         system_data:
-          type: object
-          additionalProperties: {}
           nullable: true
           description: System-specific data for the product (in JSON).
         system:
           type: integer
           description: Owner system of the product.
       required:
+      - created_on
+      - deleted_by_cascade
+      - deleted_on
       - description
       - id
       - name
       - price
       - sku
       - system
+      - updated_on
   securitySchemes:
     cookieAuth:
       type: apiKey
