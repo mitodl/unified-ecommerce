@@ -12,26 +12,16 @@
  * Do not edit the class manually.
  */
 
-import type { Configuration } from "./configuration"
-import type { AxiosPromise, AxiosInstance, AxiosRequestConfig } from "axios"
-import globalAxios from "axios"
+
+import type { Configuration } from './configuration';
+import type { AxiosPromise, AxiosInstance, AxiosRequestConfig } from 'axios';
+import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import {
-  DUMMY_BASE_URL,
-  assertParamExists,
-  setApiKeyToObject,
-  setBasicAuthToObject,
-  setBearerAuthToObject,
-  setOAuthToObject,
-  setSearchParams,
-  serializeDataIfNeeded,
-  toPathString,
-  createRequestFunction,
-} from "./common"
-import type { RequestArgs } from "./base"
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common';
+import type { RequestArgs } from './base';
 // @ts-ignore
-import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from "./base"
+import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 
 /**
  * Serializer for IntegratedSystem model.
@@ -39,54 +29,60 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from "./base"
  * @interface IntegratedSystem
  */
 export interface IntegratedSystem {
-  /**
-   *
-   * @type {number}
-   * @memberof IntegratedSystem
-   */
-  id: number
-  /**
-   *
-   * @type {string}
-   * @memberof IntegratedSystem
-   */
-  deleted_on: string | null
-  /**
-   *
-   * @type {boolean}
-   * @memberof IntegratedSystem
-   */
-  deleted_by_cascade: boolean
-  /**
-   *
-   * @type {string}
-   * @memberof IntegratedSystem
-   */
-  created_on: string
-  /**
-   *
-   * @type {string}
-   * @memberof IntegratedSystem
-   */
-  updated_on: string
-  /**
-   *
-   * @type {string}
-   * @memberof IntegratedSystem
-   */
-  name: string
-  /**
-   *
-   * @type {string}
-   * @memberof IntegratedSystem
-   */
-  description?: string
-  /**
-   *
-   * @type {string}
-   * @memberof IntegratedSystem
-   */
-  api_key?: string
+    /**
+     *
+     * @type {number}
+     * @memberof IntegratedSystem
+     */
+    'id': number;
+    /**
+     *
+     * @type {string}
+     * @memberof IntegratedSystem
+     */
+    'deleted_on': string | null;
+    /**
+     *
+     * @type {boolean}
+     * @memberof IntegratedSystem
+     */
+    'deleted_by_cascade': boolean;
+    /**
+     *
+     * @type {string}
+     * @memberof IntegratedSystem
+     */
+    'created_on': string;
+    /**
+     *
+     * @type {string}
+     * @memberof IntegratedSystem
+     */
+    'updated_on': string;
+    /**
+     *
+     * @type {string}
+     * @memberof IntegratedSystem
+     */
+    'name': string;
+    /**
+     *
+     * @type {string}
+     * @memberof IntegratedSystem
+     */
+    'slug'?: string | null;
+    /**
+     *
+     * @type {string}
+     * @memberof IntegratedSystem
+     */
+    'description'?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof IntegratedSystem
+     */
+    'api_key'?: string;
 }
 /**
  *
@@ -94,30 +90,30 @@ export interface IntegratedSystem {
  * @interface PaginatedIntegratedSystemList
  */
 export interface PaginatedIntegratedSystemList {
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedIntegratedSystemList
-   */
-  count?: number
-  /**
-   *
-   * @type {string}
-   * @memberof PaginatedIntegratedSystemList
-   */
-  next?: string | null
-  /**
-   *
-   * @type {string}
-   * @memberof PaginatedIntegratedSystemList
-   */
-  previous?: string | null
-  /**
-   *
-   * @type {Array<IntegratedSystem>}
-   * @memberof PaginatedIntegratedSystemList
-   */
-  results?: Array<IntegratedSystem>
+    /**
+     *
+     * @type {number}
+     * @memberof PaginatedIntegratedSystemList
+     */
+    'count'?: number;
+    /**
+     *
+     * @type {string}
+     * @memberof PaginatedIntegratedSystemList
+     */
+    'next'?: string | null;
+    /**
+     *
+     * @type {string}
+     * @memberof PaginatedIntegratedSystemList
+     */
+    'previous'?: string | null;
+    /**
+     *
+     * @type {Array<IntegratedSystem>}
+     * @memberof PaginatedIntegratedSystemList
+     */
+    'results'?: Array<IntegratedSystem>;
 }
 /**
  *
@@ -125,30 +121,30 @@ export interface PaginatedIntegratedSystemList {
  * @interface PaginatedProductList
  */
 export interface PaginatedProductList {
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedProductList
-   */
-  count?: number
-  /**
-   *
-   * @type {string}
-   * @memberof PaginatedProductList
-   */
-  next?: string | null
-  /**
-   *
-   * @type {string}
-   * @memberof PaginatedProductList
-   */
-  previous?: string | null
-  /**
-   *
-   * @type {Array<Product>}
-   * @memberof PaginatedProductList
-   */
-  results?: Array<Product>
+    /**
+     *
+     * @type {number}
+     * @memberof PaginatedProductList
+     */
+    'count'?: number;
+    /**
+     *
+     * @type {string}
+     * @memberof PaginatedProductList
+     */
+    'next'?: string | null;
+    /**
+     *
+     * @type {string}
+     * @memberof PaginatedProductList
+     */
+    'previous'?: string | null;
+    /**
+     *
+     * @type {Array<Product>}
+     * @memberof PaginatedProductList
+     */
+    'results'?: Array<Product>;
 }
 /**
  * Serializer for IntegratedSystem model.
@@ -156,54 +152,60 @@ export interface PaginatedProductList {
  * @interface PatchedIntegratedSystem
  */
 export interface PatchedIntegratedSystem {
-  /**
-   *
-   * @type {number}
-   * @memberof PatchedIntegratedSystem
-   */
-  id?: number
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedIntegratedSystem
-   */
-  deleted_on?: string | null
-  /**
-   *
-   * @type {boolean}
-   * @memberof PatchedIntegratedSystem
-   */
-  deleted_by_cascade?: boolean
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedIntegratedSystem
-   */
-  created_on?: string
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedIntegratedSystem
-   */
-  updated_on?: string
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedIntegratedSystem
-   */
-  name?: string
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedIntegratedSystem
-   */
-  description?: string
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedIntegratedSystem
-   */
-  api_key?: string
+    /**
+     *
+     * @type {number}
+     * @memberof PatchedIntegratedSystem
+     */
+    'id'?: number;
+    /**
+     *
+     * @type {string}
+     * @memberof PatchedIntegratedSystem
+     */
+    'deleted_on'?: string | null;
+    /**
+     *
+     * @type {boolean}
+     * @memberof PatchedIntegratedSystem
+     */
+    'deleted_by_cascade'?: boolean;
+    /**
+     *
+     * @type {string}
+     * @memberof PatchedIntegratedSystem
+     */
+    'created_on'?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof PatchedIntegratedSystem
+     */
+    'updated_on'?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof PatchedIntegratedSystem
+     */
+    'name'?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof PatchedIntegratedSystem
+     */
+    'slug'?: string | null;
+    /**
+     *
+     * @type {string}
+     * @memberof PatchedIntegratedSystem
+     */
+    'description'?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof PatchedIntegratedSystem
+     */
+    'api_key'?: string;
 }
 /**
  * Serializer for Product model.
@@ -211,72 +213,72 @@ export interface PatchedIntegratedSystem {
  * @interface PatchedProduct
  */
 export interface PatchedProduct {
-  /**
-   *
-   * @type {number}
-   * @memberof PatchedProduct
-   */
-  id?: number
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedProduct
-   */
-  deleted_on?: string | null
-  /**
-   *
-   * @type {boolean}
-   * @memberof PatchedProduct
-   */
-  deleted_by_cascade?: boolean
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedProduct
-   */
-  created_on?: string
-  /**
-   *
-   * @type {string}
-   * @memberof PatchedProduct
-   */
-  updated_on?: string
-  /**
-   * SKU of the product.
-   * @type {string}
-   * @memberof PatchedProduct
-   */
-  sku?: string
-  /**
-   * Short name of the product, displayed in carts/etc.
-   * @type {string}
-   * @memberof PatchedProduct
-   */
-  name?: string
-  /**
-   * Price (decimal to two places)
-   * @type {string}
-   * @memberof PatchedProduct
-   */
-  price?: string
-  /**
-   * Long description of the product.
-   * @type {string}
-   * @memberof PatchedProduct
-   */
-  description?: string
-  /**
-   * System-specific data for the product (in JSON).
-   * @type {any}
-   * @memberof PatchedProduct
-   */
-  system_data?: any | null
-  /**
-   * Owner system of the product.
-   * @type {number}
-   * @memberof PatchedProduct
-   */
-  system?: number
+    /**
+     *
+     * @type {number}
+     * @memberof PatchedProduct
+     */
+    'id'?: number;
+    /**
+     *
+     * @type {string}
+     * @memberof PatchedProduct
+     */
+    'deleted_on'?: string | null;
+    /**
+     *
+     * @type {boolean}
+     * @memberof PatchedProduct
+     */
+    'deleted_by_cascade'?: boolean;
+    /**
+     *
+     * @type {string}
+     * @memberof PatchedProduct
+     */
+    'created_on'?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof PatchedProduct
+     */
+    'updated_on'?: string;
+    /**
+     * SKU of the product.
+     * @type {string}
+     * @memberof PatchedProduct
+     */
+    'sku'?: string;
+    /**
+     * Short name of the product, displayed in carts/etc.
+     * @type {string}
+     * @memberof PatchedProduct
+     */
+    'name'?: string;
+    /**
+     * Price (decimal to two places)
+     * @type {string}
+     * @memberof PatchedProduct
+     */
+    'price'?: string;
+    /**
+     * Long description of the product.
+     * @type {string}
+     * @memberof PatchedProduct
+     */
+    'description'?: string;
+    /**
+     * System-specific data for the product (in JSON).
+     * @type {any}
+     * @memberof PatchedProduct
+     */
+    'system_data'?: any | null;
+    /**
+     * Owner system of the product.
+     * @type {number}
+     * @memberof PatchedProduct
+     */
+    'system'?: number;
 }
 /**
  * Serializer for Product model.
@@ -284,686 +286,447 @@ export interface PatchedProduct {
  * @interface Product
  */
 export interface Product {
-  /**
-   *
-   * @type {number}
-   * @memberof Product
-   */
-  id: number
-  /**
-   *
-   * @type {string}
-   * @memberof Product
-   */
-  deleted_on: string | null
-  /**
-   *
-   * @type {boolean}
-   * @memberof Product
-   */
-  deleted_by_cascade: boolean
-  /**
-   *
-   * @type {string}
-   * @memberof Product
-   */
-  created_on: string
-  /**
-   *
-   * @type {string}
-   * @memberof Product
-   */
-  updated_on: string
-  /**
-   * SKU of the product.
-   * @type {string}
-   * @memberof Product
-   */
-  sku: string
-  /**
-   * Short name of the product, displayed in carts/etc.
-   * @type {string}
-   * @memberof Product
-   */
-  name: string
-  /**
-   * Price (decimal to two places)
-   * @type {string}
-   * @memberof Product
-   */
-  price: string
-  /**
-   * Long description of the product.
-   * @type {string}
-   * @memberof Product
-   */
-  description: string
-  /**
-   * System-specific data for the product (in JSON).
-   * @type {any}
-   * @memberof Product
-   */
-  system_data?: any | null
-  /**
-   * Owner system of the product.
-   * @type {number}
-   * @memberof Product
-   */
-  system: number
+    /**
+     *
+     * @type {number}
+     * @memberof Product
+     */
+    'id': number;
+    /**
+     *
+     * @type {string}
+     * @memberof Product
+     */
+    'deleted_on': string | null;
+    /**
+     *
+     * @type {boolean}
+     * @memberof Product
+     */
+    'deleted_by_cascade': boolean;
+    /**
+     *
+     * @type {string}
+     * @memberof Product
+     */
+    'created_on': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Product
+     */
+    'updated_on': string;
+    /**
+     * SKU of the product.
+     * @type {string}
+     * @memberof Product
+     */
+    'sku': string;
+    /**
+     * Short name of the product, displayed in carts/etc.
+     * @type {string}
+     * @memberof Product
+     */
+    'name': string;
+    /**
+     * Price (decimal to two places)
+     * @type {string}
+     * @memberof Product
+     */
+    'price': string;
+    /**
+     * Long description of the product.
+     * @type {string}
+     * @memberof Product
+     */
+    'description': string;
+    /**
+     * System-specific data for the product (in JSON).
+     * @type {any}
+     * @memberof Product
+     */
+    'system_data'?: any | null;
+    /**
+     * Owner system of the product.
+     * @type {number}
+     * @memberof Product
+     */
+    'system': number;
 }
 
 /**
  * IntegratedSystemApi - axios parameter creator
  * @export
  */
-export const IntegratedSystemApiAxiosParamCreator = function (
-  configuration?: Configuration,
-) {
-  return {
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {IntegratedSystem} IntegratedSystem
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemCreate: async (
-      IntegratedSystem: IntegratedSystem,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'IntegratedSystem' is not null or undefined
-      assertParamExists(
-        "integratedSystemCreate",
-        "IntegratedSystem",
-        IntegratedSystem,
-      )
-      const localVarPath = `/integrated_system/`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+export const IntegratedSystemApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {IntegratedSystem} IntegratedSystem
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemCreate: async (IntegratedSystem: IntegratedSystem, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'IntegratedSystem' is not null or undefined
+            assertParamExists('integratedSystemCreate', 'IntegratedSystem', IntegratedSystem)
+            const localVarPath = `/integrated_system/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication cookieAuth required
+            // authentication cookieAuth required
 
-      localVarHeaderParameter["Content-Type"] = "application/json"
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        IntegratedSystem,
-        localVarRequestOptions,
-        configuration,
-      )
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {number} id A unique integer value identifying this integrated system.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemDestroy: async (
-      id: number,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("integratedSystemDestroy", "id", id)
-      const localVarPath = `/integrated_system/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            localVarHeaderParameter['Content-Type'] = 'application/json';
 
-      const localVarRequestOptions = {
-        method: "DELETE",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(IntegratedSystem, localVarRequestOptions, configuration)
 
-      // authentication cookieAuth required
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {number} id A unique integer value identifying this integrated system.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemDestroy: async (id: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('integratedSystemDestroy', 'id', id)
+            const localVarPath = `/integrated_system/{id}/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {number} [limit] Number of results to return per page.
-     * @param {number} [offset] The initial index from which to return the results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemList: async (
-      limit?: number,
-      offset?: number,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/integrated_system/`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            // authentication cookieAuth required
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
 
-      // authentication cookieAuth required
 
-      if (limit !== undefined) {
-        localVarQueryParameter["limit"] = limit
-      }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      if (offset !== undefined) {
-        localVarQueryParameter["offset"] = offset
-      }
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {number} [limit] Number of results to return per page.
+         * @param {number} [offset] The initial index from which to return the results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemList: async (limit?: number, offset?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/integrated_system/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {number} id A unique integer value identifying this integrated system.
-     * @param {PatchedIntegratedSystem} [PatchedIntegratedSystem]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemPartialUpdate: async (
-      id: number,
-      PatchedIntegratedSystem?: PatchedIntegratedSystem,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("integratedSystemPartialUpdate", "id", id)
-      const localVarPath = `/integrated_system/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            // authentication cookieAuth required
 
-      const localVarRequestOptions = {
-        method: "PATCH",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
 
-      // authentication cookieAuth required
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
 
-      localVarHeaderParameter["Content-Type"] = "application/json"
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        PatchedIntegratedSystem,
-        localVarRequestOptions,
-        configuration,
-      )
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {number} id A unique integer value identifying this integrated system.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemRetrieve: async (
-      id: number,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("integratedSystemRetrieve", "id", id)
-      const localVarPath = `/integrated_system/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {number} id A unique integer value identifying this integrated system.
+         * @param {PatchedIntegratedSystem} [PatchedIntegratedSystem]
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemPartialUpdate: async (id: number, PatchedIntegratedSystem?: PatchedIntegratedSystem, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('integratedSystemPartialUpdate', 'id', id)
+            const localVarPath = `/integrated_system/{id}/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      // authentication cookieAuth required
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
+            // authentication cookieAuth required
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {number} id A unique integer value identifying this integrated system.
-     * @param {IntegratedSystem} IntegratedSystem
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemUpdate: async (
-      id: number,
-      IntegratedSystem: IntegratedSystem,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("integratedSystemUpdate", "id", id)
-      // verify required parameter 'IntegratedSystem' is not null or undefined
-      assertParamExists(
-        "integratedSystemUpdate",
-        "IntegratedSystem",
-        IntegratedSystem,
-      )
-      const localVarPath = `/integrated_system/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
 
-      const localVarRequestOptions = {
-        method: "PUT",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
 
-      // authentication cookieAuth required
+            localVarHeaderParameter['Content-Type'] = 'application/json';
 
-      localVarHeaderParameter["Content-Type"] = "application/json"
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(PatchedIntegratedSystem, localVarRequestOptions, configuration)
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        IntegratedSystem,
-        localVarRequestOptions,
-        configuration,
-      )
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {number} id A unique integer value identifying this integrated system.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemRetrieve: async (id: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('integratedSystemRetrieve', 'id', id)
+            const localVarPath = `/integrated_system/{id}/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-  }
-}
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {number} id A unique integer value identifying this integrated system.
+         * @param {IntegratedSystem} IntegratedSystem
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemUpdate: async (id: number, IntegratedSystem: IntegratedSystem, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('integratedSystemUpdate', 'id', id)
+            // verify required parameter 'IntegratedSystem' is not null or undefined
+            assertParamExists('integratedSystemUpdate', 'IntegratedSystem', IntegratedSystem)
+            const localVarPath = `/integrated_system/{id}/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(IntegratedSystem, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
 
 /**
  * IntegratedSystemApi - functional programming interface
  * @export
  */
-export const IntegratedSystemApiFp = function (configuration?: Configuration) {
-  const localVarAxiosParamCreator =
-    IntegratedSystemApiAxiosParamCreator(configuration)
-  return {
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {IntegratedSystem} IntegratedSystem
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async integratedSystemCreate(
-      IntegratedSystem: IntegratedSystem,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<IntegratedSystem>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.integratedSystemCreate(
-          IntegratedSystem,
-          options,
-        )
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {number} id A unique integer value identifying this integrated system.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async integratedSystemDestroy(
-      id: number,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.integratedSystemDestroy(id, options)
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {number} [limit] Number of results to return per page.
-     * @param {number} [offset] The initial index from which to return the results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async integratedSystemList(
-      limit?: number,
-      offset?: number,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<PaginatedIntegratedSystemList>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.integratedSystemList(
-          limit,
-          offset,
-          options,
-        )
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {number} id A unique integer value identifying this integrated system.
-     * @param {PatchedIntegratedSystem} [PatchedIntegratedSystem]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async integratedSystemPartialUpdate(
-      id: number,
-      PatchedIntegratedSystem?: PatchedIntegratedSystem,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<IntegratedSystem>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.integratedSystemPartialUpdate(
-          id,
-          PatchedIntegratedSystem,
-          options,
-        )
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {number} id A unique integer value identifying this integrated system.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async integratedSystemRetrieve(
-      id: number,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<IntegratedSystem>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.integratedSystemRetrieve(id, options)
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {number} id A unique integer value identifying this integrated system.
-     * @param {IntegratedSystem} IntegratedSystem
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async integratedSystemUpdate(
-      id: number,
-      IntegratedSystem: IntegratedSystem,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<IntegratedSystem>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.integratedSystemUpdate(
-          id,
-          IntegratedSystem,
-          options,
-        )
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-  }
-}
+export const IntegratedSystemApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = IntegratedSystemApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {IntegratedSystem} IntegratedSystem
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async integratedSystemCreate(IntegratedSystem: IntegratedSystem, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemCreate(IntegratedSystem, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {number} id A unique integer value identifying this integrated system.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async integratedSystemDestroy(id: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemDestroy(id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {number} [limit] Number of results to return per page.
+         * @param {number} [offset] The initial index from which to return the results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async integratedSystemList(limit?: number, offset?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedIntegratedSystemList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemList(limit, offset, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {number} id A unique integer value identifying this integrated system.
+         * @param {PatchedIntegratedSystem} [PatchedIntegratedSystem]
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async integratedSystemPartialUpdate(id: number, PatchedIntegratedSystem?: PatchedIntegratedSystem, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemPartialUpdate(id, PatchedIntegratedSystem, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {number} id A unique integer value identifying this integrated system.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async integratedSystemRetrieve(id: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemRetrieve(id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {number} id A unique integer value identifying this integrated system.
+         * @param {IntegratedSystem} IntegratedSystem
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async integratedSystemUpdate(id: number, IntegratedSystem: IntegratedSystem, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemUpdate(id, IntegratedSystem, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
 
 /**
  * IntegratedSystemApi - factory interface
  * @export
  */
-export const IntegratedSystemApiFactory = function (
-  configuration?: Configuration,
-  basePath?: string,
-  axios?: AxiosInstance,
-) {
-  const localVarFp = IntegratedSystemApiFp(configuration)
-  return {
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {IntegratedSystemApiIntegratedSystemCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemCreate(
-      requestParameters: IntegratedSystemApiIntegratedSystemCreateRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<IntegratedSystem> {
-      return localVarFp
-        .integratedSystemCreate(requestParameters.IntegratedSystem, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {IntegratedSystemApiIntegratedSystemDestroyRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemDestroy(
-      requestParameters: IntegratedSystemApiIntegratedSystemDestroyRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .integratedSystemDestroy(requestParameters.id, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {IntegratedSystemApiIntegratedSystemListRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemList(
-      requestParameters: IntegratedSystemApiIntegratedSystemListRequest = {},
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<PaginatedIntegratedSystemList> {
-      return localVarFp
-        .integratedSystemList(
-          requestParameters.limit,
-          requestParameters.offset,
-          options,
-        )
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {IntegratedSystemApiIntegratedSystemPartialUpdateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemPartialUpdate(
-      requestParameters: IntegratedSystemApiIntegratedSystemPartialUpdateRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<IntegratedSystem> {
-      return localVarFp
-        .integratedSystemPartialUpdate(
-          requestParameters.id,
-          requestParameters.PatchedIntegratedSystem,
-          options,
-        )
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {IntegratedSystemApiIntegratedSystemRetrieveRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemRetrieve(
-      requestParameters: IntegratedSystemApiIntegratedSystemRetrieveRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<IntegratedSystem> {
-      return localVarFp
-        .integratedSystemRetrieve(requestParameters.id, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Viewset for IntegratedSystem model.
-     * @param {IntegratedSystemApiIntegratedSystemUpdateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    integratedSystemUpdate(
-      requestParameters: IntegratedSystemApiIntegratedSystemUpdateRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<IntegratedSystem> {
-      return localVarFp
-        .integratedSystemUpdate(
-          requestParameters.id,
-          requestParameters.IntegratedSystem,
-          options,
-        )
-        .then((request) => request(axios, basePath))
-    },
-  }
-}
+export const IntegratedSystemApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = IntegratedSystemApiFp(configuration)
+    return {
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {IntegratedSystemApiIntegratedSystemCreateRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemCreate(requestParameters: IntegratedSystemApiIntegratedSystemCreateRequest, options?: AxiosRequestConfig): AxiosPromise<IntegratedSystem> {
+            return localVarFp.integratedSystemCreate(requestParameters.IntegratedSystem, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {IntegratedSystemApiIntegratedSystemDestroyRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemDestroy(requestParameters: IntegratedSystemApiIntegratedSystemDestroyRequest, options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.integratedSystemDestroy(requestParameters.id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {IntegratedSystemApiIntegratedSystemListRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemList(requestParameters: IntegratedSystemApiIntegratedSystemListRequest = {}, options?: AxiosRequestConfig): AxiosPromise<PaginatedIntegratedSystemList> {
+            return localVarFp.integratedSystemList(requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {IntegratedSystemApiIntegratedSystemPartialUpdateRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemPartialUpdate(requestParameters: IntegratedSystemApiIntegratedSystemPartialUpdateRequest, options?: AxiosRequestConfig): AxiosPromise<IntegratedSystem> {
+            return localVarFp.integratedSystemPartialUpdate(requestParameters.id, requestParameters.PatchedIntegratedSystem, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {IntegratedSystemApiIntegratedSystemRetrieveRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemRetrieve(requestParameters: IntegratedSystemApiIntegratedSystemRetrieveRequest, options?: AxiosRequestConfig): AxiosPromise<IntegratedSystem> {
+            return localVarFp.integratedSystemRetrieve(requestParameters.id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Viewset for IntegratedSystem model.
+         * @param {IntegratedSystemApiIntegratedSystemUpdateRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        integratedSystemUpdate(requestParameters: IntegratedSystemApiIntegratedSystemUpdateRequest, options?: AxiosRequestConfig): AxiosPromise<IntegratedSystem> {
+            return localVarFp.integratedSystemUpdate(requestParameters.id, requestParameters.IntegratedSystem, options).then((request) => request(axios, basePath));
+        },
+    };
+};
 
 /**
  * Request parameters for integratedSystemCreate operation in IntegratedSystemApi.
@@ -971,12 +734,12 @@ export const IntegratedSystemApiFactory = function (
  * @interface IntegratedSystemApiIntegratedSystemCreateRequest
  */
 export interface IntegratedSystemApiIntegratedSystemCreateRequest {
-  /**
-   *
-   * @type {IntegratedSystem}
-   * @memberof IntegratedSystemApiIntegratedSystemCreate
-   */
-  readonly IntegratedSystem: IntegratedSystem
+    /**
+     *
+     * @type {IntegratedSystem}
+     * @memberof IntegratedSystemApiIntegratedSystemCreate
+     */
+    readonly IntegratedSystem: IntegratedSystem
 }
 
 /**
@@ -985,12 +748,12 @@ export interface IntegratedSystemApiIntegratedSystemCreateRequest {
  * @interface IntegratedSystemApiIntegratedSystemDestroyRequest
  */
 export interface IntegratedSystemApiIntegratedSystemDestroyRequest {
-  /**
-   * A unique integer value identifying this integrated system.
-   * @type {number}
-   * @memberof IntegratedSystemApiIntegratedSystemDestroy
-   */
-  readonly id: number
+    /**
+     * A unique integer value identifying this integrated system.
+     * @type {number}
+     * @memberof IntegratedSystemApiIntegratedSystemDestroy
+     */
+    readonly id: number
 }
 
 /**
@@ -999,19 +762,19 @@ export interface IntegratedSystemApiIntegratedSystemDestroyRequest {
  * @interface IntegratedSystemApiIntegratedSystemListRequest
  */
 export interface IntegratedSystemApiIntegratedSystemListRequest {
-  /**
-   * Number of results to return per page.
-   * @type {number}
-   * @memberof IntegratedSystemApiIntegratedSystemList
-   */
-  readonly limit?: number
+    /**
+     * Number of results to return per page.
+     * @type {number}
+     * @memberof IntegratedSystemApiIntegratedSystemList
+     */
+    readonly limit?: number
 
-  /**
-   * The initial index from which to return the results.
-   * @type {number}
-   * @memberof IntegratedSystemApiIntegratedSystemList
-   */
-  readonly offset?: number
+    /**
+     * The initial index from which to return the results.
+     * @type {number}
+     * @memberof IntegratedSystemApiIntegratedSystemList
+     */
+    readonly offset?: number
 }
 
 /**
@@ -1020,19 +783,19 @@ export interface IntegratedSystemApiIntegratedSystemListRequest {
  * @interface IntegratedSystemApiIntegratedSystemPartialUpdateRequest
  */
 export interface IntegratedSystemApiIntegratedSystemPartialUpdateRequest {
-  /**
-   * A unique integer value identifying this integrated system.
-   * @type {number}
-   * @memberof IntegratedSystemApiIntegratedSystemPartialUpdate
-   */
-  readonly id: number
+    /**
+     * A unique integer value identifying this integrated system.
+     * @type {number}
+     * @memberof IntegratedSystemApiIntegratedSystemPartialUpdate
+     */
+    readonly id: number
 
-  /**
-   *
-   * @type {PatchedIntegratedSystem}
-   * @memberof IntegratedSystemApiIntegratedSystemPartialUpdate
-   */
-  readonly PatchedIntegratedSystem?: PatchedIntegratedSystem
+    /**
+     *
+     * @type {PatchedIntegratedSystem}
+     * @memberof IntegratedSystemApiIntegratedSystemPartialUpdate
+     */
+    readonly PatchedIntegratedSystem?: PatchedIntegratedSystem
 }
 
 /**
@@ -1041,12 +804,12 @@ export interface IntegratedSystemApiIntegratedSystemPartialUpdateRequest {
  * @interface IntegratedSystemApiIntegratedSystemRetrieveRequest
  */
 export interface IntegratedSystemApiIntegratedSystemRetrieveRequest {
-  /**
-   * A unique integer value identifying this integrated system.
-   * @type {number}
-   * @memberof IntegratedSystemApiIntegratedSystemRetrieve
-   */
-  readonly id: number
+    /**
+     * A unique integer value identifying this integrated system.
+     * @type {number}
+     * @memberof IntegratedSystemApiIntegratedSystemRetrieve
+     */
+    readonly id: number
 }
 
 /**
@@ -1055,19 +818,19 @@ export interface IntegratedSystemApiIntegratedSystemRetrieveRequest {
  * @interface IntegratedSystemApiIntegratedSystemUpdateRequest
  */
 export interface IntegratedSystemApiIntegratedSystemUpdateRequest {
-  /**
-   * A unique integer value identifying this integrated system.
-   * @type {number}
-   * @memberof IntegratedSystemApiIntegratedSystemUpdate
-   */
-  readonly id: number
+    /**
+     * A unique integer value identifying this integrated system.
+     * @type {number}
+     * @memberof IntegratedSystemApiIntegratedSystemUpdate
+     */
+    readonly id: number
 
-  /**
-   *
-   * @type {IntegratedSystem}
-   * @memberof IntegratedSystemApiIntegratedSystemUpdate
-   */
-  readonly IntegratedSystem: IntegratedSystem
+    /**
+     *
+     * @type {IntegratedSystem}
+     * @memberof IntegratedSystemApiIntegratedSystemUpdate
+     */
+    readonly IntegratedSystem: IntegratedSystem
 }
 
 /**
@@ -1077,699 +840,447 @@ export interface IntegratedSystemApiIntegratedSystemUpdateRequest {
  * @extends {BaseAPI}
  */
 export class IntegratedSystemApi extends BaseAPI {
-  /**
-   * Viewset for IntegratedSystem model.
-   * @param {IntegratedSystemApiIntegratedSystemCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof IntegratedSystemApi
-   */
-  public integratedSystemCreate(
-    requestParameters: IntegratedSystemApiIntegratedSystemCreateRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return IntegratedSystemApiFp(this.configuration)
-      .integratedSystemCreate(requestParameters.IntegratedSystem, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for IntegratedSystem model.
+     * @param {IntegratedSystemApiIntegratedSystemCreateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof IntegratedSystemApi
+     */
+    public integratedSystemCreate(requestParameters: IntegratedSystemApiIntegratedSystemCreateRequest, options?: AxiosRequestConfig) {
+        return IntegratedSystemApiFp(this.configuration).integratedSystemCreate(requestParameters.IntegratedSystem, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Viewset for IntegratedSystem model.
-   * @param {IntegratedSystemApiIntegratedSystemDestroyRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof IntegratedSystemApi
-   */
-  public integratedSystemDestroy(
-    requestParameters: IntegratedSystemApiIntegratedSystemDestroyRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return IntegratedSystemApiFp(this.configuration)
-      .integratedSystemDestroy(requestParameters.id, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for IntegratedSystem model.
+     * @param {IntegratedSystemApiIntegratedSystemDestroyRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof IntegratedSystemApi
+     */
+    public integratedSystemDestroy(requestParameters: IntegratedSystemApiIntegratedSystemDestroyRequest, options?: AxiosRequestConfig) {
+        return IntegratedSystemApiFp(this.configuration).integratedSystemDestroy(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Viewset for IntegratedSystem model.
-   * @param {IntegratedSystemApiIntegratedSystemListRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof IntegratedSystemApi
-   */
-  public integratedSystemList(
-    requestParameters: IntegratedSystemApiIntegratedSystemListRequest = {},
-    options?: AxiosRequestConfig,
-  ) {
-    return IntegratedSystemApiFp(this.configuration)
-      .integratedSystemList(
-        requestParameters.limit,
-        requestParameters.offset,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for IntegratedSystem model.
+     * @param {IntegratedSystemApiIntegratedSystemListRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof IntegratedSystemApi
+     */
+    public integratedSystemList(requestParameters: IntegratedSystemApiIntegratedSystemListRequest = {}, options?: AxiosRequestConfig) {
+        return IntegratedSystemApiFp(this.configuration).integratedSystemList(requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Viewset for IntegratedSystem model.
-   * @param {IntegratedSystemApiIntegratedSystemPartialUpdateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof IntegratedSystemApi
-   */
-  public integratedSystemPartialUpdate(
-    requestParameters: IntegratedSystemApiIntegratedSystemPartialUpdateRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return IntegratedSystemApiFp(this.configuration)
-      .integratedSystemPartialUpdate(
-        requestParameters.id,
-        requestParameters.PatchedIntegratedSystem,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for IntegratedSystem model.
+     * @param {IntegratedSystemApiIntegratedSystemPartialUpdateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof IntegratedSystemApi
+     */
+    public integratedSystemPartialUpdate(requestParameters: IntegratedSystemApiIntegratedSystemPartialUpdateRequest, options?: AxiosRequestConfig) {
+        return IntegratedSystemApiFp(this.configuration).integratedSystemPartialUpdate(requestParameters.id, requestParameters.PatchedIntegratedSystem, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Viewset for IntegratedSystem model.
-   * @param {IntegratedSystemApiIntegratedSystemRetrieveRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof IntegratedSystemApi
-   */
-  public integratedSystemRetrieve(
-    requestParameters: IntegratedSystemApiIntegratedSystemRetrieveRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return IntegratedSystemApiFp(this.configuration)
-      .integratedSystemRetrieve(requestParameters.id, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for IntegratedSystem model.
+     * @param {IntegratedSystemApiIntegratedSystemRetrieveRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof IntegratedSystemApi
+     */
+    public integratedSystemRetrieve(requestParameters: IntegratedSystemApiIntegratedSystemRetrieveRequest, options?: AxiosRequestConfig) {
+        return IntegratedSystemApiFp(this.configuration).integratedSystemRetrieve(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Viewset for IntegratedSystem model.
-   * @param {IntegratedSystemApiIntegratedSystemUpdateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof IntegratedSystemApi
-   */
-  public integratedSystemUpdate(
-    requestParameters: IntegratedSystemApiIntegratedSystemUpdateRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return IntegratedSystemApiFp(this.configuration)
-      .integratedSystemUpdate(
-        requestParameters.id,
-        requestParameters.IntegratedSystem,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for IntegratedSystem model.
+     * @param {IntegratedSystemApiIntegratedSystemUpdateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof IntegratedSystemApi
+     */
+    public integratedSystemUpdate(requestParameters: IntegratedSystemApiIntegratedSystemUpdateRequest, options?: AxiosRequestConfig) {
+        return IntegratedSystemApiFp(this.configuration).integratedSystemUpdate(requestParameters.id, requestParameters.IntegratedSystem, options).then((request) => request(this.axios, this.basePath));
+    }
 }
+
 
 /**
  * ProductApi - axios parameter creator
  * @export
  */
-export const ProductApiAxiosParamCreator = function (
-  configuration?: Configuration,
-) {
-  return {
-    /**
-     * Viewset for Product model.
-     * @param {Product} Product
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productCreate: async (
-      Product: Product,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'Product' is not null or undefined
-      assertParamExists("productCreate", "Product", Product)
-      const localVarPath = `/product/`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+export const ProductApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Viewset for Product model.
+         * @param {Product} Product
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productCreate: async (Product: Product, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'Product' is not null or undefined
+            assertParamExists('productCreate', 'Product', Product)
+            const localVarPath = `/product/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = {
-        method: "POST",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication cookieAuth required
+            // authentication cookieAuth required
 
-      localVarHeaderParameter["Content-Type"] = "application/json"
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        Product,
-        localVarRequestOptions,
-        configuration,
-      )
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Viewset for Product model.
-     * @param {number} id A unique integer value identifying this product.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productDestroy: async (
-      id: number,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("productDestroy", "id", id)
-      const localVarPath = `/product/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            localVarHeaderParameter['Content-Type'] = 'application/json';
 
-      const localVarRequestOptions = {
-        method: "DELETE",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(Product, localVarRequestOptions, configuration)
 
-      // authentication cookieAuth required
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Viewset for Product model.
+         * @param {number} id A unique integer value identifying this product.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productDestroy: async (id: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('productDestroy', 'id', id)
+            const localVarPath = `/product/{id}/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Viewset for Product model.
-     * @param {number} [limit] Number of results to return per page.
-     * @param {number} [offset] The initial index from which to return the results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productList: async (
-      limit?: number,
-      offset?: number,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/product/`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            // authentication cookieAuth required
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
 
-      // authentication cookieAuth required
 
-      if (limit !== undefined) {
-        localVarQueryParameter["limit"] = limit
-      }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      if (offset !== undefined) {
-        localVarQueryParameter["offset"] = offset
-      }
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Viewset for Product model.
+         * @param {number} [limit] Number of results to return per page.
+         * @param {number} [offset] The initial index from which to return the results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productList: async (limit?: number, offset?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/product/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Viewset for Product model.
-     * @param {number} id A unique integer value identifying this product.
-     * @param {PatchedProduct} [PatchedProduct]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productPartialUpdate: async (
-      id: number,
-      PatchedProduct?: PatchedProduct,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("productPartialUpdate", "id", id)
-      const localVarPath = `/product/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            // authentication cookieAuth required
 
-      const localVarRequestOptions = {
-        method: "PATCH",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
 
-      // authentication cookieAuth required
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
 
-      localVarHeaderParameter["Content-Type"] = "application/json"
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        PatchedProduct,
-        localVarRequestOptions,
-        configuration,
-      )
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Viewset for Product model.
-     * @param {number} id A unique integer value identifying this product.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productRetrieve: async (
-      id: number,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("productRetrieve", "id", id)
-      const localVarPath = `/product/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      const localVarRequestOptions = {
-        method: "GET",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Viewset for Product model.
+         * @param {number} id A unique integer value identifying this product.
+         * @param {PatchedProduct} [PatchedProduct]
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productPartialUpdate: async (id: number, PatchedProduct?: PatchedProduct, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('productPartialUpdate', 'id', id)
+            const localVarPath = `/product/{id}/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      // authentication cookieAuth required
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
+            // authentication cookieAuth required
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Viewset for Product model.
-     * @param {number} id A unique integer value identifying this product.
-     * @param {Product} Product
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productUpdate: async (
-      id: number,
-      Product: Product,
-      options: AxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists("productUpdate", "id", id)
-      // verify required parameter 'Product' is not null or undefined
-      assertParamExists("productUpdate", "Product", Product)
-      const localVarPath = `/product/{id}/`.replace(
-        `{${"id"}}`,
-        encodeURIComponent(String(id)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
 
-      const localVarRequestOptions = {
-        method: "PUT",
-        ...baseOptions,
-        ...options,
-      }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
 
-      // authentication cookieAuth required
+            localVarHeaderParameter['Content-Type'] = 'application/json';
 
-      localVarHeaderParameter["Content-Type"] = "application/json"
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(PatchedProduct, localVarRequestOptions, configuration)
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions =
-        baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        Product,
-        localVarRequestOptions,
-        configuration,
-      )
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Viewset for Product model.
+         * @param {number} id A unique integer value identifying this product.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productRetrieve: async (id: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('productRetrieve', 'id', id)
+            const localVarPath = `/product/{id}/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-  }
-}
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Viewset for Product model.
+         * @param {number} id A unique integer value identifying this product.
+         * @param {Product} Product
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productUpdate: async (id: number, Product: Product, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('productUpdate', 'id', id)
+            // verify required parameter 'Product' is not null or undefined
+            assertParamExists('productUpdate', 'Product', Product)
+            const localVarPath = `/product/{id}/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(Product, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
 
 /**
  * ProductApi - functional programming interface
  * @export
  */
-export const ProductApiFp = function (configuration?: Configuration) {
-  const localVarAxiosParamCreator = ProductApiAxiosParamCreator(configuration)
-  return {
-    /**
-     * Viewset for Product model.
-     * @param {Product} Product
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async productCreate(
-      Product: Product,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.productCreate(
-        Product,
-        options,
-      )
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-    /**
-     * Viewset for Product model.
-     * @param {number} id A unique integer value identifying this product.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async productDestroy(
-      id: number,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.productDestroy(
-        id,
-        options,
-      )
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-    /**
-     * Viewset for Product model.
-     * @param {number} [limit] Number of results to return per page.
-     * @param {number} [offset] The initial index from which to return the results.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async productList(
-      limit?: number,
-      offset?: number,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string,
-      ) => AxiosPromise<PaginatedProductList>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.productList(
-        limit,
-        offset,
-        options,
-      )
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-    /**
-     * Viewset for Product model.
-     * @param {number} id A unique integer value identifying this product.
-     * @param {PatchedProduct} [PatchedProduct]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async productPartialUpdate(
-      id: number,
-      PatchedProduct?: PatchedProduct,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>
-    > {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.productPartialUpdate(
-          id,
-          PatchedProduct,
-          options,
-        )
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-    /**
-     * Viewset for Product model.
-     * @param {number} id A unique integer value identifying this product.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async productRetrieve(
-      id: number,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.productRetrieve(
-        id,
-        options,
-      )
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-    /**
-     * Viewset for Product model.
-     * @param {number} id A unique integer value identifying this product.
-     * @param {Product} Product
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async productUpdate(
-      id: number,
-      Product: Product,
-      options?: AxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.productUpdate(
-        id,
-        Product,
-        options,
-      )
-      return createRequestFunction(
-        localVarAxiosArgs,
-        globalAxios,
-        BASE_PATH,
-        configuration,
-      )
-    },
-  }
-}
+export const ProductApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ProductApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Viewset for Product model.
+         * @param {Product} Product
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async productCreate(Product: Product, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.productCreate(Product, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Viewset for Product model.
+         * @param {number} id A unique integer value identifying this product.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async productDestroy(id: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.productDestroy(id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Viewset for Product model.
+         * @param {number} [limit] Number of results to return per page.
+         * @param {number} [offset] The initial index from which to return the results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async productList(limit?: number, offset?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedProductList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.productList(limit, offset, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Viewset for Product model.
+         * @param {number} id A unique integer value identifying this product.
+         * @param {PatchedProduct} [PatchedProduct]
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async productPartialUpdate(id: number, PatchedProduct?: PatchedProduct, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.productPartialUpdate(id, PatchedProduct, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Viewset for Product model.
+         * @param {number} id A unique integer value identifying this product.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async productRetrieve(id: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.productRetrieve(id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Viewset for Product model.
+         * @param {number} id A unique integer value identifying this product.
+         * @param {Product} Product
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async productUpdate(id: number, Product: Product, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.productUpdate(id, Product, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
 
 /**
  * ProductApi - factory interface
  * @export
  */
-export const ProductApiFactory = function (
-  configuration?: Configuration,
-  basePath?: string,
-  axios?: AxiosInstance,
-) {
-  const localVarFp = ProductApiFp(configuration)
-  return {
-    /**
-     * Viewset for Product model.
-     * @param {ProductApiProductCreateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productCreate(
-      requestParameters: ProductApiProductCreateRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<Product> {
-      return localVarFp
-        .productCreate(requestParameters.Product, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Viewset for Product model.
-     * @param {ProductApiProductDestroyRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productDestroy(
-      requestParameters: ProductApiProductDestroyRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .productDestroy(requestParameters.id, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Viewset for Product model.
-     * @param {ProductApiProductListRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productList(
-      requestParameters: ProductApiProductListRequest = {},
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<PaginatedProductList> {
-      return localVarFp
-        .productList(requestParameters.limit, requestParameters.offset, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Viewset for Product model.
-     * @param {ProductApiProductPartialUpdateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productPartialUpdate(
-      requestParameters: ProductApiProductPartialUpdateRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<Product> {
-      return localVarFp
-        .productPartialUpdate(
-          requestParameters.id,
-          requestParameters.PatchedProduct,
-          options,
-        )
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Viewset for Product model.
-     * @param {ProductApiProductRetrieveRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productRetrieve(
-      requestParameters: ProductApiProductRetrieveRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<Product> {
-      return localVarFp
-        .productRetrieve(requestParameters.id, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Viewset for Product model.
-     * @param {ProductApiProductUpdateRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    productUpdate(
-      requestParameters: ProductApiProductUpdateRequest,
-      options?: AxiosRequestConfig,
-    ): AxiosPromise<Product> {
-      return localVarFp
-        .productUpdate(requestParameters.id, requestParameters.Product, options)
-        .then((request) => request(axios, basePath))
-    },
-  }
-}
+export const ProductApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ProductApiFp(configuration)
+    return {
+        /**
+         * Viewset for Product model.
+         * @param {ProductApiProductCreateRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productCreate(requestParameters: ProductApiProductCreateRequest, options?: AxiosRequestConfig): AxiosPromise<Product> {
+            return localVarFp.productCreate(requestParameters.Product, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Viewset for Product model.
+         * @param {ProductApiProductDestroyRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productDestroy(requestParameters: ProductApiProductDestroyRequest, options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.productDestroy(requestParameters.id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Viewset for Product model.
+         * @param {ProductApiProductListRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productList(requestParameters: ProductApiProductListRequest = {}, options?: AxiosRequestConfig): AxiosPromise<PaginatedProductList> {
+            return localVarFp.productList(requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Viewset for Product model.
+         * @param {ProductApiProductPartialUpdateRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productPartialUpdate(requestParameters: ProductApiProductPartialUpdateRequest, options?: AxiosRequestConfig): AxiosPromise<Product> {
+            return localVarFp.productPartialUpdate(requestParameters.id, requestParameters.PatchedProduct, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Viewset for Product model.
+         * @param {ProductApiProductRetrieveRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productRetrieve(requestParameters: ProductApiProductRetrieveRequest, options?: AxiosRequestConfig): AxiosPromise<Product> {
+            return localVarFp.productRetrieve(requestParameters.id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Viewset for Product model.
+         * @param {ProductApiProductUpdateRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        productUpdate(requestParameters: ProductApiProductUpdateRequest, options?: AxiosRequestConfig): AxiosPromise<Product> {
+            return localVarFp.productUpdate(requestParameters.id, requestParameters.Product, options).then((request) => request(axios, basePath));
+        },
+    };
+};
 
 /**
  * Request parameters for productCreate operation in ProductApi.
@@ -1777,12 +1288,12 @@ export const ProductApiFactory = function (
  * @interface ProductApiProductCreateRequest
  */
 export interface ProductApiProductCreateRequest {
-  /**
-   *
-   * @type {Product}
-   * @memberof ProductApiProductCreate
-   */
-  readonly Product: Product
+    /**
+     *
+     * @type {Product}
+     * @memberof ProductApiProductCreate
+     */
+    readonly Product: Product
 }
 
 /**
@@ -1791,12 +1302,12 @@ export interface ProductApiProductCreateRequest {
  * @interface ProductApiProductDestroyRequest
  */
 export interface ProductApiProductDestroyRequest {
-  /**
-   * A unique integer value identifying this product.
-   * @type {number}
-   * @memberof ProductApiProductDestroy
-   */
-  readonly id: number
+    /**
+     * A unique integer value identifying this product.
+     * @type {number}
+     * @memberof ProductApiProductDestroy
+     */
+    readonly id: number
 }
 
 /**
@@ -1805,19 +1316,19 @@ export interface ProductApiProductDestroyRequest {
  * @interface ProductApiProductListRequest
  */
 export interface ProductApiProductListRequest {
-  /**
-   * Number of results to return per page.
-   * @type {number}
-   * @memberof ProductApiProductList
-   */
-  readonly limit?: number
+    /**
+     * Number of results to return per page.
+     * @type {number}
+     * @memberof ProductApiProductList
+     */
+    readonly limit?: number
 
-  /**
-   * The initial index from which to return the results.
-   * @type {number}
-   * @memberof ProductApiProductList
-   */
-  readonly offset?: number
+    /**
+     * The initial index from which to return the results.
+     * @type {number}
+     * @memberof ProductApiProductList
+     */
+    readonly offset?: number
 }
 
 /**
@@ -1826,19 +1337,19 @@ export interface ProductApiProductListRequest {
  * @interface ProductApiProductPartialUpdateRequest
  */
 export interface ProductApiProductPartialUpdateRequest {
-  /**
-   * A unique integer value identifying this product.
-   * @type {number}
-   * @memberof ProductApiProductPartialUpdate
-   */
-  readonly id: number
+    /**
+     * A unique integer value identifying this product.
+     * @type {number}
+     * @memberof ProductApiProductPartialUpdate
+     */
+    readonly id: number
 
-  /**
-   *
-   * @type {PatchedProduct}
-   * @memberof ProductApiProductPartialUpdate
-   */
-  readonly PatchedProduct?: PatchedProduct
+    /**
+     *
+     * @type {PatchedProduct}
+     * @memberof ProductApiProductPartialUpdate
+     */
+    readonly PatchedProduct?: PatchedProduct
 }
 
 /**
@@ -1847,12 +1358,12 @@ export interface ProductApiProductPartialUpdateRequest {
  * @interface ProductApiProductRetrieveRequest
  */
 export interface ProductApiProductRetrieveRequest {
-  /**
-   * A unique integer value identifying this product.
-   * @type {number}
-   * @memberof ProductApiProductRetrieve
-   */
-  readonly id: number
+    /**
+     * A unique integer value identifying this product.
+     * @type {number}
+     * @memberof ProductApiProductRetrieve
+     */
+    readonly id: number
 }
 
 /**
@@ -1861,19 +1372,19 @@ export interface ProductApiProductRetrieveRequest {
  * @interface ProductApiProductUpdateRequest
  */
 export interface ProductApiProductUpdateRequest {
-  /**
-   * A unique integer value identifying this product.
-   * @type {number}
-   * @memberof ProductApiProductUpdate
-   */
-  readonly id: number
+    /**
+     * A unique integer value identifying this product.
+     * @type {number}
+     * @memberof ProductApiProductUpdate
+     */
+    readonly id: number
 
-  /**
-   *
-   * @type {Product}
-   * @memberof ProductApiProductUpdate
-   */
-  readonly Product: Product
+    /**
+     *
+     * @type {Product}
+     * @memberof ProductApiProductUpdate
+     */
+    readonly Product: Product
 }
 
 /**
@@ -1883,103 +1394,69 @@ export interface ProductApiProductUpdateRequest {
  * @extends {BaseAPI}
  */
 export class ProductApi extends BaseAPI {
-  /**
-   * Viewset for Product model.
-   * @param {ProductApiProductCreateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ProductApi
-   */
-  public productCreate(
-    requestParameters: ProductApiProductCreateRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return ProductApiFp(this.configuration)
-      .productCreate(requestParameters.Product, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for Product model.
+     * @param {ProductApiProductCreateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProductApi
+     */
+    public productCreate(requestParameters: ProductApiProductCreateRequest, options?: AxiosRequestConfig) {
+        return ProductApiFp(this.configuration).productCreate(requestParameters.Product, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Viewset for Product model.
-   * @param {ProductApiProductDestroyRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ProductApi
-   */
-  public productDestroy(
-    requestParameters: ProductApiProductDestroyRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return ProductApiFp(this.configuration)
-      .productDestroy(requestParameters.id, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for Product model.
+     * @param {ProductApiProductDestroyRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProductApi
+     */
+    public productDestroy(requestParameters: ProductApiProductDestroyRequest, options?: AxiosRequestConfig) {
+        return ProductApiFp(this.configuration).productDestroy(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Viewset for Product model.
-   * @param {ProductApiProductListRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ProductApi
-   */
-  public productList(
-    requestParameters: ProductApiProductListRequest = {},
-    options?: AxiosRequestConfig,
-  ) {
-    return ProductApiFp(this.configuration)
-      .productList(requestParameters.limit, requestParameters.offset, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for Product model.
+     * @param {ProductApiProductListRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProductApi
+     */
+    public productList(requestParameters: ProductApiProductListRequest = {}, options?: AxiosRequestConfig) {
+        return ProductApiFp(this.configuration).productList(requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Viewset for Product model.
-   * @param {ProductApiProductPartialUpdateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ProductApi
-   */
-  public productPartialUpdate(
-    requestParameters: ProductApiProductPartialUpdateRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return ProductApiFp(this.configuration)
-      .productPartialUpdate(
-        requestParameters.id,
-        requestParameters.PatchedProduct,
-        options,
-      )
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for Product model.
+     * @param {ProductApiProductPartialUpdateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProductApi
+     */
+    public productPartialUpdate(requestParameters: ProductApiProductPartialUpdateRequest, options?: AxiosRequestConfig) {
+        return ProductApiFp(this.configuration).productPartialUpdate(requestParameters.id, requestParameters.PatchedProduct, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Viewset for Product model.
-   * @param {ProductApiProductRetrieveRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ProductApi
-   */
-  public productRetrieve(
-    requestParameters: ProductApiProductRetrieveRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return ProductApiFp(this.configuration)
-      .productRetrieve(requestParameters.id, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for Product model.
+     * @param {ProductApiProductRetrieveRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProductApi
+     */
+    public productRetrieve(requestParameters: ProductApiProductRetrieveRequest, options?: AxiosRequestConfig) {
+        return ProductApiFp(this.configuration).productRetrieve(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Viewset for Product model.
-   * @param {ProductApiProductUpdateRequest} requestParameters Request parameters.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ProductApi
-   */
-  public productUpdate(
-    requestParameters: ProductApiProductUpdateRequest,
-    options?: AxiosRequestConfig,
-  ) {
-    return ProductApiFp(this.configuration)
-      .productUpdate(requestParameters.id, requestParameters.Product, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Viewset for Product model.
+     * @param {ProductApiProductUpdateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProductApi
+     */
+    public productUpdate(requestParameters: ProductApiProductUpdateRequest, options?: AxiosRequestConfig) {
+        return ProductApiFp(this.configuration).productUpdate(requestParameters.id, requestParameters.Product, options).then((request) => request(this.axios, this.basePath));
+    }
 }
