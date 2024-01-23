@@ -3,9 +3,9 @@ info:
   title: ''
   version: 0.0.0
 paths:
-  /integrated_system/:
+  /api/v0/meta/integrated_system/:
     get:
-      operationId: integrated_system_list
+      operationId: meta_integrated_system_list
       description: Viewset for IntegratedSystem model.
       parameters:
       - name: limit
@@ -21,7 +21,7 @@ paths:
         schema:
           type: integer
       tags:
-      - integrated_system
+      - meta
       security:
       - cookieAuth: []
       responses:
@@ -32,10 +32,10 @@ paths:
                 $ref: '#/components/schemas/PaginatedIntegratedSystemList'
           description: ''
     post:
-      operationId: integrated_system_create
+      operationId: meta_integrated_system_create
       description: Viewset for IntegratedSystem model.
       tags:
-      - integrated_system
+      - meta
       requestBody:
         content:
           application/json:
@@ -57,9 +57,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/IntegratedSystem'
           description: ''
-  /integrated_system/{id}/:
+  /api/v0/meta/integrated_system/{id}/:
     get:
-      operationId: integrated_system_retrieve
+      operationId: meta_integrated_system_retrieve
       description: Viewset for IntegratedSystem model.
       parameters:
       - in: path
@@ -69,7 +69,7 @@ paths:
         description: A unique integer value identifying this integrated system.
         required: true
       tags:
-      - integrated_system
+      - meta
       security:
       - cookieAuth: []
       responses:
@@ -80,7 +80,7 @@ paths:
                 $ref: '#/components/schemas/IntegratedSystem'
           description: ''
     put:
-      operationId: integrated_system_update
+      operationId: meta_integrated_system_update
       description: Viewset for IntegratedSystem model.
       parameters:
       - in: path
@@ -90,7 +90,7 @@ paths:
         description: A unique integer value identifying this integrated system.
         required: true
       tags:
-      - integrated_system
+      - meta
       requestBody:
         content:
           application/json:
@@ -113,7 +113,7 @@ paths:
                 $ref: '#/components/schemas/IntegratedSystem'
           description: ''
     patch:
-      operationId: integrated_system_partial_update
+      operationId: meta_integrated_system_partial_update
       description: Viewset for IntegratedSystem model.
       parameters:
       - in: path
@@ -123,7 +123,7 @@ paths:
         description: A unique integer value identifying this integrated system.
         required: true
       tags:
-      - integrated_system
+      - meta
       requestBody:
         content:
           application/json:
@@ -145,7 +145,7 @@ paths:
                 $ref: '#/components/schemas/IntegratedSystem'
           description: ''
     delete:
-      operationId: integrated_system_destroy
+      operationId: meta_integrated_system_destroy
       description: Viewset for IntegratedSystem model.
       parameters:
       - in: path
@@ -155,15 +155,15 @@ paths:
         description: A unique integer value identifying this integrated system.
         required: true
       tags:
-      - integrated_system
+      - meta
       security:
       - cookieAuth: []
       responses:
         '204':
           description: No response body
-  /product/:
+  /api/v0/meta/product/:
     get:
-      operationId: product_list
+      operationId: meta_product_list
       description: Viewset for Product model.
       parameters:
       - name: limit
@@ -179,7 +179,7 @@ paths:
         schema:
           type: integer
       tags:
-      - product
+      - meta
       security:
       - cookieAuth: []
       responses:
@@ -190,10 +190,10 @@ paths:
                 $ref: '#/components/schemas/PaginatedProductList'
           description: ''
     post:
-      operationId: product_create
+      operationId: meta_product_create
       description: Viewset for Product model.
       tags:
-      - product
+      - meta
       requestBody:
         content:
           application/json:
@@ -215,9 +215,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Product'
           description: ''
-  /product/{id}/:
+  /api/v0/meta/product/{id}/:
     get:
-      operationId: product_retrieve
+      operationId: meta_product_retrieve
       description: Viewset for Product model.
       parameters:
       - in: path
@@ -227,7 +227,7 @@ paths:
         description: A unique integer value identifying this product.
         required: true
       tags:
-      - product
+      - meta
       security:
       - cookieAuth: []
       responses:
@@ -238,7 +238,7 @@ paths:
                 $ref: '#/components/schemas/Product'
           description: ''
     put:
-      operationId: product_update
+      operationId: meta_product_update
       description: Viewset for Product model.
       parameters:
       - in: path
@@ -248,7 +248,7 @@ paths:
         description: A unique integer value identifying this product.
         required: true
       tags:
-      - product
+      - meta
       requestBody:
         content:
           application/json:
@@ -271,7 +271,7 @@ paths:
                 $ref: '#/components/schemas/Product'
           description: ''
     patch:
-      operationId: product_partial_update
+      operationId: meta_product_partial_update
       description: Viewset for Product model.
       parameters:
       - in: path
@@ -281,7 +281,7 @@ paths:
         description: A unique integer value identifying this product.
         required: true
       tags:
-      - product
+      - meta
       requestBody:
         content:
           application/json:
@@ -303,7 +303,7 @@ paths:
                 $ref: '#/components/schemas/Product'
           description: ''
     delete:
-      operationId: product_destroy
+      operationId: meta_product_destroy
       description: Viewset for Product model.
       parameters:
       - in: path
@@ -313,14 +313,219 @@ paths:
         description: A unique integer value identifying this product.
         required: true
       tags:
-      - product
+      - meta
       security:
       - cookieAuth: []
       responses:
         '204':
           description: No response body
+  /api/v0/payments/baskets/:
+    get:
+      operationId: payments_baskets_list
+      description: API view set for Basket
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBasketList'
+          description: ''
+  /api/v0/payments/baskets/{basket}/items/:
+    get:
+      operationId: payments_baskets_items_list
+      description: API view set for BasketItem
+      parameters:
+      - in: path
+        name: basket
+        schema:
+          type: string
+        required: true
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBasketItemList'
+          description: ''
+    post:
+      operationId: payments_baskets_items_create
+      description: |-
+        Create a new basket item.
+
+        Args:
+            request (HttpRequest): HTTP request
+
+        Returns:
+            Response: HTTP response
+      parameters:
+      - in: path
+        name: basket
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasketItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BasketItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BasketItem'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketItem'
+          description: ''
+  /api/v0/payments/baskets/{basket}/items/{id}/:
+    delete:
+      operationId: payments_baskets_items_destroy
+      description: API view set for BasketItem
+      parameters:
+      - in: path
+        name: basket
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v0/payments/baskets/{username}/:
+    get:
+      operationId: payments_baskets_retrieve
+      description: API view set for Basket
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Basket'
+          description: ''
+  /api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/:
+    post:
+      operationId: payments_baskets_create_from_product_create
+      description: |-
+        Create a new basket item from a product for the currently logged in user. Reuse
+        the existing basket object if it exists.
+
+        Args:
+            system_slug (str): system slug
+            sku (str): product slug
+
+        Returns:
+            Response: HTTP response
+      parameters:
+      - in: path
+        name: sku
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
 components:
   schemas:
+    Basket:
+      type: object
+      description: Basket model serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        basket_items:
+          type: string
+          readOnly: true
+      required:
+      - basket_items
+      - id
+      - user
+    BasketItem:
+      type: object
+      description: BasketItem model serializer
+      properties:
+        basket:
+          type: integer
+        product:
+          type: integer
+        id:
+          type: integer
+          readOnly: true
+      required:
+      - basket
+      - id
+      - product
     IntegratedSystem:
       type: object
       description: Serializer for IntegratedSystem model.
@@ -362,6 +567,46 @@ components:
       - id
       - name
       - updated_on
+    PaginatedBasketItemList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BasketItem'
+    PaginatedBasketList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Basket'
     PaginatedIntegratedSystemList:
       type: object
       properties:
