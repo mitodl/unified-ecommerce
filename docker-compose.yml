@@ -26,6 +26,28 @@ services:
     ports:
       - "6379"
 
+  etcd:
+    image: 'bitnami/etcd:latest'
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    ports:
+      - 2379:2379
+      - 2380:2380
+    volumes:
+      - ./config/etcd/etcd.conf.yml:/opt/bitnami/Etcd/conf/etcd.conf.yml bitnami/etcd:latest
+
+  api:
+    image: apache/apisix
+    platform: linux/amd64
+    ports:
+      - 9080:9080
+      - 9180:9180
+    volumes:
+      - ./config/apisix/apisix.yml:/usr/local/apisix/conf/config.yaml
+    depends_on:
+      - etcd
+
   nginx:
     image: nginx:1.25
     ports:
@@ -33,9 +55,17 @@ services:
     links:
       - web
     volumes:
-      - ./config/nginx.conf:/etc/nginx/conf.d/web.conf
+      - ./config/nginx/nginx.conf:/etc/nginx/conf.d/web.conf
       - ./:/src
       - django_media:/app/django_media
+    labels:
+      - "traefik.http.routers.ue.rule=Host(`ue.odl.local`)"
+      - "traefik.http.routers.ue.middlewares=traefik-forward-auth"
+      - "traefik.http.services.ue-service.loadbalancer.server.url=http://ue.odl.local:8073"
+      - "traefik.http.services.ue-service.loadbalancer.server.port=8073"
+    networks:
+      - default
+      - traefik-keycloak_default
 
   web:
     build:
@@ -97,3 +127,8 @@ services:
 volumes:
   django_media:
   yarn-cache:
+
+
+networks:
+  traefik-keycloak_default:
+    external: true

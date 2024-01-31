@@ -89,8 +89,10 @@ INSTALLED_APPS = [
     "reversion",
     "django_fsm",
     "fsm_admin",
+    "oauth2_provider",
     # Application modules
     "unified_ecommerce",
+    "authentication",
     "system_meta",
     "payments",
     "mitol.payment_gateway.apps.PaymentGatewayApp",
@@ -102,6 +104,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "unified_ecommerce.authentication.ForwardUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -112,6 +115,7 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = get_list_of_str("CORS_ALLOWED_ORIGINS", [])
 CORS_ALLOWED_ORIGIN_REGEXES = get_list_of_str("CORS_ALLOWED_ORIGIN_REGEXES", [])
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL = True
 
 # enable the nplusone profiler only in debug mode
 if DEBUG:
@@ -196,6 +200,7 @@ USE_TZ = True
 AUTHENTICATION_BACKENDS = (
     # "authentication.backends.ol_open_id_connect.OlOpenIdConnectAuth",
     # the following needs to stay here to allow login of local users
+    "django.contrib.auth.backends.RemoteUserBackend",
     "django.contrib.auth.backends.ModelBackend",
     "guardian.backends.ObjectPermissionBackend",
 )
@@ -518,3 +523,9 @@ MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string(
     "MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitxonline-"
 )
 import_settings_modules("mitol.payment_gateway.settings.cybersource")
+
+# Keycloak API settings
+KEYCLOAK_ADMIN_CLIENT_ID = get_string("KEYCLOAK_ADMIN_CLIENT_ID", False)  # noqa: FBT003
+KEYCLOAK_ADMIN_CLIENT_SECRET = get_string("KEYCLOAK_ADMIN_CLIENT_SECRET", False)  # noqa: FBT003
+KEYCLOAK_ADMIN_REALM = get_string("KEYCLOAK_ADMIN_REALM", False)  # noqa: FBT003
+KEYCLOAK_ADMIN_URL = get_string("KEYCLOAK_ADMIN_URL", False)  # noqa: FBT003
