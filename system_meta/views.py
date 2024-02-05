@@ -5,49 +5,50 @@ import json
 import logging
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, viewsets
+from rest_framework import status
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
     permission_classes,
 )
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    DjangoModelPermissionsOrAnonReadOnly,
+    IsAuthenticated,
+)
 from rest_framework.response import Response
 
 from system_meta.models import IntegratedSystem, Product
-from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
+from system_meta.serializers import (
+    AdminIntegratedSystemSerializer,
+    IntegratedSystemSerializer,
+    ProductSerializer,
+)
 from unified_ecommerce.authentication import (
     ApiGatewayAuthentication,
 )
-from unified_ecommerce.utils import keycloak_update_user_account
+from unified_ecommerce.viewsets import AuthVariatedModelViewSet
 
 log = logging.getLogger(__name__)
 
 
-class IntegratedSystemViewSet(viewsets.ModelViewSet):
+class IntegratedSystemViewSet(AuthVariatedModelViewSet):
     """Viewset for IntegratedSystem model."""
 
     queryset = IntegratedSystem.objects.all()
-    serializer_class = IntegratedSystemSerializer
-    permission_classes = (IsAuthenticated,)
+    read_write_serializer_class = AdminIntegratedSystemSerializer
+    read_only_serializer_class = IntegratedSystemSerializer
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(AuthVariatedModelViewSet):
     """Viewset for Product model."""
 
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    read_write_serializer_class = ProductSerializer
+    read_only_serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["name", "system__slug"]
-
-    def get_permissions(self):
-        """Get the permissions required for the route."""
-
-        permission_classes = (
-            [] if self.action in ("list", "retrieve") else [IsAuthenticated]
-        )
-
-        return [permission() for permission in permission_classes]
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
 
 
 @api_view(["GET"])
@@ -80,16 +81,24 @@ def apisix_test_request(request):
 def traefik_test_request(request):
     """Test API request so we can see how the Traefik integration works."""
 
-    log.info("Traefik test request received")
-    [log.info(f"{key}: {value}") for key, value in request.META.items()]  # noqa: G004
-
     response = {
         "name": "Response ok!",
         "user": request.user.username if request.user is not None else None,
         "metas": [f"{key}: {value}" for key, value in request.META.items()],
     }
 
-    log.info("Queueing update task")
-    keycloak_update_user_account.delay(request.user.id)
+    return Response(response, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def authed_traefik_test_request(request):
+    """Test API request so we can see how the Traefik integration works."""
+
+    response = {
+        "name": "Response ok!",
+        "user": request.user.username if request.user is not None else None,
+        "metas": [f"{key}: {value}" for key, value in request.META.items()],
+    }
 
     return Response(response, status=status.HTTP_200_OK)

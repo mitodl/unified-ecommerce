@@ -7,6 +7,7 @@ from system_meta.views import (
     IntegratedSystemViewSet,
     ProductViewSet,
     apisix_test_request,
+    authed_traefik_test_request,
     traefik_test_request,
 )
 
@@ -26,5 +27,10 @@ urlpatterns = [
         r"^traefik_test_request/$",
         traefik_test_request,
         name="traefik_test_request",
+    ),
+    re_path(
+        r"^authed_traefik_test_request/$",
+        authed_traefik_test_request,
+        name="authed_traefik_test_request",
     ),
 ]

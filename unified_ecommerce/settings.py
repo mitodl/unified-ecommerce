@@ -200,7 +200,7 @@ USE_TZ = True
 AUTHENTICATION_BACKENDS = (
     # "authentication.backends.ol_open_id_connect.OlOpenIdConnectAuth",
     # the following needs to stay here to allow login of local users
-    "django.contrib.auth.backends.RemoteUserBackend",
+    "authentication.backends.KeycloakRemoteUserBackend",
     "django.contrib.auth.backends.ModelBackend",
     "guardian.backends.ObjectPermissionBackend",
 )

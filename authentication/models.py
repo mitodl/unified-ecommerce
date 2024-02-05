@@ -3,9 +3,27 @@
 
 from datetime import timedelta
 
+from django.contrib.auth import get_user_model
 from django.db import models
 from mitol.common.models import TimestampedModel
 from mitol.common.utils import now_in_utc
+
+User = get_user_model()
+
+
+class KeycloakUserToken(TimestampedModel):
+    """Stores the Keycloak ID for users."""
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="keycloak_user_tokens"
+    )
+    keycloak_id = models.CharField(
+        max_length=255, unique=True, default=None, null=True, blank=True
+    )
+
+    def __str__(self):
+        """Return string version of the KeycloakUserToken."""
+        return f"{self.user} {{{self.keycloak_id}}}"
 
 
 class KeycloakAdminToken(TimestampedModel):
