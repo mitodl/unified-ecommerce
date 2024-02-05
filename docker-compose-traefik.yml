@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:v2.2
+    command: --providers.docker --api.insecure=true
+    ports:
+      - "80:80"
+      - "8080:8080"
+    environment:
+      - LOG_LEVEL=debug
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  traefik-forward-auth:
+    image: mesosphere/traefik-forward-auth
+    command: --client-secret $KEYCLOAK_CLIENT_SECRET --client-id $KEYCLOAK_CLIENT_ID --provider-uri "http://keycloak.int.murgee.me:8080/auth/realms/$KEYCLOAK_ADMIN_REALM" --secret $TRAEFIK_SECRET
+    environment:
+      - INSECURE_COOKIE=true # Example assumes no https, do not use in production
+      - LOG_LEVEL=debug
+    env_file: .env
+    labels:
+      - "traefik.http.middlewares.traefik-forward-auth.forwardauth.address=http://traefik-forward-auth:4181"
+      - "traefik.http.middlewares.traefik-forward-auth.forwardauth.authResponseHeaders=X-Forwarded-User"
+      - "traefik.http.services.traefik-forward-auth.loadbalancer.server.port=4181"
+
+  whoami:
+    image: traefik/whoami
+    labels:
+      - "traefik.http.routers.whoami.rule=Host(`whoami.odl.local`)"
+      - "traefik.http.routers.whoami.middlewares=traefik-forward-auth"
+
+  whoamiext:
+    image: traefik/whoami
+    ports:
+      - "8090:8090"
+    environment:
+      - WHOAMI_PORT_NUMBER=8090

@@ -7,7 +7,7 @@ from rest_framework import viewsets
 log = logging.getLogger(__name__)
 
 
-class AuthVariatedModelViewSet(viewsets.ModelViewSet):
+class AuthVariegatedModelViewSet(viewsets.ModelViewSet):
     """
     Viewset with customizable serializer based on user authentication.
 

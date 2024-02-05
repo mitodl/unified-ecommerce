@@ -26,12 +26,12 @@ from system_meta.serializers import (
 from unified_ecommerce.authentication import (
     ApiGatewayAuthentication,
 )
-from unified_ecommerce.viewsets import AuthVariatedModelViewSet
+from unified_ecommerce.viewsets import AuthVariegatedModelViewSet
 
 log = logging.getLogger(__name__)
 
 
-class IntegratedSystemViewSet(AuthVariatedModelViewSet):
+class IntegratedSystemViewSet(AuthVariegatedModelViewSet):
     """Viewset for IntegratedSystem model."""
 
     queryset = IntegratedSystem.objects.all()
@@ -40,7 +40,7 @@ class IntegratedSystemViewSet(AuthVariatedModelViewSet):
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
 
 
-class ProductViewSet(AuthVariatedModelViewSet):
+class ProductViewSet(AuthVariegatedModelViewSet):
     """Viewset for Product model."""
 
     queryset = Product.objects.all()

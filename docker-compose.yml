@@ -26,28 +26,6 @@ services:
     ports:
       - "6379"
 
-  etcd:
-    image: 'bitnami/etcd:latest'
-    environment:
-      - ALLOW_NONE_AUTHENTICATION=yes
-      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
-    ports:
-      - 2379:2379
-      - 2380:2380
-    volumes:
-      - ./config/etcd/etcd.conf.yml:/opt/bitnami/Etcd/conf/etcd.conf.yml bitnami/etcd:latest
-
-  api:
-    image: apache/apisix
-    platform: linux/amd64
-    ports:
-      - 9080:9080
-      - 9180:9180
-    volumes:
-      - ./config/apisix/apisix.yml:/usr/local/apisix/conf/config.yaml
-    depends_on:
-      - etcd
-
   nginx:
     image: nginx:1.25
     ports:
@@ -127,7 +105,6 @@ services:
 volumes:
   django_media:
   yarn-cache:
-
 
 networks:
   traefik-keycloak_default:
