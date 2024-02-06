@@ -95,6 +95,7 @@ INSTALLED_APPS = [
     "authentication",
     "system_meta",
     "payments",
+    "cart",
     "mitol.payment_gateway.apps.PaymentGatewayApp",
 ]
 

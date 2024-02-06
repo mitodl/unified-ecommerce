@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Cart{% endblock %}
+{% block innertitle %}Cart{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <p>This is the current cart information.</p>
+
+    </div>
+</div>
+{% if basket %}
+<div class="row">
+    <div class="col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if basket_items|length == 0 %}
+                <tr>
+                    <td colspan="4">No items in the basket.</td>
+                </tr>
+                {% endif %}
+                {% for item in basket_items %}
+                <tr>
+                    <td>{{ item.product }}</td>
+                    <td>{{ item.product.price }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+<div class="row">
+    <div class="col-12">
+        <p>Add a product to the basket:</p>
+
+        <form method="post" id="cartform">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="product">Product</label>
+                <select name="product" id="product">
+                    <option></option>
+                    {% for product in products %}
+                    <option value="{{ product.system.slug }}/{{ product.sku }}">{{ product.system.name }} - {{ product.name }} ${{ product.price }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group d-flex align-items-end">
+                <button type="button" id="clear-button" class="btn btn-secondary">Clear Cart</button>
+                <button type="submit" class="wl-auto btn btn-primary">Add Item</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+function add_to_cart(event) {
+    console.log("adding to cart");
+    event.preventDefault();
+
+    var product_raw = document.getElementById("product").value;
+    var csrfmiddlewaretoken = document.querySelector("input[name='csrfmiddlewaretoken']").value
+
+    axios.post(`http://ue.odl.local/api/v0/payments/baskets/create_from_product/${product_raw}/`, {}, { headers: { "X-CSRFToken": csrfmiddlewaretoken }})
+        .then(function (response) {
+            window.location.reload();
+        })
+     .catch(function (error) {
+            alert(error);
+        });
+
+    return false;
+}
+
+function clear_cart(event) {
+    event.preventDefault();
+
+    var slug = "{{ basket.integrated_system.slug }}";
+    var csrfmiddlewaretoken = document.querySelector("input[name='csrfmiddlewaretoken']").value
+
+    axios.delete(`http://ue.odl.local/api/v0/payments/baskets/clear/${slug}/`, { headers: { "X-CSRFToken": csrfmiddlewaretoken }, withCredentials: true, xsrfCookieName: "csrftoken", xsrfHeaderName: "X-CSRFToken" })
+        .then(function (response) {
+            window.location.reload();
+        })
+     .catch(function (error) {
+            alert(error);
+        });
+
+    return false;
+}
+
+document.getElementById("cartform").addEventListener("submit", add_to_cart);
+document.getElementById("clear-button").addEventListener("click", clear_cart);
+</script>
+{% endblock body %}

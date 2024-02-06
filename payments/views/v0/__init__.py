@@ -10,7 +10,7 @@ from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from payments.models import Basket, BasketItem
 from payments.serializers.v0 import BasketItemSerializer, BasketSerializer
-from system_meta.models import Product
+from system_meta.models import IntegratedSystem, Product
 
 
 class BasketViewSet(
@@ -96,15 +96,43 @@ def create_from_product(request, system_slug, sku):
     Returns:
         Response: HTTP response
     """
-    basket = Basket.establish_basket(request)
+    system = IntegratedSystem.objects.get(slug=system_slug)
+    basket = Basket.establish_basket(request, system)
+    quantity = request.data.get("quantity", 1)
 
     try:
-        product = Product.objects.get(system__slug=system_slug, sku=sku)
+        product = Product.objects.get(system=system, sku=sku)
     except Product.DoesNotExist:
         return Response(
             {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
         )
 
-    basket.basket_items.create(product=product)
+    (_, created) = BasketItem.objects.update_or_create(
+        basket=basket, product=product, defaults={"quantity": quantity}
+    )
+    basket.refresh_from_db()
 
-    return Response(BasketSerializer(basket).data, status=status.HTTP_201_CREATED)
+    return Response(
+        BasketSerializer(basket).data,
+        status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+    )
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def clear(request, system_slug):
+    """
+    Clear the basket for the current user.
+
+    Args:
+        system_slug (str): system slug
+
+    Returns:
+        Response: HTTP response
+    """
+    system = IntegratedSystem.objects.get(slug=system_slug)
+    basket = Basket.establish_basket(request, system)
+
+    basket.delete()
+
+    return Response(None, status=status.HTTP_204_NO_CONTENT)
