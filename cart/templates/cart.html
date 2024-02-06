@@ -6,8 +6,10 @@
 {% block body %}
 <div class="row">
     <div class="col-12">
-        <p>This is the current cart information.</p>
-
+        <p>
+            This is the current cart information.
+            <button type="button" id="clear-button" class="btn btn-secondary float-right">Clear Cart</button>
+        </p>
     </div>
 </div>
 {% if basket %}
@@ -58,7 +60,6 @@
             </div>
 
             <div class="form-group d-flex align-items-end">
-                <button type="button" id="clear-button" class="btn btn-secondary">Clear Cart</button>
                 <button type="submit" class="wl-auto btn btn-primary">Add Item</button>
             </div>
         </form>
