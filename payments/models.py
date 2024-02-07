@@ -2,6 +2,7 @@
 # ruff: noqa: TD002,TD003,FIX002
 
 import logging
+import re
 import uuid
 
 from django.conf import settings
@@ -13,7 +14,7 @@ from django_fsm import FSMField, transition
 from mitol.common.models import TimestampedModel
 from reversion.models import Version
 
-from system_meta.models import IntegratedSystem, Product
+from system_meta.models import Product
 from unified_ecommerce.constants import (
     TRANSACTION_TYPE_PAYMENT,
     TRANSACTION_TYPE_REFUND,
@@ -28,7 +29,6 @@ class Basket(TimestampedModel):
     """Represents a User's basket."""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="basket")
-    integrated_system = models.OneToOneField(IntegratedSystem, on_delete=models.CASCADE)
 
     def compare_to_order(self, order):
         """
@@ -204,7 +204,7 @@ class Order(TimestampedModel):
 
     def _generate_reference_number(self):
         """Generate the order reference number"""
-        return f"{settings.REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}-{self.id}"
+        return f"{self.system.slug}-{settings.ENVIRONMENT}-{self.id}"
 
     def __str__(self):
         """Generate a string representation of the order"""
@@ -216,9 +216,7 @@ class Order(TimestampedModel):
     @staticmethod
     def decode_reference_number(refno):
         """Decode the reference number"""
-        return refno.replace(
-            f"{settings.REFERENCE_NUMBER_PREFIX}{settings.ENVIRONMENT}-", ""
-        )
+        return re.sub(rf"^.*-{settings.ENVIRONMENT}-", "", refno)
 
 
 class FulfillableOrder:
@@ -264,7 +262,7 @@ class FulfillableOrder:
         """
         Send the receipt email.
 
-        TODO: we don't have this yet, and it should go back to the connected system.
+        TODO: add email
         """
 
     @transition(
@@ -278,7 +276,7 @@ class FulfillableOrder:
         self.create_transaction(payment_data)
 
         # trigger post-sale events
-        transaction.on_commnt(self.handle_post_sale)
+        transaction.on_commit(self.handle_post_sale)
 
         # send the receipt emails
         transaction.on_commit(self.send_ecommerce_order_receipt)
