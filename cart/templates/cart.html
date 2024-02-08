@@ -39,6 +39,13 @@
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4">
+                        <a href="{% url 'checkout_interstitial_page' %}" class="btn btn-primary float-right">Check Out</a>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>
@@ -49,6 +56,7 @@
 
         <form method="post" id="cartform">
             {% csrf_token %}
+            <input type="hidden" name="checkout" value="1" />
             <div class="form-group">
                 <label for="product">Product</label>
                 <select name="product" id="product">
@@ -61,6 +69,7 @@
 
             <div class="form-group d-flex align-items-end">
                 <button type="submit" class="wl-auto btn btn-primary">Add Item</button>
+                <button type="submit" id="add-and-checkout" class="wl-auto btn btn-success">Add Item &amp; Check Out</button>
             </div>
         </form>
     </div>
@@ -69,10 +78,18 @@
 <script type="text/javascript">
 function add_to_cart(event) {
     console.log("adding to cart");
-    event.preventDefault();
 
     var product_raw = document.getElementById("product").value;
     var csrfmiddlewaretoken = document.querySelector("input[name='csrfmiddlewaretoken']").value
+
+    if (event.submitter.id === "add-and-checkout") {
+        var form = event.target;
+        
+        form.setAttribute("action", `http://ue.odl.local/api/v0/payments/baskets/create_from_product/${product_raw}/`)
+        return true;
+    }
+
+    event.preventDefault();
 
     axios.post(`http://ue.odl.local/api/v0/payments/baskets/create_from_product/${product_raw}/`, {}, { headers: { "X-CSRFToken": csrfmiddlewaretoken }})
         .then(function (response) {
@@ -91,7 +108,7 @@ function clear_cart(event) {
     var slug = "{{ basket.integrated_system.slug }}";
     var csrfmiddlewaretoken = document.querySelector("input[name='csrfmiddlewaretoken']").value
 
-    axios.delete(`http://ue.odl.local/api/v0/payments/baskets/clear/${slug}/`, { headers: { "X-CSRFToken": csrfmiddlewaretoken }, withCredentials: true, xsrfCookieName: "csrftoken", xsrfHeaderName: "X-CSRFToken" })
+    axios.delete(`http://ue.odl.local/api/v0/payments/baskets/clear/`, { headers: { "X-CSRFToken": csrfmiddlewaretoken } })
         .then(function (response) {
             window.location.reload();
         })

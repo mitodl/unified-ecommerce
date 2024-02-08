@@ -2,8 +2,10 @@
 from django.urls import include, path, re_path
 
 from payments.views.v0 import (
+    BackofficeCallbackView,
     BasketItemViewSet,
     BasketViewSet,
+    CheckoutApiViewSet,
     clear_basket,
     create_basket_from_product,
 )
@@ -19,6 +21,8 @@ basket_router.register(
     parents_query_lookups=["basket"],
 )
 
+router.register(r"checkout", CheckoutApiViewSet, basename="checkout")
+
 urlpatterns = [
     path(
         "baskets/create_from_product/<str:system_slug>/<str:sku>/",
@@ -26,9 +30,14 @@ urlpatterns = [
         name="create_from_product",
     ),
     path(
-        "baskets/clear/<str:system_slug>/",
+        "baskets/clear/",
         clear_basket,
         name="clear_basket",
+    ),
+    path(
+        "checkout/callback/",
+        BackofficeCallbackView.as_view(),
+        name="checkout-callback",
     ),
     re_path("^", include(router.urls)),
 ]

@@ -2,11 +2,11 @@
 
 import logging
 
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 from django.urls import reverse
 from ipware import get_client_ip
-from main.settings import ECOMMERCE_DEFAULT_PAYMENT_GATEWAY
 from mitol.payment_gateway.api import CartItem as GatewayCartItem
 from mitol.payment_gateway.api import Order as GatewayOrder
 from mitol.payment_gateway.api import PaymentGateway, ProcessorResponse
@@ -18,6 +18,7 @@ from payments.models import (
     Order,
     PendingOrder,
 )
+from system_meta.models import IntegratedSystem
 from unified_ecommerce.constants import (
     CYBERSOURCE_ACCEPT_CODES,
     CYBERSOURCE_ERROR_CODES,
@@ -56,12 +57,14 @@ def generate_checkout_payload(request):
 
     for line_item in order.lines.all():
         field_dict = line_item.product_version.field_dict
+        system = IntegratedSystem.objects.get(pk=field_dict["system_id"])
+        sku = f"{system.slug}-{field_dict['sku']}"
         gateway_order.items.append(
             GatewayCartItem(
-                code=field_dict["content_type_id"],
+                code=sku,
                 name=field_dict["description"],
                 quantity=1,
-                sku=f"{field_dict['content_type_id']}-{field_dict['object_id']}",
+                sku=sku,
                 unitprice=line_item.discounted_price,
                 taxable=0,
             )
@@ -76,7 +79,7 @@ def generate_checkout_payload(request):
             return {
                 "no_checkout": True,
                 "response": redirect_with_user_message(
-                    reverse("user-dashboard"),
+                    reverse("cart"),
                     {
                         "type": USER_MSG_TYPE_PAYMENT_ACCEPTED_NOVALUE,
                         "run": order.lines.first().purchased_object.course.title,
@@ -87,7 +90,7 @@ def generate_checkout_payload(request):
     callback_uri = request.build_absolute_uri(reverse("checkout-result-callback"))
 
     return PaymentGateway.start_payment(
-        ECOMMERCE_DEFAULT_PAYMENT_GATEWAY,
+        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY,
         gateway_order,
         callback_uri,
         callback_uri,
@@ -108,7 +111,7 @@ def get_order_from_cybersource_payment_response(request):
     """Figure out the order from the payment response from Cybersource."""
     payment_data = request.POST
     converted_order = PaymentGateway.get_gateway_class(
-        ECOMMERCE_DEFAULT_PAYMENT_GATEWAY
+        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY
     ).convert_to_order(payment_data)
     order_id = Order.decode_reference_number(converted_order.reference)
 
@@ -133,13 +136,13 @@ def process_cybersource_payment_response(request, order):
     """
 
     if not PaymentGateway.validate_processor_response(
-        ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, request
+        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, request
     ):
         msg = "Could not validate response from the payment processor."
         raise PermissionDenied(msg)
 
     processor_response = PaymentGateway.get_formatted_response(
-        ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, request
+        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, request
     )
 
     reason_code = processor_response.response_code
@@ -280,11 +283,11 @@ def refund_order(
         transaction_dict["req_amount"] = refund_amount
 
     refund_gateway_request = PaymentGateway.create_refund_request(
-        ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, transaction_dict
+        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, transaction_dict
     )
 
     response = PaymentGateway.start_refund(
-        ECOMMERCE_DEFAULT_PAYMENT_GATEWAY,
+        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY,
         refund_gateway_request,
     )
 
@@ -321,7 +324,9 @@ def check_and_process_pending_orders_for_resolution(refnos=None):
 
     """
 
-    gateway = PaymentGateway.get_gateway_class(ECOMMERCE_DEFAULT_PAYMENT_GATEWAY)
+    gateway = PaymentGateway.get_gateway_class(
+        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY
+    )
 
     if refnos is not None:
         pending_orders = PendingOrder.objects.filter(

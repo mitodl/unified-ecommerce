@@ -59,7 +59,7 @@ class Basket(TimestampedModel):
         return [item.product for item in self.basket_items.all()]
 
     @staticmethod
-    def establish_basket(request, system):
+    def establish_basket(request):
         """
         Get or create the user's basket.
 
@@ -69,7 +69,7 @@ class Basket(TimestampedModel):
         """
         user = request.user
         (basket, is_new) = Basket.objects.filter(user=user).get_or_create(
-            defaults={"integrated_system": system, "user": user}
+            defaults={"user": user}
         )
 
         if is_new:
@@ -154,6 +154,9 @@ class Order(TimestampedModel):
     # override save method to auto-fill generated_rerefence_number
     def save(self, *args, **kwargs):
         """Save the order."""
+
+        logger.info("Saving order %s", self.id)
+
         # initial save in order to get primary key for new order
         super().save(*args, **kwargs)
 
@@ -161,7 +164,8 @@ class Order(TimestampedModel):
         kwargs.pop("force_insert", None)
 
         # if we don't have a generated reference number, we generate one and save again
-        if self.reference_number is None:
+        if self.reference_number is None or len(self.reference_number) == 0:
+            logger.info("Generating reference number for order %s", self.id)
             self.reference_number = self._generate_reference_number()
             super().save(*args, **kwargs)
 
@@ -204,13 +208,16 @@ class Order(TimestampedModel):
 
     def _generate_reference_number(self):
         """Generate the order reference number"""
-        return f"{self.system.slug}-{settings.ENVIRONMENT}-{self.id}"
+        return (
+            f"{settings.MITOL_UE_REFERENCE_NUMBER_PREFIX}-"
+            f"{settings.ENVIRONMENT}-{self.id}"
+        )
 
     def __str__(self):
         """Generate a string representation of the order"""
         return (
-            f"{self.state.capitalize()} Order for {self.purchaser.name}"
-            f"({self.purchaser.email})"
+            f"{self.state.capitalize()} Order for {self.purchaser.username}"
+            f" ({self.purchaser.email})"
         )
 
     @staticmethod
@@ -360,7 +367,7 @@ class PendingOrder(FulfillableOrder, Order):
             PendingOrder: the created pending order
         """
         products = basket.get_products()
-        return cls._get_or_create(cls, products, basket.user, None)
+        return cls._get_or_create(cls, products, basket.user)
 
     @classmethod
     def create_from_product(cls, product: Product, user: User):
@@ -376,7 +383,7 @@ class PendingOrder(FulfillableOrder, Order):
             PendingOrder: the created pending order
         """
 
-        return cls._get_or_create(cls, [product], user, None)
+        return cls._get_or_create(cls, [product], user)
 
     @transition(field="state", source=Order.STATE.PENDING, target=Order.STATE.CANCELED)
     def cancel(self):
@@ -595,7 +602,7 @@ class Line(TimestampedModel):
     @cached_property
     def discounted_price(self):
         """Return the price of the product with discounts"""
-        return self.total_price()
+        return self.total_price
 
     @cached_property
     def product(self):

@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block title %}{% trans "MIT ODL Ecommerce" %}{% endblock %}
+{% block title %}{% trans "Complete Payment" %}{% endblock %}
+{% block innertitle %}{% trans "Complete Payment" %}{% endblock %}
 
-{% block content %}    
+{% block body %}    
     <section id="main" class="info-block">
         <div class="container">
             <div class="content-row">
@@ -13,12 +14,17 @@
 
                         <form id="checkout_form" method="post" action="{{ checkout_payload.url }}">
                             {% for key, value in form.items %}
-                            <input type="hidden" readonly="readonly" name="{{ key }}" value="{{ value }}" />
-                            {% endfor %}        
+                            <div><label for="{{ key }}">{{ key }}</label>
+                            <input type="text" readonly="readonly" name="{{ key }}" value="{{ value }}" /></div>
+                            {% endfor %}     
+                            
+                            <div>
+                                <button class="btn btn-primary" type="submit">CyberSource It</button>
+                            </div>
                         </form>
 
                         <script type="text/javascript">
-                    document.getElementById('checkout_form').submit();
+                    //document.getElementById('checkout_form').submit();
                         </script>
                     </div>
                 </div>

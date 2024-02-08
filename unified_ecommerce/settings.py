@@ -521,7 +521,7 @@ REST_FRAMEWORK_EXTENSIONS = {
 
 # ecommerce settings
 MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string(
-    "MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitxonline-"
+    "MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitol-"
 )
 import_settings_modules("mitol.payment_gateway.settings.cybersource")
 
