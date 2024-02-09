@@ -66,7 +66,7 @@ class CheckoutCallbackView(View):
     things via the backoffice webhook.
     """
 
-    def post_checkout_redirect(self, order_state, order, request):
+    def post_checkout_redirect(self, order_state, request):
         """
         Redirect the user with a message depending on the provided state.
 
@@ -148,11 +148,9 @@ class CheckoutCallbackView(View):
                     request, order
                 )
 
-                return self.post_checkout_redirect(
-                    processed_order_state, order, request
-                )
+                return self.post_checkout_redirect(processed_order_state, request)
             else:
-                return self.post_checkout_redirect(order.state, order, request)
+                return self.post_checkout_redirect(order.state, request)
 
 
 class CheckoutInterstitialView(LoginRequiredMixin, TemplateView):

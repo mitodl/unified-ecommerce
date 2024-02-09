@@ -95,7 +95,7 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
         if product_version is None:
             return product
 
-        versions = reversion.Version.objects.get_for_object(product)
+        versions = reversion.models.Version.objects.get_for_object(product)
 
         if versions.count() == 0:
             return product
@@ -106,7 +106,8 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
                     id=test_version.field_dict["id"],
                     price=test_version.field_dict["price"],
                     description=test_version.field_dict["description"],
-                    is_active=test_version.field_dict["is_active"],
+                    deleted_on=test_version.field_dict["deleted_on"],
+                    deleted_by_cascade=test_version.field_dict["deleted_by_cascade"],
                 )
 
         exception_message = "Invalid product version specified"

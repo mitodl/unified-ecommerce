@@ -4,7 +4,7 @@
 {% block title %}{% trans "Complete Payment" %}{% endblock %}
 {% block innertitle %}{% trans "Complete Payment" %}{% endblock %}
 
-{% block body %}    
+{% block body %}
     <section id="main" class="info-block">
         <div class="container">
             <div class="content-row">
@@ -16,8 +16,8 @@
                             {% for key, value in form.items %}
                             <div><label for="{{ key }}">{{ key }}</label>
                             <input type="text" readonly="readonly" name="{{ key }}" value="{{ value }}" /></div>
-                            {% endfor %}     
-                            
+                            {% endfor %}
+
                             <div>
                                 <button class="btn btn-primary" type="submit">CyberSource It</button>
                             </div>

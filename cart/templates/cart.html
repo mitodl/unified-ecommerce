@@ -84,7 +84,7 @@ function add_to_cart(event) {
 
     if (event.submitter.id === "add-and-checkout") {
         var form = event.target;
-        
+
         form.setAttribute("action", `http://ue.odl.local/api/v0/payments/baskets/create_from_product/${product_raw}/`)
         return true;
     }
