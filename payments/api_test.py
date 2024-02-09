@@ -2,47 +2,40 @@
 
 import random
 import uuid
-from datetime import datetime
 
 import pytest
-import pytz
 import reversion
-from courses.factories import CourseRunEnrollmentFactory
 from CyberSource.rest import ApiException
 from django.conf import settings
+from django.http import HttpRequest
 from django.urls import reverse
-from ecommerce.api import (
+from factory import Faker, fuzzy
+from mitol.payment_gateway.api import PaymentGateway, ProcessorResponse
+
+from payments.api import (
     check_and_process_pending_orders_for_resolution,
-    check_for_duplicate_discount_redemptions,
+    generate_checkout_payload,
     process_cybersource_payment_response,
     refund_order,
-    unenroll_learner_from_order,
 )
-from ecommerce.constants import TRANSACTION_TYPE_PAYMENT, TRANSACTION_TYPE_REFUND
-from ecommerce.factories import (
-    DiscountRedemptionFactory,
-    LineFactory,
-    OneTimeDiscountFactory,
-    OneTimePerUserDiscountFactory,
+from payments.exceptions import PaymentGatewayError, PaypalRefundError
+from payments.factories import (
     OrderFactory,
-    ProductFactory,
     TransactionFactory,
-    UnlimitedUseDiscountFactory,
 )
-from ecommerce.models import (
+from payments.models import (
     Basket,
     BasketItem,
-    DiscountRedemption,
     FulfilledOrder,
     Order,
     Transaction,
 )
-from factory import Faker, fuzzy
-from mitol.payment_gateway.api import ProcessorResponse
-from reversion.models import Version
-from users.factories import UserFactory
-
-from payments.exceptions import PaymentGatewayError, PaypalRefundError
+from system_meta.factories import ProductFactory
+from unified_ecommerce.constants import (
+    TRANSACTION_TYPE_PAYMENT,
+    TRANSACTION_TYPE_REFUND,
+)
+from unified_ecommerce.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -116,12 +109,6 @@ def _payment_gateway_settings():
     settings.MITOL_PAYMENT_GATEWAY_CYBERSOURCE_SECURITY_KEY = "Test Security Key"
     settings.MITOL_PAYMENT_GATEWAY_CYBERSOURCE_ACCESS_KEY = "Test Access Key"
     settings.MITOL_PAYMENT_GATEWAY_CYBERSOURCE_PROFILE_ID = uuid.uuid4()
-
-
-@pytest.fixture(autouse=True)
-def mock_create_run_enrollments(mocker):
-    """Mock the create_run_enrollments method"""
-    return mocker.patch("courses.api.create_run_enrollments", autospec=True)
 
 
 def test_cybersource_refund_no_order():
@@ -198,22 +185,20 @@ def test_cybersource_order_no_transaction(fulfilled_order):
     fulfilled_order = OrderFactory.create(state=Order.STATE.FULFILLED)
     refund_response, message = refund_order(order_id=fulfilled_order.id)
     assert (
-        f"There is no associated transaction against order_id {fulfilled_order.id}."
+        f"There is no associated transaction against order_id {fulfilled_order.id}"
         in message
     )
     assert refund_response is False
 
 
 @pytest.mark.parametrize(
-    ("order_state", "unenroll"),
+    ("order_state"),
     [
-        (ProcessorResponse.STATE_PENDING, True),
-        (ProcessorResponse.STATE_DUPLICATE, True),
-        (ProcessorResponse.STATE_PENDING, False),
-        (ProcessorResponse.STATE_DUPLICATE, False),
+        (ProcessorResponse.STATE_PENDING),
+        (ProcessorResponse.STATE_DUPLICATE),
     ],
 )
-def test_order_refund_success(mocker, order_state, unenroll, fulfilled_transaction):
+def test_order_refund_success(mocker, order_state, fulfilled_transaction):
     """
     Test that appropriate data is created for a successful refund and its
     state changes to REFUNDED
@@ -230,9 +215,6 @@ def test_order_refund_success(mocker, order_state, unenroll, fulfilled_transacti
         message="",
         response_code="",
     )
-    downgrade_task_mock = mocker.patch(
-        "ecommerce.tasks.perform_downgrade_from_order.delay"
-    )
 
     mocker.patch(
         "mitol.payment_gateway.api.PaymentGateway.start_refund",
@@ -242,13 +224,13 @@ def test_order_refund_success(mocker, order_state, unenroll, fulfilled_transacti
     if order_state == ProcessorResponse.STATE_DUPLICATE:
         with pytest.raises((PaypalRefundError, PaymentGatewayError)):
             refund_success, _ = refund_order(
-                order_id=fulfilled_transaction.order.id, unenroll=unenroll
+                order_id=fulfilled_transaction.order.id,
             )
 
         return
     else:
         refund_success, _ = refund_order(
-            order_id=fulfilled_transaction.order.id, unenroll=unenroll
+            order_id=fulfilled_transaction.order.id,
         )
 
     # There should be two transaction objects (One for payment and other for refund)
@@ -268,12 +250,6 @@ def test_order_refund_success(mocker, order_state, unenroll, fulfilled_transacti
     )
     assert refund_success is True
 
-    # Unenrollment task should only run if unenrollment was requested
-    if unenroll:
-        downgrade_task_mock.assert_called_once_with(fulfilled_transaction.order.id)
-    else:
-        assert not downgrade_task_mock.called
-
     # Refund transaction object should have appropriate data
     refund_transaction = Transaction.objects.filter(
         order=fulfilled_transaction.order.id, transaction_type=TRANSACTION_TYPE_REFUND
@@ -287,8 +263,7 @@ def test_order_refund_success(mocker, order_state, unenroll, fulfilled_transacti
     assert fulfilled_transaction.order.state == Order.STATE.REFUNDED
 
 
-@pytest.mark.parametrize("unenroll", [True, False])
-def test_order_refund_success_with_ref_num(mocker, unenroll, fulfilled_transaction):
+def test_order_refund_success_with_ref_num(mocker, fulfilled_transaction):
     """Test a successful refund based only on reference number"""
     sample_response_data = {
         "id": "12345",
@@ -301,16 +276,12 @@ def test_order_refund_success_with_ref_num(mocker, unenroll, fulfilled_transacti
         message="",
         response_code="",
     )
-    downgrade_task_mock = mocker.patch(
-        "ecommerce.tasks.perform_downgrade_from_order.delay"
-    )
-
     mocker.patch(
         "mitol.payment_gateway.api.PaymentGateway.start_refund",
         return_value=sample_response,
     )
     refund_success, message = refund_order(
-        reference_number=fulfilled_transaction.order.reference_number, unenroll=unenroll
+        reference_number=fulfilled_transaction.order.reference_number
     )
     # There should be two transaction objects (One for payment and other for refund)
     assert (
@@ -329,12 +300,6 @@ def test_order_refund_success_with_ref_num(mocker, unenroll, fulfilled_transacti
     )
     assert refund_success is True
     assert message == ""
-
-    # Unenrollment task should only run if unenrollment was requested
-    if unenroll:
-        downgrade_task_mock.assert_called_once_with(fulfilled_transaction.order.id)
-    else:
-        assert not downgrade_task_mock.called
 
     # Refund transaction object should have appropriate data
     refund_transaction = Transaction.objects.filter(
@@ -358,14 +323,14 @@ def test_order_refund_failure(mocker, fulfilled_transaction):
         "mitol.payment_gateway.api.PaymentGateway.start_refund",
         side_effect=ApiException(),
     )
-    downgrade_task_mock = mocker.patch(
-        "ecommerce.tasks.perform_downgrade_from_order.delay"
-    )
+
+    def run_refund_order(order_id):
+        refund_response, _ = refund_order(order_id=order_id)
+        assert refund_response is False
 
     with pytest.raises(ApiException):
-        refund_response, message = refund_order(order_id=fulfilled_transaction.order.id)
+        run_refund_order(order_id=fulfilled_transaction.order.id)
 
-    assert refund_response is False
     assert (
         Transaction.objects.filter(
             order=fulfilled_transaction.order.id,
@@ -373,8 +338,6 @@ def test_order_refund_failure(mocker, fulfilled_transaction):
         ).count()
         == 0
     )
-    # Unenrollment task should not run when API fails
-    assert not downgrade_task_mock.called
 
 
 def test_order_refund_failure_no_exception(mocker, fulfilled_transaction):
@@ -382,23 +345,20 @@ def test_order_refund_failure_no_exception(mocker, fulfilled_transaction):
     Test that refund operation throws an exception if the gateway returns
     an error state
     """
-    error_return = {
-        "state": ProcessorResponse.STATE_ERROR,
-        "message": "This is an error message. Testing 123456",
-    }
 
-    mocker.patch(
-        "mitol.payment_gateway.api.PaymentGateway.start_refund",
-        returns=error_return,
-    )
-    downgrade_task_mock = mocker.patch(
-        "ecommerce.tasks.perform_downgrade_from_order.delay"
-    )
+    class MockedGatewayResponse:
+        state = (ProcessorResponse.STATE_ERROR,)
+        message = ("This is an error message. Testing 123456",)
+
+    error_return = MockedGatewayResponse()
+
+    patched_refund_method = mocker.patch.object(PaymentGateway, "start_refund")
+    patched_refund_method.return_value = error_return
 
     with pytest.raises((PaymentGatewayError, PaypalRefundError)) as exc:
         refund_order(order_id=fulfilled_transaction.order.id)
 
-    assert "Testing 123456" in str(exc)
+    assert "Testing 123456" in str(exc.value)
 
     assert (
         Transaction.objects.filter(
@@ -407,8 +367,6 @@ def test_order_refund_failure_no_exception(mocker, fulfilled_transaction):
         ).count()
         == 0
     )
-    # Unenrollment task should not run when API fails
-    assert not downgrade_task_mock.called
 
 
 def test_paypal_refunds(fulfilled_paypal_transaction):
@@ -419,49 +377,43 @@ def test_paypal_refunds(fulfilled_paypal_transaction):
     with pytest.raises((PaymentGatewayError, PaypalRefundError)) as exc:
         refund_order(order_id=fulfilled_paypal_transaction.order.id)
 
-    assert "PayPal" in exc
+    assert "PayPal" in str(exc.value)
 
 
-def test_unenrollment_unenrolls_learner(mocker, user):
+def generate_mocked_request(user):
     """
-    Test that unenroll_learner_from_order unenrolls the learner from an order
+    Generate a mocked request for test_process_cybersource_*.
+
+    The RequestFactory misses some stuff, so instead just make a full-fat
+    HttpRequest and add the things in that we need.
+
+    Args:
+    - user (User): The user to set in the request.
+
+    Returns:
+    - HttpRequest: The mocked request.
     """
+    mocked_request = HttpRequest()
+    mocked_request.user = user
+    mocked_request.META["REMOTE_ADDR"] = "127.0.0.1"
+    mocked_request.META["HTTP_HOST"] = "localhost"
 
-    order = OrderFactory.create(purchaser=user)
-    with reversion.create_revision():
-        product = ProductFactory.create()
-    version = Version.objects.get_for_object(product).first()
-    enrollment = CourseRunEnrollmentFactory.create(user=user)
-    LineFactory.create(
-        order=order, purchased_object=enrollment.run, product_version=version
-    )
-
-    unenroll_mock = mocker.patch(
-        "ecommerce.api.deactivate_run_enrollment",
-        return_value=enrollment,
-    )
-    unenroll_learner_from_order(order_id=order.id)
-    unenroll_mock.assert_called()
+    return mocked_request
 
 
-def test_process_cybersource_payment_response(  # noqa: PLR0913
-    settings, rf, mocker, user_client, user, products
-):
+def test_process_cybersource_payment_response(rf, mocker, user, products):
     """
     Test that ensures the response from Cybersource for an ACCEPTed payment
     updates the orders state
     """
-
-    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
     mocker.patch(
         "mitol.payment_gateway.api.PaymentGateway.validate_processor_response",
         return_value=True,
     )
     create_basket(user, products)
+    resp = generate_checkout_payload(generate_mocked_request(user))
 
-    resp = user_client.post(reverse("checkout_api-start_checkout"))
-
-    payload = resp.json()["payload"]
+    payload = resp["payload"]
     payload = {
         **{f"req_{key}": value for key, value in payload.items()},
         "decision": "ACCEPT",
@@ -473,7 +425,7 @@ def test_process_cybersource_payment_response(  # noqa: PLR0913
 
     assert order.reference_number == payload["req_reference_number"]
 
-    request = rf.post(reverse("checkout_result_api"), payload)
+    request = rf.post(reverse("checkout-result-callback"), payload)
 
     # This is checked on the BackofficeCallbackView and CheckoutCallbackView
     # POST endpoints since we expect to receive a response to both from
@@ -484,9 +436,8 @@ def test_process_cybersource_payment_response(  # noqa: PLR0913
     assert result == Order.STATE.FULFILLED
 
 
-@pytest.mark.parametrize("include_discount", [True, False])
-def test_process_cybersource_payment_decline_response(  # noqa: PLR0913
-    rf, mocker, user_client, user, products, include_discount
+def test_process_cybersource_payment_decline_response(
+    rf, mocker, user_client, user, products
 ):
     """
     Test that ensures the response from Cybersource for an DECLINEd payment
@@ -499,9 +450,9 @@ def test_process_cybersource_payment_decline_response(  # noqa: PLR0913
     )
     create_basket(user, products)
 
-    resp = user_client.post(reverse("checkout_api-start_checkout"))
+    resp = generate_checkout_payload(generate_mocked_request(user))
 
-    payload = resp.json()["payload"]
+    payload = resp["payload"]
     payload = {
         **{f"req_{key}": value for key, value in payload.items()},
         "decision": "DECLINE",
@@ -513,17 +464,7 @@ def test_process_cybersource_payment_decline_response(  # noqa: PLR0913
 
     assert order.reference_number == payload["req_reference_number"]
 
-    if include_discount:
-        discount = UnlimitedUseDiscountFactory.create()
-        DiscountRedemption(
-            redeemed_by=user,
-            redeemed_discount=discount,
-            redeemed_order=order,
-            redemption_date=datetime.now(pytz.timezone(settings.TIME_ZONE)),
-        ).save()
-        order.refresh_from_db()
-
-    request = rf.post(reverse("checkout_result_api"), payload)
+    request = rf.post(reverse("checkout-result-callback"), payload)
 
     # This is checked on the BackofficeCallbackView and CheckoutCallbackView
     # POST endpoints since we expect to receive a response to both from
@@ -531,13 +472,9 @@ def test_process_cybersource_payment_decline_response(  # noqa: PLR0913
     # the response.
     assert order.state == Order.STATE.PENDING
 
-    if include_discount:
-        assert order.discounts.count() > 0
-
     result = process_cybersource_payment_response(request, order)
     assert result == Order.STATE.DECLINED
     order.refresh_from_db()
-    assert order.discounts.count() == 0
 
 
 @pytest.mark.parametrize("test_type", [None, "fail", "empty"])
@@ -549,15 +486,6 @@ def test_check_and_process_pending_orders_for_resolution(mocker, test_type):
     - empty - order isn't pending
     """
     order = OrderFactory.create(state=Order.STATE.PENDING)
-
-    # mocking out the create_enrollment and create_paid_courserun calls
-    # we don't really care that it hits edX for this
-    mocker.patch(
-        "ecommerce.models.FulfillableOrder.create_enrollments", return_value=True
-    )
-    mocker.patch(
-        "ecommerce.models.FulfillableOrder.create_paid_courseruns", return_value=True
-    )
 
     test_payload = {
         "utf8": "",
@@ -644,38 +572,3 @@ def test_check_and_process_pending_orders_for_resolution(mocker, test_type):
         order.refresh_from_db()
         assert order.state == Order.STATE.FULFILLED
         assert (fulfilled, cancelled, errored) == (1, 0, 0)
-
-
-@pytest.mark.parametrize("peruser", [True, False])
-def test_duplicate_redemption_check(peruser):
-    """
-    Tests the check for multiple discount redemptions. Set peruser to test a
-    one-time-per-user discount.
-    """
-
-    def make_stuff(user, discount):
-        """Create some data that is used elsewhere in the test"""
-        order = OrderFactory.create(purchaser=user, state=Order.STATE.FULFILLED)
-        redemption = DiscountRedemptionFactory.create(
-            redeemed_by=user, redeemed_discount=discount, redeemed_order=order
-        )
-
-        return (order, redemption)
-
-    discount = (
-        OneTimePerUserDiscountFactory.create()
-        if peruser
-        else OneTimeDiscountFactory.create()
-    )
-
-    user = UserFactory.create()
-    make_stuff(user, discount)
-
-    if not peruser:
-        user = UserFactory.create()
-
-    make_stuff(user, discount)
-
-    seen_ids = check_for_duplicate_discount_redemptions()
-
-    assert discount.id in seen_ids
