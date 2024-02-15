@@ -3,6 +3,26 @@ info:
   title: ''
   version: 0.0.0
 paths:
+  /api/v0/meta/apisix_test_request/:
+    get:
+      operationId: meta_apisix_test_request_retrieve
+      description: Test API request so we can see how the APISIX integration works.
+      tags:
+      - meta
+      responses:
+        '200':
+          description: No response body
+  /api/v0/meta/authed_traefik_test_request/:
+    get:
+      operationId: meta_authed_traefik_test_request_retrieve
+      description: Test API request so we can see how the Traefik integration works.
+      tags:
+      - meta
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
   /api/v0/meta/integrated_system/:
     get:
       operationId: meta_integrated_system_list
@@ -172,12 +192,20 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
+      - in: query
+        name: name
+        schema:
+          type: string
       - name: offset
         required: false
         in: query
         description: The initial index from which to return the results.
         schema:
           type: integer
+      - in: query
+        name: system__slug
+        schema:
+          type: string
       tags:
       - meta
       security:
@@ -318,6 +346,17 @@ paths:
       - cookieAuth: []
       responses:
         '204':
+          description: No response body
+  /api/v0/meta/traefik_test_request/:
+    get:
+      operationId: meta_traefik_test_request_retrieve
+      description: Test API request so we can see how the Traefik integration works.
+      tags:
+      - meta
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
           description: No response body
   /api/v0/payments/baskets/:
     get:
@@ -462,6 +501,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/Basket'
           description: ''
+  /api/v0/payments/baskets/clear/:
+    delete:
+      operationId: payments_baskets_clear_destroy
+      description: |-
+        Clear the basket for the current user.
+
+        Returns:
+            Response: HTTP response
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/:
     post:
       operationId: payments_baskets_create_from_product_create
@@ -469,9 +523,17 @@ paths:
         Create a new basket item from a product for the currently logged in user. Reuse
         the existing basket object if it exists.
 
+        If the checkout flag is set in the POST data, then this will create the
+        basket, then immediately flip the user to the checkout interstitial (which
+        then redirects to the payment gateway).
+
         Args:
             system_slug (str): system slug
             sku (str): product slug
+
+        POST Args:
+            quantity (int): quantity of the product to add to the basket (defaults to 1)
+            checkout (bool): redirect to checkout interstitial (defaults to False)
 
         Returns:
             Response: HTTP response
@@ -486,6 +548,45 @@ paths:
         schema:
           type: string
         required: true
+      tags:
+      - payments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v0/payments/checkout/callback/:
+    post:
+      operationId: payments_checkout_callback_create
+      description: |-
+        Handle webhook call from the payment gateway when the user has
+        completed a transaction.
+
+        Returns:
+            - HTTP_200_OK if the Order is found.
+
+        Raises:
+            - Http404 if the Order is not found.
+      tags:
+      - payments
+      responses:
+        '200':
+          description: No response body
+  /api/v0/payments/checkout/start_checkout/:
+    post:
+      operationId: payments_checkout_start_checkout_create
+      description: |-
+        Start the checkout process. This assembles the basket items
+        into an Order with Lines for each item, applies the attached basket
+        discounts, and then calls the payment gateway to prepare for payment.
+
+        This is expected to be called from within the Ecommerce cart app, not
+        from an integrated system.
+
+        Returns:
+            - JSON payload from the ol-django payment gateway app. The payment
+              gateway returns data necessary to construct a form that will
+              ultimately POST to the actual payment processor.
       tags:
       - payments
       security:
@@ -533,22 +634,6 @@ components:
         id:
           type: integer
           readOnly: true
-        deleted_on:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        deleted_by_cascade:
-          type: boolean
-          readOnly: true
-        created_on:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_on:
-          type: string
-          format: date-time
-          readOnly: true
         name:
           type: string
           maxLength: 255
@@ -558,15 +643,9 @@ components:
           maxLength: 80
         description:
           type: string
-        api_key:
-          type: string
       required:
-      - created_on
-      - deleted_by_cascade
-      - deleted_on
       - id
       - name
-      - updated_on
     PaginatedBasketItemList:
       type: object
       properties:
@@ -654,22 +733,6 @@ components:
         id:
           type: integer
           readOnly: true
-        deleted_on:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        deleted_by_cascade:
-          type: boolean
-          readOnly: true
-        created_on:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_on:
-          type: string
-          format: date-time
-          readOnly: true
         name:
           type: string
           maxLength: 255
@@ -678,8 +741,6 @@ components:
           nullable: true
           maxLength: 80
         description:
-          type: string
-        api_key:
           type: string
     PatchedProduct:
       type: object

@@ -90,30 +90,6 @@ export interface IntegratedSystem {
      * @type {string}
      * @memberof IntegratedSystem
      */
-    'deleted_on': string | null;
-    /**
-     *
-     * @type {boolean}
-     * @memberof IntegratedSystem
-     */
-    'deleted_by_cascade': boolean;
-    /**
-     *
-     * @type {string}
-     * @memberof IntegratedSystem
-     */
-    'created_on': string;
-    /**
-     *
-     * @type {string}
-     * @memberof IntegratedSystem
-     */
-    'updated_on': string;
-    /**
-     *
-     * @type {string}
-     * @memberof IntegratedSystem
-     */
     'name': string;
     /**
      *
@@ -127,12 +103,6 @@ export interface IntegratedSystem {
      * @memberof IntegratedSystem
      */
     'description'?: string;
-    /**
-     *
-     * @type {string}
-     * @memberof IntegratedSystem
-     */
-    'api_key'?: string;
 }
 /**
  *
@@ -275,30 +245,6 @@ export interface PatchedIntegratedSystem {
      * @type {string}
      * @memberof PatchedIntegratedSystem
      */
-    'deleted_on'?: string | null;
-    /**
-     *
-     * @type {boolean}
-     * @memberof PatchedIntegratedSystem
-     */
-    'deleted_by_cascade'?: boolean;
-    /**
-     *
-     * @type {string}
-     * @memberof PatchedIntegratedSystem
-     */
-    'created_on'?: string;
-    /**
-     *
-     * @type {string}
-     * @memberof PatchedIntegratedSystem
-     */
-    'updated_on'?: string;
-    /**
-     *
-     * @type {string}
-     * @memberof PatchedIntegratedSystem
-     */
     'name'?: string;
     /**
      *
@@ -312,12 +258,6 @@ export interface PatchedIntegratedSystem {
      * @memberof PatchedIntegratedSystem
      */
     'description'?: string;
-    /**
-     *
-     * @type {string}
-     * @memberof PatchedIntegratedSystem
-     */
-    'api_key'?: string;
 }
 /**
  * Serializer for Product model.
@@ -472,6 +412,66 @@ export interface Product {
  */
 export const MetaApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
+        /**
+         * Test API request so we can see how the APISIX integration works.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        metaApisixTestRequestRetrieve: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/meta/apisix_test_request/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Test API request so we can see how the Traefik integration works.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        metaAuthedTraefikTestRequestRetrieve: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/meta/authed_traefik_test_request/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
         /**
          * Viewset for IntegratedSystem model.
          * @param {IntegratedSystem} IntegratedSystem
@@ -775,11 +775,13 @@ export const MetaApiAxiosParamCreator = function (configuration?: Configuration)
         /**
          * Viewset for Product model.
          * @param {number} [limit] Number of results to return per page.
+         * @param {string} [name]
          * @param {number} [offset] The initial index from which to return the results.
+         * @param {string} [system__slug]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        metaProductList: async (limit?: number, offset?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        metaProductList: async (limit?: number, name?: string, offset?: number, system__slug?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v0/meta/product/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -798,8 +800,16 @@ export const MetaApiAxiosParamCreator = function (configuration?: Configuration)
                 localVarQueryParameter['limit'] = limit;
             }
 
+            if (name !== undefined) {
+                localVarQueryParameter['name'] = name;
+            }
+
             if (offset !== undefined) {
                 localVarQueryParameter['offset'] = offset;
+            }
+
+            if (system__slug !== undefined) {
+                localVarQueryParameter['system__slug'] = system__slug;
             }
 
 
@@ -928,6 +938,37 @@ export const MetaApiAxiosParamCreator = function (configuration?: Configuration)
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Test API request so we can see how the Traefik integration works.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        metaTraefikTestRequestRetrieve: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/meta/traefik_test_request/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -938,6 +979,24 @@ export const MetaApiAxiosParamCreator = function (configuration?: Configuration)
 export const MetaApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = MetaApiAxiosParamCreator(configuration)
     return {
+        /**
+         * Test API request so we can see how the APISIX integration works.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async metaApisixTestRequestRetrieve(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.metaApisixTestRequestRetrieve(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Test API request so we can see how the Traefik integration works.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async metaAuthedTraefikTestRequestRetrieve(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.metaAuthedTraefikTestRequestRetrieve(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
         /**
          * Viewset for IntegratedSystem model.
          * @param {IntegratedSystem} IntegratedSystem
@@ -1024,12 +1083,14 @@ export const MetaApiFp = function(configuration?: Configuration) {
         /**
          * Viewset for Product model.
          * @param {number} [limit] Number of results to return per page.
+         * @param {string} [name]
          * @param {number} [offset] The initial index from which to return the results.
+         * @param {string} [system__slug]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async metaProductList(limit?: number, offset?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedProductList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.metaProductList(limit, offset, options);
+        async metaProductList(limit?: number, name?: string, offset?: number, system__slug?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedProductList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.metaProductList(limit, name, offset, system__slug, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1064,6 +1125,15 @@ export const MetaApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.metaProductUpdate(id, Product, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         * Test API request so we can see how the Traefik integration works.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async metaTraefikTestRequestRetrieve(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.metaTraefikTestRequestRetrieve(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     }
 };
 
@@ -1074,6 +1144,22 @@ export const MetaApiFp = function(configuration?: Configuration) {
 export const MetaApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = MetaApiFp(configuration)
     return {
+        /**
+         * Test API request so we can see how the APISIX integration works.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        metaApisixTestRequestRetrieve(options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.metaApisixTestRequestRetrieve(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Test API request so we can see how the Traefik integration works.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        metaAuthedTraefikTestRequestRetrieve(options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.metaAuthedTraefikTestRequestRetrieve(options).then((request) => request(axios, basePath));
+        },
         /**
          * Viewset for IntegratedSystem model.
          * @param {MetaApiMetaIntegratedSystemCreateRequest} requestParameters Request parameters.
@@ -1153,7 +1239,7 @@ export const MetaApiFactory = function (configuration?: Configuration, basePath?
          * @throws {RequiredError}
          */
         metaProductList(requestParameters: MetaApiMetaProductListRequest = {}, options?: AxiosRequestConfig): AxiosPromise<PaginatedProductList> {
-            return localVarFp.metaProductList(requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
+            return localVarFp.metaProductList(requestParameters.limit, requestParameters.name, requestParameters.offset, requestParameters.system__slug, options).then((request) => request(axios, basePath));
         },
         /**
          * Viewset for Product model.
@@ -1181,6 +1267,14 @@ export const MetaApiFactory = function (configuration?: Configuration, basePath?
          */
         metaProductUpdate(requestParameters: MetaApiMetaProductUpdateRequest, options?: AxiosRequestConfig): AxiosPromise<Product> {
             return localVarFp.metaProductUpdate(requestParameters.id, requestParameters.Product, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Test API request so we can see how the Traefik integration works.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        metaTraefikTestRequestRetrieve(options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.metaTraefikTestRequestRetrieve(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1332,11 +1426,25 @@ export interface MetaApiMetaProductListRequest {
     readonly limit?: number
 
     /**
+     *
+     * @type {string}
+     * @memberof MetaApiMetaProductList
+     */
+    readonly name?: string
+
+    /**
      * The initial index from which to return the results.
      * @type {number}
      * @memberof MetaApiMetaProductList
      */
     readonly offset?: number
+
+    /**
+     *
+     * @type {string}
+     * @memberof MetaApiMetaProductList
+     */
+    readonly system__slug?: string
 }
 
 /**
@@ -1402,6 +1510,26 @@ export interface MetaApiMetaProductUpdateRequest {
  * @extends {BaseAPI}
  */
 export class MetaApi extends BaseAPI {
+    /**
+     * Test API request so we can see how the APISIX integration works.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MetaApi
+     */
+    public metaApisixTestRequestRetrieve(options?: AxiosRequestConfig) {
+        return MetaApiFp(this.configuration).metaApisixTestRequestRetrieve(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Test API request so we can see how the Traefik integration works.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MetaApi
+     */
+    public metaAuthedTraefikTestRequestRetrieve(options?: AxiosRequestConfig) {
+        return MetaApiFp(this.configuration).metaAuthedTraefikTestRequestRetrieve(options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Viewset for IntegratedSystem model.
      * @param {MetaApiMetaIntegratedSystemCreateRequest} requestParameters Request parameters.
@@ -1498,7 +1626,7 @@ export class MetaApi extends BaseAPI {
      * @memberof MetaApi
      */
     public metaProductList(requestParameters: MetaApiMetaProductListRequest = {}, options?: AxiosRequestConfig) {
-        return MetaApiFp(this.configuration).metaProductList(requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
+        return MetaApiFp(this.configuration).metaProductList(requestParameters.limit, requestParameters.name, requestParameters.offset, requestParameters.system__slug, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1533,6 +1661,16 @@ export class MetaApi extends BaseAPI {
     public metaProductUpdate(requestParameters: MetaApiMetaProductUpdateRequest, options?: AxiosRequestConfig) {
         return MetaApiFp(this.configuration).metaProductUpdate(requestParameters.id, requestParameters.Product, options).then((request) => request(this.axios, this.basePath));
     }
+
+    /**
+     * Test API request so we can see how the Traefik integration works.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof MetaApi
+     */
+    public metaTraefikTestRequestRetrieve(options?: AxiosRequestConfig) {
+        return MetaApiFp(this.configuration).metaTraefikTestRequestRetrieve(options).then((request) => request(this.axios, this.basePath));
+    }
 }
 
 
@@ -1543,7 +1681,38 @@ export class MetaApi extends BaseAPI {
 export const PaymentsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  Args:     system_slug (str): system slug     sku (str): product slug  Returns:     Response: HTTP response
+         * Clear the basket for the current user.  Returns:     Response: HTTP response
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsBasketsClearDestroy: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/payments/baskets/clear/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  If the checkout flag is set in the POST data, then this will create the basket, then immediately flip the user to the checkout interstitial (which then redirects to the payment gateway).  Args:     system_slug (str): system slug     sku (str): product slug  POST Args:     quantity (int): quantity of the product to add to the basket (defaults to 1)     checkout (bool): redirect to checkout interstitial (defaults to False)  Returns:     Response: HTTP response
          * @param {string} sku
          * @param {string} system_slug
          * @param {*} [options] Override http request option.
@@ -1782,6 +1951,66 @@ export const PaymentsApiAxiosParamCreator = function (configuration?: Configurat
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * Handle webhook call from the payment gateway when the user has completed a transaction.  Returns:     - HTTP_200_OK if the Order is found.  Raises:     - Http404 if the Order is not found.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsCheckoutCallbackCreate: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/payments/checkout/callback/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Start the checkout process. This assembles the basket items into an Order with Lines for each item, applies the attached basket discounts, and then calls the payment gateway to prepare for payment.  This is expected to be called from within the Ecommerce cart app, not from an integrated system.  Returns:     - JSON payload from the ol-django payment gateway app. The payment       gateway returns data necessary to construct a form that will       ultimately POST to the actual payment processor.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsCheckoutStartCheckoutCreate: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/payments/checkout/start_checkout/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -1793,7 +2022,16 @@ export const PaymentsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PaymentsApiAxiosParamCreator(configuration)
     return {
         /**
-         * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  Args:     system_slug (str): system slug     sku (str): product slug  Returns:     Response: HTTP response
+         * Clear the basket for the current user.  Returns:     Response: HTTP response
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async paymentsBasketsClearDestroy(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsBasketsClearDestroy(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  If the checkout flag is set in the POST data, then this will create the basket, then immediately flip the user to the checkout interstitial (which then redirects to the payment gateway).  Args:     system_slug (str): system slug     sku (str): product slug  POST Args:     quantity (int): quantity of the product to add to the basket (defaults to 1)     checkout (bool): redirect to checkout interstitial (defaults to False)  Returns:     Response: HTTP response
          * @param {string} sku
          * @param {string} system_slug
          * @param {*} [options] Override http request option.
@@ -1858,6 +2096,24 @@ export const PaymentsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsBasketsRetrieve(username, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         * Handle webhook call from the payment gateway when the user has completed a transaction.  Returns:     - HTTP_200_OK if the Order is found.  Raises:     - Http404 if the Order is not found.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async paymentsCheckoutCallbackCreate(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsCheckoutCallbackCreate(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Start the checkout process. This assembles the basket items into an Order with Lines for each item, applies the attached basket discounts, and then calls the payment gateway to prepare for payment.  This is expected to be called from within the Ecommerce cart app, not from an integrated system.  Returns:     - JSON payload from the ol-django payment gateway app. The payment       gateway returns data necessary to construct a form that will       ultimately POST to the actual payment processor.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async paymentsCheckoutStartCheckoutCreate(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsCheckoutStartCheckoutCreate(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     }
 };
 
@@ -1869,7 +2125,15 @@ export const PaymentsApiFactory = function (configuration?: Configuration, baseP
     const localVarFp = PaymentsApiFp(configuration)
     return {
         /**
-         * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  Args:     system_slug (str): system slug     sku (str): product slug  Returns:     Response: HTTP response
+         * Clear the basket for the current user.  Returns:     Response: HTTP response
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsBasketsClearDestroy(options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.paymentsBasketsClearDestroy(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  If the checkout flag is set in the POST data, then this will create the basket, then immediately flip the user to the checkout interstitial (which then redirects to the payment gateway).  Args:     system_slug (str): system slug     sku (str): product slug  POST Args:     quantity (int): quantity of the product to add to the basket (defaults to 1)     checkout (bool): redirect to checkout interstitial (defaults to False)  Returns:     Response: HTTP response
          * @param {PaymentsApiPaymentsBasketsCreateFromProductCreateRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1921,6 +2185,22 @@ export const PaymentsApiFactory = function (configuration?: Configuration, baseP
          */
         paymentsBasketsRetrieve(requestParameters: PaymentsApiPaymentsBasketsRetrieveRequest, options?: AxiosRequestConfig): AxiosPromise<Basket> {
             return localVarFp.paymentsBasketsRetrieve(requestParameters.username, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Handle webhook call from the payment gateway when the user has completed a transaction.  Returns:     - HTTP_200_OK if the Order is found.  Raises:     - Http404 if the Order is not found.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsCheckoutCallbackCreate(options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.paymentsCheckoutCallbackCreate(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Start the checkout process. This assembles the basket items into an Order with Lines for each item, applies the attached basket discounts, and then calls the payment gateway to prepare for payment.  This is expected to be called from within the Ecommerce cart app, not from an integrated system.  Returns:     - JSON payload from the ol-django payment gateway app. The payment       gateway returns data necessary to construct a form that will       ultimately POST to the actual payment processor.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsCheckoutStartCheckoutCreate(options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.paymentsCheckoutStartCheckoutCreate(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -2059,7 +2339,17 @@ export interface PaymentsApiPaymentsBasketsRetrieveRequest {
  */
 export class PaymentsApi extends BaseAPI {
     /**
-     * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  Args:     system_slug (str): system slug     sku (str): product slug  Returns:     Response: HTTP response
+     * Clear the basket for the current user.  Returns:     Response: HTTP response
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PaymentsApi
+     */
+    public paymentsBasketsClearDestroy(options?: AxiosRequestConfig) {
+        return PaymentsApiFp(this.configuration).paymentsBasketsClearDestroy(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  If the checkout flag is set in the POST data, then this will create the basket, then immediately flip the user to the checkout interstitial (which then redirects to the payment gateway).  Args:     system_slug (str): system slug     sku (str): product slug  POST Args:     quantity (int): quantity of the product to add to the basket (defaults to 1)     checkout (bool): redirect to checkout interstitial (defaults to False)  Returns:     Response: HTTP response
      * @param {PaymentsApiPaymentsBasketsCreateFromProductCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2122,5 +2412,25 @@ export class PaymentsApi extends BaseAPI {
      */
     public paymentsBasketsRetrieve(requestParameters: PaymentsApiPaymentsBasketsRetrieveRequest, options?: AxiosRequestConfig) {
         return PaymentsApiFp(this.configuration).paymentsBasketsRetrieve(requestParameters.username, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Handle webhook call from the payment gateway when the user has completed a transaction.  Returns:     - HTTP_200_OK if the Order is found.  Raises:     - Http404 if the Order is not found.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PaymentsApi
+     */
+    public paymentsCheckoutCallbackCreate(options?: AxiosRequestConfig) {
+        return PaymentsApiFp(this.configuration).paymentsCheckoutCallbackCreate(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Start the checkout process. This assembles the basket items into an Order with Lines for each item, applies the attached basket discounts, and then calls the payment gateway to prepare for payment.  This is expected to be called from within the Ecommerce cart app, not from an integrated system.  Returns:     - JSON payload from the ol-django payment gateway app. The payment       gateway returns data necessary to construct a form that will       ultimately POST to the actual payment processor.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PaymentsApi
+     */
+    public paymentsCheckoutStartCheckoutCreate(options?: AxiosRequestConfig) {
+        return PaymentsApiFp(this.configuration).paymentsCheckoutStartCheckoutCreate(options).then((request) => request(this.axios, this.basePath));
     }
 }
