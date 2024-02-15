@@ -7,7 +7,6 @@ import pytest
 import reversion
 from CyberSource.rest import ApiException
 from django.conf import settings
-from django.http import HttpRequest
 from django.urls import reverse
 from factory import Faker, fuzzy
 from mitol.payment_gateway.api import PaymentGateway, ProcessorResponse
@@ -36,6 +35,7 @@ from unified_ecommerce.constants import (
     TRANSACTION_TYPE_REFUND,
 )
 from unified_ecommerce.factories import UserFactory
+from unified_ecommerce.test_utils import generate_mocked_request
 
 pytestmark = [pytest.mark.django_db]
 
@@ -378,27 +378,6 @@ def test_paypal_refunds(fulfilled_paypal_transaction):
         refund_order(order_id=fulfilled_paypal_transaction.order.id)
 
     assert "PayPal" in str(exc.value)
-
-
-def generate_mocked_request(user):
-    """
-    Generate a mocked request for test_process_cybersource_*.
-
-    The RequestFactory misses some stuff, so instead just make a full-fat
-    HttpRequest and add the things in that we need.
-
-    Args:
-    - user (User): The user to set in the request.
-
-    Returns:
-    - HttpRequest: The mocked request.
-    """
-    mocked_request = HttpRequest()
-    mocked_request.user = user
-    mocked_request.META["REMOTE_ADDR"] = "127.0.0.1"
-    mocked_request.META["HTTP_HOST"] = "localhost"
-
-    return mocked_request
 
 
 def test_process_cybersource_payment_response(rf, mocker, user, products):

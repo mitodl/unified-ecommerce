@@ -29,7 +29,9 @@ class AuthVariegatedModelViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         """Get the serializer class for the route."""
 
-        if self.request.user.is_staff or self.request.user.is_superuser:
+        if hasattr(self, "request") and (
+            self.request.user.is_staff or self.request.user.is_superuser
+        ):
             log.debug("get_serializer_class returning the Admin one")
             return self.read_write_serializer_class
 

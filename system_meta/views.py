@@ -12,7 +12,6 @@ from rest_framework.decorators import (
     permission_classes,
 )
 from rest_framework.permissions import (
-    DjangoModelPermissionsOrAnonReadOnly,
     IsAuthenticated,
 )
 from rest_framework.response import Response
@@ -26,6 +25,9 @@ from system_meta.serializers import (
 from unified_ecommerce.authentication import (
     ApiGatewayAuthentication,
 )
+from unified_ecommerce.permissions import (
+    IsAdminUserOrReadOnly,
+)
 from unified_ecommerce.viewsets import AuthVariegatedModelViewSet
 
 log = logging.getLogger(__name__)
@@ -37,7 +39,9 @@ class IntegratedSystemViewSet(AuthVariegatedModelViewSet):
     queryset = IntegratedSystem.objects.all()
     read_write_serializer_class = AdminIntegratedSystemSerializer
     read_only_serializer_class = IntegratedSystemSerializer
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    permission_classes = [
+        IsAdminUserOrReadOnly,
+    ]
 
 
 class ProductViewSet(AuthVariegatedModelViewSet):
@@ -46,13 +50,24 @@ class ProductViewSet(AuthVariegatedModelViewSet):
     queryset = Product.objects.all()
     read_write_serializer_class = ProductSerializer
     read_only_serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ["name", "system__slug"]
-    permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    filter_backends = [
+        DjangoFilterBackend,
+    ]
+    filterset_fields = [
+        "name",
+        "system__slug",
+    ]
+    permission_classes = [
+        IsAdminUserOrReadOnly,
+    ]
 
 
 @api_view(["GET"])
-@authentication_classes([ApiGatewayAuthentication])
+@authentication_classes(
+    [
+        ApiGatewayAuthentication,
+    ]
+)
 @permission_classes([])
 def apisix_test_request(request):
     """Test API request so we can see how the APISIX integration works."""
