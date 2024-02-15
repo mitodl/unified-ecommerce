@@ -126,16 +126,8 @@ class ApiGatewayAuthentication(BaseAuthentication):
                 "".join(random.choices(string.ascii_uppercase + string.digits, k=32)),  # noqa: S311
             )
 
-            user.first_name = (
-                decoded_user_info["given_name"]
-                if "given_name" in decoded_user_info
-                else None
-            )
-            user.last_name = (
-                decoded_user_info["family_name"]
-                if "family_name" in decoded_user_info
-                else None
-            )
+            user.first_name = decoded_user_info.get("given_name", None)
+            user.last_name = decoded_user_info.get("family_name", None)
             user.save()
 
         return (user, None)

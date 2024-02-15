@@ -52,7 +52,7 @@ def fake_courseware_id(courseware_type: str, **kwargs) -> str:
     optional_third_digit = random.randint(0, 9) if fake.boolean() else ""
     optional_run_tag = (
         f"+{random.randint(1,3)}T{fake.date_this_decade().year}"
-        if "include_run_tag" in kwargs and kwargs["include_run_tag"]
+        if kwargs["include_run_tag"]
         else ""
     )
 
