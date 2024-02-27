@@ -24,8 +24,11 @@ from payments import api
 from payments.models import Basket, BasketItem, Order
 from payments.serializers.v0 import BasketItemSerializer, BasketSerializer
 from system_meta.models import IntegratedSystem, Product
+from unified_ecommerce.constants import POST_SALE_SOURCE_BACKOFFICE
+from unified_ecommerce.plugin_manager import get_plugin_manager
 
 log = logging.getLogger(__name__)
+pm = get_plugin_manager()
 
 # Baskets
 
@@ -227,5 +230,6 @@ class BackofficeCallbackView(APIView):
                 raise Http404
             elif order.state == Order.STATE.PENDING:
                 api.process_cybersource_payment_response(request, order)
+                pm.hook.post_sale(order_id=order.id, source=POST_SALE_SOURCE_BACKOFFICE)
 
             return Response(status=status.HTTP_200_OK)

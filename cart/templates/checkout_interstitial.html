@@ -19,12 +19,22 @@
                             {% endfor %}
 
                             <div>
-                                <button class="btn btn-primary" type="submit">CyberSource It</button>
+                                <button class="btn btn-primary" type="submit">Redirect to CyberSource in <span id="countdown-time">5</span></button>
                             </div>
                         </form>
 
                         <script type="text/javascript">
-                    //document.getElementById('checkout_form').submit();
+                    var counter = 5;
+
+                    setInterval(function() {
+                        counter--;
+
+                        document.getElementById('countdown-time').innerHTML = counter;
+
+                        if (counter === 0) {
+                            document.getElementById('checkout_form').submit();
+                        }
+                    }, 1000);
                         </script>
                     </div>
                 </div>
