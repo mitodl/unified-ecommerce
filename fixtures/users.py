@@ -24,12 +24,6 @@ def staff_user(db):  # noqa: ARG001
 
 
 @pytest.fixture()
-def index_user(db):  # noqa: ARG001
-    """Create a user to be used for indexing"""
-    return UserFactory.create(is_staff=True)
-
-
-@pytest.fixture()
 def logged_in_user(client, user):
     """Log the user in and yield the user object"""
     client.force_login(user)
@@ -68,7 +62,7 @@ def client(db):  # noqa: ARG001
 def user_client(user):
     """Version of the client that is authenticated with the user"""
     client = APIClient()
-    client.force_login(user)
+    client.force_authenticate(user=user)
     return client
 
 
@@ -76,7 +70,7 @@ def user_client(user):
 def staff_client(staff_user):
     """Version of the client that is authenticated with the staff_user"""
     client = APIClient()
-    client.force_login(staff_user)
+    client.force_authenticate(user=staff_user)
     return client
 
 
