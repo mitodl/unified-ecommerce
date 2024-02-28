@@ -18,8 +18,9 @@ from urllib.parse import urljoin, urlparse
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
+from mitol.common.envs import get_bool, get_int, get_string, import_settings_modules
 
-from unified_ecommerce.envs import get_bool, get_int, get_list_of_str, get_string
+from unified_ecommerce.envs import get_list_of_str
 from unified_ecommerce.sentry import init_sentry
 from unified_ecommerce.settings_celery import *  # noqa: F403
 from unified_ecommerce.settings_pluggy import *  # noqa: F403
@@ -85,8 +86,13 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "safedelete",
+    "reversion",
+    "django_fsm",
+    "fsm_admin",
+    "oauth2_provider",
     # Application modules
     "unified_ecommerce",
+    "authentication",
     "system_meta",
 ]
 
@@ -96,6 +102,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "unified_ecommerce.authentication.ForwardUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -190,6 +197,7 @@ USE_TZ = True
 AUTHENTICATION_BACKENDS = (
     # "authentication.backends.ol_open_id_connect.OlOpenIdConnectAuth",
     # the following needs to stay here to allow login of local users
+    "authentication.backends.KeycloakRemoteUserBackend",
     "django.contrib.auth.backends.ModelBackend",
     "guardian.backends.ObjectPermissionBackend",
 )
@@ -509,5 +517,12 @@ REST_FRAMEWORK_EXTENSIONS = {
 
 # ecommerce settings
 MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string(
-    "MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitxonline-"
+    "MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitol-"
 )
+import_settings_modules("mitol.payment_gateway.settings.cybersource")
+
+# Keycloak API settings
+KEYCLOAK_ADMIN_CLIENT_ID = get_string("KEYCLOAK_ADMIN_CLIENT_ID", False)  # noqa: FBT003
+KEYCLOAK_ADMIN_CLIENT_SECRET = get_string("KEYCLOAK_ADMIN_CLIENT_SECRET", False)  # noqa: FBT003
+KEYCLOAK_ADMIN_REALM = get_string("KEYCLOAK_ADMIN_REALM", False)  # noqa: FBT003
+KEYCLOAK_ADMIN_URL = get_string("KEYCLOAK_ADMIN_URL", False)  # noqa: FBT003
