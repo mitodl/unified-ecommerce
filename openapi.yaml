@@ -3,6 +3,26 @@ info:
   title: ''
   version: 0.0.0
 paths:
+  /apisix_test_request/:
+    get:
+      operationId: apisix_test_request_retrieve
+      description: Test API request so we can see how the APISIX integration works.
+      tags:
+      - apisix_test_request
+      responses:
+        '200':
+          description: No response body
+  /authed_traefik_test_request/:
+    get:
+      operationId: authed_traefik_test_request_retrieve
+      description: Test API request so we can see how the Traefik integration works.
+      tags:
+      - authed_traefik_test_request
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
   /integrated_system/:
     get:
       operationId: integrated_system_list
@@ -318,6 +338,17 @@ paths:
       - cookieAuth: []
       responses:
         '204':
+          description: No response body
+  /traefik_test_request/:
+    get:
+      operationId: traefik_test_request_retrieve
+      description: Test API request so we can see how the Traefik integration works.
+      tags:
+      - traefik_test_request
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
           description: No response body
 components:
   schemas:
