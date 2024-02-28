@@ -4,8 +4,7 @@ import base64
 import json
 import logging
 
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -18,19 +17,14 @@ from rest_framework.response import Response
 
 from system_meta.models import IntegratedSystem, Product
 from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
-
-
-class IntegratedSystemViewSet(viewsets.ModelViewSet):
 from unified_ecommerce.authentication import (
     ApiGatewayAuthentication,
 )
-from unified_ecommerce.permissions import (
-    IsAdminUserOrReadOnly,
-)
-from unified_ecommerce.viewsets import AuthVariegatedModelViewSet
 
 log = logging.getLogger(__name__)
 
+
+class IntegratedSystemViewSet(viewsets.ModelViewSet):
     """Viewset for IntegratedSystem model."""
 
     queryset = IntegratedSystem.objects.all()
@@ -44,6 +38,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = (IsAuthenticated,)
+
+
 @api_view(["GET"])
 @authentication_classes(
     [
