@@ -45,13 +45,13 @@ The following settings must be configured before running the app:
 
   Sets the client secret for the service account.
 
-- `KEYCLOAK_ADMIN_URL`
+- `KEYCLOAK_URL`
 
-  Sets the base URL for the Keycloak instance. Do not append a trailing slash. (_TODO: shouldn't be named `ADMIN`, that's confusing_)
+  Sets the base URL for the Keycloak instance. Do not append a trailing slash.
 
-- `KEYCLOAK_ADMIN_REALM`
+- `KEYCLOAK_REALM`
 
-  Sets the realm name that the application should use. (_TODO: shouldn't be named `ADMIN`, that's confusing_)
+  Sets the realm name that the application should use.
 
 If you're going to use the included Traefik Composer environment, also set these:
 
