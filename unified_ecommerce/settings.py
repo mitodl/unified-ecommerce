@@ -88,6 +88,9 @@ INSTALLED_APPS = [
     # Application modules
     "unified_ecommerce",
     "system_meta",
+    "payments",
+    "cart",
+    "mitol.payment_gateway.apps.PaymentGatewayApp",
 ]
 
 MIDDLEWARE = [
