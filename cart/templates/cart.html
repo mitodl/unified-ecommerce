@@ -7,9 +7,9 @@
 <div class="row">
     <div class="col-12">
         <p>
-            This is the current cart information.
-            <button type="button" id="clear-button" class="btn btn-secondary float-right">Clear Cart</button>
+            This is the current cart information for {{ user.email }} ({{ user.first_name }} {{ user.last_name }}).
         </p>
+        <button type="button" id="clear-button" class="d-block btn btn-secondary float-end">Clear Cart</button>
     </div>
 </div>
 {% if basket %}
@@ -42,7 +42,7 @@
             <tfoot>
                 <tr>
                     <td colspan="4">
-                        <a href="{% url 'checkout_interstitial_page' %}" class="btn btn-primary float-right">Check Out</a>
+                        <a href="{% url 'checkout_interstitial_page' %}" class="btn btn-primary float-end">Check Out</a>
                     </td>
                 </tr>
             </tfoot>
@@ -67,8 +67,8 @@
                 </select>
             </div>
 
-            <div class="form-group d-flex align-items-end">
-                <button type="submit" class="wl-auto btn btn-primary">Add Item</button>
+            <div class="form-group d-flex align-items-end mt-2">
+                <button type="submit" class="wl-auto btn btn-primary me-2">Add Item</button>
                 <button type="submit" id="add-and-checkout" class="wl-auto btn btn-success">Add Item &amp; Check Out</button>
             </div>
         </form>
