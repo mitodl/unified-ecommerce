@@ -172,12 +172,20 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
+      - in: query
+        name: name
+        schema:
+          type: string
       - name: offset
         required: false
         in: query
         description: The initial index from which to return the results.
         schema:
           type: integer
+      - in: query
+        name: system__slug
+        schema:
+          type: string
       tags:
       - product
       security:
@@ -328,36 +336,18 @@ components:
         id:
           type: integer
           readOnly: true
-        deleted_on:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        deleted_by_cascade:
-          type: boolean
-          readOnly: true
-        created_on:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_on:
-          type: string
-          format: date-time
-          readOnly: true
         name:
           type: string
           maxLength: 255
+        slug:
+          type: string
+          nullable: true
+          maxLength: 80
         description:
           type: string
-        api_key:
-          type: string
       required:
-      - created_on
-      - deleted_by_cascade
-      - deleted_on
       - id
       - name
-      - updated_on
     PaginatedIntegratedSystemList:
       type: object
       properties:
@@ -405,28 +395,14 @@ components:
         id:
           type: integer
           readOnly: true
-        deleted_on:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        deleted_by_cascade:
-          type: boolean
-          readOnly: true
-        created_on:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_on:
-          type: string
-          format: date-time
-          readOnly: true
         name:
           type: string
           maxLength: 255
-        description:
+        slug:
           type: string
-        api_key:
+          nullable: true
+          maxLength: 80
+        description:
           type: string
     PatchedProduct:
       type: object
