@@ -52,7 +52,7 @@ def fake_courseware_id(courseware_type: str, **kwargs) -> str:
     optional_third_digit = random.randint(0, 9) if fake.boolean() else ""
     optional_run_tag = (
         f"+{random.randint(1,3)}T{fake.date_this_decade().year}"
-        if kwargs["include_run_tag"]
+        if kwargs.get("include_run_tag", False)
         else ""
     )
 
@@ -102,7 +102,6 @@ class Command(BaseCommand):
             IntegratedSystem.objects.create(
                 name=f"Test System {i}",
                 description=f"Test System {i} description.",
-                is_active=True,
                 api_key=uuid.uuid4(),
             )
 
@@ -124,7 +123,6 @@ class Command(BaseCommand):
                 description=f"Test Product {i} description.",
                 sku=product_sku,
                 system=system,
-                is_active=True,
                 price=Decimal(random.random() * 10000).quantize(Decimal("0.01")),
                 system_data={
                     "courserun": product_sku,
