@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Complete Payment" %}{% endblock %}
+{% block innertitle %}{% trans "Complete Payment" %}{% endblock %}
+
+{% block body %}
+    <section id="main" class="info-block">
+        <div class="container">
+            <div class="content-row">
+                <div class="content-col">
+                    <div class="text">
+                        <h1 class="mt-4">Redirecting to the payment processor...</h1>
+
+                        <form id="checkout_form" method="post" action="{{ checkout_payload.url }}">
+                            {% for key, value in form.items %}
+                            <div><label for="{{ key }}">{{ key }}</label>
+                            <input type="text" readonly="readonly" name="{{ key }}" value="{{ value }}" /></div>
+                            {% endfor %}
+
+                            <div>
+                                <button class="btn btn-primary" type="submit">CyberSource It</button>
+                            </div>
+                        </form>
+
+                        <script type="text/javascript">
+                    //document.getElementById('checkout_form').submit();
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
