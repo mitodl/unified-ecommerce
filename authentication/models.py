@@ -31,8 +31,12 @@ class KeycloakAdminToken(TimestampedModel):
 
     authorization_token = models.TextField()
     refresh_token = models.TextField(blank=True)
-    authorization_token_expires_in = models.IntegerField()
-    refresh_token_expires_in = models.IntegerField(null=True)
+    authorization_token_expires_in = models.IntegerField(
+        help_text="Seconds until authentication token expires"
+    )
+    refresh_token_expires_in = models.IntegerField(
+        null=True, help_text="Seconds until refresh token expires"
+    )
 
     def calculate_token_expiration(self) -> (int, int):
         """Calculate the expiration time of the tokens."""

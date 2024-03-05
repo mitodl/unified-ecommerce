@@ -46,7 +46,7 @@ def keycloak_session_init(url, **kwargs):
 
     def update_token(token):
         log_str = f"Refreshing Keycloak token {token}"
-        log.warning(log_str)
+        log.debug(log_str)
         KeycloakAdminToken.objects.all().delete()
         KeycloakAdminToken.objects.create(
             authorization_token=token.get("access_token"),
@@ -70,7 +70,7 @@ def keycloak_session_init(url, **kwargs):
         token = check_for_token()
 
         log_str = f"Trying to start up a session with token {token.token_formatted}"
-        log.warning(log_str)
+        log.debug(log_str)
 
         session = OAuth2Session(
             client=client,
@@ -80,10 +80,10 @@ def keycloak_session_init(url, **kwargs):
             token_updater=update_token,
         )
 
-        keycloak_info = session.get(url, **kwargs).json()
+        keycloak_response = session.get(url, **kwargs).json()
     except (InvalidGrantError, TokenExpiredError) as ige:
         log_str = f"Token error, trying to get a new token: {ige}"
-        log.warning(log_str)
+        log.debug(log_str)
 
         session = OAuth2Session(client=client)
         token = session.fetch_token(
@@ -95,12 +95,12 @@ def keycloak_session_init(url, **kwargs):
 
         update_token(token)
         session = OAuth2Session(client=client, token=token)
-        keycloak_info = session.get(url, **kwargs).json()
+        keycloak_response = session.get(url, **kwargs).json()
 
-    log_str = f"Keycloak info returned: {keycloak_info}"
-    log.warning(log_str)
+    log_str = f"Keycloak response: {keycloak_response}"
+    log.debug(log_str)
 
-    return keycloak_info
+    return keycloak_response
 
 
 def keycloak_get_user(user: User):
@@ -112,7 +112,7 @@ def keycloak_get_user(user: User):
     )
 
     log_str = f"Trying to get user info for {user.username}"
-    log.warning(log_str)
+    log.debug(log_str)
 
     if user.keycloak_user_tokens.exists():
         params = {"id": user.keycloak_user_tokens.first().keycloak_id}
@@ -122,17 +122,17 @@ def keycloak_get_user(user: User):
     userinfo = keycloak_session_init(userinfo_url, verify=False, params=params)
 
     if len(userinfo) == 0:
-        log.warning("Keycloak didn't return anything")
+        log.debug("Keycloak didn't return anything")
         return None
 
     return userinfo[0]
 
 
 @app.task
-def keycloak_update_user_account(user: int):
+def keycloak_update_user_account(user_id: int):
     """Update the user account using info from Keycloak asynchronously."""
 
-    user = User.objects.get(id=user)
+    user = User.objects.get(id=user_id)
 
     keycloak_user = keycloak_get_user(user)
 
