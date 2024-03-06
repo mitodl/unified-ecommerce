@@ -326,7 +326,7 @@ def decode_x_header(request, header):
     x_userinfo = request.META.get(header, False)
 
     if not x_userinfo:
-        return f"No {header} header"
+        return None
 
     decoded_x_userinfo = base64.b64decode(x_userinfo)
     return json.loads(decoded_x_userinfo)

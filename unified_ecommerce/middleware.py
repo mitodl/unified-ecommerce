@@ -19,6 +19,9 @@ class ApisixUserMiddleware:
         try:
             apisix_result = decode_x_header(request, "HTTP_X_USERINFO")
             if not apisix_result:
+                log.debug(
+                    "No APISIX-specific header found",
+                )
                 return None
         except json.JSONDecodeError:
             log.debug(

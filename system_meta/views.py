@@ -52,8 +52,10 @@ def apisix_test_request(request):
     response = {
         "name": "Response ok!",
         "user": request.user.username if request.user is not None else None,
-        "x_userinfo": decode_x_header(request, "HTTP_X_USERINFO"),
-        "x_id_token": decode_x_header(request, "HTTP_X_ID_TOKEN"),
+        "x_userinfo": decode_x_header(request, "HTTP_X_USERINFO")
+        or "No HTTP_X_USERINFO header",
+        "x_id_token": decode_x_header(request, "HTTP_X_ID_TOKEN")
+        or "No HTTP_X_ID_TOKEN header",
     }
 
     return Response(response, status=status.HTTP_200_OK)
