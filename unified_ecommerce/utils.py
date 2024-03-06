@@ -322,6 +322,8 @@ def decode_x_header(request, header):
     Args:
         request (HttpRequest): the HTTP request
         header (str): the name of the header to decode
+    Returns:
+    dict of decoded values, or None if the header isn't found
     """
     x_userinfo = request.META.get(header, False)
 
