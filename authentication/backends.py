@@ -26,8 +26,7 @@ class KeycloakRemoteUserBackend(RemoteUserBackend):
     def authenticate(self, request, remote_user):
         """Authenticate the user, using Keycloak to grab their ID first."""
 
-        log_str = f"KeycloakRemoteUserBackend is running for {remote_user}"
-        log.warning(log_str)
+        log.debug("KeycloakRemoteUserBackend is running for %s", {remote_user})
 
         userinfo_url = (
             f"{settings.KEYCLOAK_ADMIN_URL}/auth/admin/"
@@ -35,7 +34,7 @@ class KeycloakRemoteUserBackend(RemoteUserBackend):
         )
 
         if not remote_user:
-            log.warning("No remote_user provided")
+            log.debug("No remote_user provided")
             return None
 
         userinfo = keycloak_session_init(
@@ -43,18 +42,17 @@ class KeycloakRemoteUserBackend(RemoteUserBackend):
         )
 
         if len(userinfo) == 0:
-            log.warning("Keycloak didn't return anything")
+            log.debug("Keycloak didn't return anything")
             # User may have changed their email, so let's see if we can find an
             # existing user
 
             existing_user = User.objects.get(email=remote_user)
 
             if existing_user is not None:
-                log_str = (
-                    f"Found existing user {existing_user}, trying to get "
-                    "Keycloak info for them"
+                log.debug(
+                    "Found existing user %s, trying to get Keycloak info for them",
+                    {existing_user},
                 )
-                log.warning(log_str)
                 userinfo = [
                     keycloak_session_init(
                         f"{userinfo_url}{existing_user.username}/", verify=False
@@ -62,14 +60,13 @@ class KeycloakRemoteUserBackend(RemoteUserBackend):
                 ]
 
                 if len(userinfo) == 0:
-                    log_str = (
-                        "Keycloak still returned nothing for ID "
-                        f"{existing_user.username}, so giving up."
+                    log.debug(
+                        "Keycloak still returned nothing for ID %s, so giving up.",
+                        {existing_user.username},
                     )
-                    log.warning(log_str)
                     return None
             else:
-                log.warning(
+                log.debug(
                     "Keycloak still returned nothing and we didn't find a user to"
                     " check, so giving up."
                 )

@@ -151,8 +151,7 @@ def keycloak_get_user(user: User):
         f"realms/{settings.KEYCLOAK_ADMIN_REALM}/users/"
     )
 
-    log_str = f"Trying to get user info for {user.username}"
-    log.debug(log_str)
+    log.debug("Trying to get user info for %s", {user.username})
 
     if user.keycloak_user_tokens.exists():
         params = {"id": user.keycloak_user_tokens.first().keycloak_id}
