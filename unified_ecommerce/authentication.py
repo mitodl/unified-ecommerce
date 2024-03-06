@@ -1,8 +1,6 @@
 """Custom authentication for DRF"""
 
 import logging
-import random
-import string
 
 import jwt
 from django.contrib.auth import get_user_model
@@ -93,39 +91,44 @@ class ApiGatewayAuthentication(BaseAuthentication):
     def authenticate(self, request):
         """Authenticate the user based on request.api_gateway_userdata."""
 
-        if (
-            not request
-            or not request.api_gateway_userdata
-        ):
+        if not request or not request.api_gateway_userdata:
             return None
+
+        log.debug(
+            "ApiGatewayAuthentication: Gateway userdata is %s",
+            request.api_gateway_userdata,
+        )
 
         (
             email,
             preferred_username,
             given_name,
             family_name,
-        ) = request.api_gateway_userdata
+        ) = request.api_gateway_userdata.values()
 
-        try:
-            user = User.objects.filter(email=email).get()
+        log.debug("ApiGatewayAuthentication: Authenticating %s", preferred_username)
 
+        user, created = User.objects.filter(username=preferred_username).get_or_create(
+            defaults={
+                "username": preferred_username,
+                "email": email,
+                "first_name": given_name,
+                "last_name": family_name,
+            }
+        )
+
+        if created:
+            log.debug(
+                "ApiGatewayAuthentication: User %s not found, created new",
+                preferred_username,
+            )
+            user.set_unusable_password()
+            user.save()
+        else:
             log.debug(
                 "ApiGatewayAuthentication: Found existing user for %s: %s",
                 preferred_username,
                 user,
-            )
-        except User.DoesNotExist:
-            log.debug(
-                "ApiGatewayAuthentication: User %s not found, creating",
-                preferred_username,
-            )
-            # Create a random password for the user, 32 characters long.
-            # We don't care about the password since APISIX (or whatever) has
-            # bounced the user to an authentication system elsewhere (like Keycloak).
-            user = User.objects.create_user(
-                preferred_username,
-                email,
-                "".join(random.choices(string.ascii_uppercase + string.digits, k=32)),  # noqa: S311
             )
 
             user.first_name = given_name

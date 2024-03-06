@@ -98,7 +98,52 @@ If you don't have a Traefik instance set up, there's a `docker-compose-traefik.y
 
 #### Others (APISIX)
 
-The system is also set up to run using APISIX as the gateway (to an extent). Use the `docker-compose-apisix.yml` file to spin up the application with APISIX and etcd. You will need to define routes for the app and set up forward auth on your own.
+The system is also set up to run using APISIX as the gateway (to an extent). Use the `docker-compose-apisix.yml` file to spin up the application with APISIX and etcd. The APISIX configuration is not ready for production use - it's only here for assist in local testing and development.
+
+You'll need to define routes for APISIX before it will handle traffic for the appplication. Here are the steps to accomplish that:
+
+1. In your Keycloak instance, create a new Client in the realm you are going to use for UE.
+   2. The `Client ID` can be any valid string - a good choice is `apisix-client`.
+   1. For local testing, it's OK to use `*` for both `Valid redirect URIs` and `Web origins`. This is not OK for anything attached to the Internet. 
+   2. Make sure `Client authentication` is on, and `Standard flow` and `Implicit flow` are checked.
+   3. After you've saved the client, go to Credentials and copy out the `Client secret`. (You may need to manually cut and paste; the copy to clipboard button has never worked for me.)
+2. In your Keycloak Realm Settings, you should be able to find the OpenID Endpoint Configuration link. Copy/paste this somewhere - you'll need it later.
+3. From the `config/apisix/apisix.yml` file, get the `key` out. This should be on line 11. You can also reset it here if you wish. 
+4. Start the entire thing: `docker compose -f docker-compose-apisix.yml up`. This will bring up Universal Ecommerce and the APISIX instance.
+5. Create an all-encompassing route for UE in APISIX. This uses the APISIX API - be sure to read this through before running it and fill out placeholders.
+```bash
+# Define upstream connection
+
+curl "http://127.0.0.1:9180/apisix/admin/upstreams/2" \
+-H "X-API-KEY: <api-key>" -X PUT -d '
+{
+  "type": "roundrobin",
+  "nodes": {
+    "nginx:8073": 1
+  }
+}'
+
+# Define the Universal Ecommerce wildcard route
+
+curl http://127.0.0.1:9180/apisix/admin/routes/ue -H 'X-API-KEY: <api-key>' -X PUT -d '
+{
+  "uri": "/*",
+  "plugins":{
+    "openid-connect":{
+      "client_id": "<client ID>",
+      "client_secret": "<client secret>",
+      "discovery": "<discovery URL>",
+      "scope": "openid profile",
+      "bearer_only": false,
+      "realm": "odltest",
+      "introspection_endpoint_auth_method": "client_secret_post"
+    }
+  },
+  "upstream_id": 2
+}'
+```
+
+You should now be able to get to the app via APISIX. There is an internal API at `http://ue.odl.local:9080/_/v0/meta/apisix_test_request/` that you can hit to see if it worked. The wildcard route above will route all UE traffic (or, more correctly, all traffic going into APISIX) through Keycloak and then into UE, so you should also be able to access the Django Admin through it if you've set your Keycloak user to be an admin.
 
 ## Code Generation
 

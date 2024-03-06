@@ -1,7 +1,5 @@
 """Views for the REST API for system metadata."""
 
-import base64
-import json
 import logging
 
 from rest_framework import status, viewsets
@@ -20,6 +18,7 @@ from system_meta.serializers import IntegratedSystemSerializer, ProductSerialize
 from unified_ecommerce.authentication import (
     ApiGatewayAuthentication,
 )
+from unified_ecommerce.utils import decode_x_header
 
 log = logging.getLogger(__name__)
 
@@ -50,20 +49,11 @@ class ProductViewSet(viewsets.ModelViewSet):
 def apisix_test_request(request):
     """Test API request so we can see how the APISIX integration works."""
 
-    def decode_x_header(header):
-        x_userinfo = request.META.get(header, False)
-
-        if not x_userinfo:
-            return f"No {header} header"
-
-        decoded_x_userinfo = base64.b64decode(x_userinfo)
-        return json.loads(decoded_x_userinfo)
-
     response = {
         "name": "Response ok!",
         "user": request.user.username if request.user is not None else None,
-        "x_userinfo": decode_x_header("HTTP_X_USERINFO"),
-        "x_id_token": decode_x_header("HTTP_X_ID_TOKEN"),
+        "x_userinfo": decode_x_header(request, "HTTP_X_USERINFO"),
+        "x_id_token": decode_x_header(request, "HTTP_X_ID_TOKEN"),
     }
 
     return Response(response, status=status.HTTP_200_OK)

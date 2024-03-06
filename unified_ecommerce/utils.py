@@ -1,5 +1,6 @@
 """Unified Ecommerce utilities"""
 
+import base64
 import json
 import logging
 import os
@@ -307,3 +308,25 @@ def redirect_with_user_message(
         max_age=USER_MSG_COOKIE_MAX_AGE,
     )
     return resp
+
+
+def decode_x_header(request, header):
+    """
+    Decode an 'X-' header.
+
+    For things that put some JSON-encoded data in a HTTP header, this will both
+    base64 decode it and then JSON decode it, and return the resulting dict.
+    (This is used for the APISIX code - it puts user data in X-User-Info in
+    this format.)
+
+    Args:
+        request (HttpRequest): the HTTP request
+        header (str): the name of the header to decode
+    """
+    x_userinfo = request.META.get(header, False)
+
+    if not x_userinfo:
+        return f"No {header} header"
+
+    decoded_x_userinfo = base64.b64decode(x_userinfo)
+    return json.loads(decoded_x_userinfo)

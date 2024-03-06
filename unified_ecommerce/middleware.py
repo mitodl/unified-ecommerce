@@ -1,10 +1,11 @@
 """Middleware for Unified Ecommerce."""
 
-import base64
 import json
 import logging
 
 from django.contrib.auth.middleware import RemoteUserMiddleware
+
+from unified_ecommerce.utils import decode_x_header
 
 log = logging.getLogger(__name__)
 
@@ -14,19 +15,16 @@ class ApisixUserMiddleware:
 
     def decode_apisix_headers(self, request):
         """Decode the APISIX-specific headers."""
-        user_info = request.META.get("HTTP_X_USERINFO", False)
-
-        if not user_info:
-            return None
 
         try:
-            apisix_result = json.loads(base64.b64decode(user_info))
+            apisix_result = decode_x_header(request, "HTTP_X_USERINFO")
+            if not apisix_result:
+                return None
         except json.JSONDecodeError:
-            log_message = (
-                "ApisixUserMiddleware: Result from HTTP_X_USERINFO "
-                f"is not valid JSON: {user_info}"
+            log.debug(
+                "Got bad APISIX-specific header: %s",
+                request.META.get("HTTP_X_USERINFO", ""),
             )
-            log.debug(log_message)
 
             return None
 
@@ -35,7 +33,7 @@ class ApisixUserMiddleware:
 
         return {
             "email": apisix_result["email"],
-            "preferred_username": apisix_result["preferred_username"],
+            "preferred_username": apisix_result["sub"],
             "given_name": apisix_result["given_name"],
             "family_name": apisix_result["family_name"],
         }
