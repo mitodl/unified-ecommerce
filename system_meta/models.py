@@ -108,8 +108,14 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
             if test_version == product_version:
                 return Product(
                     id=test_version.field_dict["id"],
+                    sku=test_version.field_dict["sku"],
+                    name=test_version.field_dict["name"],
                     price=test_version.field_dict["price"],
                     description=test_version.field_dict["description"],
+                    system=IntegratedSystem.objects.get(
+                        pk=test_version.field_dict["system_id"]
+                    ),
+                    system_data=test_version.field_dict["system_data"],
                     deleted_on=test_version.field_dict["deleted_on"],
                     deleted_by_cascade=test_version.field_dict["deleted_by_cascade"],
                 )

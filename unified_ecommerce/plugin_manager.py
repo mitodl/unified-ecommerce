@@ -14,6 +14,7 @@ def get_plugin_manager():
     pm.add_hookspecs(payments_hookspecs)
     pm.register(payments_post_sale.TestPostSale())
     pm.register(payments_post_sale.PostSaleSendEmails())
+    pm.register(payments_post_sale.IntegratedSystemWebhooks())
 
     pm.load_setuptools_entrypoints("unified_ecommerce")
     return pm

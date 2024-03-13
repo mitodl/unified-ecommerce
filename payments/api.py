@@ -56,9 +56,10 @@ def generate_checkout_payload(request):
     )
 
     for line_item in order.lines.all():
+        log.debug("Adding line item %s", line_item)
         field_dict = line_item.product_version.field_dict
         system = IntegratedSystem.objects.get(pk=field_dict["system_id"])
-        sku = f"{system.slug}-{field_dict['sku']}"
+        sku = f"{system.slug}!{field_dict['sku']}"
         gateway_order.items.append(
             GatewayCartItem(
                 code=sku,
@@ -88,6 +89,8 @@ def generate_checkout_payload(request):
             }
 
     callback_uri = request.build_absolute_uri(reverse("checkout-result-callback"))
+
+    log.debug("Gateway order for %s: %s", order.reference_number, gateway_order)
 
     return PaymentGateway.start_payment(
         settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY,
