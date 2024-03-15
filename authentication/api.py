@@ -46,7 +46,7 @@ def keycloak_session_init(url, **kwargs):
     }
 
     def update_token(token):
-        log.debug("Refreshing Keycloak token %s", {token})
+        log.debug("Refreshing Keycloak token %s", token)
         KeycloakAdminToken.objects.all().delete()
         KeycloakAdminToken.objects.create(
             authorization_token=token.get("access_token"),
@@ -84,7 +84,7 @@ def keycloak_session_init(url, **kwargs):
                     "keycloak_session_init couldn't refresh token %s because of an"
                     " invalid grant error"
                 ),
-                {token},
+                token,
             )
             return None
         except TokenExpiredError:
@@ -93,7 +93,7 @@ def keycloak_session_init(url, **kwargs):
                     "keycloak_session_init couldn't refresh token %s because of an"
                     " expired token error"
                 ),
-                {token},
+                token,
             )
             return None
         except requests.exceptions.RequestException:
@@ -102,7 +102,7 @@ def keycloak_session_init(url, **kwargs):
                     "keycloak_session_init couldn't refresh token %s because of an"
                     " HTTP error"
                 ),
-                {token},
+                token,
             )
             return None
 
@@ -111,7 +111,7 @@ def keycloak_session_init(url, **kwargs):
     try:
         token = check_for_token()
 
-        log.debug("Trying to start up a session with token %s", {token.token_formatted})
+        log.debug("Trying to start up a session with token %s", token.token_formatted)
 
         session = OAuth2Session(
             client=client,
@@ -123,7 +123,7 @@ def keycloak_session_init(url, **kwargs):
 
         keycloak_response = session.get(url, **kwargs).json()
     except (InvalidGrantError, TokenExpiredError) as ige:
-        log.debug("Token error, trying to get a new token: %s", {ige})
+        log.debug("Token error, trying to get a new token: %s", ige)
 
         session = regenerate_token(client, token)
 
@@ -134,11 +134,11 @@ def keycloak_session_init(url, **kwargs):
                 "keycloak_session_init couldn't establish the session because of"
                 " an HTTP error: %s"
             ),
-            {token},
+            token,
         )
         return None
 
-    log.debug("Keycloak response: %s", {keycloak_response})
+    log.debug("Keycloak response: %s", keycloak_response)
 
     return keycloak_response
 
@@ -151,7 +151,7 @@ def keycloak_get_user(user: User):
         f"realms/{settings.KEYCLOAK_ADMIN_REALM}/users/"
     )
 
-    log.debug("Trying to get user info for %s", {user.username})
+    log.debug("Trying to get user info for %s", user.username)
 
     if user.keycloak_user_tokens.exists():
         params = {"id": user.keycloak_user_tokens.first().keycloak_id}

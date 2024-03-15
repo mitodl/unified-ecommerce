@@ -31,8 +31,7 @@ class ApisixUserMiddleware:
 
             return None
 
-        log_message = f"ApisixUserMiddleware: Got {apisix_result}"
-        log.debug(log_message)
+        log.debug("ApisixUserMiddleware: Got %s", apisix_result)
 
         return {
             "email": apisix_result["email"],

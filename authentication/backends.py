@@ -26,7 +26,7 @@ class KeycloakRemoteUserBackend(RemoteUserBackend):
     def authenticate(self, request, remote_user):
         """Authenticate the user, using Keycloak to grab their ID first."""
 
-        log.debug("KeycloakRemoteUserBackend is running for %s", {remote_user})
+        log.debug("KeycloakRemoteUserBackend is running for %s", remote_user)
 
         userinfo_url = (
             f"{settings.KEYCLOAK_ADMIN_URL}/auth/admin/"
@@ -51,7 +51,7 @@ class KeycloakRemoteUserBackend(RemoteUserBackend):
             if existing_user is not None:
                 log.debug(
                     "Found existing user %s, trying to get Keycloak info for them",
-                    {existing_user},
+                    existing_user,
                 )
                 userinfo = [
                     keycloak_session_init(
@@ -62,7 +62,7 @@ class KeycloakRemoteUserBackend(RemoteUserBackend):
                 if len(userinfo) == 0:
                     log.debug(
                         "Keycloak still returned nothing for ID %s, so giving up.",
-                        {existing_user.username},
+                        existing_user.username,
                     )
                     return None
             else:
