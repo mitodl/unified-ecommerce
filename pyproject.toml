@@ -183,7 +183,9 @@ ignore = [
     "RUF012",
     "UP007"
 ]
-
+exclude = [
+    "docs"
+]
 typing-modules = ["colour.hints"]
 
 [tool.ruff.pydocstyle]
