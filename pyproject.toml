@@ -184,7 +184,8 @@ ignore = [
     "UP007"
 ]
 exclude = [
-    "docs"
+    "docs",
+    "pants-plugins"
 ]
 typing-modules = ["colour.hints"]
 
