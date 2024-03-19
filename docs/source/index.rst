@@ -5,7 +5,8 @@ Welcome to the Unified Ecommerce documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   events
+   introduction
+   technical/index
 
 Indices and tables
 ==================
