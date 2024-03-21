@@ -14,6 +14,7 @@ from requests_oauthlib import OAuth2Session
 
 from authentication.models import KeycloakAdminToken
 from unified_ecommerce.celery import app
+from unified_ecommerce.exceptions import KeycloakAuthError
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -50,7 +51,7 @@ def keycloak_session_init(url, **kwargs):
         KeycloakAdminToken.objects.all().delete()
         KeycloakAdminToken.objects.create(
             authorization_token=token.get("access_token"),
-            refresh_token=token.get("refresh_token", None),
+            refresh_token=token.get("refresh_token", ""),
             authorization_token_expires_in=token.get("access_token_expires_in", 60),
             refresh_token_expires_in=token.get("refresh_token_expires_in", 60),
         )
@@ -64,20 +65,21 @@ def keycloak_session_init(url, **kwargs):
 
         return token
 
-    def regenerate_token(client, token):
+    def regenerate_token(client):
         """Regenerate the token, or raise an exception."""
 
         try:
             session = OAuth2Session(client=client)
-            token = session.fetch_token(
+            new_token = session.fetch_token(
                 token_url=token_url,
                 client_id=settings.KEYCLOAK_ADMIN_CLIENT_ID,
                 client_secret=settings.KEYCLOAK_ADMIN_CLIENT_SECRET,
-                verify=False,
+                verify=settings.KEYCLOAK_ADMIN_SECURE,
             )
 
-            update_token(token)
-            session = OAuth2Session(client=client, token=token)
+            log.debug("Successfully refreshed token %s", new_token)
+
+            update_token(new_token)
         except InvalidGrantError:
             log.exception(
                 (
@@ -125,7 +127,7 @@ def keycloak_session_init(url, **kwargs):
     except (InvalidGrantError, TokenExpiredError) as ige:
         log.debug("Token error, trying to get a new token: %s", ige)
 
-        session = regenerate_token(client, token)
+        session = regenerate_token(client)
 
         keycloak_response = session.get(url, **kwargs).json()
     except requests.exceptions.RequestException:
@@ -140,6 +142,10 @@ def keycloak_session_init(url, **kwargs):
 
     log.debug("Keycloak response: %s", keycloak_response)
 
+    if "error" in keycloak_response:
+        log.error("Keycloak returned an error: %s", keycloak_response["error"])
+        raise KeycloakAuthError(keycloak_response)
+
     return keycloak_response
 
 
@@ -148,7 +154,7 @@ def keycloak_get_user(user: User):
 
     userinfo_url = (
         f"{settings.KEYCLOAK_ADMIN_URL}/auth/admin/"
-        f"realms/{settings.KEYCLOAK_ADMIN_REALM}/users/"
+        f"realms/{settings.KEYCLOAK_REALM}/users/"
     )
 
     log.debug("Trying to get user info for %s", user.username)
@@ -158,7 +164,9 @@ def keycloak_get_user(user: User):
     else:
         params = {"email": user.username}
 
-    userinfo = keycloak_session_init(userinfo_url, verify=False, params=params)
+    userinfo = keycloak_session_init(
+        userinfo_url, verify=settings.KEYCLOAK_ADMIN_SECURE, params=params
+    )
 
     if len(userinfo) == 0:
         log.debug("Keycloak didn't return anything")

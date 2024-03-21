@@ -525,5 +525,6 @@ import_settings_modules("mitol.payment_gateway.settings.cybersource")
 # Keycloak API settings
 KEYCLOAK_ADMIN_CLIENT_ID = get_string("KEYCLOAK_ADMIN_CLIENT_ID", False)  # noqa: FBT003
 KEYCLOAK_ADMIN_CLIENT_SECRET = get_string("KEYCLOAK_ADMIN_CLIENT_SECRET", False)  # noqa: FBT003
-KEYCLOAK_ADMIN_REALM = get_string("KEYCLOAK_ADMIN_REALM", False)  # noqa: FBT003
+KEYCLOAK_REALM = get_string("KEYCLOAK_REALM", False)  # noqa: FBT003
 KEYCLOAK_ADMIN_URL = get_string("KEYCLOAK_ADMIN_URL", False)  # noqa: FBT003
+KEYCLOAK_ADMIN_SECURE = get_bool("KEYCLOAK_ADMIN_SECURE", True)  # noqa: FBT003

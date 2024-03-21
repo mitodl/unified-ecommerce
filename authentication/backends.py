@@ -30,7 +30,7 @@ class KeycloakRemoteUserBackend(RemoteUserBackend):
 
         userinfo_url = (
             f"{settings.KEYCLOAK_ADMIN_URL}/auth/admin/"
-            f"realms/{settings.KEYCLOAK_ADMIN_REALM}/users/"
+            f"realms/{settings.KEYCLOAK_REALM}/users/"
         )
 
         if not remote_user:

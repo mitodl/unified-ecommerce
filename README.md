@@ -37,35 +37,39 @@ The following settings must be configured before running the app:
 
   Sets the Django secret for the application. This just needs to be a random string.
 
+If you're going to use the included Traefik Composer environment, also set these:
+
+- `KEYCLOAK_ADMIN_URL`
+
+  Sets the base URL for the Keycloak instance. Do not append a trailing slash.
+
 - `KEYCLOAK_ADMIN_CLIENT_ID`
 
   Sets the client ID for the service account. (This should be in the `master` realm.)
 
 - `KEYCLOAK_ADMIN_CLIENT_SECRET`
 
-  Sets the client secret for the service account.
+  Sets the client secret for the service account in the `master` realm.
 
-- `KEYCLOAK_URL`
-
-  Sets the base URL for the Keycloak instance. Do not append a trailing slash.
+- `KEYCLOAK_ADMIN_SECURE`
+  
+  Check the Keycloak instance's certificates for validity. Defaults to True - set to False when running locally.
 
 - `KEYCLOAK_REALM`
-
-  Sets the realm name that the application should use.
-
-If you're going to use the included Traefik Composer environment, also set these:
+  
+  Sets the realm that the forward auth should use for authentication.
 
 - `KEYCLOAK_CLIENT_ID`
 
-  Sets the client ID for authentication within the realm.
+  Sets the client ID for authentication within the realm by the forward auth. 
 
 - `KEYCLOAK_CLIENT_SECRET`
 
-  Sets the client secret for authentication within the realm.
+  Sets the client secret for authentication within the realm by the forward auth.
 
-- `TRAEFIK_SECRET`
+- `TRAEFIK_FORWARD_AUTH_ADMIN_URL`
 
-  Sets the secret Traefik will use for cookie generation (works like the Django `SECRET_KEY`).
+  Sets base URI for the provider - this should be the _plain HTTP_ version of `KEYCLOAK_ADMIN_URL`. 
 
 ### Loading and Accessing Data
 
@@ -92,9 +96,31 @@ The app depends on an outside system to provide the authentication layer for its
 
 #### Traefik
 
-The base `docker-compose.yml` has labels added to support running this with Traefik on your local machine. Traefik can run outside of the UE Compose environment - it wiill pick up the configuration it needs automatically. The Compose file expects the Traefik network to be named `traefik-keycloak_default`. You will need a ForwardAuth configured to forward authentication to your Keycloak instance for auth. (The app then uses `X-Forwarded-User` to figure out who the user is.)
+If you want to run the system behind a Traefik install, there is a separate Compose file that will start the app with Traefik for you. Use the `docker-compose-traefik.yml` file for this purpose. This will expose the service on port 80, and you should be able to get to the Traefik dashboard at port 8080. The Compose file is set up with the forward auth support necessary to talk to Keycloak. Make sure you've included the extra `.env` settings mentioned above. 
 
-If you don't have a Traefik instance set up, there's a `docker-compose-traefik.yml` file that you can use to set up a basic environment with a ForwardAuth that'll work for the app. Make sure the environment settings are set up properly (see above) and then bring the Compose environment up _in its own project_ - e.g., `docker-compose up -p traefik-keycloak -f docker-compose-traefik.yml`. If your project name is different, you'll have to change the base docker-compose file or create an override so that the `nginx` container sits in the right network.
+The Traefik forward auth will need a client to authenticate users with. Create this client in the realm you want to use for user authentication. The steps to do this are:
+
+1. Log into Keycloak Admin and navigate to the realm you want to use for authentication.
+2. Go to Clients, then click Create client.
+3. Fill out the form.
+   1. The `Client ID` can be any valid string - a good choice is `traefik-client`. Save this in your `.env` as `KEYCLOAK_CLIENT_ID`. 
+   2. For local testing, it's OK to use `*` for both `Valid redirect URIs` and `Web origins`. This is not OK for anything attached to the Internet. 
+   3. Make sure `Client authentication` is on, and `Standard flow` and `Implicit flow` are checked.
+4. After you've saved the client, go to Credentials and copy out the `Client secret`. (You may need to manually cut and paste; the copy to clipboard button has never worked for me.) Set this in your `.env` as `KEYCLOAK_CLIENT_SECRET`. 
+
+Additionally, you'll need to create a service account for the application in Keycloak, as the app will need to call Keycloak directly to get user information. To do this:
+
+1. Create a Client in the master realm that has "Client authentication" turned on, which should also allow you to turn on "Service account roles". (You can follow the same steps above for this; just make sure "Service account roles" is turned on.)
+2. After saving, go to the Advanced tab and turn on "Use refresh tokens" and "Use refresh tokens for client credentials grant" under Open ID Connect Compatibility Modes. Save there (it has its own button).
+3. Under Service Accounts Roles, click Assign Role and assign everything.
+
+Then, specify the _client ID and secret_ as the `KEYCLOAK_ADMIN_CLIENT_ID` and `KEYCLOAK_ADMIN_CLIENT_SECRET` in the `.env` file.
+
+Set `KEYCLOAK_ADMIN_URL` to the base HTTPS URL for the Keycloak instance. This does need to be the HTTPS one. For local development, you'll also want to set `KEYCLOAK_ADMIN_SECURE` to `False` so that calls to Keycloak are done without checking the SSL certificates. (This defaults to True.)
+
+Finally, you will need a `TRAEFIK_FORWARD_AUTH_ADMIN_URL` set up in your `.env` file - this should be the same as `KEYCLOAK_ADMIN_URL` but is separated out so you can use plain HTTP for this. The forward auth handler for Traefik can't be set to ignore invalid (self-signed) SSL certificates, so it will fail to start if you're running Keycloak without a real certificate. (The Django OAuth2 code _can_ be set to be OK with invalid certs, hence the split.)
+
+If you don't want to use the pack-in Traefik instance, you can attach the necessary tags to the `nginx` container by running the regular `docker-compose.yml` _with_ the `docker-compose-traefik-override.yml` file. You'll also likely want to create a `docker-compose-override.yml` to put the `nginx` container in the same network as your existing Traefik instance. You'll need to set up the forward auth as appropriate for your instance.
 
 #### Others (APISIX)
 

@@ -30,7 +30,7 @@ class KeycloakAdminToken(TimestampedModel):
     """Stores OAuth tokens for the Keycloak admin API"""
 
     authorization_token = models.TextField()
-    refresh_token = models.TextField(blank=True)
+    refresh_token = models.TextField(blank=True, default="")
     authorization_token_expires_in = models.IntegerField(
         help_text="Seconds until authentication token expires"
     )

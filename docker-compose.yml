@@ -36,14 +36,6 @@ services:
       - ./config/nginx/nginx.conf:/etc/nginx/conf.d/web.conf
       - ./:/src
       - django_media:/app/django_media
-    labels:
-      - "traefik.http.routers.ue.rule=Host(`ue.odl.local`)"
-      - "traefik.http.routers.ue.middlewares=traefik-forward-auth"
-      - "traefik.http.services.ue-service.loadbalancer.server.url=http://ue.odl.local:8073"
-      - "traefik.http.services.ue-service.loadbalancer.server.port=8073"
-    networks:
-      - default
-      - traefik-keycloak_default
 
   web:
     build:
@@ -105,7 +97,3 @@ services:
 volumes:
   django_media:
   yarn-cache:
-
-networks:
-  traefik-keycloak_default:
-    external: true
