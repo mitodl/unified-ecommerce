@@ -17,8 +17,6 @@ The app requires a service account in the relevant Keycloak realm so that it can
 
 This method is useful when a more fully-fledged API gateway system is placed in front of the app. (APISIX is the canonical example and was the service that was used to write the initial integration, so this info is geared towards using APISIX.) 
 
-### Method of Operation
-
 When configured to use authentication via OIDC Connect, APISIX returns the user data back to the application by injecting it into the HTTP headers sent to the app. A custom middleware in the application decodes this data, and takes action based on it. 
 
 For _local_ deployments, APISIX sends user data retrieved via OIDC in the `X-UserInfo` header. The data is sent as a base64-encoded JSON object, and its contents may vary but include:
@@ -28,4 +26,6 @@ For _local_ deployments, APISIX sends user data retrieved via OIDC in the `X-Use
 
 The middleware creates or updates the user account based on this data and sets the session user appropriately. Note that, unlike forward authentication, APISIX includes enough user data to construct and update the user record so the app does not need to make a separate call to Keycloak directly for this data.
 
-For Heroku deployments, we do something different because we need to be able to trust the data in the `X-UserInfo` header. _TODO:_ Fill this out - we don't have the info here yet.
+For Heroku deployments, we do something different because we need to be able to trust the data in the `X-UserInfo` header. 
+
+> _TODO:_ Fill this out - we don't have the info here yet. The challenge here is preventing injection: the app won't be DMZed in production so we need to be able to verify the source of the data.
