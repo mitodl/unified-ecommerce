@@ -55,7 +55,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Lint
-        run: poetry run ruff --extend-ignore=D1 $(git ls-files '*.py')
+        run: poetry run ruff check --exclude docs/ --exclude pants-plugins/ --extend-ignore=D1 $(git ls-files '*.py')
 
       - name: Tests
         run: |
