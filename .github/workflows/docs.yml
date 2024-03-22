@@ -24,6 +24,7 @@ jobs:
           gha-cache-key: cache0-py${{ matrix.python_version }}
           named-caches-hash: ${{ hashFiles('dist/sphinx/*') }}
       - name: Build documentation
-        run: "./pants docs ::"
+        run: |
+          pants docs ::
       - name: Publish Documentation
         run: ghp-import --push --force --no-history --no-jekyll dist/sphinx/
