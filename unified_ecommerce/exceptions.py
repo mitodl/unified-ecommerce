@@ -22,5 +22,6 @@ def api_exception_handler(exc, context):
 class DoNotUseRequestException(Exception):  # noqa: N818
     """This exception is raised during unit tests if an HTTP request is attempted"""
 
+
 class KeycloakAuthError(Exception):
     """Raised if Keycloak returns an error when attempting to pull user data."""

@@ -20,7 +20,7 @@ User = get_user_model()
 log = logging.getLogger(__name__)
 
 
-def keycloak_session_init(url, **kwargs):
+def keycloak_session_init(url, **kwargs):  # noqa: C901
     """
     Initialize a Keycloak session.
 
