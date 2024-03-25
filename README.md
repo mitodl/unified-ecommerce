@@ -71,6 +71,14 @@ If you're going to use the included Traefik Composer environment, also set these
 
   Sets base URI for the provider - this should be the _plain HTTP_ version of `KEYCLOAK_ADMIN_URL`. 
 
+- `TRAEFIK_PORT`
+  
+  Sets the port that Traefik uses for incoming requests. (Usually, this is port 80.)
+
+- `TRAEFIK_ADMIN_PORT`
+
+  Sets the port that Traefik's admin dashboard lives on. (8081 is a good choice.)
+
 ### Loading and Accessing Data
 
 You'll need an integrated system and product for that system to be able to do much of anything. Once you've done initial setup, run these commands:
