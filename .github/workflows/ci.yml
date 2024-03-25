@@ -34,7 +34,7 @@ jobs:
         run: sudo apt-get update -y
 
       - name: Apt install
-        run: cat Aptfile | sudo xargs apt-get install
+        run: cat Aptfile | sudo xargs apt-get install -y
 
       - name: Install poetry
         uses: snok/install-poetry@v1
@@ -55,7 +55,7 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Lint
-        run: poetry run ruff --extend-ignore=D1 $(git ls-files '*.py')
+        run: poetry run ruff check --extend-ignore=D1 $(git ls-files '*.py')
 
       - name: Tests
         run: |

@@ -123,3 +123,7 @@ tsconfig.tsbuildinfo
 
 # VS-Code
 .vscode
+
+# Pants stuff
+.pants.d/
+.pids/

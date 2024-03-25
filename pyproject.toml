@@ -183,7 +183,10 @@ ignore = [
     "RUF012",
     "UP007"
 ]
-
+exclude = [
+    "docs",
+    "pants-plugins"
+]
 typing-modules = ["colour.hints"]
 
 [tool.ruff.pydocstyle]
