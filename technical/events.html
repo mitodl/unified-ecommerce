@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Events &#8212; Unified Ecommerce  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/nature.css?v=601dbdee" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="API Gateway Integration" href="apigateway.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="apigateway.html" title="API Gateway Integration"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Unified Ecommerce  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Unified Ecommerce: Technical Information</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Events</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="events">
+<h1>Events<a class="headerlink" href="#events" title="Link to this heading">§</a></h1>
+<p>Unified Ecommerce emits events when certain transaction states are hit. These are emitted to the relevant integrated system as a hit to a configured webhook.</p>
+<section id="data-sent">
+<h2>Data Sent<a class="headerlink" href="#data-sent" title="Link to this heading">§</a></h2>
+<p>The data that gets sent is:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">reference_number</span></code> - the reference number for the order</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">system_slug</span></code> - the system slug for the data being sent</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">user</span></code> - nested object containing user information</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">total_price_paid</span></code> - the total price paid for the order, inclusive of <em>all</em> items on the order</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state</span></code> - the order state</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lines</span></code> - line items in the order</p></li>
+</ul>
+<p>Each system will only get the data that is relevant to itself, which will be indicated by the <code class="docutils literal notranslate"><span class="pre">system_slug</span></code> attribute. If the slug does not match what the system expects, the webhook target should return a 500 response so that Unified Ecommerce can log a Sentry error.</p>
+<p>To that end, the <code class="docutils literal notranslate"><span class="pre">lines</span></code> attribute will only include the line items that are for the system that UE is talking to. Totalling the line cost will not necessarily match the <code class="docutils literal notranslate"><span class="pre">total_price_paid</span></code> value as the total may include line items not visible to the system.</p>
+<p>User data includes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">username</span></code> - the username of the purchaser</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">email</span></code> - the email address of the purchaser</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">first_name</span></code> - the purchaser’s first name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">last_name</span></code> - the purchaser’s last name</p></li>
+</ul>
+<p>Individual line items include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">quantity</span></code> - the number of items purchased for this line (this will generally be one)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">discounted_price</span></code> - the discounted price of the line item</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">product_sku</span></code> - the line item’s SKU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">system_data</span></code> - the line item’s system data</p></li>
+</ul>
+<p>Products configured in the Universal Ecommerce system can contain system-specific data in JSON format - that is what is returned in the <code class="docutils literal notranslate"><span class="pre">system_data</span></code> attribute.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Events</a><ul>
+<li><a class="reference internal" href="#data-sent">Data Sent</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="apigateway.html"
+                          title="previous chapter">API Gateway Integration</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/technical/events.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="apigateway.html" title="API Gateway Integration"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Unified Ecommerce  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Unified Ecommerce: Technical Information</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Events</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, OL Engineering.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>
