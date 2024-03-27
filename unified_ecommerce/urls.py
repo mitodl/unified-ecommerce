@@ -41,8 +41,12 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
+    # OAuth2 Paths
+    path("o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
     # App Paths
     re_path(r"^api/v0/meta/", include("system_meta.urls")),
+    # Private Paths
+    re_path(r"^_/v0/meta/", include("system_meta.private_urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

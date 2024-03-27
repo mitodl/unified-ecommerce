@@ -1,19 +1,29 @@
 """Unified Ecommerce utilities"""
 
+import base64
+import json
 import logging
 import os
 from enum import Flag, auto
+from typing import Union
+from urllib.parse import quote_plus
 
 import markdown2
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
+from django.http import HttpResponseRedirect
 from mitol.common.utils.datetime import now_in_utc
+
+from unified_ecommerce.constants import USER_MSG_COOKIE_MAX_AGE, USER_MSG_COOKIE_NAME
 
 log = logging.getLogger(__name__)
 
 # This is the Django ImageField max path size
 IMAGE_PATH_MAX_LENGTH = 100
+
+User = get_user_model()
 
 
 class FeatureFlag(Flag):
@@ -267,3 +277,58 @@ class SoftDeleteActiveModel(models.Model):
         """Return True if the object is active, False otherwise."""
 
         return self.deleted_on is None
+
+
+CookieValue = Union[dict, list, str, None]
+
+
+def encode_json_cookie_value(cookie_value: CookieValue) -> str:
+    """
+    Encode a JSON-compatible value to be set as the value of a cookie, which
+    can then be decoded to get the original JSON value.
+    """
+    json_str_value = json.dumps(cookie_value)
+    return quote_plus(json_str_value.replace(" ", "%20"))
+
+
+def redirect_with_user_message(
+    redirect_uri: str, cookie_value: CookieValue
+) -> HttpResponseRedirect:
+    """
+    Create a redirect response with a user message
+
+    Args:
+        redirect_uri (str): the uri to redirect to
+        cookie_value (CookieValue): the object to serialize into the cookie
+    """
+    resp = HttpResponseRedirect(redirect_uri)
+    resp.set_cookie(
+        key=USER_MSG_COOKIE_NAME,
+        value=encode_json_cookie_value(cookie_value),
+        max_age=USER_MSG_COOKIE_MAX_AGE,
+    )
+    return resp
+
+
+def decode_x_header(request, header):
+    """
+    Decode an 'X-' header.
+
+    For things that put some JSON-encoded data in a HTTP header, this will both
+    base64 decode it and then JSON decode it, and return the resulting dict.
+    (This is used for the APISIX code - it puts user data in X-User-Info in
+    this format.)
+
+    Args:
+        request (HttpRequest): the HTTP request
+        header (str): the name of the header to decode
+    Returns:
+    dict of decoded values, or None if the header isn't found
+    """
+    x_userinfo = request.META.get(header, False)
+
+    if not x_userinfo:
+        return None
+
+    decoded_x_userinfo = base64.b64decode(x_userinfo)
+    return json.loads(decoded_x_userinfo)
