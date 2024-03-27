@@ -13,6 +13,7 @@ from deepdiff import DeepDiff
 from django.conf import settings
 from django.core.serializers import serialize
 from django.core.serializers.json import DjangoJSONEncoder
+from django.http import HttpRequest
 from django.http.response import HttpResponse
 from rest_framework.renderers import JSONRenderer
 
@@ -213,6 +214,27 @@ def make_timestamps_matchable(objs, **kwargs):
     ]
 
 
+def generate_mocked_request(user):
+    """
+    Generate a mocked request for test_process_cybersource_*.
+
+    The RequestFactory misses some stuff, so instead just make a full-fat
+    HttpRequest and add the things in that we need.
+
+    Args:
+    - user (User): The user to set in the request.
+
+    Returns:
+    - HttpRequest: The mocked request.
+    """
+    mocked_request = HttpRequest()
+    mocked_request.user = user
+    mocked_request.META["REMOTE_ADDR"] = "127.0.0.1"
+    mocked_request.META["HTTP_HOST"] = "localhost"
+
+    return mocked_request
+
+
 class PickleableMock(Mock):
     """
     A Mock that can be passed to pickle.dumps()
@@ -232,12 +254,22 @@ class ViewSetNotConfiguredError(Exception):
 
 
 class BaseSerializerTest:
-    """Base class for serializer tests."""
+    """
+    Base class for serializer tests.
+
+    Class variables:
+    - model_class (class): the model class to test
+    - serializer_class (class): the serializer class to test
+    - factory_class (class): the factory class to use for creating instances
+    - queryset (QuerySet): the queryset to use, if you need a custom one
+    - only_fields (list): a list of field names that should be included in the serialized output
+    """
 
     model_class = None
     serializer_class = None
     factory_class = None
     queryset = None
+    only_fields = None
 
     def test_serialize(self):
         """Test that the serializer can serialize an instance."""
@@ -249,7 +281,11 @@ class BaseSerializerTest:
             instance_qs = self.model_class.objects.filter(pk=instance.pk)
 
         serializer = self.serializer_class(instance)
-        dj_serializer = queryset_to_json(instance_qs)
+
+        if self.only_fields:
+            dj_serializer = instance_qs.values(*self.only_fields).get()
+        else:
+            dj_serializer = queryset_to_json(instance_qs)
 
         assert_json_equal(*make_timestamps_matchable([serializer.data, dj_serializer]))
 
@@ -281,6 +317,9 @@ class BaseViewSetTest:
         """
         Test that hitting the specified URL works with the specified client.
 
+        You still need to test for the proper response code; this will just
+        check for 500s and 403.
+
         Args:
         - api_client (APIClient): the client to use
         - url (str): the URL to test with
@@ -298,7 +337,8 @@ class BaseViewSetTest:
 
         response = api_client.get(url)
         assert response.status_code < 500
-        assert response.status_code == 403 if kwargs["test_non_authenticated"] else 200
+        if kwargs["test_non_authenticated"]:
+            assert response.status_code == 403
         return response
 
     def test_get_queryset(self):
@@ -438,6 +478,246 @@ class BaseViewSetTest:
         assert response.status_code < 500
 
         if not is_logged_in:
+            assert response.status_code == 403
+
+        return response
+
+
+class AuthVariegatedModelViewSetTest(BaseViewSetTest):
+    """
+    Extends the BaseViewSetTest class to add support for auth variegated
+    viewsets. These viewsets use different serializers based on the user's
+    session.
+
+    Set read_only_viewset_class and read_write_viewset_class to the appropriate
+    values for your viewset.
+    """
+
+    read_only_serializer_class = None
+    read_write_serializer_class = None
+
+    @pytest.mark.parametrize("is_logged_in", [True, False])
+    def test_get_serializer_class(self, is_logged_in, user):
+        """Test the viewset returns the right serializer class."""
+
+        viewset = self.viewset_class()
+
+        if is_logged_in:
+            # Forcing staff/superuser to get the read-write serializer.
+            user.is_staff = True
+            user.is_superuser = True
+            viewset.request = generate_mocked_request(user)
+            assert viewset.get_serializer_class() == self.read_write_serializer_class
+        else:
+            assert viewset.get_serializer_class() == self.read_only_serializer_class
+
+    def _test_retrieval(self, api_client, url, url_name, **kwargs):  # noqa: ARG002
+        """
+        Test that hitting the specified URL works with the specified client.
+        This will expect a 200 regardless of what you're requesting as you'll
+        get a different result set and not a denial for these viewsets.
+
+        noqa ARG002 so the API matches the parent class.
+
+        Args:
+        - api_client (APIClient): the client to use
+        - url (str): the URL to test with
+        - url_name (str): the name of the URL (used for the skip message if it's not defined)
+
+        Keyword Args:
+        - test_non_authenticated (bool): whether or not this should expect a 403
+
+        Returns:
+        - response (Response): the response from the API
+        """
+        if not url:
+            exception_string = f"{url_name} is not defined"
+            raise ViewSetNotConfiguredError(exception_string)
+
+        response = api_client.get(url)
+        assert response.status_code < 500
+        return response
+
+    def _determine_client_wrapper(  # noqa: PLR0913
+        self, is_logged_in, use_staff_user, client, user_client, staff_client
+    ):
+        """
+        Determine the client to use for the test.
+
+        Args:
+        - is_logged_in (bool): whether or not the client is logged in
+        - use_staff_user (bool): use the staff user client, rather than the regular user client
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in regular user requests
+        - staff_client (APIClient): the client to use for staff user requests
+
+        Returns:
+        - client (APIClient): the client to use for the test
+        """
+        if is_logged_in:
+            if use_staff_user:
+                return staff_client
+            else:
+                return user_client
+        else:
+            return client
+
+    @pytest.mark.parametrize(
+        ("is_logged_in", "use_staff_user"),
+        [(True, False), (True, True), (False, False)],
+    )
+    def test_retrieve(self, *args):
+        """
+        Test that the viewset can retrieve an object, and returns the correct
+        dataset depending on the status of the user.
+
+        If the user is anonymous _or_ a regular user, we should receive a
+        dataset that matches the read-only serializer class. Otherwise, we
+        should receive a dataset that matches the read-write serializer class.
+
+        Args:
+        - is_logged_in (bool): whether or not the client is logged in
+        - use_staff_user (bool): use the staff user client, rather than the regular user client
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in regular user requests
+        - staff_client (APIClient): the client to use for staff user requests
+        """
+        instance = self.factory_class()
+
+        is_logged_in = args[0]
+        use_staff_user = args[1]
+
+        use_client = self._determine_client_wrapper(*args)
+
+        response = self._test_retrieval(
+            use_client,
+            self.object_url.format(instance.pk),
+            "object_url",
+        )
+
+        if instance.is_active:
+            if is_logged_in and use_staff_user:
+                dj_serializer = self.read_write_serializer_class(instance).data
+            else:
+                dj_serializer = self.read_only_serializer_class(instance).data
+
+            assert_json_equal(
+                *make_timestamps_matchable([response.data, dj_serializer])
+            )
+
+        if not instance.is_active:
+            # Deleted items should return a 404.
+            assert response.status_code == 404
+
+    @pytest.mark.parametrize(
+        ("is_logged_in", "use_staff_user"),
+        [(True, False), (True, True), (False, False)],
+    )
+    def test_update(self, update_data, *args):
+        """
+        Test that the viewset can update an object.
+
+        Args:
+        - update_data (dict): the data to use for the update
+        - is_logged_in (bool): whether or not the client is logged in
+        - use_staff_user (bool): use the staff user client, rather than the regular user client
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in regular user requests
+        - staff_client (APIClient): the client to use for staff user requests
+
+        Returns:
+        - tuple of (instance, response): the instance that was updated and the response
+        """
+        instance = self.factory_class()
+
+        use_client = self._determine_client_wrapper(*args)
+
+        is_logged_in = args[0]
+        use_staff_user = args[1]
+
+        response = use_client.patch(
+            self.object_url.format(instance.pk), data=update_data
+        )
+
+        assert response.status_code < 500
+
+        if not is_logged_in or not use_staff_user:
+            assert response.status_code == 403
+
+        return (instance, response)
+
+    @pytest.mark.parametrize(
+        ("is_logged_in", "use_staff_user"),
+        [(True, False), (True, True), (False, False)],
+    )
+    def test_delete(self, *args):
+        """
+        Test that the viewset can delete an object. Note that this will actually test
+        deletion.
+
+        Args:
+        - is_logged_in (bool): whether or not the client is logged in
+        - use_staff_user (bool): use the staff user client, rather than the regular user client
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in regular user requests
+        - staff_client (APIClient): the client to use for staff user requests
+
+        Returns:
+        - tuple of (instance, response): the instance that was deleted and the response
+        """
+        instance = self.factory_class()
+
+        before_count = self.queryset.count()
+
+        use_client = self._determine_client_wrapper(*args)
+        is_logged_in = args[0]
+        use_staff_user = args[1]
+
+        response = use_client.delete(self.object_url.format(instance.pk))
+
+        assert response.status_code < 500
+        assert (
+            response.status_code == 403
+            if not is_logged_in or not use_staff_user
+            else 204
+        )
+
+        assert (
+            self.queryset.count() == before_count - 1
+            if is_logged_in and use_staff_user
+            else before_count
+        )
+
+        return (instance, response)
+
+    @pytest.mark.parametrize(
+        ("is_logged_in", "use_staff_user"),
+        [(True, False), (True, True), (False, False)],
+    )
+    def test_create(self, create_data, *args):
+        """
+        Test that the viewset can create an object.
+
+        Args:
+        - create_data (dict): the data to use for the update
+        - is_logged_in (bool): whether or not the client is logged in
+        - use_staff_user (bool): use the staff user client, rather than the regular user client
+        - client (APIClient): the client to use for non-logged in requests
+        - user_client (APIClient): the client to use for logged in regular user requests
+        - staff_client (APIClient): the client to use for staff user requests
+
+        Returns:
+        - response (Response): the response from the API
+        """
+        use_client = self._determine_client_wrapper(*args)
+        is_logged_in = args[0]
+        use_staff_user = args[1]
+
+        response = use_client.post(self.list_url, data=create_data)
+
+        assert response.status_code < 500
+
+        if not is_logged_in or not use_staff_user:
             assert response.status_code == 403
 
         return response

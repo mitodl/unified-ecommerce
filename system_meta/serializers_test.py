@@ -4,10 +4,23 @@ import pytest
 
 from system_meta.factories import IntegratedSystemFactory, ProductFactory
 from system_meta.models import IntegratedSystem, Product
-from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
+from system_meta.serializers import (
+    AdminIntegratedSystemSerializer,
+    IntegratedSystemSerializer,
+    ProductSerializer,
+)
 from unified_ecommerce.test_utils import BaseSerializerTest
 
 pytestmark = pytest.mark.django_db
+
+
+class TestAdminIntegratedSystemSerializer(BaseSerializerTest):
+    """Tests for the IntegratedSystemSerializer."""
+
+    serializer_class = AdminIntegratedSystemSerializer
+    factory_class = IntegratedSystemFactory
+    model_class = IntegratedSystem
+    queryset = IntegratedSystem.all_objects
 
 
 class TestIntegratedSystemSerializer(BaseSerializerTest):
@@ -17,6 +30,7 @@ class TestIntegratedSystemSerializer(BaseSerializerTest):
     factory_class = IntegratedSystemFactory
     model_class = IntegratedSystem
     queryset = IntegratedSystem.all_objects
+    only_fields = ["id", "name", "slug", "description"]
 
 
 class TestProductSerializer(BaseSerializerTest):

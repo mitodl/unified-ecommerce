@@ -10,25 +10,50 @@ from system_meta.factories import (
     IntegratedSystemFactory,
 )
 from system_meta.models import IntegratedSystem, Product
+from system_meta.serializers import (
+    AdminIntegratedSystemSerializer,
+    IntegratedSystemSerializer,
+    ProductSerializer,
+)
 from system_meta.views import IntegratedSystemViewSet, ProductViewSet
-from unified_ecommerce.test_utils import BaseViewSetTest
+from unified_ecommerce.test_utils import AuthVariegatedModelViewSetTest
 
 pytestmark = pytest.mark.django_db
 
 
-class TestIntegratedSystemViewSet(BaseViewSetTest):
+class TestIntegratedSystemViewSet(AuthVariegatedModelViewSetTest):
     """Tests for the IntegratedSystemViewSet."""
 
     viewset_class = IntegratedSystemViewSet
     factory_class = ActiveIntegratedSystemFactory
-    queryset = IntegratedSystem.objects.all()
+    queryset = IntegratedSystem.all_objects.all()
 
     list_url = "/api/v0/meta/integrated_system/"
     object_url = "/api/v0/meta/integrated_system/{}/"
 
-    @pytest.mark.parametrize("is_logged_in", [True, False])
-    @pytest.mark.parametrize("is_active_system", [True, False])
-    def test_retrieve(self, is_logged_in, is_active_system, client, user_client):
+    read_only_serializer_class = IntegratedSystemSerializer
+    read_write_serializer_class = AdminIntegratedSystemSerializer
+
+    @pytest.mark.parametrize(
+        ("is_logged_in", "use_staff_user", "is_active_system"),
+        [
+            (True, False, True),
+            (True, True, True),
+            (False, False, True),
+            (True, False, False),
+            (True, True, False),
+            (False, False, False),
+        ],
+    )
+    def test_retrieve(  # noqa: PLR0913
+        self,
+        is_active_system,
+        is_logged_in,
+        use_staff_user,
+        client,
+        user_client,
+        staff_client,
+    ):
         """
         Test that the viewset can retrieve an object that is either active or possibly
         inactive.
@@ -40,11 +65,30 @@ class TestIntegratedSystemViewSet(BaseViewSetTest):
             else InactiveIntegratedSystemFactory
         )
 
-        super().test_retrieve(is_logged_in, client, user_client)
+        super().test_retrieve(
+            is_logged_in, use_staff_user, client, user_client, staff_client
+        )
 
-    @pytest.mark.parametrize("is_active_system", [True, False])
-    @pytest.mark.parametrize("is_logged_in", [True, False])
-    def test_update(self, is_active_system, is_logged_in, client, user_client):
+    @pytest.mark.parametrize(
+        ("is_logged_in", "use_staff_user", "is_active_system"),
+        [
+            (True, False, True),
+            (True, True, True),
+            (False, False, True),
+            (True, False, False),
+            (True, True, False),
+            (False, False, False),
+        ],
+    )
+    def test_update(  # noqa: PLR0913
+        self,
+        is_active_system,
+        is_logged_in,
+        use_staff_user,
+        client,
+        user_client,
+        staff_client,
+    ):
         """Test that the viewset can update an object."""
         self.factory_class = (
             ActiveIntegratedSystemFactory
@@ -54,10 +98,10 @@ class TestIntegratedSystemViewSet(BaseViewSetTest):
         update_data = {"name": "Updated Name"}
 
         (instance, response) = super().test_update(
-            update_data, is_logged_in, client, user_client
+            update_data, is_logged_in, use_staff_user, client, user_client, staff_client
         )
 
-        if is_logged_in:
+        if is_logged_in and use_staff_user:
             if not is_active_system:
                 assert instance.name != update_data["name"]
                 assert response.status_code == 404
@@ -68,21 +112,73 @@ class TestIntegratedSystemViewSet(BaseViewSetTest):
         else:
             assert instance.name != update_data["name"]
 
-    @pytest.mark.parametrize("is_logged_in", [True, False])
-    def test_delete(self, is_logged_in, client, user_client):
+    @pytest.mark.parametrize(
+        (
+            "is_logged_in",
+            "use_staff_user",
+        ),
+        [
+            (
+                True,
+                False,
+            ),
+            (
+                True,
+                True,
+            ),
+            (
+                False,
+                False,
+            ),
+        ],
+    )
+    def test_delete(  # noqa: PLR0913
+        self, is_logged_in, use_staff_user, client, user_client, staff_client
+    ):
         """Test that the viewset can delete an object."""
-        (instance, response) = super().test_delete(is_logged_in, client, user_client)
 
-        if is_logged_in:
+        self.queryset = IntegratedSystem.objects.all()
+        (instance, response) = super().test_delete(
+            is_logged_in, use_staff_user, client, user_client, staff_client
+        )
+
+        if is_logged_in and use_staff_user:
             instance.refresh_from_db()
             assert response.status_code == 204
             assert not instance.is_active
         else:
             assert instance.is_active
 
-    @pytest.mark.parametrize("is_logged_in", [True, False])
+    @pytest.mark.parametrize(
+        (
+            "is_logged_in",
+            "use_staff_user",
+        ),
+        [
+            (
+                True,
+                False,
+            ),
+            (
+                True,
+                True,
+            ),
+            (
+                False,
+                False,
+            ),
+        ],
+    )
     @pytest.mark.parametrize("with_bad_data", [True, False])
-    def test_create(self, with_bad_data, is_logged_in, client, user_client):
+    def test_create(  # noqa: PLR0913
+        self,
+        with_bad_data,
+        is_logged_in,
+        use_staff_user,
+        client,
+        user_client,
+        staff_client,
+    ):
         """Test that the viewset can create an object."""
         create_data = {
             "description": "a description",
@@ -92,20 +188,21 @@ class TestIntegratedSystemViewSet(BaseViewSetTest):
         if not with_bad_data:
             create_data["name"] = "System Name"
 
-        response = super().test_create(create_data, is_logged_in, client, user_client)
+        response = super().test_create(
+            create_data, is_logged_in, use_staff_user, client, user_client, staff_client
+        )
 
-        if is_logged_in:
+        if is_logged_in and use_staff_user:
             assert response.status_code == 201 if not with_bad_data else 400
             assert (
                 IntegratedSystem.objects.filter(name="System Name").exists()
                 is not with_bad_data
             )
         else:
-            assert response.data["detail"].code == "not_authenticated"
             assert response.status_code == 403
 
 
-class TestProductViewSet(BaseViewSetTest):
+class TestProductViewSet(AuthVariegatedModelViewSetTest):
     """Tests for the ProductViewSet."""
 
     viewset_class = ProductViewSet
@@ -115,9 +212,29 @@ class TestProductViewSet(BaseViewSetTest):
     list_url = "/api/v0/meta/product/"
     object_url = "/api/v0/meta/product/{}/"
 
-    @pytest.mark.parametrize("is_logged_in", [True, False])
-    @pytest.mark.parametrize("is_active_product", [True, False])
-    def test_retrieve(self, is_logged_in, is_active_product, client, user_client):
+    read_only_serializer_class = ProductSerializer
+    read_write_serializer_class = ProductSerializer
+
+    @pytest.mark.parametrize(
+        ("is_logged_in", "use_staff_user", "is_active_product"),
+        [
+            (True, False, True),
+            (True, True, True),
+            (False, False, True),
+            (True, False, False),
+            (True, True, False),
+            (False, False, False),
+        ],
+    )
+    def test_retrieve(  # noqa: PLR0913
+        self,
+        is_active_product,
+        is_logged_in,
+        use_staff_user,
+        client,
+        user_client,
+        staff_client,
+    ):
         """
         Test that the viewset can retrieve an object that is either active or possibly
         inactive.
@@ -127,11 +244,30 @@ class TestProductViewSet(BaseViewSetTest):
             ActiveProductFactory if is_active_product else InactiveProductFactory
         )
 
-        super().test_retrieve(is_logged_in, client, user_client)
+        super().test_retrieve(
+            is_logged_in, use_staff_user, client, user_client, staff_client
+        )
 
-    @pytest.mark.parametrize("is_active_product", [True, False])
-    @pytest.mark.parametrize("is_logged_in", [True, False])
-    def test_update(self, is_active_product, is_logged_in, client, user_client):
+    @pytest.mark.parametrize(
+        ("is_logged_in", "use_staff_user", "is_active_product"),
+        [
+            (True, False, True),
+            (True, True, True),
+            (False, False, True),
+            (True, False, False),
+            (True, True, False),
+            (False, False, False),
+        ],
+    )
+    def test_update(  # noqa: PLR0913
+        self,
+        is_active_product,
+        is_logged_in,
+        use_staff_user,
+        client,
+        user_client,
+        staff_client,
+    ):
         """Test that the viewset can update an object."""
         self.factory_class = (
             ActiveProductFactory if is_active_product else InactiveProductFactory
@@ -139,10 +275,10 @@ class TestProductViewSet(BaseViewSetTest):
         update_data = {"name": "Updated Name"}
 
         (instance, response) = super().test_update(
-            update_data, is_logged_in, client, user_client
+            update_data, is_logged_in, use_staff_user, client, user_client, staff_client
         )
 
-        if is_logged_in:
+        if is_logged_in and use_staff_user:
             if not is_active_product:
                 assert instance.name != update_data["name"]
                 assert response.status_code == 404
@@ -153,21 +289,72 @@ class TestProductViewSet(BaseViewSetTest):
         else:
             assert instance.name != update_data["name"]
 
-    @pytest.mark.parametrize("is_logged_in", [True, False])
-    def test_delete(self, is_logged_in, client, user_client):
+    @pytest.mark.parametrize(
+        (
+            "is_logged_in",
+            "use_staff_user",
+        ),
+        [
+            (
+                True,
+                False,
+            ),
+            (
+                True,
+                True,
+            ),
+            (
+                False,
+                False,
+            ),
+        ],
+    )
+    def test_delete(  # noqa: PLR0913
+        self, is_logged_in, use_staff_user, client, user_client, staff_client
+    ):
         """Test that the viewset can delete an object."""
-        (instance, response) = super().test_delete(is_logged_in, client, user_client)
+        self.queryset = Product.objects.all()
+        (instance, response) = super().test_delete(
+            is_logged_in, use_staff_user, client, user_client, staff_client
+        )
 
-        if is_logged_in:
+        if is_logged_in and use_staff_user:
             instance.refresh_from_db()
             assert response.status_code == 204
             assert not instance.is_active
         else:
             assert instance.is_active
 
-    @pytest.mark.parametrize("is_logged_in", [True, False])
+    @pytest.mark.parametrize(
+        (
+            "is_logged_in",
+            "use_staff_user",
+        ),
+        [
+            (
+                True,
+                False,
+            ),
+            (
+                True,
+                True,
+            ),
+            (
+                False,
+                False,
+            ),
+        ],
+    )
     @pytest.mark.parametrize("with_bad_data", [True, False])
-    def test_create(self, with_bad_data, is_logged_in, client, user_client):
+    def test_create(  # noqa: PLR0913
+        self,
+        with_bad_data,
+        is_logged_in,
+        use_staff_user,
+        client,
+        user_client,
+        staff_client,
+    ):
         """Test that the viewset can create an object."""
         system = IntegratedSystemFactory.create()
         create_data = {
@@ -180,11 +367,12 @@ class TestProductViewSet(BaseViewSetTest):
         if not with_bad_data:
             create_data["description"] = "a description"
 
-        response = super().test_create(create_data, is_logged_in, client, user_client)
+        response = super().test_create(
+            create_data, is_logged_in, use_staff_user, client, user_client, staff_client
+        )
 
-        if is_logged_in:
+        if is_logged_in and use_staff_user:
             assert response.status_code == 201 if not with_bad_data else 400
             assert Product.objects.filter(name="New Name").exists() is not with_bad_data
         else:
-            assert response.data["detail"].code == "not_authenticated"
             assert response.status_code == 403

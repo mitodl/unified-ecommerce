@@ -12,6 +12,16 @@ class IntegratedSystemSerializer(serializers.ModelSerializer):
         """Meta class for serializer."""
 
         model = IntegratedSystem
+        fields = ["id", "name", "slug", "description"]
+
+
+class AdminIntegratedSystemSerializer(serializers.ModelSerializer):
+    """Serializer for IntegratedSystem model."""
+
+    class Meta:
+        """Meta class for serializer."""
+
+        model = IntegratedSystem
         fields = "__all__"
 
 

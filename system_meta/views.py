@@ -2,7 +2,8 @@
 
 import logging
 
-from rest_framework import status, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -14,29 +15,51 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 
 from system_meta.models import IntegratedSystem, Product
-from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
+from system_meta.serializers import (
+    AdminIntegratedSystemSerializer,
+    IntegratedSystemSerializer,
+    ProductSerializer,
+)
 from unified_ecommerce.authentication import (
     ApiGatewayAuthentication,
 )
+from unified_ecommerce.permissions import (
+    IsAdminUserOrReadOnly,
+)
 from unified_ecommerce.utils import decode_x_header
+from unified_ecommerce.viewsets import AuthVariegatedModelViewSet
 
 log = logging.getLogger(__name__)
 
 
-class IntegratedSystemViewSet(viewsets.ModelViewSet):
+class IntegratedSystemViewSet(AuthVariegatedModelViewSet):
     """Viewset for IntegratedSystem model."""
 
     queryset = IntegratedSystem.objects.all()
-    serializer_class = IntegratedSystemSerializer
-    permission_classes = (IsAuthenticated,)
+    read_write_serializer_class = AdminIntegratedSystemSerializer
+    read_only_serializer_class = IntegratedSystemSerializer
+    permission_classes = [
+        IsAdminUserOrReadOnly,
+    ]
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(AuthVariegatedModelViewSet):
     """Viewset for Product model."""
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [
+        IsAdminUserOrReadOnly,
+    ]
+    read_write_serializer_class = ProductSerializer
+    read_only_serializer_class = ProductSerializer
+    filter_backends = [
+        DjangoFilterBackend,
+    ]
+    filterset_fields = [
+        "name",
+        "system__slug",
+    ]
 
 
 @api_view(["GET"])
