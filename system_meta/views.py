@@ -48,7 +48,9 @@ class ProductViewSet(AuthVariegatedModelViewSet):
 
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [
+        IsAdminUserOrReadOnly,
+    ]
     read_write_serializer_class = ProductSerializer
     read_only_serializer_class = ProductSerializer
     filter_backends = [
