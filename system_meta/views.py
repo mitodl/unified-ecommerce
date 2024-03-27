@@ -3,7 +3,7 @@
 import logging
 
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, viewsets
+from rest_framework import status
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
