@@ -19,6 +19,12 @@ from django.db import transaction
 from system_meta.models import IntegratedSystem, Product
 
 
+def get_input(text):
+    """Wrap the internal input function so we can test it later."""
+
+    return input(text)
+
+
 def fake_courseware_id(courseware_type: str, **kwargs) -> str:
     """
     Generate a fake courseware id.
@@ -76,7 +82,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--only-systems",
             action="store_true",
-            help="Only add test systems.",
+            help="Only add test systems. Will add two active and one inactive system.",
         )
 
         parser.add_argument(
@@ -86,10 +92,10 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--system",
+            "--system-slug",
             type=str,
             help=(
-                "The name of the system to add products to."
+                "The slug of the system to add products to."
                 " Only used with --only-products."
             ),
             nargs="?",
@@ -99,26 +105,29 @@ class Command(BaseCommand):
         """Add the test systems."""
         max_systems = 3
         for i in range(1, max_systems + 1):
-            IntegratedSystem.objects.create(
+            system = IntegratedSystem.objects.create(
                 name=f"Test System {i}",
                 description=f"Test System {i} description.",
                 api_key=uuid.uuid4(),
             )
+            self.stdout.write(f"Created system {system.name} - {system.slug}")
 
-    def add_test_products(self, system: str) -> None:
+    def add_test_products(self, system_slug: str) -> None:
         """Add the test products to the specified system."""
+        self.stdout.write(f"Creating test products for {system_slug}")
 
-        if not IntegratedSystem.objects.filter(name=system).exists():
+        if not IntegratedSystem.objects.filter(slug=system_slug).exists():
             self.stdout.write(
-                self.style.ERROR(f"Integrated system {system} does not exist.")
+                self.style.ERROR(f"Integrated system {system_slug} does not exist.")
             )
             return
 
-        system = IntegratedSystem.objects.get(name=system)
+        system = IntegratedSystem.objects.get(slug=system_slug)
 
-        for i in range(1, 4):
+        max_products = 3
+        for i in range(1, max_products + 1):
             product_sku = fake_courseware_id("course", include_run_tag=True)
-            Product.objects.create(
+            product = Product.objects.create(
                 name=f"Test Product {i}",
                 description=f"Test Product {i} description.",
                 sku=product_sku,
@@ -129,6 +138,7 @@ class Command(BaseCommand):
                     "program": fake_courseware_id("program"),
                 },
             )
+            self.stdout.write(f"Created product {product.id} - {product.sku}")
 
     def remove_test_data(self) -> None:
         """Remove the test data."""
@@ -160,7 +170,7 @@ class Command(BaseCommand):
             )
         )
 
-        if input("Type 'yes' to continue: ") != "yes":
+        if get_input("Type 'yes' to continue: ") != "yes":
             self.stdout.write(self.style.ERROR("Aborting."))
             return
 
@@ -177,7 +187,7 @@ class Command(BaseCommand):
         remove = options["remove"]
         only_systems = options["only_systems"]
         only_products = options["only_products"]
-        systems = [options["system"]] if options["system"] else []
+        systems = []
 
         with transaction.atomic():
             if remove:
@@ -186,9 +196,20 @@ class Command(BaseCommand):
 
             if not only_products:
                 self.add_test_systems()
+                systems = [
+                    system.slug
+                    for system in (
+                        IntegratedSystem.all_objects.filter(
+                            name__startswith="Test System"
+                        ).all()
+                    )
+                ]
 
-            if not only_systems:
-                if only_products and len(systems) == 0:
+            if only_systems:
+                return
+
+            if only_products:
+                if not options["system_slug"] or len(options["system_slug"]) == 0:
                     self.stdout.write(
                         self.style.ERROR(
                             "You must specify a system when using --only-products."
@@ -196,21 +217,15 @@ class Command(BaseCommand):
                     )
                     return
                 else:
-                    systems = [
-                        system.name
-                        for system in (
-                            IntegratedSystem.all_objects.filter(
-                                name__startswith="Test System"
-                            ).all()
-                        )
-                    ]
+                    systems = [options["system_slug"]]
 
-                [self.add_test_products(system) for system in systems]
-                return
+            self.stdout.write(f"we are creating products now {systems}")
+
+            [self.add_test_products(system) for system in systems]
 
             if not only_products:
-                third_test_system = IntegratedSystem.all_objects.filter(
+                IntegratedSystem.all_objects.filter(
                     name__startswith="Test System"
-                ).get()
-                third_test_system.is_active = False
-                third_test_system.save(update_fields=("is_active",))
+                ).last().delete()
+
+            return
