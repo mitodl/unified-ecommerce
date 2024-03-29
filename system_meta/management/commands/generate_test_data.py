@@ -206,6 +206,9 @@ class Command(BaseCommand):
                 ]
 
             if only_systems:
+                IntegratedSystem.objects.filter(
+                    name__startswith="Test System"
+                ).last().delete()
                 return
 
             if only_products:
@@ -224,7 +227,7 @@ class Command(BaseCommand):
             [self.add_test_products(system) for system in systems]
 
             if not only_products:
-                IntegratedSystem.all_objects.filter(
+                IntegratedSystem.objects.filter(
                     name__startswith="Test System"
                 ).last().delete()
 
