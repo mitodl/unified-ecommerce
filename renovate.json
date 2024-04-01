@@ -3,7 +3,7 @@
   "extends": ["local>mitodl/.github:renovate-config"],
   "packageRules": [
     {
-      "matchFiles": ["frontends/unified_ecommerce/package.json"],
+      "matchFileNames": ["frontends/unified_ecommerce/package.json"],
       "matchUpdateTypes": ["major"],
       "enabled": false
     },
