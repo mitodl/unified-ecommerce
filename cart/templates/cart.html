@@ -77,15 +77,13 @@
 
 <script type="text/javascript">
 function add_to_cart(event) {
-    console.log("adding to cart");
-
-    var product_raw = document.getElementById("product").value;
-    var csrfmiddlewaretoken = document.querySelector("input[name='csrfmiddlewaretoken']").value
+    var product_raw = encodeURIComponent(document.getElementById("product").value);
+    var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
 
     if (event.submitter.id === "add-and-checkout") {
         var form = event.target;
 
-        form.setAttribute("action", `http://ue.odl.local/api/v0/payments/baskets/create_from_product/${product_raw}/`)
+        form.setAttribute("action", `http://ue.odl.local/api/v0/payments/baskets/create_from_product/${product_raw}/`);
         return true;
     }
 
@@ -106,7 +104,7 @@ function clear_cart(event) {
     event.preventDefault();
 
     var slug = "{{ basket.integrated_system.slug }}";
-    var csrfmiddlewaretoken = document.querySelector("input[name='csrfmiddlewaretoken']").value
+    var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
 
     axios.delete(`http://ue.odl.local/api/v0/payments/baskets/clear/`, { headers: { "X-CSRFToken": csrfmiddlewaretoken } })
         .then(function (response) {
