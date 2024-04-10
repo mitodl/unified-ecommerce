@@ -12,12 +12,13 @@ x-environment: &py-environment
   CELERY_BROKER_URL: redis://redis:6379/4
   CELERY_RESULT_BACKEND: redis://redis:6379/4
   DOCKER_HOST: ${DOCKER_HOST:-missing}
+  POSTGRES_PORT: ${POSTGRES_PORT:-5432}
 
 services:
   db:
     image: postgres:16
     ports:
-      - 5432:5432
+      - "$POSTGRES_PORT:5432"
     environment:
       - POSTGRES_PASSWORD=postgres
 

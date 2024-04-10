@@ -12,6 +12,7 @@ import uuid
 from decimal import Decimal
 
 import faker
+import reversion
 from django.core.management import BaseCommand
 from django.core.management.base import CommandParser
 from django.db import transaction
@@ -125,20 +126,21 @@ class Command(BaseCommand):
         system = IntegratedSystem.objects.get(slug=system_slug)
 
         max_products = 3
-        for i in range(1, max_products + 1):
-            product_sku = fake_courseware_id("course", include_run_tag=True)
-            product = Product.objects.create(
-                name=f"Test Product {i}",
-                description=f"Test Product {i} description.",
-                sku=product_sku,
-                system=system,
-                price=Decimal(random.random() * 10000).quantize(Decimal("0.01")),
-                system_data={
-                    "courserun": product_sku,
-                    "program": fake_courseware_id("program"),
-                },
-            )
-            self.stdout.write(f"Created product {product.id} - {product.sku}")
+        with reversion.create_revision():
+            for i in range(1, max_products + 1):
+                product_sku = fake_courseware_id("course", include_run_tag=True)
+                product = Product.objects.create(
+                    name=f"Test Product {i}",
+                    description=f"Test Product {i} description.",
+                    sku=product_sku,
+                    system=system,
+                    price=Decimal(random.uniform(0, 999)).quantize(Decimal("0.01")),
+                    system_data={
+                        "courserun": product_sku,
+                        "program": fake_courseware_id("program"),
+                    },
+                )
+                self.stdout.write(f"Created product {product.id} - {product.sku}")
 
     def remove_test_data(self) -> None:
         """Remove the test data."""
@@ -174,11 +176,25 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("Aborting."))
             return
 
-        for system in test_systems:
-            Product.all_objects.filter(
-                pk__in=[product.id for product in system.products.all()]
-            ).delete()
-            IntegratedSystem.all_objects.filter(pk=system.id).delete()
+        with transaction.atomic():
+            for system in test_systems:
+                all_products = Product.all_objects.filter(
+                    pk__in=[product.id for product in system.products.all()]
+                )
+
+                for product in all_products.all():
+                    versions = (
+                        reversion.models.Version.objects.get_for_object_reference(
+                            Product, product.id
+                        )
+                    )
+                    [version.revision.delete() for version in versions.all()]
+                    versions.delete()
+
+                all_products.delete()
+
+        with transaction.atomic():
+            IntegratedSystem.all_objects.filter(pk__in=test_systems).delete()
 
         self.stdout.write(self.style.SUCCESS("Test data removed."))
 
@@ -189,11 +205,11 @@ class Command(BaseCommand):
         only_products = options["only_products"]
         systems = []
 
-        with transaction.atomic():
-            if remove:
-                self.remove_test_data()
-                return
+        if remove:
+            self.remove_test_data()
+            return
 
+        with transaction.atomic():
             if not only_products:
                 self.add_test_systems()
                 systems = [

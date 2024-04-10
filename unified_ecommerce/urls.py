@@ -27,6 +27,7 @@ from drf_spectacular.views import (
 )
 
 urlpatterns = [
+    path("", include("cart.urls")),
     path("admin/", admin.site.urls),
     path("hijack/", include("hijack.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
