@@ -241,7 +241,8 @@ def refund_order(
        Transaction obj
 
     Returns:
-        bool : A boolean identifying if an order refund was successful
+        tuple of (bool, str) : A boolean identifying if an order refund was
+        successful, and the error message (if there is one)
     """
     refund_amount = kwargs.get("refund_amount")
     refund_reason = kwargs.get("refund_reason", "")
