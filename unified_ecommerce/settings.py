@@ -14,7 +14,7 @@ import datetime
 import logging
 import os
 import platform
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
