@@ -1,60 +1,55 @@
 """Middleware for Unified Ecommerce."""
 
-import json
 import logging
 
+from django.contrib.auth import login
 from django.contrib.auth.middleware import RemoteUserMiddleware
+from django.core.exceptions import ImproperlyConfigured
 
-from unified_ecommerce.utils import decode_x_header
+from authentication.api import get_user_from_apisix_headers
 
 log = logging.getLogger(__name__)
 
 
-class ApisixUserMiddleware:
+class ApisixUserMiddleware(RemoteUserMiddleware):
     """Checks for and processes APISIX-specific headers."""
 
-    def decode_apisix_headers(self, request):
-        """Decode the APISIX-specific headers."""
+    def process_request(self, request):
+        """
+        Check the request for an authenticated user, or authenticate using the
+        APISIX data if there isn't one.
+        """
+
+        if not hasattr(request, "user"):
+            msg = "ApisixUserMiddleware requires the authentication middleware."
+            raise ImproperlyConfigured(msg)
 
         try:
-            apisix_result = decode_x_header(request, "HTTP_X_USERINFO")
-            if not apisix_result:
-                log.debug(
-                    "No APISIX-specific header found",
-                )
-                return None
-        except json.JSONDecodeError:
-            log.debug(
-                "Got bad APISIX-specific header: %s",
-                request.META.get("HTTP_X_USERINFO", ""),
-            )
+            apisix_user = get_user_from_apisix_headers(request)
+        except KeyError:
+            if self.force_logout_if_no_header and request.user.is_authenticated:
+                self._remove_invalid_user(request)
+            return
 
-            return None
+        if request.user.is_authenticated:
+            # The user is authenticated but like the RemoteUserMiddleware we
+            # should now check and make sure the user APISIX is passing is
+            # the same user.
 
-        log.debug("ApisixUserMiddleware: Got %s", apisix_result)
+            if request.user != apisix_user:
+                self._remove_invalid_user(request)
 
-        return {
-            "email": apisix_result["email"],
-            "preferred_username": apisix_result["sub"],
-            "given_name": apisix_result["given_name"],
-            "family_name": apisix_result["family_name"],
-        }
+            return
 
-    def __init__(self, get_response):
-        """Initialize the middleware."""
-        self.get_response = get_response
+        if not apisix_user:
+            self._remove_invalid_user(request)
 
-    def __call__(self, request):
-        """
-        Process any APISIX headers and put them in the request.
+            return
 
-        If valid data is found, then it will be put into the "api_gateway_userdata"
-        attribute of the request. Otherwise, it'll be set to None.
-        """
+        request.user = apisix_user
+        login(request, apisix_user, backend="django.contrib.auth.backends.ModelBackend")
 
-        request.api_gateway_userdata = self.decode_apisix_headers(request)
-
-        return self.get_response(request)
+        return
 
 
 class ForwardUserMiddleware(RemoteUserMiddleware):

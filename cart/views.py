@@ -35,6 +35,7 @@ class CartView(LoginRequiredMixin, TemplateView):
 
     template_name = "cart.html"
     extra_context = {"title": "Cart", "innertitle": "Cart"}
+    login_url = "/sso_login/"
 
     def get(self, request: HttpRequest) -> HttpResponse:
         """Render the cart page."""

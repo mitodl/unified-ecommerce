@@ -4,6 +4,7 @@ import logging
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -19,9 +20,6 @@ from system_meta.serializers import (
     AdminIntegratedSystemSerializer,
     IntegratedSystemSerializer,
     ProductSerializer,
-)
-from unified_ecommerce.authentication import (
-    ApiGatewayAuthentication,
 )
 from unified_ecommerce.permissions import (
     IsAdminUserOrReadOnly,
@@ -63,17 +61,14 @@ class ProductViewSet(AuthVariegatedModelViewSet):
 
 
 @api_view(["GET"])
-@authentication_classes(
-    [
-        ApiGatewayAuthentication,
-    ]
-)
 @permission_classes([])
+@authentication_classes([SessionAuthentication])
 def apisix_test_request(request):
     """Test API request so we can see how the APISIX integration works."""
 
     response = {
         "name": "Response ok!",
+        "authenticated": request.user.is_authenticated,
         "user": request.user.username if request.user is not None else None,
         "x_userinfo": decode_x_header(request, "HTTP_X_USERINFO")
         or "No HTTP_X_USERINFO header",
@@ -86,6 +81,7 @@ def apisix_test_request(request):
 
 @api_view(["GET"])
 @permission_classes([])
+@authentication_classes([SessionAuthentication])
 def traefik_test_request(request):
     """Test API request so we can see how the Traefik integration works."""
 
@@ -100,6 +96,7 @@ def traefik_test_request(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+@authentication_classes([SessionAuthentication])
 def authed_traefik_test_request(request):
     """Test API request so we can see how the Traefik integration works."""
 

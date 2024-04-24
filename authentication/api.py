@@ -1,5 +1,6 @@
 """API functions for authentication."""
 
+import json
 import logging
 
 import requests
@@ -15,9 +16,85 @@ from requests_oauthlib import OAuth2Session
 from authentication.models import KeycloakAdminToken
 from unified_ecommerce.celery import app
 from unified_ecommerce.exceptions import KeycloakAuthError
+from unified_ecommerce.utils import decode_x_header
 
 User = get_user_model()
 log = logging.getLogger(__name__)
+
+
+def decode_apisix_headers(request):
+    """Decode the APISIX-specific headers."""
+
+    try:
+        apisix_result = decode_x_header(request, "HTTP_X_USERINFO")
+        if not apisix_result:
+            log.debug(
+                "decode_apisix_headers: No APISIX-specific header found",
+            )
+            return None
+    except json.JSONDecodeError:
+        log.debug(
+            "decode_apisix_headers: Got bad APISIX-specific header: %s",
+            request.META.get("HTTP_X_USERINFO", ""),
+        )
+
+        return None
+
+    log.debug("decode_apisix_headers: Got %s", apisix_result)
+
+    return {
+        "email": apisix_result["email"],
+        "preferred_username": apisix_result["sub"],
+        "given_name": apisix_result["given_name"],
+        "family_name": apisix_result["family_name"],
+    }
+
+
+def get_user_from_apisix_headers(request):
+    """Get a user based on the APISIX headers."""
+
+    decoded_headers = decode_apisix_headers(request)
+
+    if not decoded_headers:
+        return None
+
+    (
+        email,
+        preferred_username,
+        given_name,
+        family_name,
+    ) = decoded_headers.values()
+
+    log.debug("get_user_from_apisix_headers: Authenticating %s", preferred_username)
+
+    user, created = User.objects.filter(username=preferred_username).get_or_create(
+        defaults={
+            "username": preferred_username,
+            "email": email,
+            "first_name": given_name,
+            "last_name": family_name,
+        }
+    )
+
+    if created:
+        log.debug(
+            "get_user_from_apisix_headers: User %s not found, created new",
+            preferred_username,
+        )
+        user.set_unusable_password()
+        user.save()
+    else:
+        log.debug(
+            "get_user_from_apisix_headers: Found existing user for %s: %s",
+            preferred_username,
+            user,
+        )
+
+        user.first_name = given_name
+        user.last_name = family_name
+        user.save()
+
+    return user
 
 
 def keycloak_session_init(url, **kwargs):  # noqa: C901

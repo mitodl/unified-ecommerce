@@ -197,88 +197,14 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Social Auth configurations - [START]
-AUTHENTICATION_BACKENDS = (
+AUTHENTICATION_BACKENDS = [
     # "authentication.backends.ol_open_id_connect.OlOpenIdConnectAuth",
     # the following needs to stay here to allow login of local users
     "authentication.backends.KeycloakRemoteUserBackend",
     "django.contrib.auth.backends.ModelBackend",
     "guardian.backends.ObjectPermissionBackend",
-)
+]
 
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/"
-SOCIAL_AUTH_LOGIN_ERROR_URL = "login"
-SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS = [urlparse(SITE_BASE_URL).netloc]
-
-SOCIAL_AUTH_PIPELINE = (
-    # Checks if an admin user attempts to login/register while hijacking another user.
-    "authentication.pipeline.user.forbid_hijack",
-    # Get the information we can about the user and return it in a simple
-    # format to create the user instance later. On some cases the details are
-    # already part of the auth response from the provider, but sometimes this
-    # could hit a provider API.
-    "social_core.pipeline.social_auth.social_details",
-    # Get the social uid from whichever service we're authing thru. The uid is
-    # the unique identifier of the given user in the provider.
-    "social_core.pipeline.social_auth.social_uid",
-    # Verifies that the current auth process is valid within the current
-    # project, this is where emails and domains whitelists are applied (if
-    # defined).
-    "social_core.pipeline.social_auth.auth_allowed",
-    # Checks if the current social-account is already associated in the site.
-    "social_core.pipeline.social_auth.social_user",
-    # Associates the current social details with another user account with the same email address.  # noqa: E501
-    "social_core.pipeline.social_auth.associate_by_email",
-    # Send a validation email to the user to verify its email address.
-    # Disabled by default.
-    "social_core.pipeline.mail.mail_validation",
-    # # Generate a username for the user
-    # # NOTE: needs to be right before create_user so nothing overrides the username
-    # "authentication.pipeline.user.get_username",
-    # Create a user account if we haven't found one yet.
-    "social_core.pipeline.user.create_user",
-    # Create the record that associates the social account with the user.
-    "social_core.pipeline.social_auth.associate_user",
-    # Populate the extra_data field in the social record with the values
-    # specified by settings (and the default ones like access_token, etc).
-    "social_core.pipeline.social_auth.load_extra_data",
-    # Update the user record with any changed info from the auth service.
-    "social_core.pipeline.user.user_details",
-    # Create a favorites list for new users
-    "authentication.pipeline.user.user_created_actions",
-)
-
-SOCIAL_AUTH_OL_OIDC_OIDC_ENDPOINT = get_string(
-    name="SOCIAL_AUTH_OL_OIDC_OIDC_ENDPOINT",
-    default=None,
-)
-
-SOCIAL_AUTH_OL_OIDC_KEY = get_string(
-    name="SOCIAL_AUTH_OL_OIDC_KEY",
-    default="some available client id",
-)
-
-SOCIAL_AUTH_OL_OIDC_SECRET = get_string(
-    name="SOCIAL_AUTH_OL_OIDC_SECRET",
-    default="some super secret key",
-)
-
-USERINFO_URL = get_string(
-    name="USERINFO_URL",
-    default=None,
-)
-
-ACCESS_TOKEN_URL = get_string(
-    name="ACCESS_TOKEN_URL",
-    default=None,
-)
-
-AUTHORIZATION_URL = get_string(
-    name="AUTHORIZATION_URL",
-    default=None,
-)
-
-# Social Auth configurations - [END]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/

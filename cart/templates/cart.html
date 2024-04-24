@@ -83,13 +83,13 @@ function add_to_cart(event) {
     if (event.submitter.id === "add-and-checkout") {
         var form = event.target;
 
-        form.setAttribute("action", `http://ue.odl.local/api/v0/payments/baskets/create_from_product/${product_raw}/`);
+        form.setAttribute("action", `/api/v0/payments/baskets/create_from_product/${product_raw}/`);
         return true;
     }
 
     event.preventDefault();
 
-    axios.post(`http://ue.odl.local/api/v0/payments/baskets/create_from_product/${product_raw}/`, {}, { headers: { "X-CSRFToken": csrfmiddlewaretoken }})
+    axios.post(`/api/v0/payments/baskets/create_from_product/${product_raw}/`, {}, { headers: { "X-CSRFToken": csrfmiddlewaretoken }})
         .then(function (response) {
             window.location.reload();
         })
@@ -106,7 +106,7 @@ function clear_cart(event) {
     var slug = "{{ basket.integrated_system.slug }}";
     var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
 
-    axios.delete(`http://ue.odl.local/api/v0/payments/baskets/clear/`, { headers: { "X-CSRFToken": csrfmiddlewaretoken } })
+    axios.delete(`/api/v0/payments/baskets/clear/`, { headers: { "X-CSRFToken": csrfmiddlewaretoken } })
         .then(function (response) {
             window.location.reload();
         })
