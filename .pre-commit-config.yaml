@@ -11,7 +11,7 @@ ci:
     - scss-lint
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -38,11 +38,11 @@ repos:
   #         - prettier
   #         - prettier-plugin-django-alpine
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.7.0-1
+    rev: v3.8.0-1
     hooks:
       - id: shfmt
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.32.0
+    rev: v1.35.1
     hooks:
       - id: yamllint
         args: [--format, parsable, -d, relaxed]
@@ -70,7 +70,7 @@ repos:
           - --exclude-files
           - ".*/generated/"
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.1.4"
+    rev: "v0.4.2"
     hooks:
       - id: ruff-format
       - id: ruff
@@ -96,7 +96,7 @@ repos:
   #       exclude: node_modules/
   #       require_serial: false
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
+    rev: v0.10.0.1
     hooks:
       - id: shellcheck
         args: ["--severity=warning"]
