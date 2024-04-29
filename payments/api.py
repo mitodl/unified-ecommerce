@@ -394,12 +394,9 @@ def check_and_process_pending_orders_for_resolution(refnos=None):
 
                 msg = f"Cancelled order {order.reference_number}."
                 log.info(msg)
-            except Exception as e:
-                msg = (
-                    "Couldn't process pending order for cancellation "
-                    f"{payload['req_reference_number']}: {e!s}"
-                )
-                log.exception(msg)
+            except Exception:
+                msg = "Couldn't process pending order for cancellation %s"
+                log.exception(msg, payload["req_reference_number"])
                 error_count += 1
 
     return (fulfilled_count, cancel_count, error_count)
