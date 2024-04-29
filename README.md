@@ -52,16 +52,16 @@ If you're going to use the included Traefik Composer environment, also set these
   Sets the client secret for the service account in the `master` realm.
 
 - `KEYCLOAK_ADMIN_SECURE`
-  
+
   Check the Keycloak instance's certificates for validity. Defaults to True - set to False when running locally.
 
 - `KEYCLOAK_REALM`
-  
+
   Sets the realm that the forward auth should use for authentication.
 
 - `KEYCLOAK_CLIENT_ID`
 
-  Sets the client ID for authentication within the realm by the forward auth. 
+  Sets the client ID for authentication within the realm by the forward auth.
 
 - `KEYCLOAK_CLIENT_SECRET`
 
@@ -69,10 +69,10 @@ If you're going to use the included Traefik Composer environment, also set these
 
 - `TRAEFIK_FORWARD_AUTH_ADMIN_URL`
 
-  Sets base URI for the provider - this should be the _plain HTTP_ version of `KEYCLOAK_ADMIN_URL`. 
+  Sets base URI for the provider - this should be the _plain HTTP_ version of `KEYCLOAK_ADMIN_URL`.
 
 - `TRAEFIK_PORT`
-  
+
   Sets the port that Traefik uses for incoming requests. (Usually, this is port 80.)
 
 - `TRAEFIK_ADMIN_PORT`
@@ -104,17 +104,17 @@ The app depends on an outside system to provide the authentication layer for its
 
 #### Traefik
 
-If you want to run the system behind a Traefik install, there is a separate Compose file that will start the app with Traefik for you. Use the `docker-compose-traefik.yml` file for this purpose. This will expose the service on port 80, and you should be able to get to the Traefik dashboard at port 8080. The Compose file is set up with the forward auth support necessary to talk to Keycloak. Make sure you've included the extra `.env` settings mentioned above. 
+If you want to run the system behind a Traefik install, there is a separate Compose file that will start the app with Traefik for you. Use the `docker-compose-traefik.yml` file for this purpose. This will expose the service on port 80, and you should be able to get to the Traefik dashboard at port 8080. The Compose file is set up with the forward auth support necessary to talk to Keycloak. Make sure you've included the extra `.env` settings mentioned above.
 
 The Traefik forward auth will need a client to authenticate users with. Create this client in the realm you want to use for user authentication. The steps to do this are:
 
 1. Log into Keycloak Admin and navigate to the realm you want to use for authentication.
 2. Go to Clients, then click Create client.
 3. Fill out the form.
-   1. The `Client ID` can be any valid string - a good choice is `traefik-client`. Save this in your `.env` as `KEYCLOAK_CLIENT_ID`. 
-   2. For local testing, it's OK to use `*` for both `Valid redirect URIs` and `Web origins`. This is not OK for anything attached to the Internet. 
+   1. The `Client ID` can be any valid string - a good choice is `traefik-client`. Save this in your `.env` as `KEYCLOAK_CLIENT_ID`.
+   2. For local testing, it's OK to use `*` for both `Valid redirect URIs` and `Web origins`. This is not OK for anything attached to the Internet.
    3. Make sure `Client authentication` is on, and `Standard flow` and `Implicit flow` are checked.
-4. After you've saved the client, go to Credentials and copy out the `Client secret`. (You may need to manually cut and paste; the copy to clipboard button has never worked for me.) Set this in your `.env` as `KEYCLOAK_CLIENT_SECRET`. 
+4. After you've saved the client, go to Credentials and copy out the `Client secret`. (You may need to manually cut and paste; the copy to clipboard button has never worked for me.) Set this in your `.env` as `KEYCLOAK_CLIENT_SECRET`.
 
 Additionally, you'll need to create a service account for the application in Keycloak, as the app will need to call Keycloak directly to get user information. To do this:
 
@@ -138,9 +138,9 @@ You'll need to define routes for APISIX before it will handle traffic for the ap
 
 1. In your Keycloak instance, create a new Client in the realm you are going to use for UE.
    2. The `Client ID` can be any valid string - a good choice is `apisix-client`. Set this in your shell as `CLIENT_ID`.
-   1. For local testing, it's OK to use `*` for both `Valid redirect URIs` and `Web origins`. This is not OK for anything attached to the Internet. 
+   1. For local testing, it's OK to use `*` for both `Valid redirect URIs` and `Web origins`. This is not OK for anything attached to the Internet.
    2. Make sure `Client authentication` is on, and `Standard flow` and `Implicit flow` are checked.
-   3. After you've saved the client, go to Credentials and copy out the `Client secret`. (You may need to manually cut and paste; the copy to clipboard button has never worked for me.) Set this in your shell as `CLIENT_SECRET`. 
+   3. After you've saved the client, go to Credentials and copy out the `Client secret`. (You may need to manually cut and paste; the copy to clipboard button has never worked for me.) Set this in your shell as `CLIENT_SECRET`.
 2. Set the realm you're using in your shell as `OIDC_REALM`.
 3. In your Keycloak Realm Settings, you should be able to find the OpenID Endpoint Configuration link. Copy/paste this somewhere - you'll need it later. Set this in your shell as `DISCOVERY_URL`.
 4. From the `config/apisix/apisix.yml` file, get the `key` out. This should be on line 11. You can also reset it here if you wish. Set this as `API_KEY`.
