@@ -22,7 +22,7 @@ services:
 
   traefik-forward-auth:
     image: mesosphere/traefik-forward-auth
-    command: --auth-host ue.odl.local --client-secret $KEYCLOAK_CLIENT_SECRET --client-id $KEYCLOAK_CLIENT_ID --provider-uri "$TRAEFIK_FORWARD_AUTH_ADMIN_URL/realms/$KEYCLOAK_REALM" --secret $KEYCLOAK_CLIENT_SECRET --scope "openid profile email"
+    command: --auth-host $TRAEFIK_APP_URL --client-secret $KEYCLOAK_CLIENT_SECRET --client-id $KEYCLOAK_CLIENT_ID --provider-uri "$TRAEFIK_FORWARD_AUTH_ADMIN_URL/realms/$KEYCLOAK_REALM" --secret $KEYCLOAK_CLIENT_SECRET --scope "openid profile email"
     environment:
       - INSECURE_COOKIE=true # Example assumes no https, do not use in production
       - LOG_LEVEL=debug
