@@ -27,6 +27,8 @@ from drf_spectacular.views import (
 )
 
 urlpatterns = [
+    path("", include("cart.urls")),
+    path("", include("django.contrib.auth.urls")),
     path("admin/", admin.site.urls),
     path("hijack/", include("hijack.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
@@ -47,6 +49,7 @@ urlpatterns = [
     re_path(r"^api/v0/meta/", include("system_meta.urls")),
     # Private Paths
     re_path(r"^_/v0/meta/", include("system_meta.private_urls")),
+    re_path(r"^api/v0/payments/", include("payments.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

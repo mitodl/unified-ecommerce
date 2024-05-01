@@ -3,12 +3,12 @@
 # See https://pre-commit.com/hooks.html for more hooks
 # A bunch of frontend related stuff is commented out here - this is because we don't
 # have a frontend yet.
-ci:
-  skip:
-    - prettier-django
+# ci:
+#  skip:
+#    - prettier-django
     # Because these are local hooks it seems like they won't easily run in pre-commit CI
-    - eslint
-    - scss-lint
+#    - eslint
+#    - scss-lint
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
