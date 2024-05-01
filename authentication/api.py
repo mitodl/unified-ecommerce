@@ -122,6 +122,8 @@ def keycloak_session_init(url, **kwargs):  # noqa: C901
         "client_secret": settings.KEYCLOAK_ADMIN_CLIENT_SECRET,
     }
 
+    log.debug("Token URL is %s", token_url)
+
     def update_token(token):
         log.debug("Refreshing Keycloak token %s", token)
         KeycloakAdminToken.objects.all().delete()
