@@ -113,8 +113,7 @@ def keycloak_session_init(url, **kwargs):  # noqa: C901
     """
 
     token_url = (
-        f"{settings.KEYCLOAK_ADMIN_URL}/auth/realms/master/"
-        "protocol/openid-connect/token"
+        f"{settings.KEYCLOAK_ADMIN_URL}/realms/master/protocol/openid-connect/token"
     )
     client = BackendApplicationClient(client_id=settings.KEYCLOAK_ADMIN_CLIENT_ID)
 
@@ -160,28 +159,25 @@ def keycloak_session_init(url, **kwargs):  # noqa: C901
         except InvalidGrantError:
             log.exception(
                 (
-                    "keycloak_session_init couldn't refresh token %s because of an"
+                    "keycloak_session_init couldn't refresh token because of an"
                     " invalid grant error"
                 ),
-                token,
             )
             return None
         except TokenExpiredError:
             log.exception(
                 (
-                    "keycloak_session_init couldn't refresh token %s because of an"
+                    "keycloak_session_init couldn't refresh token because of an"
                     " expired token error"
                 ),
-                token,
             )
             return None
         except requests.exceptions.RequestException:
             log.exception(
                 (
-                    "keycloak_session_init couldn't refresh token %s because of an"
+                    "keycloak_session_init couldn't refresh token because of an"
                     " HTTP error"
                 ),
-                token,
             )
             return None
 
@@ -206,6 +202,13 @@ def keycloak_session_init(url, **kwargs):  # noqa: C901
 
         session = regenerate_token(client)
 
+        if not session:
+            log.exception(
+                "keycloak_session_init: attempted to regenerate the token, but"
+                " failed to"
+            )
+            return None
+
         keycloak_response = session.get(url, **kwargs).json()
     except requests.exceptions.RequestException:
         log.exception(
@@ -215,6 +218,9 @@ def keycloak_session_init(url, **kwargs):  # noqa: C901
             ),
             token,
         )
+        return None
+    except AttributeError:
+        log.exception("keycloak_session_init failed")
         return None
 
     log.debug("Keycloak response: %s", keycloak_response)
