@@ -149,9 +149,11 @@ You'll need to define routes for APISIX before it will handle traffic for the ap
 4. From the `config/apisix/apisix.yml` file, get the `key` out. This should be on line 11. You can also reset it here if you wish. Set this as `API_KEY`.
 5. Start the entire thing: `docker compose -f docker-compose-apisix.yml up`. This will bring up Universal Ecommerce and the APISIX instance.
 6. Create an all-encompassing route for UE in APISIX. This uses the APISIX API - be sure to read this through before running it and fill out placeholders.
+   > This is now available in a script in `scripts/bootstrap_apisix.sh`. Copy it elsewhere, fill in the blanks, and run it to set up APISIX.
 ```bash
 # Set variables - skip if you were doing this in each step above
 
+APISIX_ROOT=<root location for APISIX - no trailing slash>
 API_KEY=<api key>
 OIDC_REALM=<your Keycloak realm>
 CLIENT_ID=<your client ID>
@@ -211,7 +213,7 @@ postbody=$(cat << ROUTE_END
 ROUTE_END
 )
 
-curl http://127.0.0.1:9180/apisix/admin/routes/ue-default -H "X-API-KEY: $API_KEY" -X PUT -d "$postbody"
+curl http://127.0.0.1:9180/apisix/admin/routes/ue -H "X-API-KEY: $API_KEY" -X PUT -d ${postbody}
 ```
 
 You should now be able to get to the app via APISIX. There is an internal API at `http://ue.odl.local:9080/_/v0/meta/apisix_test_request/` that you can hit to see if it worked. The wildcard route above will route all UE traffic (or, more correctly, all traffic going into APISIX) through Keycloak and then into UE, so you should also be able to access the Django Admin through it if you've set your Keycloak user to be an admin.
