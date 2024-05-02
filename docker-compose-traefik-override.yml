@@ -1,7 +1,0 @@
-services:
-  nginx:
-    labels:
-      - "traefik.http.routers.ue.rule=Host(`ue.odl.local`)"
-      - "traefik.http.routers.ue.middlewares=traefik-forward-auth"
-      - "traefik.http.services.ue-service.loadbalancer.server.url=http://ue.odl.local:8073"
-      - "traefik.http.services.ue-service.loadbalancer.server.port=8073"

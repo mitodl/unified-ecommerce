@@ -3,8 +3,6 @@
 import json
 import logging
 
-from django.contrib.auth.middleware import RemoteUserMiddleware
-
 from unified_ecommerce.utils import decode_x_header
 
 log = logging.getLogger(__name__)
@@ -55,9 +53,3 @@ class ApisixUserMiddleware:
         request.api_gateway_userdata = self.decode_apisix_headers(request)
 
         return self.get_response(request)
-
-
-class ForwardUserMiddleware(RemoteUserMiddleware):
-    """RemoteUserMiddleware, but looks at X-Forwarded-User"""
-
-    header = "HTTP_X_FORWARDED_USER"
