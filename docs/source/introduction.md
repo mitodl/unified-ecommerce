@@ -9,4 +9,3 @@ The goal of the Unified Ecommerce system is to:
 - Provide a single interface for managing products, discounts, and financial assistance
 - Provide a clearinghouse for post-sale events and data
 - Reduce the load of implementing new features and responding to new requirements
-

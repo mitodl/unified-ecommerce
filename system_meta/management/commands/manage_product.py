@@ -8,6 +8,7 @@ Return codes:
 
 Ignoring A003 because "help" is valid for argparse.
 """
+
 # ruff: noqa: A003, PLR0913, FBT002
 import argparse
 
