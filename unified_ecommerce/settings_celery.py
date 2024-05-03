@@ -2,7 +2,6 @@
 Django settings for celery.
 """
 
-
 from unified_ecommerce.envs import get_bool, get_int, get_string
 
 USE_CELERY = True

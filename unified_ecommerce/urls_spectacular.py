@@ -1,5 +1,4 @@
-"""project URL Configuration
-"""
+"""project URL Configuration"""
 
 from django.urls import include, re_path
 
