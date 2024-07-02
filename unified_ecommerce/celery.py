@@ -9,7 +9,7 @@ from celery import Celery
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "unified_ecommerce.settings")
 
-from django.conf import settings  # noqa: E402
+from django.conf import settings
 
 app = Celery("unified_ecommerce")
 app.config_from_object("django.conf:settings", namespace="CELERY")
