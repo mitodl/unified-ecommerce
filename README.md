@@ -160,7 +160,8 @@ DISCOVERY_URL=<OpenID Endpoint Configuration link>
 curl "http://127.0.0.1:9180/apisix/admin/upstreams/2" \
 -H "X-API-KEY: $API_KEY" -X PUT -d '
 {
-  "type": "roundrobin",
+  "type": "chash",
+  "hash_on": "consumer",
   "nodes": {
     "nginx:8073": 1
   }
