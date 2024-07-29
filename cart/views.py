@@ -55,6 +55,7 @@ class CartView(LoginRequiredMixin, TemplateView):
                 "basket": basket,
                 "basket_items": basket.basket_items.all(),
                 "products": products,
+                "debug_mode": settings.MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG,
             },
         )
 

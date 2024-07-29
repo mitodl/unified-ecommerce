@@ -187,7 +187,7 @@ def process_cybersource_payment_response(request, order):
         # mean that the entire order is invalid, so we'll do nothing with
         # the order here (other than set it to Cancelled).
         # Transaction could be
-        msg = f"Transaction cancelled/reviewed: {processor_response.messages}"
+        msg = f"Transaction cancelled/reviewed: {processor_response.message}"
         log.debug(msg)
         order.cancel()
         order.save()

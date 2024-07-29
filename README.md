@@ -14,6 +14,7 @@ This application provides a central system to handle ecommerce activities across
   - [Code Generation](#code-generation)
   - [Committing \& Formatting](#committing--formatting)
   - [Optional Setup](#optional-setup)
+    - [Interstitial Debug Mode](#interstitial-debug-mode)
     - [Running the app in a notebook](#running-the-app-in-a-notebook)
 
 ## Initial Setup
@@ -246,6 +247,10 @@ pre-commit init-templatedir ~/.git-template
 ## Optional Setup
 
 Described below are some setup steps that are not strictly necessary for running Unified Ecommerce.
+
+### Interstitial Debug Mode
+
+You can set `MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG` to control whether or not the checkout interstitial page displays additional data and waits to submit or not. By default, this tracks the `DEBUG` setting (so it should be off in production, and on in local testing).
 
 ### Running the app in a notebook
 

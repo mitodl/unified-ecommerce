@@ -450,6 +450,9 @@ REST_FRAMEWORK_EXTENSIONS = {
 MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string(
     "MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitol-"
 )
+MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG = get_bool(
+    "MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG", DEBUG
+)
 import_settings_modules("mitol.payment_gateway.settings.cybersource")
 
 # Keycloak API settings
