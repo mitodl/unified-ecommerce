@@ -132,7 +132,7 @@ class TestIntegratedSystemViewSet(AuthVariegatedModelViewSetTest):
             ),
         ],
     )
-    def test_delete(  # noqa: PLR0913
+    def test_delete(
         self, is_logged_in, use_staff_user, client, user_client, staff_client
     ):
         """Test that the viewset can delete an object."""
@@ -309,7 +309,7 @@ class TestProductViewSet(AuthVariegatedModelViewSetTest):
             ),
         ],
     )
-    def test_delete(  # noqa: PLR0913
+    def test_delete(
         self, is_logged_in, use_staff_user, client, user_client, staff_client
     ):
         """Test that the viewset can delete an object."""
