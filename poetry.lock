@@ -1179,24 +1179,17 @@ Django = "*"
 
 [[package]]
 name = "django-server-status"
-version = "0.5.0"
-description = "Monitor server status with a healthcheck.\n"
+version = "0.7.3"
+description = "Monitor server status with a healthcheck."
 optional = false
 python-versions = "*"
 files = [
-    {file = "django-server-status-0.5.0.tar.gz", hash = "sha256:c0e7853f65208fa8596baa6916e4e85e30811fb13839c91bfa95de4c6eeb869d"},
+    {file = "django-server-status-0.7.3.tar.gz", hash = "sha256:9126e20d78c88f62ffe382c1a5c73f1206ba8dca07a8039e81e3f35f1f75941a"},
+    {file = "django_server_status-0.7.3-py3-none-any.whl", hash = "sha256:2a018c731504a3c82d45717bca011c4f6b1d547f5384c9b0a04b439e9e5c3552"},
 ]
 
 [package.dependencies]
-celery = "*"
-elasticsearch = "*"
-kombu = "*"
-psycopg2 = "*"
-redis = "*"
-six = "*"
-
-[package.extras]
-dev = ["flake8"]
+django = "*"
 
 [[package]]
 name = "django-storages"
@@ -1323,42 +1316,6 @@ uritemplate = ">=2.0.0"
 [package.extras]
 offline = ["drf-spectacular-sidecar"]
 sidecar = ["drf-spectacular-sidecar"]
-
-[[package]]
-name = "elastic-transport"
-version = "8.12.0"
-description = "Transport classes and utilities shared among Python Elastic client libraries"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "elastic-transport-8.12.0.tar.gz", hash = "sha256:48839b942fcce199eece1558ecea6272e116c58da87ca8d495ef12eb61effaf7"},
-    {file = "elastic_transport-8.12.0-py3-none-any.whl", hash = "sha256:87d9dc9dee64a05235e7624ed7e6ab6e5ca16619aa7a6d22e853273b9f1cfbee"},
-]
-
-[package.dependencies]
-certifi = "*"
-urllib3 = ">=1.26.2,<3"
-
-[package.extras]
-develop = ["aiohttp", "furo", "mock", "pytest", "pytest-asyncio", "pytest-cov", "pytest-httpserver", "pytest-mock", "requests", "sphinx (>2)", "sphinx-autodoc-typehints", "trustme"]
-
-[[package]]
-name = "elasticsearch"
-version = "8.12.1"
-description = "Python client for Elasticsearch"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "elasticsearch-8.12.1-py3-none-any.whl", hash = "sha256:cc459b7e0fb88dc85b43b9d7d254cffad552b0063a3e0a12290c8fa5f138c038"},
-    {file = "elasticsearch-8.12.1.tar.gz", hash = "sha256:00c997720fbd0f2afe5417c8193cf65d116817a0250de0521e30c3e81f00b8ac"},
-]
-
-[package.dependencies]
-elastic-transport = ">=8,<9"
-
-[package.extras]
-async = ["aiohttp (>=3,<4)"]
-requests = ["requests (>=2.4.0,<3.0.0)"]
 
 [[package]]
 name = "executing"
@@ -4072,4 +4029,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11.0"
-content-hash = "3fc497224e3a9896dbfc1752f801a6e97a08d335d9179f68465be59ee6dfa979"
+content-hash = "b003b0bc005104c8ea3358a4fb5f9f5cd8c784ce102ef9a1d3c18ac547b6a7cd"
