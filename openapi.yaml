@@ -3,6 +3,242 @@ info:
   title: ''
   version: 0.0.0
 paths:
+  /api/v0/payments/baskets/:
+    get:
+      operationId: api_v0_payments_baskets_list
+      description: API view set for Basket
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBasketList'
+          description: ''
+  /api/v0/payments/baskets/{basket}/items/:
+    get:
+      operationId: api_v0_payments_baskets_items_list
+      description: API view set for BasketItem
+      parameters:
+      - in: path
+        name: basket
+        schema:
+          type: string
+        required: true
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBasketItemList'
+          description: ''
+    post:
+      operationId: api_v0_payments_baskets_items_create
+      description: |-
+        Create a new basket item.
+
+        Args:
+            request (HttpRequest): HTTP request
+
+        Returns:
+            Response: HTTP response
+      parameters:
+      - in: path
+        name: basket
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasketItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BasketItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BasketItem'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketItem'
+          description: ''
+  /api/v0/payments/baskets/{basket}/items/{id}/:
+    delete:
+      operationId: api_v0_payments_baskets_items_destroy
+      description: API view set for BasketItem
+      parameters:
+      - in: path
+        name: basket
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v0/payments/baskets/{username}/:
+    get:
+      operationId: api_v0_payments_baskets_retrieve
+      description: API view set for Basket
+      parameters:
+      - in: path
+        name: username
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Basket'
+          description: ''
+  /api/v0/payments/baskets/clear/:
+    delete:
+      operationId: api_v0_payments_baskets_clear_destroy
+      description: |-
+        Clear the basket for the current user.
+
+        Returns:
+            Response: HTTP response
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/:
+    post:
+      operationId: api_v0_payments_baskets_create_from_product_create
+      description: |-
+        Create a new basket item from a product for the currently logged in user. Reuse
+        the existing basket object if it exists.
+
+        If the checkout flag is set in the POST data, then this will create the
+        basket, then immediately flip the user to the checkout interstitial (which
+        then redirects to the payment gateway).
+
+        Args:
+            system_slug (str): system slug
+            sku (str): product slug
+
+        POST Args:
+            quantity (int): quantity of the product to add to the basket (defaults to 1)
+            checkout (bool): redirect to checkout interstitial (defaults to False)
+
+        Returns:
+            Response: HTTP response
+      parameters:
+      - in: path
+        name: sku
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v0/payments/checkout/callback/:
+    post:
+      operationId: api_v0_payments_checkout_callback_create
+      description: |-
+        Handle webhook call from the payment gateway when the user has
+        completed a transaction.
+
+        Returns:
+            - HTTP_200_OK if the Order is found.
+
+        Raises:
+            - Http404 if the Order is not found.
+      tags:
+      - api
+      responses:
+        '200':
+          description: No response body
+  /api/v0/payments/checkout/start_checkout/:
+    post:
+      operationId: api_v0_payments_checkout_start_checkout_create
+      description: |-
+        Start the checkout process. This assembles the basket items
+        into an Order with Lines for each item, applies the attached basket
+        discounts, and then calls the payment gateway to prepare for payment.
+
+        This is expected to be called from within the Ecommerce cart app, not
+        from an integrated system.
+
+        Returns:
+            - JSON payload from the ol-django payment gateway app. The payment
+              gateway returns data necessary to construct a form that will
+              ultimately POST to the actual payment processor.
+      tags:
+      - api
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
   /integrated_system/:
     get:
       operationId: integrated_system_list
@@ -329,6 +565,37 @@ paths:
           description: No response body
 components:
   schemas:
+    Basket:
+      type: object
+      description: Basket model serializer
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        basket_items:
+          type: string
+          readOnly: true
+      required:
+      - basket_items
+      - id
+      - user
+    BasketItem:
+      type: object
+      description: BasketItem model serializer
+      properties:
+        basket:
+          type: integer
+        product:
+          type: integer
+        id:
+          type: integer
+          readOnly: true
+      required:
+      - basket
+      - id
+      - product
     IntegratedSystem:
       type: object
       description: Serializer for IntegratedSystem model.
@@ -348,6 +615,46 @@ components:
       required:
       - id
       - name
+    PaginatedBasketItemList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BasketItem'
+    PaginatedBasketList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Basket'
     PaginatedIntegratedSystemList:
       type: object
       properties:

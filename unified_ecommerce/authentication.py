@@ -92,6 +92,7 @@ class ApiGatewayAuthentication(BaseAuthentication):
         """Authenticate the user based on request.api_gateway_userdata."""
 
         if not request or not request.api_gateway_userdata:
+            log.debug("ApiGatewayAuthentication: no request or userdata, exiting")
             return None
 
         log.debug(
