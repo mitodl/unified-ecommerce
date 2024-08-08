@@ -3688,12 +3688,12 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
 name = "static3"
-version = "0.5.1"
+version = "0.7.0"
 description = "A really simple WSGI way to serve static (or mixed) content."
 optional = false
 python-versions = "*"
 files = [
-    {file = "static3-0.5.1.tar.gz", hash = "sha256:78393983482d8f41e6fcf91f3fd99c979ced088c4740c9f22835b96e6712897c"},
+    {file = "static3-0.7.0.tar.gz", hash = "sha256:674641c64bc75507af2eb20bef7e7e3593dca993dec6674be108fa15b42f47c8"},
 ]
 
 [package.extras]
@@ -4072,4 +4072,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11.0"
-content-hash = "3fc497224e3a9896dbfc1752f801a6e97a08d335d9179f68465be59ee6dfa979"
+content-hash = "8b0018626a96d61cdf79e2596c454e2cd12a1810f360bfcad0c1b6c83d2a8fa9"
