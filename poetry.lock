@@ -3751,12 +3751,13 @@ testing = ["black", "mypy", "pytest", "pytest-gitignore", "pytest-mock", "respon
 
 [[package]]
 name = "toolz"
-version = "0.10.0"
+version = "0.12.1"
 description = "List processing tools and functional utilities"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = ">=3.7"
 files = [
-    {file = "toolz-0.10.0.tar.gz", hash = "sha256:08fdd5ef7c96480ad11c12d472de21acd32359996f69a5259299b540feba4560"},
+    {file = "toolz-0.12.1-py3-none-any.whl", hash = "sha256:d22731364c07d72eea0a0ad45bafb2c2937ab6fd38a3507bf55eae8744aa7d85"},
+    {file = "toolz-0.12.1.tar.gz", hash = "sha256:ecca342664893f177a13dac0e6b41cbd8ac25a358e5f215316d43e2100224f4d"},
 ]
 
 [[package]]
@@ -4072,4 +4073,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11.0"
-content-hash = "3fc497224e3a9896dbfc1752f801a6e97a08d335d9179f68465be59ee6dfa979"
+content-hash = "a6e5d241b41c4c9021afced65b746270fc4da73f441a35e680fb78fe04a65f2b"
