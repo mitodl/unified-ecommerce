@@ -23,3 +23,27 @@ services:
       - ./config/apisix/apisix.yml:/usr/local/apisix/conf/config.yaml
     depends_on:
       - etcd
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    depends_on:
+      - db
+    ports:
+      - 7080:7080
+      - 7443:7443
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_SVC_ADMIN:-admin}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_SVC_ADMIN_PASSWORD:-admin}
+    networks:
+      default:
+        aliases:
+        - ${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local}
+    command: start --verbose --features scripts --import-realm --hostname=${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local} --hostname-strict=false --hostname-debug=true --https-port=7443 --https-certificate-file=/etc/x509/https/tls.crt --https-certificate-key-file=/etc/x509/https/tls.key --http-enabled=true --http-port=7080 --config-keystore=/etc/keycloak-store --config-keystore-password=supersecret --db=postgres --db-url-database=keycloak --db-url-host=db --db-schema=public --db-password=postgres --db-username=postgres
+    volumes:
+      - keycloak-store:/etc/keycloak-store
+      - ./config/keycloak/tls:/etc/x509/https
+      - ./config/keycloak/realms:/opt/keycloak/data/import
+
+volumes:
+  keycloak-store:
+    driver: local
