@@ -24,6 +24,56 @@ import type { RequestArgs } from './base';
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 
 /**
+ * Basket model serializer
+ * @export
+ * @interface Basket
+ */
+export interface Basket {
+    /**
+     *
+     * @type {number}
+     * @memberof Basket
+     */
+    'id': number;
+    /**
+     *
+     * @type {number}
+     * @memberof Basket
+     */
+    'user': number;
+    /**
+     *
+     * @type {string}
+     * @memberof Basket
+     */
+    'basket_items': string;
+}
+/**
+ * BasketItem model serializer
+ * @export
+ * @interface BasketItem
+ */
+export interface BasketItem {
+    /**
+     *
+     * @type {number}
+     * @memberof BasketItem
+     */
+    'basket': number;
+    /**
+     *
+     * @type {number}
+     * @memberof BasketItem
+     */
+    'product': number;
+    /**
+     *
+     * @type {number}
+     * @memberof BasketItem
+     */
+    'id': number;
+}
+/**
  * Serializer for IntegratedSystem model.
  * @export
  * @interface IntegratedSystem
@@ -40,43 +90,81 @@ export interface IntegratedSystem {
      * @type {string}
      * @memberof IntegratedSystem
      */
-    'deleted_on': string | null;
-    /**
-     *
-     * @type {boolean}
-     * @memberof IntegratedSystem
-     */
-    'deleted_by_cascade': boolean;
-    /**
-     *
-     * @type {string}
-     * @memberof IntegratedSystem
-     */
-    'created_on': string;
-    /**
-     *
-     * @type {string}
-     * @memberof IntegratedSystem
-     */
-    'updated_on': string;
-    /**
-     *
-     * @type {string}
-     * @memberof IntegratedSystem
-     */
     'name': string;
     /**
      *
      * @type {string}
      * @memberof IntegratedSystem
      */
-    'description'?: string;
+    'slug'?: string | null;
     /**
      *
      * @type {string}
      * @memberof IntegratedSystem
      */
-    'api_key'?: string;
+    'description'?: string;
+}
+/**
+ *
+ * @export
+ * @interface PaginatedBasketItemList
+ */
+export interface PaginatedBasketItemList {
+    /**
+     *
+     * @type {number}
+     * @memberof PaginatedBasketItemList
+     */
+    'count'?: number;
+    /**
+     *
+     * @type {string}
+     * @memberof PaginatedBasketItemList
+     */
+    'next'?: string | null;
+    /**
+     *
+     * @type {string}
+     * @memberof PaginatedBasketItemList
+     */
+    'previous'?: string | null;
+    /**
+     *
+     * @type {Array<BasketItem>}
+     * @memberof PaginatedBasketItemList
+     */
+    'results'?: Array<BasketItem>;
+}
+/**
+ *
+ * @export
+ * @interface PaginatedBasketList
+ */
+export interface PaginatedBasketList {
+    /**
+     *
+     * @type {number}
+     * @memberof PaginatedBasketList
+     */
+    'count'?: number;
+    /**
+     *
+     * @type {string}
+     * @memberof PaginatedBasketList
+     */
+    'next'?: string | null;
+    /**
+     *
+     * @type {string}
+     * @memberof PaginatedBasketList
+     */
+    'previous'?: string | null;
+    /**
+     *
+     * @type {Array<Basket>}
+     * @memberof PaginatedBasketList
+     */
+    'results'?: Array<Basket>;
 }
 /**
  *
@@ -157,43 +245,19 @@ export interface PatchedIntegratedSystem {
      * @type {string}
      * @memberof PatchedIntegratedSystem
      */
-    'deleted_on'?: string | null;
-    /**
-     *
-     * @type {boolean}
-     * @memberof PatchedIntegratedSystem
-     */
-    'deleted_by_cascade'?: boolean;
-    /**
-     *
-     * @type {string}
-     * @memberof PatchedIntegratedSystem
-     */
-    'created_on'?: string;
-    /**
-     *
-     * @type {string}
-     * @memberof PatchedIntegratedSystem
-     */
-    'updated_on'?: string;
-    /**
-     *
-     * @type {string}
-     * @memberof PatchedIntegratedSystem
-     */
     'name'?: string;
     /**
      *
      * @type {string}
      * @memberof PatchedIntegratedSystem
      */
-    'description'?: string;
+    'slug'?: string | null;
     /**
      *
      * @type {string}
      * @memberof PatchedIntegratedSystem
      */
-    'api_key'?: string;
+    'description'?: string;
 }
 /**
  * Serializer for Product model.
@@ -341,6 +405,768 @@ export interface Product {
      */
     'system': number;
 }
+
+/**
+ * ApiApi - axios parameter creator
+ * @export
+ */
+export const ApiApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Clear the basket for the current user.  Returns:     Response: HTTP response
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsClearDestroy: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/payments/baskets/clear/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  If the checkout flag is set in the POST data, then this will create the basket, then immediately flip the user to the checkout interstitial (which then redirects to the payment gateway).  Args:     system_slug (str): system slug     sku (str): product slug  POST Args:     quantity (int): quantity of the product to add to the basket (defaults to 1)     checkout (bool): redirect to checkout interstitial (defaults to False)  Returns:     Response: HTTP response
+         * @param {string} sku
+         * @param {string} system_slug
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsCreateFromProductCreate: async (sku: string, system_slug: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sku' is not null or undefined
+            assertParamExists('apiV0PaymentsBasketsCreateFromProductCreate', 'sku', sku)
+            // verify required parameter 'system_slug' is not null or undefined
+            assertParamExists('apiV0PaymentsBasketsCreateFromProductCreate', 'system_slug', system_slug)
+            const localVarPath = `/api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/`
+                .replace(`{${"sku"}}`, encodeURIComponent(String(sku)))
+                .replace(`{${"system_slug"}}`, encodeURIComponent(String(system_slug)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a new basket item.  Args:     request (HttpRequest): HTTP request  Returns:     Response: HTTP response
+         * @param {string} basket
+         * @param {BasketItem} BasketItem
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsItemsCreate: async (basket: string, BasketItem: BasketItem, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'basket' is not null or undefined
+            assertParamExists('apiV0PaymentsBasketsItemsCreate', 'basket', basket)
+            // verify required parameter 'BasketItem' is not null or undefined
+            assertParamExists('apiV0PaymentsBasketsItemsCreate', 'BasketItem', BasketItem)
+            const localVarPath = `/api/v0/payments/baskets/{basket}/items/`
+                .replace(`{${"basket"}}`, encodeURIComponent(String(basket)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(BasketItem, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * API view set for BasketItem
+         * @param {string} basket
+         * @param {string} id
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsItemsDestroy: async (basket: string, id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'basket' is not null or undefined
+            assertParamExists('apiV0PaymentsBasketsItemsDestroy', 'basket', basket)
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('apiV0PaymentsBasketsItemsDestroy', 'id', id)
+            const localVarPath = `/api/v0/payments/baskets/{basket}/items/{id}/`
+                .replace(`{${"basket"}}`, encodeURIComponent(String(basket)))
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * API view set for BasketItem
+         * @param {string} basket
+         * @param {number} [limit] Number of results to return per page.
+         * @param {number} [offset] The initial index from which to return the results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsItemsList: async (basket: string, limit?: number, offset?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'basket' is not null or undefined
+            assertParamExists('apiV0PaymentsBasketsItemsList', 'basket', basket)
+            const localVarPath = `/api/v0/payments/baskets/{basket}/items/`
+                .replace(`{${"basket"}}`, encodeURIComponent(String(basket)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * API view set for Basket
+         * @param {number} [limit] Number of results to return per page.
+         * @param {number} [offset] The initial index from which to return the results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsList: async (limit?: number, offset?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/payments/baskets/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * API view set for Basket
+         * @param {string} username
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsRetrieve: async (username: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'username' is not null or undefined
+            assertParamExists('apiV0PaymentsBasketsRetrieve', 'username', username)
+            const localVarPath = `/api/v0/payments/baskets/{username}/`
+                .replace(`{${"username"}}`, encodeURIComponent(String(username)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Handle webhook call from the payment gateway when the user has completed a transaction.  Returns:     - HTTP_200_OK if the Order is found.  Raises:     - Http404 if the Order is not found.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsCheckoutCallbackCreate: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/payments/checkout/callback/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Start the checkout process. This assembles the basket items into an Order with Lines for each item, applies the attached basket discounts, and then calls the payment gateway to prepare for payment.  This is expected to be called from within the Ecommerce cart app, not from an integrated system.  Returns:     - JSON payload from the ol-django payment gateway app. The payment       gateway returns data necessary to construct a form that will       ultimately POST to the actual payment processor.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsCheckoutStartCheckoutCreate: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/payments/checkout/start_checkout/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ApiApi - functional programming interface
+ * @export
+ */
+export const ApiApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ApiApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Clear the basket for the current user.  Returns:     Response: HTTP response
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsBasketsClearDestroy(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsClearDestroy(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  If the checkout flag is set in the POST data, then this will create the basket, then immediately flip the user to the checkout interstitial (which then redirects to the payment gateway).  Args:     system_slug (str): system slug     sku (str): product slug  POST Args:     quantity (int): quantity of the product to add to the basket (defaults to 1)     checkout (bool): redirect to checkout interstitial (defaults to False)  Returns:     Response: HTTP response
+         * @param {string} sku
+         * @param {string} system_slug
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsBasketsCreateFromProductCreate(sku: string, system_slug: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsCreateFromProductCreate(sku, system_slug, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Create a new basket item.  Args:     request (HttpRequest): HTTP request  Returns:     Response: HTTP response
+         * @param {string} basket
+         * @param {BasketItem} BasketItem
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsBasketsItemsCreate(basket: string, BasketItem: BasketItem, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BasketItem>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsItemsCreate(basket, BasketItem, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * API view set for BasketItem
+         * @param {string} basket
+         * @param {string} id
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsBasketsItemsDestroy(basket: string, id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsItemsDestroy(basket, id, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * API view set for BasketItem
+         * @param {string} basket
+         * @param {number} [limit] Number of results to return per page.
+         * @param {number} [offset] The initial index from which to return the results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsBasketsItemsList(basket: string, limit?: number, offset?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedBasketItemList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsItemsList(basket, limit, offset, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * API view set for Basket
+         * @param {number} [limit] Number of results to return per page.
+         * @param {number} [offset] The initial index from which to return the results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsBasketsList(limit?: number, offset?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedBasketList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsList(limit, offset, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * API view set for Basket
+         * @param {string} username
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsBasketsRetrieve(username: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Basket>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsRetrieve(username, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Handle webhook call from the payment gateway when the user has completed a transaction.  Returns:     - HTTP_200_OK if the Order is found.  Raises:     - Http404 if the Order is not found.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsCheckoutCallbackCreate(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsCheckoutCallbackCreate(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Start the checkout process. This assembles the basket items into an Order with Lines for each item, applies the attached basket discounts, and then calls the payment gateway to prepare for payment.  This is expected to be called from within the Ecommerce cart app, not from an integrated system.  Returns:     - JSON payload from the ol-django payment gateway app. The payment       gateway returns data necessary to construct a form that will       ultimately POST to the actual payment processor.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsCheckoutStartCheckoutCreate(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsCheckoutStartCheckoutCreate(options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * ApiApi - factory interface
+ * @export
+ */
+export const ApiApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ApiApiFp(configuration)
+    return {
+        /**
+         * Clear the basket for the current user.  Returns:     Response: HTTP response
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsClearDestroy(options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiV0PaymentsBasketsClearDestroy(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  If the checkout flag is set in the POST data, then this will create the basket, then immediately flip the user to the checkout interstitial (which then redirects to the payment gateway).  Args:     system_slug (str): system slug     sku (str): product slug  POST Args:     quantity (int): quantity of the product to add to the basket (defaults to 1)     checkout (bool): redirect to checkout interstitial (defaults to False)  Returns:     Response: HTTP response
+         * @param {ApiApiApiV0PaymentsBasketsCreateFromProductCreateRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsCreateFromProductCreate(requestParameters: ApiApiApiV0PaymentsBasketsCreateFromProductCreateRequest, options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiV0PaymentsBasketsCreateFromProductCreate(requestParameters.sku, requestParameters.system_slug, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a new basket item.  Args:     request (HttpRequest): HTTP request  Returns:     Response: HTTP response
+         * @param {ApiApiApiV0PaymentsBasketsItemsCreateRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsItemsCreate(requestParameters: ApiApiApiV0PaymentsBasketsItemsCreateRequest, options?: AxiosRequestConfig): AxiosPromise<BasketItem> {
+            return localVarFp.apiV0PaymentsBasketsItemsCreate(requestParameters.basket, requestParameters.BasketItem, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * API view set for BasketItem
+         * @param {ApiApiApiV0PaymentsBasketsItemsDestroyRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsItemsDestroy(requestParameters: ApiApiApiV0PaymentsBasketsItemsDestroyRequest, options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiV0PaymentsBasketsItemsDestroy(requestParameters.basket, requestParameters.id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * API view set for BasketItem
+         * @param {ApiApiApiV0PaymentsBasketsItemsListRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsItemsList(requestParameters: ApiApiApiV0PaymentsBasketsItemsListRequest, options?: AxiosRequestConfig): AxiosPromise<PaginatedBasketItemList> {
+            return localVarFp.apiV0PaymentsBasketsItemsList(requestParameters.basket, requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * API view set for Basket
+         * @param {ApiApiApiV0PaymentsBasketsListRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsList(requestParameters: ApiApiApiV0PaymentsBasketsListRequest = {}, options?: AxiosRequestConfig): AxiosPromise<PaginatedBasketList> {
+            return localVarFp.apiV0PaymentsBasketsList(requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * API view set for Basket
+         * @param {ApiApiApiV0PaymentsBasketsRetrieveRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsBasketsRetrieve(requestParameters: ApiApiApiV0PaymentsBasketsRetrieveRequest, options?: AxiosRequestConfig): AxiosPromise<Basket> {
+            return localVarFp.apiV0PaymentsBasketsRetrieve(requestParameters.username, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Handle webhook call from the payment gateway when the user has completed a transaction.  Returns:     - HTTP_200_OK if the Order is found.  Raises:     - Http404 if the Order is not found.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsCheckoutCallbackCreate(options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiV0PaymentsCheckoutCallbackCreate(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Start the checkout process. This assembles the basket items into an Order with Lines for each item, applies the attached basket discounts, and then calls the payment gateway to prepare for payment.  This is expected to be called from within the Ecommerce cart app, not from an integrated system.  Returns:     - JSON payload from the ol-django payment gateway app. The payment       gateway returns data necessary to construct a form that will       ultimately POST to the actual payment processor.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsCheckoutStartCheckoutCreate(options?: AxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.apiV0PaymentsCheckoutStartCheckoutCreate(options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * Request parameters for apiV0PaymentsBasketsCreateFromProductCreate operation in ApiApi.
+ * @export
+ * @interface ApiApiApiV0PaymentsBasketsCreateFromProductCreateRequest
+ */
+export interface ApiApiApiV0PaymentsBasketsCreateFromProductCreateRequest {
+    /**
+     *
+     * @type {string}
+     * @memberof ApiApiApiV0PaymentsBasketsCreateFromProductCreate
+     */
+    readonly sku: string
+
+    /**
+     *
+     * @type {string}
+     * @memberof ApiApiApiV0PaymentsBasketsCreateFromProductCreate
+     */
+    readonly system_slug: string
+}
+
+/**
+ * Request parameters for apiV0PaymentsBasketsItemsCreate operation in ApiApi.
+ * @export
+ * @interface ApiApiApiV0PaymentsBasketsItemsCreateRequest
+ */
+export interface ApiApiApiV0PaymentsBasketsItemsCreateRequest {
+    /**
+     *
+     * @type {string}
+     * @memberof ApiApiApiV0PaymentsBasketsItemsCreate
+     */
+    readonly basket: string
+
+    /**
+     *
+     * @type {BasketItem}
+     * @memberof ApiApiApiV0PaymentsBasketsItemsCreate
+     */
+    readonly BasketItem: BasketItem
+}
+
+/**
+ * Request parameters for apiV0PaymentsBasketsItemsDestroy operation in ApiApi.
+ * @export
+ * @interface ApiApiApiV0PaymentsBasketsItemsDestroyRequest
+ */
+export interface ApiApiApiV0PaymentsBasketsItemsDestroyRequest {
+    /**
+     *
+     * @type {string}
+     * @memberof ApiApiApiV0PaymentsBasketsItemsDestroy
+     */
+    readonly basket: string
+
+    /**
+     *
+     * @type {string}
+     * @memberof ApiApiApiV0PaymentsBasketsItemsDestroy
+     */
+    readonly id: string
+}
+
+/**
+ * Request parameters for apiV0PaymentsBasketsItemsList operation in ApiApi.
+ * @export
+ * @interface ApiApiApiV0PaymentsBasketsItemsListRequest
+ */
+export interface ApiApiApiV0PaymentsBasketsItemsListRequest {
+    /**
+     *
+     * @type {string}
+     * @memberof ApiApiApiV0PaymentsBasketsItemsList
+     */
+    readonly basket: string
+
+    /**
+     * Number of results to return per page.
+     * @type {number}
+     * @memberof ApiApiApiV0PaymentsBasketsItemsList
+     */
+    readonly limit?: number
+
+    /**
+     * The initial index from which to return the results.
+     * @type {number}
+     * @memberof ApiApiApiV0PaymentsBasketsItemsList
+     */
+    readonly offset?: number
+}
+
+/**
+ * Request parameters for apiV0PaymentsBasketsList operation in ApiApi.
+ * @export
+ * @interface ApiApiApiV0PaymentsBasketsListRequest
+ */
+export interface ApiApiApiV0PaymentsBasketsListRequest {
+    /**
+     * Number of results to return per page.
+     * @type {number}
+     * @memberof ApiApiApiV0PaymentsBasketsList
+     */
+    readonly limit?: number
+
+    /**
+     * The initial index from which to return the results.
+     * @type {number}
+     * @memberof ApiApiApiV0PaymentsBasketsList
+     */
+    readonly offset?: number
+}
+
+/**
+ * Request parameters for apiV0PaymentsBasketsRetrieve operation in ApiApi.
+ * @export
+ * @interface ApiApiApiV0PaymentsBasketsRetrieveRequest
+ */
+export interface ApiApiApiV0PaymentsBasketsRetrieveRequest {
+    /**
+     *
+     * @type {string}
+     * @memberof ApiApiApiV0PaymentsBasketsRetrieve
+     */
+    readonly username: string
+}
+
+/**
+ * ApiApi - object-oriented interface
+ * @export
+ * @class ApiApi
+ * @extends {BaseAPI}
+ */
+export class ApiApi extends BaseAPI {
+    /**
+     * Clear the basket for the current user.  Returns:     Response: HTTP response
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsBasketsClearDestroy(options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsBasketsClearDestroy(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  If the checkout flag is set in the POST data, then this will create the basket, then immediately flip the user to the checkout interstitial (which then redirects to the payment gateway).  Args:     system_slug (str): system slug     sku (str): product slug  POST Args:     quantity (int): quantity of the product to add to the basket (defaults to 1)     checkout (bool): redirect to checkout interstitial (defaults to False)  Returns:     Response: HTTP response
+     * @param {ApiApiApiV0PaymentsBasketsCreateFromProductCreateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsBasketsCreateFromProductCreate(requestParameters: ApiApiApiV0PaymentsBasketsCreateFromProductCreateRequest, options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsBasketsCreateFromProductCreate(requestParameters.sku, requestParameters.system_slug, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a new basket item.  Args:     request (HttpRequest): HTTP request  Returns:     Response: HTTP response
+     * @param {ApiApiApiV0PaymentsBasketsItemsCreateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsBasketsItemsCreate(requestParameters: ApiApiApiV0PaymentsBasketsItemsCreateRequest, options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsBasketsItemsCreate(requestParameters.basket, requestParameters.BasketItem, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * API view set for BasketItem
+     * @param {ApiApiApiV0PaymentsBasketsItemsDestroyRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsBasketsItemsDestroy(requestParameters: ApiApiApiV0PaymentsBasketsItemsDestroyRequest, options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsBasketsItemsDestroy(requestParameters.basket, requestParameters.id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * API view set for BasketItem
+     * @param {ApiApiApiV0PaymentsBasketsItemsListRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsBasketsItemsList(requestParameters: ApiApiApiV0PaymentsBasketsItemsListRequest, options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsBasketsItemsList(requestParameters.basket, requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * API view set for Basket
+     * @param {ApiApiApiV0PaymentsBasketsListRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsBasketsList(requestParameters: ApiApiApiV0PaymentsBasketsListRequest = {}, options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsBasketsList(requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * API view set for Basket
+     * @param {ApiApiApiV0PaymentsBasketsRetrieveRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsBasketsRetrieve(requestParameters: ApiApiApiV0PaymentsBasketsRetrieveRequest, options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsBasketsRetrieve(requestParameters.username, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Handle webhook call from the payment gateway when the user has completed a transaction.  Returns:     - HTTP_200_OK if the Order is found.  Raises:     - Http404 if the Order is not found.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsCheckoutCallbackCreate(options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsCheckoutCallbackCreate(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Start the checkout process. This assembles the basket items into an Order with Lines for each item, applies the attached basket discounts, and then calls the payment gateway to prepare for payment.  This is expected to be called from within the Ecommerce cart app, not from an integrated system.  Returns:     - JSON payload from the ol-django payment gateway app. The payment       gateway returns data necessary to construct a form that will       ultimately POST to the actual payment processor.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsCheckoutStartCheckoutCreate(options?: AxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsCheckoutStartCheckoutCreate(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
 
 /**
  * IntegratedSystemApi - axios parameter creator
@@ -977,11 +1803,13 @@ export const ProductApiAxiosParamCreator = function (configuration?: Configurati
         /**
          * Viewset for Product model.
          * @param {number} [limit] Number of results to return per page.
+         * @param {string} [name]
          * @param {number} [offset] The initial index from which to return the results.
+         * @param {string} [system__slug]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productList: async (limit?: number, offset?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        productList: async (limit?: number, name?: string, offset?: number, system__slug?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/product/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1000,8 +1828,16 @@ export const ProductApiAxiosParamCreator = function (configuration?: Configurati
                 localVarQueryParameter['limit'] = limit;
             }
 
+            if (name !== undefined) {
+                localVarQueryParameter['name'] = name;
+            }
+
             if (offset !== undefined) {
                 localVarQueryParameter['offset'] = offset;
+            }
+
+            if (system__slug !== undefined) {
+                localVarQueryParameter['system__slug'] = system__slug;
             }
 
 
@@ -1163,12 +1999,14 @@ export const ProductApiFp = function(configuration?: Configuration) {
         /**
          * Viewset for Product model.
          * @param {number} [limit] Number of results to return per page.
+         * @param {string} [name]
          * @param {number} [offset] The initial index from which to return the results.
+         * @param {string} [system__slug]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async productList(limit?: number, offset?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedProductList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.productList(limit, offset, options);
+        async productList(limit?: number, name?: string, offset?: number, system__slug?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedProductList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.productList(limit, name, offset, system__slug, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -1238,7 +2076,7 @@ export const ProductApiFactory = function (configuration?: Configuration, basePa
          * @throws {RequiredError}
          */
         productList(requestParameters: ProductApiProductListRequest = {}, options?: AxiosRequestConfig): AxiosPromise<PaginatedProductList> {
-            return localVarFp.productList(requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
+            return localVarFp.productList(requestParameters.limit, requestParameters.name, requestParameters.offset, requestParameters.system__slug, options).then((request) => request(axios, basePath));
         },
         /**
          * Viewset for Product model.
@@ -1312,11 +2150,25 @@ export interface ProductApiProductListRequest {
     readonly limit?: number
 
     /**
+     *
+     * @type {string}
+     * @memberof ProductApiProductList
+     */
+    readonly name?: string
+
+    /**
      * The initial index from which to return the results.
      * @type {number}
      * @memberof ProductApiProductList
      */
     readonly offset?: number
+
+    /**
+     *
+     * @type {string}
+     * @memberof ProductApiProductList
+     */
+    readonly system__slug?: string
 }
 
 /**
@@ -1412,7 +2264,7 @@ export class ProductApi extends BaseAPI {
      * @memberof ProductApi
      */
     public productList(requestParameters: ProductApiProductListRequest = {}, options?: AxiosRequestConfig) {
-        return ProductApiFp(this.configuration).productList(requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
+        return ProductApiFp(this.configuration).productList(requestParameters.limit, requestParameters.name, requestParameters.offset, requestParameters.system__slug, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

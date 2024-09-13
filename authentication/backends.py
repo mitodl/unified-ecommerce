@@ -29,8 +29,8 @@ class KeycloakRemoteUserBackend(RemoteUserBackend):
         log.debug("KeycloakRemoteUserBackend is running for %s", remote_user)
 
         userinfo_url = (
-            f"{settings.KEYCLOAK_ADMIN_URL}/auth/admin/"
-            f"realms/{settings.KEYCLOAK_REALM}/users/"
+            f"{settings.KEYCLOAK_ADMIN_URL}"
+            f"/admin/realms/{settings.KEYCLOAK_REALM}/users/"
         )
 
         if not remote_user:

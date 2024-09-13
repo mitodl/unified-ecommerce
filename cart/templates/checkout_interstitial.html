@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Complete Payment" %}{% endblock %}
+{% block innertitle %}{% trans "Complete Payment" %}{% endblock %}
+
+{% block body %}
+    <section id="main" class="info-block">
+        <div class="container">
+            <div class="content-row">
+                <div class="content-col">
+                    <div class="text">
+                        <h1 class="mt-4">Redirecting to the payment processor...</h1>
+
+                        <form id="checkout_form" method="post" action="{{ checkout_payload.url }}">
+                            {% if debug_mode %}
+                            {% for key, value in form.items %}
+                            <div><label for="{{ key }}">{{ key }}</label>
+                            <input type="text" readonly="readonly" name="{{ key }}" value="{{ value }}" /></div>
+                            {% endfor %}
+
+                            <div>
+                                <button class="btn btn-primary" type="submit">Redirect to CyberSource in <span id="countdown-time">5</span></button>
+                            </div>
+                            {% else %}
+                            {% for key, value in form.items %}
+                            <input type="hidden" readonly="readonly" name="{{ key }}" value="{{ value }}" />
+                            {% endfor %}
+                            {% endif %}
+                        </form>
+
+                        {% if debug_mode %}
+                        <script type="text/javascript">
+                    var counter = 5;
+
+                    setInterval(function() {
+                        counter--;
+
+                        document.getElementById('countdown-time').innerHTML = counter;
+
+                        if (counter === 0) {
+                            document.getElementById('checkout_form').submit();
+                        }
+                    }, 1000);
+                        </script>
+                        {% else %}
+                        <script type="text/javascript">
+                            setInterval(function() {
+                                document.getElementById('checkout_form').submit();
+                            }, 1);
+                        </script>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

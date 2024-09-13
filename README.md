@@ -14,6 +14,7 @@ This application provides a central system to handle ecommerce activities across
   - [Code Generation](#code-generation)
   - [Committing \& Formatting](#committing--formatting)
   - [Optional Setup](#optional-setup)
+    - [Interstitial Debug Mode](#interstitial-debug-mode)
     - [Running the app in a notebook](#running-the-app-in-a-notebook)
 
 ## Initial Setup
@@ -160,16 +161,37 @@ DISCOVERY_URL=<OpenID Endpoint Configuration link>
 curl "http://127.0.0.1:9180/apisix/admin/upstreams/2" \
 -H "X-API-KEY: $API_KEY" -X PUT -d '
 {
-  "type": "roundrobin",
+  "type": "chash",
+  "hash_on": "consumer",
   "nodes": {
     "nginx:8073": 1
   }
 }'
 
+# Define the Universal Ecommerce unauthenticated route
+# This is stuff that doesn't need a session - static resources, and the checkout result API
+
+postbody=$(cat << ROUTE_END
+{
+  "uris": [ "/checkout/result/", "/static" ],
+  "plugins": {},
+  "upstream_id": 2,
+  "priority": 0,
+  "desc": "Unauthenticated routes, including assets and the checkout callback API",
+  "name": "ue-unauth"
+}
+ROUTE_END
+)
+
+curl http://127.0.0.1:9180/apisix/admin/routes/ue-unauth -H "X-API-KEY: $API_KEY" -X PUT -d "$postbody"
+
 # Define the Universal Ecommerce wildcard route
 
 postbody=$(cat << ROUTE_END
 {
+  "name": "ue-default",
+  "desc": "Wildcard route for the rest of the system - authentication required",
+  "priority": 1,
   "uri": "/*",
   "plugins":{
     "openid-connect":{
@@ -187,7 +209,7 @@ postbody=$(cat << ROUTE_END
 ROUTE_END
 )
 
-curl http://127.0.0.1:9180/apisix/admin/routes/ue -H "X-API-KEY: $API_KEY" -X PUT -d $postbody
+curl http://127.0.0.1:9180/apisix/admin/routes/ue-default -H "X-API-KEY: $API_KEY" -X PUT -d "$postbody"
 ```
 
 You should now be able to get to the app via APISIX. There is an internal API at `http://ue.odl.local:9080/_/v0/meta/apisix_test_request/` that you can hit to see if it worked. The wildcard route above will route all UE traffic (or, more correctly, all traffic going into APISIX) through Keycloak and then into UE, so you should also be able to access the Django Admin through it if you've set your Keycloak user to be an admin.
@@ -225,6 +247,10 @@ pre-commit init-templatedir ~/.git-template
 ## Optional Setup
 
 Described below are some setup steps that are not strictly necessary for running Unified Ecommerce.
+
+### Interstitial Debug Mode
+
+You can set `MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG` to control whether or not the checkout interstitial page displays additional data and waits to submit or not. By default, this tracks the `DEBUG` setting (so it should be off in production, and on in local testing).
 
 ### Running the app in a notebook
 
