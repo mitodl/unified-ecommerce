@@ -183,7 +183,7 @@ postbody=$(cat << ROUTE_END
 ROUTE_END
 )
 
-curl http://127.0.0.1:9180/apisix/admin/routes/ue-unauth -H "X-API-KEY: $API_KEY" -X PUT -d $postbody
+curl http://127.0.0.1:9180/apisix/admin/routes/ue-unauth -H "X-API-KEY: $API_KEY" -X PUT -d "$postbody"
 
 # Define the Universal Ecommerce wildcard route
 
@@ -209,7 +209,7 @@ postbody=$(cat << ROUTE_END
 ROUTE_END
 )
 
-curl http://127.0.0.1:9180/apisix/admin/routes/ue-default -H "X-API-KEY: $API_KEY" -X PUT -d $postbody
+curl http://127.0.0.1:9180/apisix/admin/routes/ue-default -H "X-API-KEY: $API_KEY" -X PUT -d "$postbody"
 ```
 
 You should now be able to get to the app via APISIX. There is an internal API at `http://ue.odl.local:9080/_/v0/meta/apisix_test_request/` that you can hit to see if it worked. The wildcard route above will route all UE traffic (or, more correctly, all traffic going into APISIX) through Keycloak and then into UE, so you should also be able to access the Django Admin through it if you've set your Keycloak user to be an admin.
