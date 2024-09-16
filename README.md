@@ -23,7 +23,9 @@ Unified Ecommerce follows the same [initial setup steps outlined in the common O
 Run through those steps **including the addition of `/etc/hosts` aliases and the optional step for running the
 `createsuperuser` command**.
 
-Additionally, you will need a Keycloak instance set up with a realm for the application. The realm can be an existing one (and should if you want to use the same accounts from another integrated app). The application needs a service account for the app (so it can pull user information) in the _master_ realm and a client.
+Additionally, you will need a Keycloak instance set up with a realm for the application. The realm can be an existing one - if you have a realm set up for other applications (e.g. Learn), you should use that realm.
+
+If you don't have a Keycloak instance set up, or if you want to test with a known-good configuration, the app can optionally run with its own Keycloak instance. See [README-keycloak.md](README-keycloak.md) for instructions.
 
 ### Configure required `.env` settings
 
