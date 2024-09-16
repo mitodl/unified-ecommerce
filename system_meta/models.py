@@ -24,6 +24,10 @@ class IntegratedSystem(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel)
     description = models.TextField(blank=True)
     api_key = models.TextField(blank=True)
 
+    # Webhook URLs
+    sale_succeeded_webhook_url = models.URLField(blank=True, default="")
+    sale_refunded_webhook_url = models.URLField(blank=True, default="")
+
     objects = SafeDeleteManager()
     all_objects = models.Manager()
 

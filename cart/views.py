@@ -19,15 +19,18 @@ from payments import api
 from payments.models import Basket, Order
 from system_meta.models import Product
 from unified_ecommerce.constants import (
+    POST_SALE_SOURCE_REDIRECT,
     USER_MSG_TYPE_PAYMENT_ACCEPTED,
     USER_MSG_TYPE_PAYMENT_CANCELLED,
     USER_MSG_TYPE_PAYMENT_DECLINED,
     USER_MSG_TYPE_PAYMENT_ERROR,
     USER_MSG_TYPE_PAYMENT_ERROR_UNKNOWN,
 )
+from unified_ecommerce.plugin_manager import get_plugin_manager
 from unified_ecommerce.utils import redirect_with_user_message
 
 log = logging.getLogger(__name__)
+pm = get_plugin_manager()
 
 
 class CartView(LoginRequiredMixin, TemplateView):
@@ -149,6 +152,8 @@ class CheckoutCallbackView(View):
                 processed_order_state = api.process_cybersource_payment_response(
                     request, order
                 )
+                pm.hook.post_sale(order_id=order.id, source=POST_SALE_SOURCE_REDIRECT)
+
                 return self.post_checkout_redirect(processed_order_state, request)
             else:
                 return self.post_checkout_redirect(order.state, request)

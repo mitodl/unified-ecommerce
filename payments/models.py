@@ -21,7 +21,7 @@ from unified_ecommerce.constants import (
 )
 
 User = get_user_model()
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class Basket(TimestampedModel):
@@ -144,7 +144,7 @@ class Order(TimestampedModel):
     def save(self, *args, **kwargs):
         """Save the order."""
 
-        logger.info("Saving order %s", self.id)
+        log.info("Saving order %s", self.id)
 
         # initial save in order to get primary key for new order
         super().save(*args, **kwargs)
@@ -154,7 +154,7 @@ class Order(TimestampedModel):
 
         # if we don't have a generated reference number, we generate one and save again
         if self.reference_number is None or len(self.reference_number) == 0:
-            logger.info("Generating reference number for order %s", self.id)
+            log.info("Generating reference number for order %s", self.id)
             self.reference_number = self._generate_reference_number()
             super().save(*args, **kwargs)
 
@@ -357,6 +357,9 @@ class PendingOrder(Order):
             PendingOrder: the created pending order
         """
         products = basket.get_products()
+
+        log.debug("Products to add to order: %s", products)
+
         return cls._get_or_create(cls, products, basket.user)
 
     @classmethod

@@ -1,6 +1,7 @@
 """Django Admin for system_meta app"""
 
 from django.contrib import admin
+from reversion.admin import VersionAdmin
 from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter, highlight_deleted
 
 from system_meta.models import IntegratedSystem, Product
@@ -25,7 +26,7 @@ IntegratedSystemAdmin.highlight_deleted_field.short_description = (
 )
 
 
-class ProductAdmin(SafeDeleteAdmin):
+class ProductAdmin(SafeDeleteAdmin, VersionAdmin):
     """Admin for Product model"""
 
     list_display = (
