@@ -41,7 +41,9 @@ The following settings must be configured before running the app:
 
 ### Loading and Accessing Data
 
-You'll need an integrated system and product for that system to be able to do much of anything. Once you've done initial setup, run these commands:
+You'll need an integrated system and product for that system to be able to do much of anything. A management command exists to create the test data: `create_test_data`. This will create a system and add some products with random (but usable) prices in it.
+
+Alternatively, you can create them manually:
 
 * Create an integrated system: `./manage.py add_system <name> -d <description> -s <slug`
 * Create a product: `./manage.py manage_product add -s <system slug> --sku <an SKU> --name <name> --description <description> --price <price>`
@@ -98,7 +100,7 @@ curl "http://127.0.0.1:9180/apisix/admin/upstreams/2" \
 
 postbody=$(cat << ROUTE_END
 {
-  "uris": [ "/checkout/result/", "/static", "/api/schema" ],
+  "uris": [ "/checkout/result/", "/static/*", "/api/schema/*" ],
   "plugins": {},
   "upstream_id": 2,
   "priority": 0,

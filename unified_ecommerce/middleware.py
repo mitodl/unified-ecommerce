@@ -6,7 +6,7 @@ from django.contrib.auth import login
 from django.contrib.auth.middleware import RemoteUserMiddleware
 from django.core.exceptions import ImproperlyConfigured
 
-from unified_ecommerce.utils import get_user_from_apisix_headers
+from unified_ecommerce.utils import decode_apisix_headers, get_user_from_apisix_headers
 
 log = logging.getLogger(__name__)
 
@@ -46,6 +46,6 @@ class ApisixUserMiddleware(RemoteUserMiddleware):
                 backend="django.contrib.auth.backends.ModelBackend",
             )
 
-        request.api_gateway_userdata = self.decode_apisix_headers(request)
+        request.api_gateway_userdata = decode_apisix_headers(request)
 
         return self.get_response(request)
