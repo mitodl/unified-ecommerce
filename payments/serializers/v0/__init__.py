@@ -1,10 +1,29 @@
 """Serializers for payments."""
 
+from dataclasses import dataclass
+from decimal import Decimal
+
 from rest_framework import serializers
 
-from payments.models import Basket, BasketItem
+from payments.models import Basket, BasketItem, Line, Order
 from system_meta.models import Product
-from system_meta.serializers import ProductSerializer
+from system_meta.serializers import ProductSerializer, UserSerializer
+
+TWO_DECIMAL_PLACES = Decimal("0.01")
+
+
+@dataclass
+class WebhookOrderSelector:
+    """
+    Class representing the order data that we into the serializer to pass to
+    a webhook.
+
+    This allows us to specify the order and the system we want to pull info for,
+    so we're not leaking purchased product information to other systems.
+    """
+
+    order_id: int
+    system_slug: str
 
 
 class BasketItemSerializer(serializers.ModelSerializer):
@@ -109,3 +128,112 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
             "total_price",
         ]
         model = Basket
+
+
+class LineSerializer(serializers.ModelSerializer):
+    """Serializes a line item for an order."""
+
+    product = serializers.SerializerMethodField()
+    unit_price = serializers.SerializerMethodField()
+    total_price = serializers.SerializerMethodField()
+
+    def get_product(self, instance):
+        """Get the product for the line."""
+        return ProductSerializer(instance=instance.product).data
+
+    def get_unit_price(self, instance):
+        """Get the unit price for the line."""
+        return str(instance.unit_price.quantize(TWO_DECIMAL_PLACES))
+
+    def get_total_price(self, instance):
+        """Get the total price for the line."""
+        return str(instance.total_price.quantize(TWO_DECIMAL_PLACES))
+
+    class Meta:
+        """Meta options for LineSerializer"""
+
+        fields = [
+            "id",
+            "quantity",
+            "item_description",
+            "unit_price",
+            "total_price",
+            "product",
+        ]
+        model = Line
+
+
+class WebhookOrderDataSerializer(serializers.Serializer):
+    """Serializes an Order object for use with a webhook."""
+
+    reference_number = serializers.SerializerMethodField()
+    system_slug = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    total_price_paid = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
+    lines = serializers.SerializerMethodField()
+
+    _order = None
+    _lines = None
+
+    def __init__(self, *args, **kwargs):
+        """Initialize the class, including pulling the order info."""
+        super().__init__(*args, **kwargs)
+
+        self._order = Order.objects.get(pk=args[0]["order_id"])
+        # Just pull the line items for the system specified. This uses a for
+        # loop because the 'product' is a virtual prop - internally the line
+        # model stores a FK to the product version, not the product itself.
+        self._lines = [
+            line
+            for line in self._order.lines.all()
+            if line.product.system.slug == args[0]["system_slug"]
+        ]
+
+    def get_reference_number(self, instance):  # noqa: ARG002
+        """Get the reference number associated with the order"""
+        return self._order.reference_number
+
+    def get_system_slug(self, instance):
+        """Get the system slug associated with the order"""
+        return instance["system_slug"]
+
+    def get_user(self, instance):  # noqa: ARG002
+        """Get the purchasing user associated with the order"""
+        return UserSerializer(self._order.purchaser).data
+
+    def get_total_price_paid(self, instance):  # noqa: ARG002
+        """
+        Get the total price paid for the order. This includes all items on the
+        order, not just the items for the specfied system.
+        """
+        return str(self._order.total_price_paid.quantize(TWO_DECIMAL_PLACES))
+
+    def get_state(self, instance):  # noqa: ARG002
+        """Get the state of the order."""
+        return self._order.state
+
+    def get_lines(self, instance):  # noqa: ARG002
+        """Get the order's line items, for products that belong to the system."""
+        return LineSerializer(self._lines, many=True).data
+
+    class Meta:
+        """Meta options for WebhookOrderDataSerializer"""
+
+        models = WebhookOrderSelector
+        fields = [
+            "reference_number",
+            "system_slug",
+            "user",
+            "total_price_paid",
+            "state",
+            "lines",
+        ]
+        read_only_fields = [
+            "reference_number",
+            "system_slug",
+            "user",
+            "total_price_paid",
+            "state",
+            "lines",
+        ]
