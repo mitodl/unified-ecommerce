@@ -140,7 +140,7 @@ The system is also set up to run using APISIX as the gateway (to an extent). Use
 You'll need to define routes for APISIX before it will handle traffic for the appplication. Here are the steps to accomplish that:
 
 1. In your Keycloak instance, create a new Client in the realm you are going to use for UE.
-   2. The `Client ID` can be any valid string - a good choice is `apisix-client`. Set this in your shell as `CLIENT_ID`.
+   1. The `Client ID` can be any valid string - a good choice is `apisix-client`. Set this in your shell as `CLIENT_ID`.
    1. For local testing, it's OK to use `*` for both `Valid redirect URIs` and `Web origins`. This is not OK for anything attached to the Internet.
    2. Make sure `Client authentication` is on, and `Standard flow` and `Implicit flow` are checked.
    3. After you've saved the client, go to Credentials and copy out the `Client secret`. (You may need to manually cut and paste; the copy to clipboard button has never worked for me.) Set this in your shell as `CLIENT_SECRET`.
