@@ -21,11 +21,32 @@ curl "${APISIX_ROOT}/apisix/admin/upstreams/2" \
   }
 }'
 
+# Define the Universal Ecommerce unauthenticated route
+# This is stuff that doesn't need a session - static resources, and the checkout result API
+
+postbody=$(
+	cat <<ROUTE_END
+{
+  "uris": [ "/checkout/result/", "/static", "/api/schema" ],
+  "plugins": {},
+  "upstream_id": 2,
+  "priority": 0,
+  "desc": "Unauthenticated routes, including assets and the checkout callback API",
+  "name": "ue-unauth"
+}
+ROUTE_END
+)
+
+curl http://127.0.0.1:9180/apisix/admin/routes/ue-unauth -H "X-API-KEY: $API_KEY" -X PUT -d "$postbody"
+
 # Define the Universal Ecommerce wildcard route
 
 postbody=$(
 	cat <<ROUTE_END
 {
+  "name": "ue-default",
+  "desc": "Wildcard route for the rest of the system - authentication required",
+  "priority": 1,
   "uri": "/*",
   "plugins":{
     "openid-connect":{
@@ -43,4 +64,4 @@ postbody=$(
 ROUTE_END
 )
 
-curl "${APISIX_ROOT}/apisix/admin/routes/ue" -H "X-API-KEY: $API_KEY" -X PUT -d "${postbody}"
+curl "${APISIX_ROOT}/apisix/admin/routes/ue-default" -H "X-API-KEY: $API_KEY" -X PUT -d "${postbody}"
