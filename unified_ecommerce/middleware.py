@@ -2,7 +2,11 @@
 
 import logging
 
-from unified_ecommerce.utils import decode_x_header
+from django.contrib.auth import login
+from django.contrib.auth.middleware import RemoteUserMiddleware
+from django.core.exceptions import ImproperlyConfigured
+
+from unified_ecommerce.utils import get_user_from_apisix_headers
 
 log = logging.getLogger(__name__)
 
