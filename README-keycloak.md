@@ -1,6 +1,6 @@
 # Keycloak Integration
 
-The APISIX Compose file includes a Keycloak instance that you can use for authentication instead of spinning up a separate one or using one of the deployed instances. _By default, however, it doesn't work._ Some configuration is required, so by default this will start and then fail to configure itself and stop.
+The APISIX Compose file includes a Keycloak instance that you can use for authentication instead of spinning up a separate one or using one of the deployed instances. It's not enabled by default, but you can run it if you prefer not to run your own Keycloak instance.
 
 ## Default Settings
 
@@ -30,8 +30,8 @@ If you want to use the Keycloak instance, follow these steps:
    1. `KEYCLOAK_SVC_HOSTNAME` is the hostname you want to use for the instance - the default is `kc.odl.local`.
    2. `KEYCLOAK_SVC_ADMIN` is the admin username. The default is `admin`.
    3. `KEYCLOAK_SVC_ADMIN_PASSWORD` is the admin password. The default is `admin`.
-4. Start the Keycloak service: `docker compose -f docker-compose-apisix.yml up -d keycloak`
+4. Start the Keycloak service: `docker compose -f docker-compose-apisix.yml --profile keycloak up -d keycloak`
 
-The Keycloak container should start and stay running. Once it does, you should be able to log in at `https://kc.odl.local:7443/` with username and password `admin`. (Substitute your changes in there if you've made any.)
+The Keycloak container should start and stay running. Once it does, you should be able to log in at `https://kc.odl.local:7443/` with username and password `admin` (or the values you supplied).
 
-Once you've got it up and running, you can follow the normal steps in the main README to configure APISIX to use the Keycloak container. (The Keycloak container should set your configured hostname as an alias, so you should be able to use e.g. `kc.odl.local` when defining routes, etc.)
+Once you've got it up and running, you can follow the normal steps in the main README to configure APISIX to use the Keycloak container. Use the configured hostname (default `kc.odl.local`) where you need to use a hostname. (The Compose file configures it as an alias for the APISIX service, so it should work.)
