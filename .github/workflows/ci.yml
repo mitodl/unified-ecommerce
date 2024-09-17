@@ -75,6 +75,6 @@ jobs:
           MITOL_UE_DB_DISABLE_SSL: "True"
 
       - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v3.1.6
+        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v4.5.0
         with:
           file: ./coverage.xml
