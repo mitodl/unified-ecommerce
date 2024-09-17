@@ -3644,12 +3644,12 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
 name = "static3"
-version = "0.5.1"
+version = "0.7.0"
 description = "A really simple WSGI way to serve static (or mixed) content."
 optional = false
 python-versions = "*"
 files = [
-    {file = "static3-0.5.1.tar.gz", hash = "sha256:78393983482d8f41e6fcf91f3fd99c979ced088c4740c9f22835b96e6712897c"},
+    {file = "static3-0.7.0.tar.gz", hash = "sha256:674641c64bc75507af2eb20bef7e7e3593dca993dec6674be108fa15b42f47c8"},
 ]
 
 [package.extras]
@@ -3707,12 +3707,13 @@ testing = ["black", "mypy", "pytest", "pytest-gitignore", "pytest-mock", "respon
 
 [[package]]
 name = "toolz"
-version = "0.10.0"
+version = "0.12.1"
 description = "List processing tools and functional utilities"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = ">=3.7"
 files = [
-    {file = "toolz-0.10.0.tar.gz", hash = "sha256:08fdd5ef7c96480ad11c12d472de21acd32359996f69a5259299b540feba4560"},
+    {file = "toolz-0.12.1-py3-none-any.whl", hash = "sha256:d22731364c07d72eea0a0ad45bafb2c2937ab6fd38a3507bf55eae8744aa7d85"},
+    {file = "toolz-0.12.1.tar.gz", hash = "sha256:ecca342664893f177a13dac0e6b41cbd8ac25a358e5f215316d43e2100224f4d"},
 ]
 
 [[package]]
@@ -4028,4 +4029,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11.0"
-content-hash = "b003b0bc005104c8ea3358a4fb5f9f5cd8c784ce102ef9a1d3c18ac547b6a7cd"
+content-hash = "62c187090f26e917759b8a17c078ba2560a44df16c9a09996971bd7f42948530"

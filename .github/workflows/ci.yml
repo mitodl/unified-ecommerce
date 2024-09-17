@@ -28,7 +28,7 @@ jobs:
           - 6379:6379
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: update apt
         run: sudo apt-get update -y
@@ -43,7 +43,7 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5
         with:
           python-version: "3.12.1"
           cache: "poetry"
@@ -75,6 +75,6 @@ jobs:
           MITOL_UE_DB_DISABLE_SSL: "True"
 
       - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v3.1.6
+        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v4.5.0
         with:
           file: ./coverage.xml
