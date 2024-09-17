@@ -617,6 +617,9 @@ components:
       - name
     PaginatedBasketItemList:
       type: object
+      required:
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -637,6 +640,9 @@ components:
             $ref: '#/components/schemas/BasketItem'
     PaginatedBasketList:
       type: object
+      required:
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -657,6 +663,9 @@ components:
             $ref: '#/components/schemas/Basket'
     PaginatedIntegratedSystemList:
       type: object
+      required:
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -677,6 +686,9 @@ components:
             $ref: '#/components/schemas/IntegratedSystem'
     PaginatedProductList:
       type: object
+      required:
+      - count
+      - results
       properties:
         count:
           type: integer
