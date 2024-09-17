@@ -115,7 +115,7 @@ export interface PaginatedBasketItemList {
      * @type {number}
      * @memberof PaginatedBasketItemList
      */
-    'count'?: number;
+    'count': number;
     /**
      *
      * @type {string}
@@ -133,7 +133,7 @@ export interface PaginatedBasketItemList {
      * @type {Array<BasketItem>}
      * @memberof PaginatedBasketItemList
      */
-    'results'?: Array<BasketItem>;
+    'results': Array<BasketItem>;
 }
 /**
  *
@@ -146,7 +146,7 @@ export interface PaginatedBasketList {
      * @type {number}
      * @memberof PaginatedBasketList
      */
-    'count'?: number;
+    'count': number;
     /**
      *
      * @type {string}
@@ -164,7 +164,7 @@ export interface PaginatedBasketList {
      * @type {Array<Basket>}
      * @memberof PaginatedBasketList
      */
-    'results'?: Array<Basket>;
+    'results': Array<Basket>;
 }
 /**
  *
@@ -177,7 +177,7 @@ export interface PaginatedIntegratedSystemList {
      * @type {number}
      * @memberof PaginatedIntegratedSystemList
      */
-    'count'?: number;
+    'count': number;
     /**
      *
      * @type {string}
@@ -195,7 +195,7 @@ export interface PaginatedIntegratedSystemList {
      * @type {Array<IntegratedSystem>}
      * @memberof PaginatedIntegratedSystemList
      */
-    'results'?: Array<IntegratedSystem>;
+    'results': Array<IntegratedSystem>;
 }
 /**
  *
@@ -208,7 +208,7 @@ export interface PaginatedProductList {
      * @type {number}
      * @memberof PaginatedProductList
      */
-    'count'?: number;
+    'count': number;
     /**
      *
      * @type {string}
@@ -226,7 +226,7 @@ export interface PaginatedProductList {
      * @type {Array<Product>}
      * @memberof PaginatedProductList
      */
-    'results'?: Array<Product>;
+    'results': Array<Product>;
 }
 /**
  * Serializer for IntegratedSystem model.
