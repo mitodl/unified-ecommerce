@@ -31,23 +31,20 @@ class ApisixUserMiddleware(RemoteUserMiddleware):
                 logout(request)
             return
 
-        if request.user.is_authenticated:
-            # The user is authenticated but like the RemoteUserMiddleware we
-            # should now check and make sure the user APISIX is passing is
-            # the same user.
+        if apisix_user:
+            if request.user.is_authenticated and request.user != apisix_user:
+                # The user is authenticated, but doesn't match the user we got
+                # from APISIX. So, log them out so the APISIX user takes
+                # precedence.
 
-            if request.user != apisix_user:
                 logout(request)
 
-            return
-
-        if not apisix_user:
-            logout(request)
-
-            return
-
-        request.user = apisix_user
-        login(request, apisix_user, backend="django.contrib.auth.backends.ModelBackend")
+            request.user = apisix_user
+            login(
+                request,
+                apisix_user,
+                backend="django.contrib.auth.backends.ModelBackend",
+            )
 
         return
 
