@@ -2,7 +2,7 @@
 
 import logging
 
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.middleware import RemoteUserMiddleware
 from django.core.exceptions import ImproperlyConfigured
 
@@ -28,7 +28,7 @@ class ApisixUserMiddleware(RemoteUserMiddleware):
             apisix_user = get_user_from_apisix_headers(request)
         except KeyError:
             if self.force_logout_if_no_header and request.user.is_authenticated:
-                self._remove_invalid_user(request)
+                logout(request)
             return
 
         if request.user.is_authenticated:
@@ -37,12 +37,12 @@ class ApisixUserMiddleware(RemoteUserMiddleware):
             # the same user.
 
             if request.user != apisix_user:
-                self._remove_invalid_user(request)
+                logout(request)
 
             return
 
         if not apisix_user:
-            self._remove_invalid_user(request)
+            logout(request)
 
             return
 
