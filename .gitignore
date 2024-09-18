@@ -127,3 +127,7 @@ tsconfig.tsbuildinfo
 # Pants stuff
 .pants.d/
 .pids/
+
+# Non-default Keycloak certificates
+config/keycloak/tls/tls.crt
+config/keycloak/tls/tls.key
