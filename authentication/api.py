@@ -55,6 +55,12 @@ def get_user_from_apisix_headers(request):
 
     decoded_headers = decode_apisix_headers(request)
 
+    if request.user.is_authenticated:
+        log.debug(
+            "get_user_from_apisix_headers: existing session found for user %s",
+            request.user.username,
+        )
+
     if not decoded_headers:
         return None
 
