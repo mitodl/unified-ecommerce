@@ -11,18 +11,6 @@ from payments.serializers.v0 import WebhookOrderDataSerializer
 hookimpl = pluggy.HookimplMarker("unified_ecommerce")
 
 
-class TestPostSale:
-    """Test the post-sale hook."""
-
-    @hookimpl
-    def post_sale(self, order_id, source):
-        """Implement a basic post-sale hook."""
-        log = logging.getLogger(__name__)
-
-        msg = f"Received post-sale event for order {order_id} with source {source}"
-        log.info(msg)
-
-
 class PostSaleSendEmails:
     """Send email when the order is fulfilled."""
 
@@ -72,7 +60,11 @@ class IntegratedSystemWebhooks:
                 )
 
                 serialized_data = WebhookOrderDataSerializer(
-                    {"order_id": order_id, "system_slug": system_slug}
+                    {
+                        "order_id": order_id,
+                        "system_slug": system_slug,
+                        "action": "postsale",
+                    }
                 ).data
                 requests.post(
                     system_webhook_url,

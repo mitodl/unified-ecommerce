@@ -5,8 +5,9 @@ from decimal import Decimal
 
 from rest_framework import serializers
 
+from payments.constants import PAYMENT_HOOK_ACTIONS
 from payments.models import Basket, BasketItem, Line, Order
-from system_meta.models import Product
+from system_meta.models import IntegratedSystem, Product
 from system_meta.serializers import ProductSerializer, UserSerializer
 
 TWO_DECIMAL_PLACES = Decimal("0.01")
@@ -172,13 +173,22 @@ class WebhookOrderDataSerializer(serializers.Serializer):
     total_price_paid = serializers.SerializerMethodField()
     state = serializers.SerializerMethodField()
     lines = serializers.SerializerMethodField()
+    key = serializers.SerializerMethodField()
+    action = serializers.SerializerMethodField()
 
     _order = None
     _lines = None
+    _action = None
 
     def __init__(self, *args, **kwargs):
         """Initialize the class, including pulling the order info."""
         super().__init__(*args, **kwargs)
+
+        self._action = args[0]["action"]
+
+        if self._action not in PAYMENT_HOOK_ACTIONS:
+            value_error_str = "Invalid payment hook action: %s"
+            raise ValueError(value_error_str, self._action)
 
         self._order = Order.objects.get(pk=args[0]["order_id"])
         # Just pull the line items for the system specified. This uses a for
@@ -189,6 +199,16 @@ class WebhookOrderDataSerializer(serializers.Serializer):
             for line in self._order.lines.all()
             if line.product.system.slug == args[0]["system_slug"]
         ]
+
+    def get_action(self, instance):  # noqa: ARG002
+        """Get the action"""
+        return self._action
+
+    def get_key(self, instance):
+        """Get the shared key for the webhook"""
+
+        system = IntegratedSystem.objects.filter(slug=instance["system_slug"]).get()
+        return system.api_key
 
     def get_reference_number(self, instance):  # noqa: ARG002
         """Get the reference number associated with the order"""

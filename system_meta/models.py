@@ -22,7 +22,13 @@ class IntegratedSystem(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel)
     name = models.CharField(max_length=255, unique=True)
     slug = models.CharField(max_length=80, unique=True, blank=True, null=True)
     description = models.TextField(blank=True)
-    api_key = models.TextField(blank=True)
+    api_key = models.TextField(
+        blank=True,
+        help_text=(
+            "Shared key used by the integrated system to verify"
+            " authenticity of the data sent by UE."
+        ),
+    )
 
     # Webhook URLs
     sale_succeeded_webhook_url = models.URLField(blank=True, default="")
