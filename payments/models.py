@@ -139,7 +139,7 @@ class Order(TimestampedModel):
                 ),
             )
 
-    state = FSMField(default=STATE.PENDING, state_choices=STATE.choices())
+    state = models.CharField(default=STATE.PENDING, choices=STATE.choices())
     purchaser = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -200,7 +200,8 @@ class Order(TimestampedModel):
 
     def errored(self):
         """Error this order"""
-        raise NotImplementedError
+        self.state = Order.STATE.ERRORED
+        self.save()
 
     def refund(self, *, api_response_data, **kwargs):
         """Issue a refund"""
@@ -272,11 +273,6 @@ class FulfillableOrder:
         TODO: add email
         """
 
-    @transition(
-        field="state",
-        source=Order.STATE.PENDING,
-        target=Order.STATE.FULFILLED,
-    )
     def fulfill(self, payment_data):
         """Fufill the order."""
         # record the transaction
@@ -287,6 +283,9 @@ class FulfillableOrder:
 
         # send the receipt emails
         transaction.on_commit(self.send_ecommerce_order_receipt)
+        
+        self.state = Order.STATE.FULFILLED
+        self.save()
 
 
 class PendingOrder(FulfillableOrder, Order):
@@ -385,11 +384,11 @@ class PendingOrder(FulfillableOrder, Order):
 
         return cls._get_or_create(cls, [product], user)
 
-    @transition(field="state", source=Order.STATE.PENDING, target=Order.STATE.CANCELED)
     def cancel(self):
         """Cancel this order"""
+        self.state = Order.STATE.CANCELED
+        self.save()
 
-    @transition(field="state", source=Order.STATE.PENDING, target=Order.STATE.DECLINED)
     def decline(self):
         """
         Decline this order. This additionally clears the discount redemptions
@@ -400,10 +399,6 @@ class PendingOrder(FulfillableOrder, Order):
 
         return self
 
-    @transition(field="state", source=Order.STATE.PENDING, target=Order.STATE.ERRORED)
-    def error(self):
-        """Error this order"""
-
     class Meta:
         """Model meta options"""
 
@@ -412,10 +407,6 @@ class PendingOrder(FulfillableOrder, Order):
 
 class FulfilledOrder(Order):
     """An order that has a fulfilled payment"""
-
-    @transition(field="state", source=Order.STATE.FULFILLED, target=Order.STATE.ERRORED)
-    def error(self):
-        """Error this order"""
 
     @transition(
         field="state",
@@ -486,10 +477,6 @@ class CanceledOrder(Order):
     The state of this can't be altered further.
     """
 
-    @transition(field="state", source=Order.STATE.CANCELED, target=Order.STATE.ERRORED)
-    def error(self):
-        """Error this order"""
-
     class Meta:
         """Model meta options."""
 
@@ -515,11 +502,6 @@ class DeclinedOrder(Order):
 
     The state of this can't be altered further.
     """
-
-    @transition(field="state", source=Order.STATE.DECLINED, target=Order.STATE.ERRORED)
-    def error(self):
-        """Error this order"""
-
     class Meta:
         """Model meta options."""
 
