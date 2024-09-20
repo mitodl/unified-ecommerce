@@ -3,28 +3,53 @@
 from dataclasses import dataclass
 from decimal import Decimal
 
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from payments.constants import PAYMENT_HOOK_ACTIONS
 from payments.models import Basket, BasketItem, Line, Order
-from system_meta.models import IntegratedSystem, Product
-from system_meta.serializers import ProductSerializer, UserSerializer
+from system_meta.models import Product
+from system_meta.serializers import ProductSerializer
+from unified_ecommerce.serializers import UserSerializer
 
 TWO_DECIMAL_PLACES = Decimal("0.01")
+User = get_user_model()
 
 
 @dataclass
-class WebhookOrderSelector:
-    """
-    Class representing the order data that we into the serializer to pass to
-    a webhook.
+class WebhookBase:
+    """Class representing the base data that we need to post a webhook."""
 
-    This allows us to specify the order and the system we want to pull info for,
-    so we're not leaking purchased product information to other systems.
+    system_key: str
+    type: str
+    user: object
+
+
+@dataclass
+class WebhookOrder(WebhookBase):
+    """
+    Webhook event data for order-based events.
+
+    This includes order completed and order refunded states.
     """
 
-    order_id: int
-    system_slug: str
+    order: Order
+    lines: Line
+
+
+@dataclass
+class WebhookCart(WebhookBase):
+    """
+    Webhook event data for cart-based events.
+
+    This includes item added to cart and item removed from cart. (These are so
+    the integrated system can fire off enrollments when people add things to
+    their cart - MITx Online specifically enrolls as soon as you add to cart,
+    regardless of whether or not you pay, and then upgrades when you do, for
+    instance.)
+    """
+
+    product: Product
 
 
 class BasketItemSerializer(serializers.ModelSerializer):
@@ -134,13 +159,9 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
 class LineSerializer(serializers.ModelSerializer):
     """Serializes a line item for an order."""
 
-    product = serializers.SerializerMethodField()
+    product = ProductSerializer()
     unit_price = serializers.SerializerMethodField()
     total_price = serializers.SerializerMethodField()
-
-    def get_product(self, instance):
-        """Get the product for the line."""
-        return ProductSerializer(instance=instance.product).data
 
     def get_unit_price(self, instance):
         """Get the unit price for the line."""
@@ -164,96 +185,60 @@ class LineSerializer(serializers.ModelSerializer):
         model = Line
 
 
-class WebhookOrderDataSerializer(serializers.Serializer):
-    """Serializes an Order object for use with a webhook."""
+class WebhookBaseSerializer(serializers.Serializer):
+    """Base serializer for webhooks."""
+
+    system_key = serializers.CharField()
+    type = serializers.SerializerMethodField()
+    user = UserSerializer()
+
+    def get_type(self, instance):
+        if instance.type not in PAYMENT_HOOK_ACTIONS:
+            invalid_type_msg = f"Invalid type {instance.type}"
+            raise ValueError(invalid_type_msg)
+
+        return instance.type
+
+
+class WebhookOrderDataSerializer(WebhookBaseSerializer):
+    """Serializes order data for submission to the webhook."""
 
     reference_number = serializers.SerializerMethodField()
-    system_slug = serializers.SerializerMethodField()
-    user = serializers.SerializerMethodField()
     total_price_paid = serializers.SerializerMethodField()
     state = serializers.SerializerMethodField()
-    lines = serializers.SerializerMethodField()
-    key = serializers.SerializerMethodField()
-    action = serializers.SerializerMethodField()
+    lines = LineSerializer(many=True)
 
-    _order = None
-    _lines = None
-    _action = None
+    def get_reference_number(self, instance):
+        """Return the reference number"""
+        return instance.order.reference_number
 
-    def __init__(self, *args, **kwargs):
-        """Initialize the class, including pulling the order info."""
-        super().__init__(*args, **kwargs)
+    def get_total_price_paid(self, instance):
+        """Return the total price paid"""
+        return str(instance.order.total_price_paid)
 
-        self._action = args[0]["action"]
-
-        if self._action not in PAYMENT_HOOK_ACTIONS:
-            value_error_str = "Invalid payment hook action: %s"
-            raise ValueError(value_error_str, self._action)
-
-        self._order = Order.objects.get(pk=args[0]["order_id"])
-        # Just pull the line items for the system specified. This uses a for
-        # loop because the 'product' is a virtual prop - internally the line
-        # model stores a FK to the product version, not the product itself.
-        self._lines = [
-            line
-            for line in self._order.lines.all()
-            if line.product.system.slug == args[0]["system_slug"]
-        ]
-
-    def get_action(self, instance):  # noqa: ARG002
-        """Get the action"""
-        return self._action
-
-    def get_key(self, instance):
-        """Get the shared key for the webhook"""
-
-        system = IntegratedSystem.objects.filter(slug=instance["system_slug"]).get()
-        return system.api_key
-
-    def get_reference_number(self, instance):  # noqa: ARG002
-        """Get the reference number associated with the order"""
-        return self._order.reference_number
-
-    def get_system_slug(self, instance):
-        """Get the system slug associated with the order"""
-        return instance["system_slug"]
-
-    def get_user(self, instance):  # noqa: ARG002
-        """Get the purchasing user associated with the order"""
-        return UserSerializer(self._order.purchaser).data
-
-    def get_total_price_paid(self, instance):  # noqa: ARG002
-        """
-        Get the total price paid for the order. This includes all items on the
-        order, not just the items for the specfied system.
-        """
-        return str(self._order.total_price_paid.quantize(TWO_DECIMAL_PLACES))
-
-    def get_state(self, instance):  # noqa: ARG002
-        """Get the state of the order."""
-        return self._order.state
-
-    def get_lines(self, instance):  # noqa: ARG002
-        """Get the order's line items, for products that belong to the system."""
-        return LineSerializer(self._lines, many=True).data
+    def get_state(self, instance):
+        """Return the order state"""
+        return instance.order.state
 
     class Meta:
         """Meta options for WebhookOrderDataSerializer"""
 
-        models = WebhookOrderSelector
+        models = WebhookOrder
         fields = [
-            "reference_number",
-            "system_slug",
+            "system_key",
+            "type",
             "user",
-            "total_price_paid",
+            "reference_number",
             "state",
+            "total_price_paid",
             "lines",
         ]
         read_only_fields = [
-            "reference_number",
-            "system_slug",
+            "system_key",
+            "type",
             "user",
-            "total_price_paid",
+            "reference_number",
             "state",
+            "total_price_paid",
             "lines",
         ]

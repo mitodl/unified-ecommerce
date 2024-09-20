@@ -83,13 +83,3 @@ class WebhookProductSerializer(serializers.ModelSerializer):
 
         model = Version
         fields = ["sku", "name", "price", "description", "system_data"]
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """Serializer for User model."""
-
-    class Meta:
-        """Meta class for serializer."""
-
-        model = User
-        fields = ["id", "username", "email", "first_name", "last_name"]

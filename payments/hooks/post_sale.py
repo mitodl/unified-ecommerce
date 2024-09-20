@@ -5,8 +5,9 @@ import logging
 import pluggy
 import requests
 
+from payments.constants import PAYMENT_HOOK_ACTION_POST_SALE
 from payments.models import Order
-from payments.serializers.v0 import WebhookOrderDataSerializer
+from payments.serializers.v0 import WebhookOrder, WebhookOrderDataSerializer
 
 hookimpl = pluggy.HookimplMarker("unified_ecommerce")
 
@@ -19,8 +20,8 @@ class PostSaleSendEmails:
         """Send email when the order is fulfilled."""
         log = logging.getLogger(__name__)
 
-        msg = f"Sending email for order {order_id} with source {source}"
-        log.info(msg)
+        msg = "Sending email for order %s with source %s"
+        log.info(msg, order_id, source)
 
 
 class IntegratedSystemWebhooks:
@@ -49,7 +50,7 @@ class IntegratedSystemWebhooks:
         ]
 
         for system in systems:
-            system_webhook_url = system.sale_succeeded_webhook_url
+            system_webhook_url = system.webhook_url
             system_slug = system.slug
             if system_webhook_url:
                 log.info(
@@ -59,15 +60,20 @@ class IntegratedSystemWebhooks:
                     source,
                 )
 
-                serialized_data = WebhookOrderDataSerializer(
-                    {
-                        "order_id": order_id,
-                        "system_slug": system_slug,
-                        "action": "postsale",
-                    }
-                ).data
+                order_info = WebhookOrder(
+                    type=PAYMENT_HOOK_ACTION_POST_SALE,
+                    system_key=system.api_key,
+                    user=order.purchaser,
+                    order=order,
+                    lines=[
+                        line
+                        for line in order.lines.all()
+                        if line.product.system.slug == system_slug
+                    ],
+                )
+
                 requests.post(
                     system_webhook_url,
-                    json=serialized_data,
+                    json=WebhookOrderDataSerializer(order_info).data,
                     timeout=30,
                 )

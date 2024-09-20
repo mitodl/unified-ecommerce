@@ -31,8 +31,7 @@ class IntegratedSystem(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel)
     )
 
     # Webhook URLs
-    sale_succeeded_webhook_url = models.URLField(blank=True, default="")
-    sale_refunded_webhook_url = models.URLField(blank=True, default="")
+    webhook_url = models.URLField(blank=True, default="")
 
     objects = SafeDeleteManager()
     all_objects = models.Manager()

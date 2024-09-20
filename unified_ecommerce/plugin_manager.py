@@ -12,7 +12,6 @@ def get_plugin_manager():
     pm = pluggy.PluginManager("unified_ecommerce")
 
     pm.add_hookspecs(payments_hookspecs)
-    pm.register(payments_post_sale.TestPostSale())
     pm.register(payments_post_sale.PostSaleSendEmails())
     pm.register(payments_post_sale.IntegratedSystemWebhooks())
 
