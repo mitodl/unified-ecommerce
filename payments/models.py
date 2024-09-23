@@ -184,8 +184,7 @@ class Order(TimestampedModel):
             self.state = Order.STATE.FULFILLED
             self.save()
         except Exception as e:
-            self.state = Order.STATE.ERRORED
-            self.save()
+            self.errored()
 
     def cancel(self):
         """Cancel this order"""
@@ -232,27 +231,30 @@ class Order(TimestampedModel):
         Create the transaction record for the order. This contains payment
         processor-specific data.
         """
-        transaction_id = payment_data.get("transaction_id")
-        amount = payment_data.get("amount")
-        # There are two use cases:
-        # No payment required - no cybersource involved, so we need to generate
-        # a UUID as transaction id
-        # Payment STATE_ACCEPTED - there should always be transaction_id in payment
-        # data, if not, throw ValidationError
-        if amount == 0 and transaction_id is None:
-            transaction_id = uuid.uuid1()
-        elif transaction_id is None:
-            exception_message = (
-                "Failed to record transaction: Missing transaction id"
-                " from payment API response"
-            )
-            raise ValidationError(exception_message)
+        try:
+            transaction_id = payment_data.get("transaction_id")
+            amount = payment_data.get("amount")
+            # There are two use cases:
+            # No payment required - no cybersource involved, so we need to generate
+            # a UUID as transaction id
+            # Payment STATE_ACCEPTED - there should always be transaction_id in payment
+            # data, if not, throw ValidationError
+            if amount == 0 and transaction_id is None:
+                transaction_id = uuid.uuid1()
+            elif transaction_id is None:
+                exception_message = (
+                    "Failed to record transaction: Missing transaction id"
+                    " from payment API response"
+                )
+                raise ValidationError(exception_message)
 
-        self.transactions.get_or_create(
-            transaction_id=transaction_id,
-            data=payment_data,
-            amount=self.total_price_paid,
-        )
+            self.transactions.get_or_create(
+                transaction_id=transaction_id,
+                data=payment_data,
+                amount=self.total_price_paid,
+            )
+        except Exception as e:
+            self.errored()
 
     def handle_post_sale(self):
         """
@@ -420,8 +422,7 @@ class FulfilledOrder(Order):
 
             return refund_transaction
         except Exception as e:
-            self.state = Order.STATE.ERRORED
-            self.save()
+            self.errored()
 
     class Meta:
         """Model meta options."""
