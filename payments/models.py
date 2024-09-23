@@ -183,7 +183,7 @@ class Order(TimestampedModel):
 
             self.state = Order.STATE.FULFILLED
             self.save()
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-except  # noqa: BLE001
             self.errored()
 
     def cancel(self):
@@ -246,14 +246,14 @@ class Order(TimestampedModel):
                     "Failed to record transaction: Missing transaction id"
                     " from payment API response"
                 )
-                raise ValidationError(exception_message)
+                raise ValidationError(exception_message) # noqa: RSE102, TRY301
 
             self.transactions.get_or_create(
                 transaction_id=transaction_id,
                 data=payment_data,
                 amount=self.total_price_paid,
             )
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-except  # noqa: BLE001
             self.errored()
 
     def handle_post_sale(self):
@@ -334,7 +334,7 @@ class PendingOrder(Order):
 
             order.total_price_paid = total
 
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-except  # noqa: BLE001
             order.state = Order.STATE.ERRORED
 
         order.save()
@@ -405,7 +405,7 @@ class FulfilledOrder(Order):
                     "Failed to record transaction: Missing transaction id"
                     " from refund API response"
                 )
-                raise ValidationError(exception_message)
+                raise ValidationError(exception_message) # noqa: RSE102, TRY301
 
             refund_transaction, _ = self.transactions.get_or_create(
                 transaction_id=transaction_id,
@@ -421,7 +421,7 @@ class FulfilledOrder(Order):
             # (and any other post-refund events)
 
             return refund_transaction
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-except  # noqa: BLE001
             self.errored()
 
     class Meta:
