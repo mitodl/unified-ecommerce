@@ -425,7 +425,7 @@ class FulfilledOrder(Order):
             # (and any other post-refund events)
 
             return refund_transaction  # noqa: TRY300
-        except Exception as e: # pylint: disable=broad-except  # noqa: BLE001
+        except Exception:  # pylint: disable=broad-except  # noqa: BLE001
             self.errored()
 
     class Meta:
