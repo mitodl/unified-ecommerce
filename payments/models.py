@@ -109,7 +109,6 @@ class Order(TimestampedModel):
 
     class STATE:
         """Possible states for an order."""
-
         PENDING = "pending"
         FULFILLED = "fulfilled"
         CANCELED = "canceled"
@@ -118,28 +117,16 @@ class Order(TimestampedModel):
         REFUNDED = "refunded"
         REVIEW = "review"
         PARTIALLY_REFUNDED = "partially_refunded"
+        
+        choices = [(PENDING, "Pending"),
+                (FULFILLED, "Fulfilled"),
+                (CANCELED, "Canceled"),
+                (REFUNDED, "Refunded"),
+                (DECLINED, "Declined"),
+                (ERRORED, "Errored"),
+                (REVIEW, "Review")]
 
-        @classmethod
-        def choices(cls):
-            """Return the valid choices, their human-readable names, and the order class
-            they belong to.
-            """
-            return (
-                (cls.PENDING, "Pending", "PendingOrder"),
-                (cls.FULFILLED, "Fulfilled", "FulfilledOrder"),
-                (cls.CANCELED, "Canceled", "CanceledOrder"),
-                (cls.REFUNDED, "Refunded", "RefundedOrder"),
-                (cls.DECLINED, "Declined", "DeclinedOrder"),
-                (cls.ERRORED, "Errored", "ErroredOrder"),
-                (cls.REVIEW, "Review", "ReviewOrder"),
-                (
-                    cls.PARTIALLY_REFUNDED,
-                    "Partially Refunded",
-                    "PartiallyRefundedOrder",
-                ),
-            )
-
-    state = models.CharField(default=STATE.PENDING, choices=STATE.choices())
+    state = models.CharField(default=STATE.PENDING, choices=STATE.choices)
     purchaser = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -183,20 +170,34 @@ class Order(TimestampedModel):
         return self.state == Order.STATE.FULFILLED
 
     def fulfill(self, payment_data):
-        """Fulfill this order"""
-        raise NotImplementedError
+        """Fufill the order."""
+        # record the transaction
+        try:
+            self.create_transaction(payment_data)
+
+            # trigger post-sale events
+            transaction.on_commit(self.handle_post_sale)
+
+            # send the receipt emails
+            transaction.on_commit(self.send_ecommerce_order_receipt)
+
+            self.state = Order.STATE.FULFILLED
+            self.save()
+        except Exception as e:
+            self.state = Order.STATE.ERRORED
+            self.save()
 
     def cancel(self):
         """Cancel this order"""
-        raise NotImplementedError
+        self.state = Order.STATE.CANCELED
+        self.save()
 
     def decline(self):
         """Decline this order"""
-        raise NotImplementedError
+        self.state = Order.STATE.DECLINED
+        self.save()
 
-    def review(self):
-        """Place order in review"""
-        raise NotImplementedError
+        return self
 
     def errored(self):
         """Error this order"""
@@ -225,11 +226,7 @@ class Order(TimestampedModel):
     def decode_reference_number(refno):
         """Decode the reference number"""
         return re.sub(rf"^.*-{settings.ENVIRONMENT}-", "", refno)
-
-
-class FulfillableOrder:
-    """class to handle common logics like fulfill, enrollment etc"""
-
+    
     def create_transaction(self, payment_data):
         """
         Create the transaction record for the order. This contains payment
@@ -272,23 +269,7 @@ class FulfillableOrder:
 
         TODO: add email
         """
-
-    def fulfill(self, payment_data):
-        """Fufill the order."""
-        # record the transaction
-        self.create_transaction(payment_data)
-
-        # trigger post-sale events
-        transaction.on_commit(self.handle_post_sale)
-
-        # send the receipt emails
-        transaction.on_commit(self.send_ecommerce_order_receipt)
-        
-        self.state = Order.STATE.FULFILLED
-        self.save()
-
-
-class PendingOrder(FulfillableOrder, Order):
+class PendingOrder(Order):
     """An order that is pending payment"""
 
     @transaction.atomic
@@ -307,48 +288,52 @@ class PendingOrder(FulfillableOrder, Order):
         Returns:
             PendingOrder: the retrieved or created PendingOrder.
         """
-        # Get the details from each Product.
-        product_versions = [
-            Version.objects.get_for_object(product).first() for product in products
-        ]
+        try:
+            # Get the details from each Product.
+            product_versions = [
+                Version.objects.get_for_object(product).first() for product in products
+            ]
 
-        # Get or create a PendingOrder
-        # TODO: we prefetched the discounts here
-        orders = Order.objects.select_for_update().filter(
-            lines__product_version__in=product_versions,
-            state=Order.STATE.PENDING,
-            purchaser=user,
-        )
-        # Previously, multiple PendingOrders could be created for a single user
-        # for the same product, if multiple exist, grab the first.
-        if orders:
-            order = orders.first()
-            # TODO: this should clear discounts from the order here
-
-            order.refresh_from_db()
-        else:
-            order = Order.objects.create(
+            # Get or create a PendingOrder
+            # TODO: we prefetched the discounts here
+            orders = Order.objects.select_for_update().filter(
+                lines__product_version__in=product_versions,
                 state=Order.STATE.PENDING,
                 purchaser=user,
-                total_price_paid=0,
             )
+            # Previously, multiple PendingOrders could be created for a single user
+            # for the same product, if multiple exist, grab the first.
+            if orders:
+                order = orders.first()
+                # TODO: this should clear discounts from the order here
 
-        # TODO: Apply any discounts to the PendingOrder
+                order.refresh_from_db()
+            else:
+                order = Order.objects.create(
+                    state=Order.STATE.PENDING,
+                    purchaser=user,
+                    total_price_paid=0,
+                )
 
-        # Create or get Line for each product.
-        # Calculate the Order total based on Lines and discount.
-        total = 0
-        for i, _ in enumerate(products):
-            line, _ = order.lines.get_or_create(
-                order=order,
-                defaults={
-                    "product_version": product_versions[i],
-                    "quantity": 1,
-                },
-            )
-            total += line.discounted_price
+            # TODO: Apply any discounts to the PendingOrder
 
-        order.total_price_paid = total
+            # Create or get Line for each product.
+            # Calculate the Order total based on Lines and discount.
+            total = 0
+            for i, _ in enumerate(products):
+                line, _ = order.lines.get_or_create(
+                    order=order,
+                    defaults={
+                        "product_version": product_versions[i],
+                        "quantity": 1,
+                    },
+                )
+                total += line.discounted_price
+
+            order.total_price_paid = total
+
+        except Exception as e:
+            order.state = Order.STATE.ERRORED
 
         order.save()
 
@@ -384,21 +369,6 @@ class PendingOrder(FulfillableOrder, Order):
 
         return cls._get_or_create(cls, [product], user)
 
-    def cancel(self):
-        """Cancel this order"""
-        self.state = Order.STATE.CANCELED
-        self.save()
-
-    def decline(self):
-        """
-        Decline this order. This additionally clears the discount redemptions
-        for the order so the discounts can be reused.
-        """
-        self.state = Order.STATE.DECLINED
-        self.save()
-
-        return self
-
     class Meta:
         """Model meta options"""
 
@@ -408,12 +378,6 @@ class PendingOrder(FulfillableOrder, Order):
 class FulfilledOrder(Order):
     """An order that has a fulfilled payment"""
 
-    @transition(
-        field="state",
-        source=Order.STATE.FULFILLED,
-        target=Order.STATE.REFUNDED,
-        custom={"admin": False},
-    )
     def refund(self, *, api_response_data: dict | None = None, **kwargs):
         """
         Record the refund, then trigger any post-refund events.
@@ -429,31 +393,35 @@ class FulfilledOrder(Order):
         Returns:
         - Object (Transaction): the refund transaction object for the refund.
         """
-        amount = kwargs.get("amount")
-        reason = kwargs.get("reason")
+        try:
+            amount = kwargs.get("amount")
+            reason = kwargs.get("reason")
 
-        transaction_id = api_response_data.get("id")
-        if transaction_id is None:
-            exception_message = (
-                "Failed to record transaction: Missing transaction id"
-                " from refund API response"
+            transaction_id = api_response_data.get("id")
+            if transaction_id is None:
+                exception_message = (
+                    "Failed to record transaction: Missing transaction id"
+                    " from refund API response"
+                )
+                raise ValidationError(exception_message)
+
+            refund_transaction, _ = self.transactions.get_or_create(
+                transaction_id=transaction_id,
+                data=api_response_data,
+                amount=amount,
+                transaction_type=TRANSACTION_TYPE_REFUND,
+                reason=reason,
             )
-            raise ValidationError(exception_message)
+            self.state = Order.STATE.REFUNDED
+            self.save()
 
-        refund_transaction, _ = self.transactions.get_or_create(
-            transaction_id=transaction_id,
-            data=api_response_data,
-            amount=amount,
-            transaction_type=TRANSACTION_TYPE_REFUND,
-            reason=reason,
-        )
-        self.state = Order.STATE.REFUNDED
-        self.save()
+            # TODO: send_order_refund_email.delay(self.id)
+            # (and any other post-refund events)
 
-        # TODO: send_order_refund_email.delay(self.id)
-        # (and any other post-refund events)
-
-        return refund_transaction
+            return refund_transaction
+        except Exception as e:
+            self.state = Order.STATE.ERRORED
+            self.save()
 
     class Meta:
         """Model meta options."""
@@ -461,7 +429,7 @@ class FulfilledOrder(Order):
         proxy = True
 
 
-class ReviewOrder(FulfillableOrder, Order):
+class ReviewOrder(Order):
     """An order that has been placed under review by the payment processor."""
 
     class Meta:

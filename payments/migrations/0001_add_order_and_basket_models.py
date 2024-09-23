@@ -269,7 +269,7 @@ class Migration(migrations.Migration):
                 "indexes": [],
                 "constraints": [],
             },
-            bases=(payments.models.FulfillableOrder, "payments.order"),
+            bases=("payments.order",),
         ),
         migrations.CreateModel(
             name="RefundedOrder",
@@ -289,7 +289,7 @@ class Migration(migrations.Migration):
                 "indexes": [],
                 "constraints": [],
             },
-            bases=(payments.models.FulfillableOrder, "payments.order"),
+            bases=("payments.order",),
         ),
         migrations.AddConstraint(
             model_name="line",
