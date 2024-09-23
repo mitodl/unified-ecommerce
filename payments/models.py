@@ -10,7 +10,6 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.functional import cached_property
-from django_fsm import FSMField, transition
 from mitol.common.models import TimestampedModel
 from reversion.models import Version
 
@@ -109,6 +108,7 @@ class Order(TimestampedModel):
 
     class STATE:
         """Possible states for an order."""
+
         PENDING = "pending"
         FULFILLED = "fulfilled"
         CANCELED = "canceled"
@@ -117,14 +117,16 @@ class Order(TimestampedModel):
         REFUNDED = "refunded"
         REVIEW = "review"
         PARTIALLY_REFUNDED = "partially_refunded"
-        
-        choices = [(PENDING, "Pending"),
-                (FULFILLED, "Fulfilled"),
-                (CANCELED, "Canceled"),
-                (REFUNDED, "Refunded"),
-                (DECLINED, "Declined"),
-                (ERRORED, "Errored"),
-                (REVIEW, "Review")]
+
+        choices = [
+            (PENDING, "Pending"),
+            (FULFILLED, "Fulfilled"),
+            (CANCELED, "Canceled"),
+            (REFUNDED, "Refunded"),
+            (DECLINED, "Declined"),
+            (ERRORED, "Errored"),
+            (REVIEW, "Review"),
+        ]
 
     state = models.CharField(default=STATE.PENDING, choices=STATE.choices)
     purchaser = models.ForeignKey(
@@ -225,7 +227,7 @@ class Order(TimestampedModel):
     def decode_reference_number(refno):
         """Decode the reference number"""
         return re.sub(rf"^.*-{settings.ENVIRONMENT}-", "", refno)
-    
+
     def create_transaction(self, payment_data):
         """
         Create the transaction record for the order. This contains payment
@@ -271,6 +273,8 @@ class Order(TimestampedModel):
 
         TODO: add email
         """
+
+
 class PendingOrder(Order):
     """An order that is pending payment"""
 
@@ -471,6 +475,7 @@ class DeclinedOrder(Order):
 
     The state of this can't be altered further.
     """
+
     class Meta:
         """Model meta options."""
 

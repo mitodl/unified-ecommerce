@@ -4,15 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0002_remove_system_slug_from_basket'),
+        ("payments", "0002_remove_system_slug_from_basket"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='order',
-            name='state',
-            field=models.CharField(choices=[('pending', 'Pending'), ('fulfilled', 'Fulfilled'), ('canceled', 'Canceled'), ('refunded', 'Refunded'), ('declined', 'Declined'), ('errored', 'Errored'), ('review', 'Review')], default='pending'),
+            model_name="order",
+            name="state",
+            field=models.CharField(
+                choices=[
+                    ("pending", "Pending"),
+                    ("fulfilled", "Fulfilled"),
+                    ("canceled", "Canceled"),
+                    ("refunded", "Refunded"),
+                    ("declined", "Declined"),
+                    ("errored", "Errored"),
+                    ("review", "Review"),
+                ],
+                default="pending",
+            ),
         ),
     ]
