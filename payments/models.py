@@ -424,7 +424,7 @@ class FulfilledOrder(Order):
             # TODO: send_order_refund_email.delay(self.id)
             # (and any other post-refund events)
 
-            return refund_transaction
+            return refund_transaction  # noqa: TRY300
         except Exception as e: # pylint: disable=broad-except  # noqa: BLE001
             self.errored()
 
