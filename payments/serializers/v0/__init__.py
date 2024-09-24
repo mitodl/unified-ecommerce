@@ -203,22 +203,10 @@ class WebhookBaseSerializer(serializers.Serializer):
 class WebhookOrderDataSerializer(WebhookBaseSerializer):
     """Serializes order data for submission to the webhook."""
 
-    reference_number = serializers.SerializerMethodField()
-    total_price_paid = serializers.SerializerMethodField()
-    state = serializers.SerializerMethodField()
+    reference_number = serializers.CharField(source="order.reference_number")
+    total_price_paid = serializers.CharField(source="order.total_price_paid")
+    state = serializers.CharField(source="order.state")
     lines = LineSerializer(many=True)
-
-    def get_reference_number(self, instance):
-        """Return the reference number"""
-        return instance.order.reference_number
-
-    def get_total_price_paid(self, instance):
-        """Return the total price paid"""
-        return str(instance.order.total_price_paid)
-
-    def get_state(self, instance):
-        """Return the order state"""
-        return instance.order.state
 
     class Meta:
         """Meta options for WebhookOrderDataSerializer"""
