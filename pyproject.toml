@@ -75,7 +75,7 @@ mitol-django-common = "^2023.12.19"
 mitol-django-payment-gateway = "^2023.12.19"
 deepdiff = "^6.7.1"
 django-safedelete = "^1.3.3"
-django-fsm = "^2.8.1"
+django-fsm = "^3.0.0"
 django-fsm-admin-maintained = {git = "https://github.com/7tg/django-fsm-admin-django-4.git"}
 python-slugify = "^8.0.1"
 django-oauth-toolkit = "^2.3.0"
