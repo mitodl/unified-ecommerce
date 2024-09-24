@@ -183,7 +183,9 @@ class WebhookOrderDataSerializer(serializers.Serializer):
     """Serializes order data for submission to the webhook."""
 
     reference_number = serializers.CharField(source="order.reference_number")
-    total_price_paid = serializers.DecimalField(source="order.total_price_paid")
+    total_price_paid = serializers.DecimalField(
+        source="order.total_price_paid", max_digits=9, decimal_places=2
+    )
     state = serializers.CharField(source="order.state")
     lines = LineSerializer(many=True)
 

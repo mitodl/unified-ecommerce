@@ -75,7 +75,7 @@ class BaseOrderAdmin(FSMTransitionMixin, TimestampedModelAdmin):
     @display(description="Purchaser")
     def get_purchaser(self, obj: models.Order):
         """Return the purchaser information for the order"""
-        return f"{obj.purchaser.name} ({obj.purchaser.email})"
+        return f"{obj.purchaser.email}"
 
     def get_queryset(self, request):
         """Filter only to pending orders"""
