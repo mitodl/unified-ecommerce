@@ -164,16 +164,8 @@ class LineSerializer(serializers.ModelSerializer):
     """Serializes a line item for an order."""
 
     product = ProductSerializer()
-    unit_price = serializers.SerializerMethodField()
-    total_price = serializers.SerializerMethodField()
-
-    def get_unit_price(self, instance):
-        """Get the unit price for the line."""
-        return str(instance.unit_price.quantize(TWO_DECIMAL_PLACES))
-
-    def get_total_price(self, instance):
-        """Get the total price for the line."""
-        return str(instance.total_price.quantize(TWO_DECIMAL_PLACES))
+    unit_price = serializers.DecimalField(max_digits=9, decimal_places=2)
+    total_price = serializers.DecimalField(max_digits=9, decimal_places=2)
 
     class Meta:
         """Meta options for LineSerializer"""
@@ -193,7 +185,7 @@ class WebhookOrderDataSerializer(serializers.Serializer):
     """Serializes order data for submission to the webhook."""
 
     reference_number = serializers.CharField(source="order.reference_number")
-    total_price_paid = serializers.CharField(source="order.total_price_paid")
+    total_price_paid = serializers.DecimalField(source="order.total_price_paid")
     state = serializers.CharField(source="order.state")
     lines = LineSerializer(many=True)
 

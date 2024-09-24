@@ -76,8 +76,13 @@ class IntegratedSystemWebhooks:
                     data=order_info,
                 )
 
-                requests.post(
-                    system_webhook_url,
-                    json=WebhookBaseSerializer(webhook_data).data,
-                    timeout=30,
-                )
+                serializer = WebhookBaseSerializer(webhook_data)
+
+                if serializer.is_valid():
+                    requests.post(
+                        system_webhook_url,
+                        json=serializer.data,
+                        timeout=30,
+                    )
+                else:
+                    log.error("Webhook serializer invalid: %s", serializer.errors)
