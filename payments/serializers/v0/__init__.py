@@ -1,7 +1,6 @@
 """Serializers for payments."""
 
 from dataclasses import dataclass
-from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
@@ -15,7 +14,6 @@ from system_meta.models import Product
 from system_meta.serializers import ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
 
-TWO_DECIMAL_PLACES = Decimal("0.01")
 User = get_user_model()
 
 
