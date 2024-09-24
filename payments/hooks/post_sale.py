@@ -7,7 +7,7 @@ import requests
 
 from payments.constants import PAYMENT_HOOK_ACTION_POST_SALE
 from payments.models import Order
-from payments.serializers.v0 import WebhookOrder, WebhookOrderDataSerializer
+from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer, WebhookOrder
 
 hookimpl = pluggy.HookimplMarker("unified_ecommerce")
 
@@ -61,9 +61,6 @@ class IntegratedSystemWebhooks:
                 )
 
                 order_info = WebhookOrder(
-                    type=PAYMENT_HOOK_ACTION_POST_SALE,
-                    system_key=system.api_key,
-                    user=order.purchaser,
                     order=order,
                     lines=[
                         line
@@ -72,8 +69,15 @@ class IntegratedSystemWebhooks:
                     ],
                 )
 
+                webhook_data = WebhookBase(
+                    type=PAYMENT_HOOK_ACTION_POST_SALE,
+                    system_key=system.api_key,
+                    user=order.purchaser,
+                    data=order_info,
+                )
+
                 requests.post(
                     system_webhook_url,
-                    json=WebhookOrderDataSerializer(order_info).data,
+                    json=WebhookBaseSerializer(webhook_data).data,
                     timeout=30,
                 )

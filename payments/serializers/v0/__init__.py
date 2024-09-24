@@ -6,7 +6,10 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from payments.constants import PAYMENT_HOOK_ACTIONS
+from payments.constants import (
+    PAYMENT_HOOK_ACTION_POST_SALE,
+    PAYMENT_HOOK_ACTIONS,
+)
 from payments.models import Basket, BasketItem, Line, Order
 from system_meta.models import Product
 from system_meta.serializers import ProductSerializer
@@ -17,16 +20,7 @@ User = get_user_model()
 
 
 @dataclass
-class WebhookBase:
-    """Class representing the base data that we need to post a webhook."""
-
-    system_key: str
-    type: str
-    user: object
-
-
-@dataclass
-class WebhookOrder(WebhookBase):
+class WebhookOrder:
     """
     Webhook event data for order-based events.
 
@@ -38,7 +32,7 @@ class WebhookOrder(WebhookBase):
 
 
 @dataclass
-class WebhookCart(WebhookBase):
+class WebhookCart:
     """
     Webhook event data for cart-based events.
 
@@ -50,6 +44,16 @@ class WebhookCart(WebhookBase):
     """
 
     product: Product
+
+
+@dataclass
+class WebhookBase:
+    """Class representing the base data that we need to post a webhook."""
+
+    system_key: str
+    type: str
+    user: object
+    data: WebhookOrder | WebhookCart
 
 
 class BasketItemSerializer(serializers.ModelSerializer):
@@ -185,22 +189,7 @@ class LineSerializer(serializers.ModelSerializer):
         model = Line
 
 
-class WebhookBaseSerializer(serializers.Serializer):
-    """Base serializer for webhooks."""
-
-    system_key = serializers.CharField()
-    type = serializers.SerializerMethodField()
-    user = UserSerializer()
-
-    def get_type(self, instance):
-        if instance.type not in PAYMENT_HOOK_ACTIONS:
-            invalid_type_msg = f"Invalid type {instance.type}"
-            raise ValueError(invalid_type_msg)
-
-        return instance.type
-
-
-class WebhookOrderDataSerializer(WebhookBaseSerializer):
+class WebhookOrderDataSerializer(serializers.Serializer):
     """Serializes order data for submission to the webhook."""
 
     reference_number = serializers.CharField(source="order.reference_number")
@@ -213,20 +202,49 @@ class WebhookOrderDataSerializer(WebhookBaseSerializer):
 
         models = WebhookOrder
         fields = [
-            "system_key",
-            "type",
-            "user",
             "reference_number",
             "state",
             "total_price_paid",
             "lines",
         ]
         read_only_fields = [
-            "system_key",
-            "type",
-            "user",
             "reference_number",
             "state",
             "total_price_paid",
             "lines",
+        ]
+
+
+class WebhookBaseSerializer(serializers.Serializer):
+    """Base serializer for webhooks."""
+
+    system_key = serializers.CharField()
+    type = serializers.ChoiceField(choices=PAYMENT_HOOK_ACTIONS)
+    user = UserSerializer()
+    data = serializers.SerializerMethodField()
+
+    def get_data(self, instance):
+        """Resolve and return the proper serializer for the data field."""
+
+        if instance.type == PAYMENT_HOOK_ACTION_POST_SALE:
+            return WebhookOrderDataSerializer(instance.data).data
+
+        error_msg = "Invalid webhook type %s"
+        raise ValueError(error_msg, instance.type)
+
+    class Meta:
+        """Meta options for WebhookBaseSerializer"""
+
+        models = WebhookBase
+        fields = [
+            "system_key",
+            "type",
+            "user",
+            "data",
+        ]
+        readonly_fields = [
+            "system_key",
+            "type",
+            "user",
+            "data",
         ]
