@@ -6,7 +6,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.middleware import RemoteUserMiddleware
 from django.core.exceptions import ImproperlyConfigured
 
-from authentication.api import get_user_from_apisix_headers
+from unified_ecommerce.utils import decode_apisix_headers, get_user_from_apisix_headers
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class ApisixUserMiddleware(RemoteUserMiddleware):
         except KeyError:
             if self.force_logout_if_no_header and request.user.is_authenticated:
                 logout(request)
-            return
+            return None
 
         if apisix_user:
             if request.user.is_authenticated and request.user != apisix_user:
@@ -46,10 +46,6 @@ class ApisixUserMiddleware(RemoteUserMiddleware):
                 backend="django.contrib.auth.backends.ModelBackend",
             )
 
-        return
+        request.api_gateway_userdata = decode_apisix_headers(request)
 
-
-class ForwardUserMiddleware(RemoteUserMiddleware):
-    """RemoteUserMiddleware, but looks at X-Forwarded-User"""
-
-    header = "HTTP_X_FORWARDED_USER"
+        return self.get_response(request)

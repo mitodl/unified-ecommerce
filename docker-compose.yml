@@ -94,6 +94,51 @@ services:
       - .:/src
       - django_media:/var/media
 
+  etcd:
+    image: 'bitnami/etcd:latest'
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    ports:
+      - 2379:2379
+      - 2380:2380
+    volumes:
+      - ./config/etcd/etcd.conf.yml:/opt/bitnami/Etcd/conf/etcd.conf.yml bitnami/etcd:latest
+
+  api:
+    image: apache/apisix
+    platform: linux/amd64
+    ports:
+      - 9080:9080
+      - 9180:9180
+    volumes:
+      - ./config/apisix/apisix.yml:/usr/local/apisix/conf/config.yaml
+    depends_on:
+      - etcd
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    profiles:
+      - keycloak
+    depends_on:
+      - db
+    ports:
+      - 7080:7080
+      - 7443:7443
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_SVC_ADMIN:-admin}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_SVC_ADMIN_PASSWORD:-admin}
+    networks:
+      default:
+        aliases:
+        - ${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local}
+    command: start --verbose --features scripts --import-realm --hostname=${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local} --hostname-strict=false --hostname-debug=true --https-port=7443 --https-certificate-file=/etc/x509/https/tls.crt --https-certificate-key-file=/etc/x509/https/tls.key --http-enabled=true --http-port=7080 --config-keystore=/etc/keycloak-store --config-keystore-password=${KEYCLOAK_SVC_KEYSTORE_PASSWORD} --db=postgres --db-url-database=keycloak --db-url-host=db --db-schema=public --db-password=${POSTGRES_PASSWORD} --db-username=postgres
+    volumes:
+      - keycloak-store:/etc/keycloak-store
+      - ./config/keycloak/tls:/etc/x509/https
+      - ./config/keycloak/realms:/opt/keycloak/data/import
+
 volumes:
   django_media:
   yarn-cache:
+  keycloak-store:

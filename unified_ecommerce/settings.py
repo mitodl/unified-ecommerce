@@ -93,7 +93,6 @@ INSTALLED_APPS = [
     "oauth2_provider",
     # Application modules
     "unified_ecommerce",
-    "authentication",
     "system_meta",
     "payments",
     "cart",
@@ -107,7 +106,6 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "unified_ecommerce.middleware.ApisixUserMiddleware",
-    "unified_ecommerce.middleware.ForwardUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -201,11 +199,9 @@ USE_TZ = True
 AUTHENTICATION_BACKENDS = [
     # "authentication.backends.ol_open_id_connect.OlOpenIdConnectAuth",
     # the following needs to stay here to allow login of local users
-    "authentication.backends.KeycloakRemoteUserBackend",
     "django.contrib.auth.backends.ModelBackend",
     "guardian.backends.ObjectPermissionBackend",
 ]
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
@@ -237,8 +233,8 @@ DEFAULT_FROM_EMAIL = get_string("MITOL_UE_FROM_EMAIL", "webmaster@localhost")
 MAILGUN_SENDER_DOMAIN = get_string("MAILGUN_SENDER_DOMAIN", None)
 MAILGUN_KEY = get_string("MAILGUN_KEY", None)
 MAILGUN_RECIPIENT_OVERRIDE = get_string("MAILGUN_RECIPIENT_OVERRIDE", None)
-MAILGUN_FROM_EMAIL = get_string("MAILGUN_FROM_EMAIL", "no-reply@example.com")
-MAILGUN_BCC_TO_EMAIL = get_string("MAILGUN_BCC_TO_EMAIL", None)
+MAILGUN_FROM_EMAIL = get_string("MITOL_UE_FROM_EMAIL", "no-reply@example.com")
+MAILGUN_BCC_TO_EMAIL = get_string("MITOL_UE_BCC_EMAIL", None)
 
 ANYMAIL = {
     "MAILGUN_API_KEY": MAILGUN_KEY,
