@@ -1,11 +1,8 @@
 """Serializers for system metadata."""
 
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from system_meta.models import IntegratedSystem, Product
-
-User = get_user_model()
 
 
 class IntegratedSystemSerializer(serializers.ModelSerializer):

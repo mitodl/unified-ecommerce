@@ -27,8 +27,7 @@ class PostSaleSendEmails:
 class IntegratedSystemWebhooks:
     """Figures out what webhook endpoints to call, and calls them."""
 
-    @hookimpl
-    def post_sale(self, order_id, source):
+    def post_sale_impl(self, order_id, source):
         """Call the webhook endpoints for the order."""
 
         log = logging.getLogger(__name__)
@@ -78,11 +77,14 @@ class IntegratedSystemWebhooks:
 
                 serializer = WebhookBaseSerializer(webhook_data)
 
-                if serializer.is_valid():
-                    requests.post(
-                        system_webhook_url,
-                        json=serializer.data,
-                        timeout=30,
-                    )
-                else:
-                    log.error("Webhook serializer invalid: %s", serializer.errors)
+                requests.post(
+                    system_webhook_url,
+                    json=serializer.data,
+                    timeout=30,
+                )
+
+    @hookimpl
+    def post_sale(self, order_id, source):
+        """Call the implementation of this, so we can test it more easily."""
+
+        self.post_sale_impl(order_id, source)

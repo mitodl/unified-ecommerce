@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework_dataclasses.serializers import DataclassSerializer
 
 from payments.constants import (
     PAYMENT_HOOK_ACTION_POST_SALE,
@@ -179,7 +180,7 @@ class LineSerializer(serializers.ModelSerializer):
         model = Line
 
 
-class WebhookOrderDataSerializer(serializers.Serializer):
+class WebhookOrderDataSerializer(DataclassSerializer):
     """Serializes order data for submission to the webhook."""
 
     reference_number = serializers.CharField(source="order.reference_number")
@@ -192,22 +193,10 @@ class WebhookOrderDataSerializer(serializers.Serializer):
     class Meta:
         """Meta options for WebhookOrderDataSerializer"""
 
-        models = WebhookOrder
-        fields = [
-            "reference_number",
-            "state",
-            "total_price_paid",
-            "lines",
-        ]
-        read_only_fields = [
-            "reference_number",
-            "state",
-            "total_price_paid",
-            "lines",
-        ]
+        dataclass = WebhookOrder
 
 
-class WebhookBaseSerializer(serializers.Serializer):
+class WebhookBaseSerializer(DataclassSerializer):
     """Base serializer for webhooks."""
 
     system_key = serializers.CharField()
@@ -227,16 +216,4 @@ class WebhookBaseSerializer(serializers.Serializer):
     class Meta:
         """Meta options for WebhookBaseSerializer"""
 
-        models = WebhookBase
-        fields = [
-            "system_key",
-            "type",
-            "user",
-            "data",
-        ]
-        readonly_fields = [
-            "system_key",
-            "type",
-            "user",
-            "data",
-        ]
+        dataclass = WebhookBase

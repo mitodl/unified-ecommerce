@@ -18,6 +18,7 @@ class IntegratedSystemFactory(DjangoModelFactory):
     name = Faker("company")
     description = Faker("text")
     api_key = Faker("md5")
+    webhook_url = Faker("url")
 
 
 class ActiveIntegratedSystemFactory(IntegratedSystemFactory):
