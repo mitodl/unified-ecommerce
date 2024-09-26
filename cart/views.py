@@ -188,5 +188,9 @@ class CheckoutInterstitialView(LoginRequiredMixin, TemplateView):
         return render(
             request,
             self.template_name,
-            {"checkout_payload": checkout_payload, "form": checkout_payload["payload"]},
+            {
+                "checkout_payload": checkout_payload,
+                "form": checkout_payload["payload"],
+                "debug_mode": settings.MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG,
+            },
         )

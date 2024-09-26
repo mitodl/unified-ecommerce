@@ -40,15 +40,21 @@ class Basket(TimestampedModel):
         if self.user != order.purchaser:
             return False
 
-        all_items_found = self.basket_items.count() == order.lines.count()
+        if self.basket_items.count() != order.lines.count():
+            return False
 
-        if all_items_found:
-            for basket_item in self.basket_items.all():
-                for order_item in order.lines.all():
-                    if order_item.product != basket_item.product:
-                        all_items_found = False
+        for basket_item in self.basket_items.all():
+            found_this_one = False
 
-        return all_items_found
+            for order_item in order.lines.all():
+                if order_item.product == basket_item.product:
+                    found_this_one = True
+                    break
+
+            if not found_this_one:
+                return False
+
+        return True
 
     def get_products(self):
         """
@@ -326,15 +332,22 @@ class PendingOrder(Order):
             # Create or get Line for each product.
             # Calculate the Order total based on Lines and discount.
             total = 0
-            for i, _ in enumerate(products):
-                line, _ = order.lines.get_or_create(
+            for product_version in product_versions:
+                line, created = order.lines.get_or_create(
                     order=order,
+                    product_version=product_version,
                     defaults={
-                        "product_version": product_versions[i],
                         "quantity": 1,
                     },
                 )
                 total += line.discounted_price
+                log.debug(
+                    "%s line %s product %s",
+                    ("Created" if created else "Updated"),
+                    line,
+                    product_version.field_dict["sku"],
+                )
+                line.save()
 
             order.total_price_paid = total
 

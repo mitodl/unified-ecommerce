@@ -1,7 +1,9 @@
 """Factories for the system_meta app."""
 
+import reversion
 from factory import Faker, SubFactory
 from factory.django import DjangoModelFactory
+from reversion.models import Version
 
 from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce.factories import InactiveDjangoModelFactory
@@ -53,3 +55,27 @@ class ActiveProductFactory(ProductFactory):
 
 class InactiveProductFactory(ProductFactory, InactiveDjangoModelFactory):
     """Factory for Product model, but always returns an inactive product."""
+
+
+class ProductVersionFactory:
+    """Factory for ProductVersion"""
+
+    @staticmethod
+    def create(**kwargs):
+        """
+        Create a single ProductVersion.
+
+        This uses the ProductFactory so you should be able to specify defaults
+        as normal.
+        """
+
+        with reversion.create_revision():
+            product = ProductFactory.create(**kwargs)
+
+        return Version.objects.get_for_object(product).first()
+
+    @staticmethod
+    def create_batch(number, **kwargs):
+        """Create several ProductVersions. Same as ProductVersion, just more."""
+
+        return [ProductVersionFactory.create(**kwargs) for _ in range(number)]
