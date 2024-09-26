@@ -1049,36 +1049,6 @@ files = [
 Django = ">=3.2"
 
 [[package]]
-name = "django-fsm"
-version = "3.0.0"
-description = "Django friendly finite state machine support."
-optional = false
-python-versions = "*"
-files = [
-    {file = "django-fsm-3.0.0.tar.gz", hash = "sha256:0112bcac573ad14051cf8ebe73bf296b6d5409f093e5f1677eb16e2196e263b3"},
-    {file = "django_fsm-3.0.0-py2.py3-none-any.whl", hash = "sha256:fa28f84f47eae7ce9247585ac6c1895e4ada08efff93fb243a59e9ff77b2d4ec"},
-]
-
-[[package]]
-name = "django-fsm-admin-maintained"
-version = "1.2.6"
-description = "Integrate django-fsm state transitions into the django admin with django 4 support."
-optional = false
-python-versions = "*"
-files = []
-develop = false
-
-[package.dependencies]
-Django = ">=1.6"
-django-fsm = ">=2.1.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/7tg/django-fsm-admin-django-4.git"
-reference = "HEAD"
-resolved_reference = "0a82736a1f41e7d947a7f7eda90fe0d48afb6b1f"
-
-[[package]]
 name = "django-guardian"
 version = "2.4.0"
 description = "Implementation of per object permissions for Django."
@@ -4126,4 +4096,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11.0"
-content-hash = "4e547569aee2e5f6b5210c679d32c39f4bf9c73885a7db91838cffe9998a8c2f"
+content-hash = "261979692393d24bcf768a079e6e4484fd90e5ef7247ffadfd67adc1a12e4c49"
