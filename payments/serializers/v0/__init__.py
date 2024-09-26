@@ -124,7 +124,6 @@ class LineSerializer(serializers.ModelSerializer):
         fields = [
             "quantity",
             "item_description",
-            "content_type",
             "unit_price",
             "total_price",
             "id",
@@ -133,24 +132,7 @@ class LineSerializer(serializers.ModelSerializer):
         model = Line
 
 class OrderHistorySerializer(serializers.ModelSerializer):
-    titles = serializers.SerializerMethodField()
     lines = LineSerializer(many=True)
-
-    def get_titles(self, instance):
-        titles = []
-
-        for line in instance.lines.all():
-            product = Product.all_objects.get(
-                pk=line.product_version.field_dict["id"]
-            )
-            if product.content_type.model == "courserun":
-                titles.append(product.purchasable_object.course.title)
-            elif product.content_type.model == "programrun":
-                titles.append(product.description)
-            else:
-                titles.append(f"No Title - {product.id}")
-
-        return titles
 
     class Meta:
         fields = [
@@ -161,7 +143,6 @@ class OrderHistorySerializer(serializers.ModelSerializer):
             "total_price_paid",
             "lines",
             "created_on",
-            "titles",
             "updated_on",
         ]
         model = Order

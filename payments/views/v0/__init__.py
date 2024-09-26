@@ -17,12 +17,13 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import (
     GenericViewSet,
     ViewSet,
+    ReadOnlyModelViewSet,
 )
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from payments import api
 from payments.models import Basket, BasketItem, Order
-from payments.serializers.v0 import BasketItemSerializer, BasketSerializer
+from payments.serializers.v0 import BasketItemSerializer, BasketSerializer, OrderHistorySerializer
 from system_meta.models import IntegratedSystem, Product
 
 log = logging.getLogger(__name__)
@@ -231,13 +232,12 @@ class BackofficeCallbackView(APIView):
             return Response(status=status.HTTP_200_OK)
 class OrderHistoryViewSet(ReadOnlyModelViewSet):
     serializer_class = OrderHistorySerializer
-    pagination_class = RefinePagination
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return (
             Order.objects.filter(purchaser=self.request.user)
-            .filter(state__in=[OrderStatus.FULFILLED, OrderStatus.REFUNDED])
+            .filter(state__in=[Order.STATE.FULFILLED, Order.STATE.REFUNDED])
             .order_by("-created_on")
             .all()
         )
