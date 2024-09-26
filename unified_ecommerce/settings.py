@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     "django_fsm",
     "fsm_admin",
     "oauth2_provider",
+    "mitol.mail.apps.MailApp",
     # Application modules
     "unified_ecommerce",
     "system_meta",
