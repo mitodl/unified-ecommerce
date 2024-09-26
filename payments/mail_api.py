@@ -1,17 +1,21 @@
+from mitol.mail.api import get_message_sender
+import logging
 
+from payments.messages import SuccessfulOrderPaymentMessage
 
-def send_order_payment_successful_email(
-    financial_assistance_request, email_subject, email_body
+log = logging.getLogger(__name__)
+
+def send_successful_order_payment_successful_email(
+    order, email_subject, email_body
 ):
     try:
-        with get_message_sender(FlexiblePriceStatusChangeMessage) as sender:
+        with get_message_sender(SuccessfulOrderPaymentMessage) as sender:
             sender.build_and_send_message(
-                financial_assistance_request.user.email,
+                order.purchaser.email,
                 {
                     "subject": email_subject,
-                    "first_name": financial_assistance_request.user.legal_address.first_name,
+                    "first_name": order.purchaser.first_name,
                     "message": email_body,
-                    "program_name": financial_assistance_request.courseware_object.title,
                 },
             )
     except:  # noqa: E722
