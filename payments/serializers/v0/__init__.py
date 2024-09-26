@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from payments.models import Basket, BasketItem
+from payments.models import Basket, BasketItem, Line, Order
 from system_meta.models import Product
 from system_meta.serializers import ProductSerializer
 
@@ -109,3 +109,60 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
             "total_price",
         ]
         model = Basket
+
+class LineSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField()
+
+    def get_product(self, instance):
+        product = Product.all_objects.get(
+            pk=instance.product_version.field_dict["id"]
+        )
+
+        return ProductSerializer(instance=product).data
+
+    class Meta:
+        fields = [
+            "quantity",
+            "item_description",
+            "content_type",
+            "unit_price",
+            "total_price",
+            "id",
+            "product",
+        ]
+        model = Line
+
+class OrderHistorySerializer(serializers.ModelSerializer):
+    titles = serializers.SerializerMethodField()
+    lines = LineSerializer(many=True)
+
+    def get_titles(self, instance):
+        titles = []
+
+        for line in instance.lines.all():
+            product = Product.all_objects.get(
+                pk=line.product_version.field_dict["id"]
+            )
+            if product.content_type.model == "courserun":
+                titles.append(product.purchasable_object.course.title)
+            elif product.content_type.model == "programrun":
+                titles.append(product.description)
+            else:
+                titles.append(f"No Title - {product.id}")
+
+        return titles
+
+    class Meta:
+        fields = [
+            "id",
+            "state",
+            "reference_number",
+            "purchaser",
+            "total_price_paid",
+            "lines",
+            "created_on",
+            "titles",
+            "updated_on",
+        ]
+        model = Order
+        depth = 1

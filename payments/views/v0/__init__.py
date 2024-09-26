@@ -229,3 +229,15 @@ class BackofficeCallbackView(APIView):
                 api.process_cybersource_payment_response(request, order)
 
             return Response(status=status.HTTP_200_OK)
+class OrderHistoryViewSet(ReadOnlyModelViewSet):
+    serializer_class = OrderHistorySerializer
+    pagination_class = RefinePagination
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return (
+            Order.objects.filter(purchaser=self.request.user)
+            .filter(state__in=[OrderStatus.FULFILLED, OrderStatus.REFUNDED])
+            .order_by("-created_on")
+            .all()
+        )
