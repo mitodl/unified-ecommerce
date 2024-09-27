@@ -103,7 +103,6 @@ function add_to_cart(event) {
 function clear_cart(event) {
     event.preventDefault();
 
-    var slug = "{{ basket.integrated_system.slug }}";
     var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
 
     axios.delete(`/api/v0/payments/baskets/clear/`, { headers: { "X-CSRFToken": csrfmiddlewaretoken } })
