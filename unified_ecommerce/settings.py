@@ -88,8 +88,6 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "safedelete",
     "reversion",
-    "django_fsm",
-    "fsm_admin",
     "oauth2_provider",
     # Application modules
     "unified_ecommerce",
