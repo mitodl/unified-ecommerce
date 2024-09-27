@@ -151,6 +151,8 @@ TEMPLATES = [
     },
 ]
 
+MITOL_MAIL_MESSAGE_CLASSES = ["payments.messages.SuccessfulOrderPaymentMessage"]
+
 WSGI_APPLICATION = "unified_ecommerce.wsgi.application"
 
 # Database
@@ -236,6 +238,16 @@ MAILGUN_KEY = get_string("MAILGUN_KEY", None)
 MAILGUN_RECIPIENT_OVERRIDE = get_string("MAILGUN_RECIPIENT_OVERRIDE", None)
 MAILGUN_FROM_EMAIL = get_string("MITOL_UE_FROM_EMAIL", "no-reply@example.com")
 MAILGUN_BCC_TO_EMAIL = get_string("MITOL_UE_BCC_EMAIL", None)
+
+# mitol-django-mail
+MITOL_MAIL_FROM_EMAIL = MAILGUN_FROM_EMAIL
+MITOL_MAIL_MESSAGE_CLASSES = []
+MITOL_MAIL_RECIPIENT_OVERRIDE = MAILGUN_RECIPIENT_OVERRIDE
+MITOL_MAIL_FORMAT_RECIPIENT_FUNC = "payments.mail_api.format_recipient"
+MITOL_MAIL_ENABLE_EMAIL_DEBUGGER = get_bool(  # NOTE: this will override the legacy mail debugger defined in this project
+    name="MITOL_MAIL_ENABLE_EMAIL_DEBUGGER",
+    default=False,
+)
 
 ANYMAIL = {
     "MAILGUN_API_KEY": MAILGUN_KEY,

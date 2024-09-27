@@ -175,7 +175,7 @@ def process_cybersource_payment_response(request, order):
         # Error - something went wrong with the request
         msg = f"Error happened submitting the transaction: {processor_response.message}"
         log.debug(msg)
-        order.error()
+        order.errored()
         order.save()
         return_message = order.state
     elif processor_response.state in [
