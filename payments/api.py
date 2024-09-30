@@ -169,14 +169,12 @@ def process_cybersource_payment_response(request, order):
         msg = f"Transaction declined: {processor_response.message}"
         log.debug(msg)
         order.decline()
-        order.save()
         return_message = order.state
     elif processor_response.state == ProcessorResponse.STATE_ERROR:
         # Error - something went wrong with the request
         msg = f"Error happened submitting the transaction: {processor_response.message}"
         log.debug(msg)
         order.errored()
-        order.save()
         return_message = order.state
     elif processor_response.state in [
         ProcessorResponse.STATE_CANCELLED,
@@ -190,7 +188,6 @@ def process_cybersource_payment_response(request, order):
         msg = f"Transaction cancelled/reviewed: {processor_response.message}"
         log.debug(msg)
         order.cancel()
-        order.save()
         return_message = order.state
 
     elif (

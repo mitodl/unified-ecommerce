@@ -300,6 +300,8 @@ class PendingOrder(Order):
             product_versions = [
                 Version.objects.get_for_object(product).first() for product in products
             ]
+            print("CP")
+            print(products)
 
             # Get or create a PendingOrder
             # TODO: we prefetched the discounts here
