@@ -2,7 +2,6 @@
 
 from django.contrib import admin
 from django.contrib.admin.decorators import display
-from fsm_admin.mixins import FSMTransitionMixin
 from mitol.common.admin import TimestampedModelAdmin
 from reversion.admin import VersionAdmin
 
@@ -53,7 +52,7 @@ class OrderTransactionInline(admin.TabularInline):
     can_add = False
 
 
-class BaseOrderAdmin(FSMTransitionMixin, TimestampedModelAdmin):
+class BaseOrderAdmin(TimestampedModelAdmin):
     """Base admin for Order"""
 
     search_fields = [
@@ -75,7 +74,7 @@ class BaseOrderAdmin(FSMTransitionMixin, TimestampedModelAdmin):
     @display(description="Purchaser")
     def get_purchaser(self, obj: models.Order):
         """Return the purchaser information for the order"""
-        return f"{obj.purchaser.name} ({obj.purchaser.email})"
+        return f"{obj.purchaser.email}"
 
     def get_queryset(self, request):
         """Filter only to pending orders"""

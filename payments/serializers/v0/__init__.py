@@ -1,10 +1,53 @@
 """Serializers for payments."""
 
+from dataclasses import dataclass
+
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from payments.models import Basket, BasketItem, Line, Order
+from payments.models import Basket, BasketItem
 from system_meta.models import Product
 from system_meta.serializers import ProductSerializer
+from unified_ecommerce.serializers import UserSerializer
+
+User = get_user_model()
+
+
+@dataclass
+class WebhookOrder:
+    """
+    Webhook event data for order-based events.
+
+    This includes order completed and order refunded states.
+    """
+
+    order: Order
+    lines: Line
+
+
+@dataclass
+class WebhookCart:
+    """
+    Webhook event data for cart-based events.
+
+    This includes item added to cart and item removed from cart. (These are so
+    the integrated system can fire off enrollments when people add things to
+    their cart - MITx Online specifically enrolls as soon as you add to cart,
+    regardless of whether or not you pay, and then upgrades when you do, for
+    instance.)
+    """
+
+    product: Product
+
+
+@dataclass
+class WebhookBase:
+    """Class representing the base data that we need to post a webhook."""
+
+    system_key: str
+    type: str
+    user: object
+    data: WebhookOrder | WebhookCart
 
 
 class BasketItemSerializer(serializers.ModelSerializer):
@@ -109,41 +152,3 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
             "total_price",
         ]
         model = Basket
-
-class LineSerializer(serializers.ModelSerializer):
-    product = serializers.SerializerMethodField()
-
-    def get_product(self, instance):
-        product = Product.all_objects.get(
-            pk=instance.product_version.field_dict["id"]
-        )
-
-        return ProductSerializer(instance=product).data
-
-    class Meta:
-        fields = [
-            "quantity",
-            "item_description",
-            "unit_price",
-            "total_price",
-            "id",
-            "product",
-        ]
-        model = Line
-
-class OrderHistorySerializer(serializers.ModelSerializer):
-    lines = LineSerializer(many=True)
-
-    class Meta:
-        fields = [
-            "id",
-            "state",
-            "reference_number",
-            "purchaser",
-            "total_price_paid",
-            "lines",
-            "created_on",
-            "updated_on",
-        ]
-        model = Order
-        depth = 1

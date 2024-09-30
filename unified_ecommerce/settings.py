@@ -88,8 +88,6 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "safedelete",
     "reversion",
-    "django_fsm",
-    "fsm_admin",
     "oauth2_provider",
     "mitol.mail.apps.MailApp",
     # Application modules
