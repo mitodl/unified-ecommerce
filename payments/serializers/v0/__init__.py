@@ -5,9 +5,16 @@ from dataclasses import dataclass
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from payments.models import Basket, BasketItem
+from payments.models import Basket, BasketItem, Line, Order
 from system_meta.models import Product
 from system_meta.serializers import ProductSerializer
+
+from rest_framework_dataclasses.serializers import DataclassSerializer
+
+from payments.constants import (
+    PAYMENT_HOOK_ACTION_POST_SALE,
+    PAYMENT_HOOK_ACTIONS,
+)
 from unified_ecommerce.serializers import UserSerializer
 
 User = get_user_model()
@@ -152,3 +159,81 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
             "total_price",
         ]
         model = Basket
+        
+class LineSerializer(serializers.ModelSerializer):
+    """Serializes a line item for an order."""
+
+    product = ProductSerializer()
+    unit_price = serializers.DecimalField(max_digits=9, decimal_places=2)
+    total_price = serializers.DecimalField(max_digits=9, decimal_places=2)
+
+    class Meta:
+        """Meta options for LineSerializer"""
+
+        fields = [
+            "id",
+            "quantity",
+            "item_description",
+            "unit_price",
+            "total_price",
+            "product",
+        ]
+        model = Line
+
+
+class WebhookOrderDataSerializer(DataclassSerializer):
+    """Serializes order data for submission to the webhook."""
+
+    reference_number = serializers.CharField(source="order.reference_number")
+    total_price_paid = serializers.DecimalField(
+        source="order.total_price_paid", max_digits=9, decimal_places=2
+    )
+    state = serializers.CharField(source="order.state")
+    lines = LineSerializer(many=True)
+
+    class Meta:
+        """Meta options for WebhookOrderDataSerializer"""
+
+        dataclass = WebhookOrder
+
+
+class WebhookBaseSerializer(DataclassSerializer):
+    """Base serializer for webhooks."""
+
+    system_key = serializers.CharField()
+    type = serializers.ChoiceField(choices=PAYMENT_HOOK_ACTIONS)
+    user = UserSerializer()
+    data = serializers.SerializerMethodField()
+
+    def get_data(self, instance):
+        """Resolve and return the proper serializer for the data field."""
+
+        if instance.type == PAYMENT_HOOK_ACTION_POST_SALE:
+            return WebhookOrderDataSerializer(instance.data).data
+
+        error_msg = "Invalid webhook type %s"
+        raise ValueError(error_msg, instance.type)
+
+    class Meta:
+        """Meta options for WebhookBaseSerializer"""
+
+        dataclass = WebhookBase
+        model = Line
+
+class OrderHistorySerializer(serializers.ModelSerializer):
+    lines = LineSerializer(many=True)
+
+    class Meta:
+        fields = [
+            "id",
+            "state",
+            "reference_number",
+            "purchaser",
+            "total_price_paid",
+            "lines",
+            "created_on",
+            "updated_on",
+        ]
+        model = Order
+        depth = 1
+
