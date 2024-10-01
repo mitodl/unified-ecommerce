@@ -149,7 +149,6 @@ TEMPLATES = [
         },
     },
 ]
-
 MITOL_MAIL_MESSAGE_CLASSES = ["payments.messages.SuccessfulOrderPaymentMessage"]
 
 WSGI_APPLICATION = "unified_ecommerce.wsgi.application"
@@ -222,7 +221,7 @@ INTERNAL_IPS = (get_string("HOST_IP", "127.0.0.1"),)
 
 # Configure e-mail settings
 EMAIL_BACKEND = get_string(
-    "MITOL_UE_EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+    "MITOL_UE_EMAIL_BACKEND", "anymail.backends.mailgun.EmailBackend"
 )
 EMAIL_HOST = get_string("MITOL_UE_EMAIL_HOST", "localhost")
 EMAIL_PORT = get_int("MITOL_UE_EMAIL_PORT", 25)
@@ -240,19 +239,17 @@ MAILGUN_BCC_TO_EMAIL = get_string("MITOL_UE_BCC_EMAIL", None)
 
 # mitol-django-mail
 MITOL_MAIL_FROM_EMAIL = MAILGUN_FROM_EMAIL
-MITOL_MAIL_MESSAGE_CLASSES = []
 MITOL_MAIL_RECIPIENT_OVERRIDE = MAILGUN_RECIPIENT_OVERRIDE
 MITOL_MAIL_FORMAT_RECIPIENT_FUNC = "payments.mail_api.format_recipient"
 MITOL_MAIL_ENABLE_EMAIL_DEBUGGER = get_bool(  # NOTE: this will override the legacy mail debugger defined in this project
     name="MITOL_MAIL_ENABLE_EMAIL_DEBUGGER",
-    default=False,
+    default=DEBUG,
 )
 
 ANYMAIL = {
     "MAILGUN_API_KEY": MAILGUN_KEY,
     "MAILGUN_SENDER_DOMAIN": MAILGUN_SENDER_DOMAIN,
 }
-
 # e-mail configurable admins
 ADMIN_EMAIL = get_string("MITOL_UE_ADMIN_EMAIL", "")
 ADMINS = (("Admins", ADMIN_EMAIL),) if ADMIN_EMAIL != "" else ()
@@ -400,7 +397,7 @@ MITOL_UE_UNSUBSCRIBE_TOKEN_MAX_AGE_SECONDS = get_int(
 
 MITOL_MAIL_REPLY_TO_ADDRESS = get_string(
     name="MITOL_MAIL_REPLY_TO_ADDRESS",
-    default="webmaster@localhost",
+    default="webmaster@localhost.com",
 )
 
 SITE_NAME = get_string(
