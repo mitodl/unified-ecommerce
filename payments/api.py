@@ -18,6 +18,7 @@ from payments.models import (
     Order,
     PendingOrder,
 )
+from payments.tasks import send_post_sale_webhook
 from system_meta.models import IntegratedSystem
 from unified_ecommerce.constants import (
     CYBERSOURCE_ACCEPT_CODES,
@@ -403,3 +404,26 @@ def check_and_process_pending_orders_for_resolution(refnos=None):
                 error_count += 1
 
     return (fulfilled_count, cancel_count, error_count)
+
+
+def process_post_sale_webhooks(order_id, source):
+    """
+    Send data to the webhooks for post-sale events.
+    """
+
+    log.info("Queueing webhook endpoints for order %s with source %s", order_id, source)
+
+    order = Order.objects.prefetch_related("lines", "lines__product_version").get(
+        pk=order_id
+    )
+
+    systems = [
+        product.system
+        for product in [
+            line.product_version._object_version.object  # noqa: SLF001
+            for line in order.lines.all()
+        ]
+    ]
+
+    for system in systems:
+        send_post_sale_webhook.delay(system, order, source)

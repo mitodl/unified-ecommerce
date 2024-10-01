@@ -449,6 +449,9 @@ MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string(
 MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG = get_bool(
     "MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG", DEBUG
 )
+MITOL_UE_WEBHOOK_RETRY_COOLDOWN = get_int("MITOL_UE_WEBHOOK_RETRY_COOLDOWN", 60)
+MITOL_UE_WEBHOOK_RETRY_MAX = get_int("MITOL_UE_WEBHOOK_RETRY_MAX", 4)
+
 import_settings_modules("mitol.payment_gateway.settings.cybersource")
 
 # Keycloak API settings
