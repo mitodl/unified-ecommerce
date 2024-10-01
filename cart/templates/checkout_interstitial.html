@@ -14,20 +14,21 @@
 
                         <form id="checkout_form" method="post" action="{{ checkout_payload.url }}">
                             {% if debug_mode %}
-                            {% for key, value in form.items %}
-                            <div><label for="{{ key }}">{{ key }}</label>
-                            <input type="text" readonly="readonly" name="{{ key }}" value="{{ value }}" /></div>
-                            {% endfor %}
+                                {% for key, value in form.items %}
+                                    <div><label for="{{ key }}">{{ key }}</label>
+                                    <input type="text" readonly="readonly" name="{{ key }}" value="{{ value }}" /></div>
+                                {% endfor %}
 
-                            <div>
-                                <button class="btn btn-primary" type="submit">Redirect to CyberSource in <span id="countdown-time">5</span></button>
-                            </div>
+                                <div>
+                                    <button class="btn btn-primary" type="submit">Redirect to CyberSource in <span id="countdown-time">5</span></button>
+                                </div>
                             {% else %}
-                            {% for key, value in form.items %}
-                            <input type="hidden" readonly="readonly" name="{{ key }}" value="{{ value }}" />
-                            {% endfor %}
+                                {% for key, value in form.items %}
+                                    <input type="hidden" readonly="readonly" name="{{ key }}" value="{{ value }}" />
+                                {% endfor %}
                             {% endif %}
                         </form>
+                        <p>{{debug_mode}}</p>
 
                         {% if debug_mode %}
                         <script type="text/javascript">

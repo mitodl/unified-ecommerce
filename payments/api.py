@@ -104,7 +104,6 @@ def generate_checkout_payload(request):
 def fulfill_completed_order(order, payment_data, basket=None):
     """Fulfill the order."""
     order.fulfill(payment_data)
-    order.save()
 
     if basket and basket.compare_to_order(order):
         basket.delete()
@@ -220,7 +219,6 @@ def process_cybersource_payment_response(request, order):
         )
         log.error(msg)
         order.cancel()
-        order.save()
         return_message = order.state
 
     return return_message
@@ -363,7 +361,6 @@ def check_and_process_pending_orders_for_resolution(refnos=None):
                 ).get()
 
                 order.fulfill(payload)
-                order.save()
                 fulfilled_count += 1
 
                 msg = f"Fulfilled order {order.reference_number}."

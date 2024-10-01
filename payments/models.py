@@ -278,7 +278,7 @@ class Order(TimestampedModel):
         """
         Send the receipt email.
         """
-        successful_order_payment_email_task(self.id, "Successful Order Payment",
+        successful_order_payment_email_task.delay(self.id, "Successful Order Payment",
                                             "Your payment has been successfully processed.")  # noqa: E501
 
 
@@ -306,8 +306,6 @@ class PendingOrder(Order):
             product_versions = [
                 Version.objects.get_for_object(product).first() for product in products
             ]
-            print("CP")
-            print(products)
 
             # Get or create a PendingOrder
             # TODO: we prefetched the discounts here
