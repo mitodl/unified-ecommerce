@@ -135,7 +135,7 @@ ROOT_URLCONF = "unified_ecommerce.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, 'templates')],
+        "DIRS": [Path(BASE_DIR)/"templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -241,7 +241,7 @@ MAILGUN_BCC_TO_EMAIL = get_string("MITOL_UE_BCC_EMAIL", None)
 MITOL_MAIL_FROM_EMAIL = MAILGUN_FROM_EMAIL
 MITOL_MAIL_RECIPIENT_OVERRIDE = MAILGUN_RECIPIENT_OVERRIDE
 MITOL_MAIL_FORMAT_RECIPIENT_FUNC = "payments.mail_api.format_recipient"
-MITOL_MAIL_ENABLE_EMAIL_DEBUGGER = get_bool(  # NOTE: this will override the legacy mail debugger defined in this project
+MITOL_MAIL_ENABLE_EMAIL_DEBUGGER = get_bool(  # NOTE: this will override the legacy mail debugger defined in this project  # noqa: E501
     name="MITOL_MAIL_ENABLE_EMAIL_DEBUGGER",
     default=DEBUG,
 )
