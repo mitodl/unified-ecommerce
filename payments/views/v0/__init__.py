@@ -16,14 +16,18 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import (
     GenericViewSet,
-    ViewSet,
     ReadOnlyModelViewSet,
+    ViewSet,
 )
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from payments import api
 from payments.models import Basket, BasketItem, Order
-from payments.serializers.v0 import BasketItemSerializer, BasketSerializer, OrderHistorySerializer
+from payments.serializers.v0 import (
+    BasketItemSerializer,
+    BasketSerializer,
+    OrderHistorySerializer,
+)
 from system_meta.models import IntegratedSystem, Product
 
 log = logging.getLogger(__name__)
@@ -230,6 +234,8 @@ class BackofficeCallbackView(APIView):
                 api.process_cybersource_payment_response(request, order)
 
             return Response(status=status.HTTP_200_OK)
+
+
 class OrderHistoryViewSet(ReadOnlyModelViewSet):
     serializer_class = OrderHistorySerializer
     permission_classes = [IsAuthenticated]

@@ -11,9 +11,9 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
-from payments.tasks import successful_order_payment_email_task
 from reversion.models import Version
 
+from payments.tasks import successful_order_payment_email_task
 from system_meta.models import Product
 from unified_ecommerce.constants import (
     TRANSACTION_TYPE_PAYMENT,
@@ -278,8 +278,11 @@ class Order(TimestampedModel):
         """
         Send the receipt email.
         """
-        successful_order_payment_email_task.delay(self.id, "Successful Order Payment",
-                                            "Your payment has been successfully processed.")  # noqa: E501
+        successful_order_payment_email_task.delay(
+            self.id,
+            "Successful Order Payment",
+            "Your payment has been successfully processed.",
+        )
 
 
 class PendingOrder(Order):
