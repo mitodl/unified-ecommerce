@@ -4,17 +4,15 @@ from dataclasses import dataclass
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-
-from payments.models import Basket, BasketItem, Line, Order
-from system_meta.models import Product
-from system_meta.serializers import ProductSerializer
-
 from rest_framework_dataclasses.serializers import DataclassSerializer
 
 from payments.constants import (
     PAYMENT_HOOK_ACTION_POST_SALE,
     PAYMENT_HOOK_ACTIONS,
 )
+from payments.models import Basket, BasketItem, Line, Order
+from system_meta.models import Product
+from system_meta.serializers import ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
 
 User = get_user_model()
@@ -159,7 +157,8 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
             "total_price",
         ]
         model = Basket
-        
+
+
 class LineSerializer(serializers.ModelSerializer):
     """Serializes a line item for an order."""
 
@@ -220,6 +219,7 @@ class WebhookBaseSerializer(DataclassSerializer):
         dataclass = WebhookBase
         model = Line
 
+
 class OrderHistorySerializer(serializers.ModelSerializer):
     lines = LineSerializer(many=True)
 
@@ -236,4 +236,3 @@ class OrderHistorySerializer(serializers.ModelSerializer):
         ]
         model = Order
         depth = 1
-

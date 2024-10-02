@@ -14,7 +14,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import datetime
 import logging
 import os
-from pathlib import Path
 import platform
 from urllib.parse import urljoin
 
@@ -52,7 +51,7 @@ BASE_DIR = os.path.dirname(  # noqa: PTH120
 SECRET_KEY = get_string("SECRET_KEY", "terribly_unsafe_default_secret_key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_bool(name="DEBUG", default=False)  # noqa: FBT003
+DEBUG = get_bool(name="DEBUG", default=False)
 
 ALLOWED_HOSTS = ["*"]
 
