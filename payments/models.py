@@ -40,21 +40,10 @@ class Basket(TimestampedModel):
         if self.user != order.purchaser:
             return False
 
-        if self.basket_items.count() != order.lines.count():
-            return False
+        basket_products = {item.product for item in self.basket_items.all()}
+        order_products = {line.product for line in order.lines.all()}
 
-        for basket_item in self.basket_items.all():
-            found_this_one = False
-
-            for order_item in order.lines.all():
-                if order_item.product == basket_item.product:
-                    found_this_one = True
-                    break
-
-            if not found_this_one:
-                return False
-
-        return True
+        return basket_products == order_products
 
     def get_products(self):
         """
