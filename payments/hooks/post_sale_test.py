@@ -4,26 +4,18 @@ import pytest
 import reversion
 from reversion.models import Version
 
-from payments.constants import PAYMENT_HOOK_ACTION_POST_SALE
 from payments.factories import LineFactory, OrderFactory
-from payments.hooks.post_sale import IntegratedSystemWebhooks
 from payments.models import Order
-from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer, WebhookOrder
 from system_meta.factories import ProductFactory
-from system_meta.models import IntegratedSystem
-from unified_ecommerce.constants import (
-    POST_SALE_SOURCE_BACKOFFICE,
-    POST_SALE_SOURCE_REDIRECT,
-)
 
 pytestmark = [pytest.mark.django_db]
 
 
 @pytest.fixture()
-def fulfilled_order():
-    """Create a fulfilled order."""
+def pending_complete_order():
+    """Create a pending order with line items."""
 
-    order = OrderFactory.create(state=Order.STATE.FULFILLED)
+    order = OrderFactory.create(state=Order.STATE.PENDING)
 
     with reversion.create_revision():
         product = ProductFactory.create()
@@ -34,78 +26,48 @@ def fulfilled_order():
     return order
 
 
-@pytest.mark.parametrize(
-    "source", [POST_SALE_SOURCE_BACKOFFICE, POST_SALE_SOURCE_REDIRECT]
-)
-def test_integrated_system_webhook(mocker, fulfilled_order, source):
-    """Test fire the webhook."""
+def test_post_sale_webhook_called(mocker, pending_complete_order):
+    """Test that the post-sale webhooks get called."""
 
-    mocked_request = mocker.patch("requests.post")
-    webhook = IntegratedSystemWebhooks()
-    system_id = fulfilled_order.lines.first().product_version.field_dict["system_id"]
-    system = IntegratedSystem.objects.get(pk=system_id)
+    mocked_webhook = mocker.patch("payments.api.process_post_sale_webhooks")
 
-    order_info = WebhookOrder(
-        order=fulfilled_order,
-        lines=fulfilled_order.lines.all(),
-    )
+    mocked_transaction_data = {
+        "transaction_id": "12345",
+        "amount": 0,
+    }
 
-    webhook_data = WebhookBase(
-        type=PAYMENT_HOOK_ACTION_POST_SALE,
-        system_key=system.api_key,
-        user=fulfilled_order.purchaser,
-        data=order_info,
-    )
+    pending_complete_order.fulfill(mocked_transaction_data)
+    pending_complete_order.save()
 
-    serialized_webhook_data = WebhookBaseSerializer(webhook_data)
-
-    webhook.post_sale_impl(fulfilled_order.id, source)
-
-    mocked_request.assert_called_with(
-        system.webhook_url, json=serialized_webhook_data.data, timeout=30
-    )
+    assert pending_complete_order.state == Order.STATE.FULFILLED
+    mocked_webhook.assert_called()
 
 
-@pytest.mark.parametrize(
-    "source", [POST_SALE_SOURCE_BACKOFFICE, POST_SALE_SOURCE_REDIRECT]
-)
-def test_integrated_system_webhook_multisystem(mocker, fulfilled_order, source):
-    """Test fire the webhook with an order with lines from >1 system."""
+def test_post_sale_webhook_not_called_when_no_url(mocker, pending_complete_order):
+    """
+    Test that the post-sale webhooks aren't called if there's not a URL to call.
 
-    with reversion.create_revision():
-        product = ProductFactory.create()
+    This checks to make sure the processor gets called, but *not* the dispatcher.
+    """
 
-    product_version = Version.objects.get_for_object(product).first()
-    LineFactory.create(order=fulfilled_order, product_version=product_version)
+    mocked_webhook = mocker.patch("payments.api.process_post_sale_webhooks")
+    mocked_webhook_dispatcher = mocker.patch("payments.tasks.send_post_sale_webhook")
 
-    mocked_request = mocker.patch("requests.post")
-    webhook = IntegratedSystemWebhooks()
+    mocked_transaction_data = {
+        "transaction_id": "12345",
+        "amount": 0,
+    }
 
-    serialized_calls = []
+    products = [line.product for line in pending_complete_order.lines.all()]
+    for product in products:
+        product.system.webhook_url = ""
+        product.system.save()
 
-    for system in IntegratedSystem.objects.all():
-        order_info = WebhookOrder(
-            order=fulfilled_order,
-            lines=[
-                line
-                for line in fulfilled_order.lines.all()
-                if line.product.system.slug == system.slug
-            ],
-        )
+    pending_complete_order.refresh_from_db()
 
-        webhook_data = WebhookBase(
-            type=PAYMENT_HOOK_ACTION_POST_SALE,
-            system_key=system.api_key,
-            user=fulfilled_order.purchaser,
-            data=order_info,
-        )
+    pending_complete_order.fulfill(mocked_transaction_data)
+    pending_complete_order.save()
 
-        serialized_order = WebhookBaseSerializer(webhook_data).data
-        serialized_calls.append(
-            mocker.call(system.webhook_url, json=serialized_order, timeout=30)
-        )
-
-    webhook.post_sale_impl(fulfilled_order.id, source)
-
-    assert mocked_request.call_count == 2
-    mocked_request.assert_has_calls(serialized_calls, any_order=True)
+    assert pending_complete_order.state == Order.STATE.FULFILLED
+    mocked_webhook.assert_called()
+    mocked_webhook_dispatcher.assert_not_called()

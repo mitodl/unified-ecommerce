@@ -6,19 +6,24 @@ import requests
 from django.conf import settings
 
 from payments.constants import PAYMENT_HOOK_ACTION_POST_SALE
+from payments.models import Order
 from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer, WebhookOrder
+from system_meta.models import IntegratedSystem
 from unified_ecommerce.celery import app
 
 log = logging.getLogger(__name__)
 
 
 @app.task()
-def send_post_sale_webhook(system, order, source, attempt_count=0):
+def send_post_sale_webhook(system_id, order_id, source, attempt_count=0):
     """
     Actually send the webhook some data for a post-sale event.
 
     This is split out so we can queue the webhook requests individually.
     """
+
+    order = Order.objects.get(pk=order_id)
+    system = IntegratedSystem.objects.get(pk=system_id)
 
     system_webhook_url = system.webhook_url
     if system_webhook_url:
@@ -84,6 +89,12 @@ def send_post_sale_webhook(system, order, source, attempt_count=0):
             )
             return
 
+        log.info(
+            "Requeueing post-sale webhook %s for order %s for system %s",
+            system_webhook_url,
+            order.reference_number,
+            system.slug,
+        )
         send_post_sale_webhook.s(system, order, source, attempt_count).apply_async(
             countdown=settings.MITOL_UE_WEBHOOK_RETRY_COOLDOWN
         )

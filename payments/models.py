@@ -15,13 +15,16 @@ from reversion.models import Version
 
 from system_meta.models import Product
 from unified_ecommerce.constants import (
+    POST_SALE_SOURCE_REDIRECT,
     TRANSACTION_TYPE_PAYMENT,
     TRANSACTION_TYPE_REFUND,
     TRANSACTION_TYPES,
 )
+from unified_ecommerce.plugin_manager import get_plugin_manager
 
 User = get_user_model()
 log = logging.getLogger(__name__)
+pm = get_plugin_manager()
 
 
 class Basket(TimestampedModel):
@@ -166,21 +169,24 @@ class Order(TimestampedModel):
         """Return if the order is fulfilled"""
         return self.state == Order.STATE.FULFILLED
 
-    def fulfill(self, payment_data):
+    def fulfill(self, payment_data, source=POST_SALE_SOURCE_REDIRECT):
         """Fufill the order."""
         # record the transaction
         try:
             self.create_transaction(payment_data)
 
-            # trigger post-sale events
-            transaction.on_commit(self.handle_post_sale)
-
-            # send the receipt emails
-            transaction.on_commit(self.send_ecommerce_order_receipt)
-
             self.state = Order.STATE.FULFILLED
             self.save()
-        except Exception:  # pylint: disable=broad-except  # noqa: BLE001
+
+            # trigger post-sale events
+            self.handle_post_sale(source=source)
+
+            # send the receipt emails
+            self.send_ecommerce_order_receipt()
+        except Exception as e:  # pylint: disable=broad-except
+            log.exception(
+                "Error occurred fulfilling order %s", self.reference_number, exc_info=e
+            )
             self.errored()
 
     def cancel(self):
@@ -253,14 +259,15 @@ class Order(TimestampedModel):
         except Exception:  # pylint: disable=broad-except  # noqa: BLE001
             self.errored()
 
-    def handle_post_sale(self):
+    def handle_post_sale(self, source=POST_SALE_SOURCE_REDIRECT):
         """
         Trigger post-sale events. This is where we used to have the logic to create
         courseruns enrollments and stuff.
-
-        TODO: this should be implemented using Pluggy to figure out what to send back
-        to the connected system.
         """
+
+        log.info("Running post-sale events")
+
+        pm.hook.post_sale(order_id=self.id, source=source)
 
     def send_ecommerce_order_receipt(self):
         """

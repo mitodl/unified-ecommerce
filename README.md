@@ -14,6 +14,7 @@ This application provides a central system to handle ecommerce activities across
   - [Committing \& Formatting](#committing--formatting)
   - [Optional Setup](#optional-setup)
     - [Interstitial Debug Mode](#interstitial-debug-mode)
+    - [Webhook Retry](#webhook-retry)
     - [Running the app in a notebook](#running-the-app-in-a-notebook)
 
 ## Initial Setup
@@ -188,6 +189,15 @@ Described below are some setup steps that are not strictly necessary for running
 ### Interstitial Debug Mode
 
 You can set `MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG` to control whether or not the checkout interstitial page displays additional data and waits to submit or not. By default, this tracks the `DEBUG` setting (so it should be off in production, and on in local testing).
+
+### Webhook Retry
+
+The events system will attempt to ping integrated systems via a webhook when orders hit certain states (such as completed or refunded). You can control how this works with these settings:
+
+- `MITOL_UE_WEBHOOK_RETRY_MAX` - Max number of attempts to make to hit a webhook. Defaults to 4.
+- `MITOL_UE_WEBHOOK_RETRY_COOLDOWN` - How long to wait between retrying, in seconds. Defaults to 60 seconds.
+
+The retry happens if the request times out, returns an HTTP error, or returns a connection error. If the webhook isn't configured with a URL, if it returns non-JSON data or a redirect loop, or some other error happens, the system _will not_ retry the webhook and an error message will be emitted to that effect. Similarly, if it falls out the end of the available retries it will also emit an error message and stop.
 
 ### Running the app in a notebook
 
