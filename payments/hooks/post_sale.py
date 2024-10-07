@@ -2,6 +2,7 @@
 
 import logging
 
+from payments.tasks import successful_order_payment_email_task
 import pluggy
 import requests
 
@@ -16,12 +17,13 @@ class PostSaleSendEmails:
     """Send email when the order is fulfilled."""
 
     @hookimpl
-    def post_sale(self, order_id, source):
+    def post_sale(self, order_id):
         """Send email when the order is fulfilled."""
-        log = logging.getLogger(__name__)
-
-        msg = "Sending email for order %s with source %s"
-        log.info(msg, order_id, source)
+        successful_order_payment_email_task.delay(
+            order_id,
+            "Successful Order Payment",
+            "Your payment has been successfully processed.",
+        )
 
 
 class IntegratedSystemWebhooks:

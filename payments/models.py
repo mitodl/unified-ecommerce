@@ -187,9 +187,6 @@ class Order(TimestampedModel):
             # trigger post-sale events
             transaction.on_commit(self.handle_post_sale)
 
-            # send the receipt emails
-            transaction.on_commit(self.send_ecommerce_order_receipt)
-
             self.state = Order.STATE.FULFILLED
             self.save()
         except Exception:  # pylint: disable=broad-except  # noqa: BLE001
@@ -273,16 +270,6 @@ class Order(TimestampedModel):
         TODO: this should be implemented using Pluggy to figure out what to send back
         to the connected system.
         """
-
-    def send_ecommerce_order_receipt(self):
-        """
-        Send the receipt email.
-        """
-        successful_order_payment_email_task.delay(
-            self.id,
-            "Successful Order Payment",
-            "Your payment has been successfully processed.",
-        )
 
 
 class PendingOrder(Order):
