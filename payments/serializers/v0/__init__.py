@@ -10,7 +10,7 @@ from payments.constants import (
     PAYMENT_HOOK_ACTION_POST_SALE,
     PAYMENT_HOOK_ACTIONS,
 )
-from payments.models import Basket, BasketItem, Line, Order
+from payments.models import BasketItem, Line, Order
 from system_meta.models import Product
 from system_meta.serializers import ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
@@ -69,6 +69,7 @@ class BasketItemSerializer(serializers.ModelSerializer):
         Returns:
             BasketItem: The created BasketItem instance.
         """
+        from payments.models import Basket
         basket = Basket.objects.get(user=validated_data["user"])
         # Product queryset returns active Products by default
         product = Product.objects.get(id=validated_data["product"])
@@ -100,6 +101,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for BasketSerializer"""
+        from payments.models import Basket
 
         fields = [
             "id",
@@ -149,6 +151,7 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for BasketWithProductSerializer"""
+        from payments.models import Basket
 
         fields = [
             "id",
