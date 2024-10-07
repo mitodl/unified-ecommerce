@@ -2,13 +2,13 @@
 
 import logging
 
-from payments.tasks import successful_order_payment_email_task
 import pluggy
 import requests
 
 from payments.constants import PAYMENT_HOOK_ACTION_POST_SALE
 from payments.models import Order
 from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer, WebhookOrder
+from payments.tasks import successful_order_payment_email_task
 
 hookimpl = pluggy.HookimplMarker("unified_ecommerce")
 

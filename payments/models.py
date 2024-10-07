@@ -13,7 +13,6 @@ from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
 from reversion.models import Version
 
-from payments.tasks import successful_order_payment_email_task
 from system_meta.models import Product
 from unified_ecommerce.constants import (
     TRANSACTION_TYPE_PAYMENT,
