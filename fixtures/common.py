@@ -9,8 +9,8 @@ import factory
 import pytest
 import responses
 from pytest_mock import PytestMockWarning
-from urllib3.exceptions import InsecureRequestWarning
 from rest_framework.test import APIClient
+from urllib3.exceptions import InsecureRequestWarning
 
 
 @pytest.fixture(autouse=True)
@@ -84,8 +84,9 @@ def mocked_responses():
     """Mock responses fixture"""
     with responses.RequestsMock() as rsps:
         yield rsps
-        
-@pytest.fixture
+
+
+@pytest.fixture()
 def admin_drf_client(admin_user):
     """DRF API test client with admin user"""
     client = APIClient()
