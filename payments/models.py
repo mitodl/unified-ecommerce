@@ -280,6 +280,7 @@ class Order(TimestampedModel):
         TODO: add email
         """
 
+
 class PendingOrder(Order):
     """An order that is pending payment"""
 

@@ -12,7 +12,6 @@ from payments.constants import PAYMENT_HOOK_ACTION_POST_SALE
 from payments.models import Order
 from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer, WebhookOrder
 from system_meta.models import IntegratedSystem
-from unified_ecommerce.celery import app
 
 log = logging.getLogger(__name__)
 
