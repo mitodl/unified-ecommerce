@@ -26,11 +26,9 @@ from unified_ecommerce.constants import (
     USER_MSG_TYPE_PAYMENT_ERROR,
     USER_MSG_TYPE_PAYMENT_ERROR_UNKNOWN,
 )
-from unified_ecommerce.plugin_manager import get_plugin_manager
 from unified_ecommerce.utils import redirect_with_user_message
 
 log = logging.getLogger(__name__)
-pm = get_plugin_manager()
 
 
 class CartView(LoginRequiredMixin, TemplateView):
@@ -150,9 +148,10 @@ class CheckoutCallbackView(View):
 
             if order.state == Order.STATE.PENDING:
                 processed_order_state = api.process_cybersource_payment_response(
-                    request, order
+                    request,
+                    order,
+                    POST_SALE_SOURCE_REDIRECT,
                 )
-                pm.hook.post_sale(order_id=order.id, source=POST_SALE_SOURCE_REDIRECT)
 
                 return self.post_checkout_redirect(processed_order_state, request)
             else:
