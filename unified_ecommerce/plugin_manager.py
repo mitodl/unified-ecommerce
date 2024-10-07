@@ -3,11 +3,11 @@
 import pluggy
 
 from payments import hookspecs as payments_hookspecs
+from payments.hooks import post_sale as payments_post_sale
 
 
 def get_plugin_manager():
     """Return the plugin manager for the app."""
-    from payments.hooks import post_sale as payments_post_sale
 
     pm = pluggy.PluginManager("unified_ecommerce")
 

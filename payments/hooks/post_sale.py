@@ -2,8 +2,6 @@
 
 import pluggy
 
-from payments.tasks import successful_order_payment_email_task
-
 hookimpl = pluggy.HookimplMarker("unified_ecommerce")
 
 
@@ -13,6 +11,7 @@ class PostSaleSendEmails:
     @hookimpl
     def post_sale(self, order_id, source):  # noqa: ARG002
         """Send email when the order is fulfilled."""
+        from payments.tasks import successful_order_payment_email_task
         successful_order_payment_email_task.delay(
             order_id,
             "Successful Order Payment",
