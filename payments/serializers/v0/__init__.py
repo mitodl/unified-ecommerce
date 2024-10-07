@@ -101,6 +101,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for BasketSerializer"""
+
         from payments.models import Basket
 
         fields = [
@@ -151,6 +152,7 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for BasketWithProductSerializer"""
+
         from payments.models import Basket
 
         fields = [
