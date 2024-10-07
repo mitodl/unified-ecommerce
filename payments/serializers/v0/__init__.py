@@ -71,6 +71,7 @@ class BasketItemSerializer(serializers.ModelSerializer):
             BasketItem: The created BasketItem instance.
         """
         from payments.models import Basket, BasketItem
+
         basket = Basket.objects.get(user=validated_data["user"])
         # Product queryset returns active Products by default
         product = Product.objects.get(id=validated_data["product"])
@@ -79,7 +80,9 @@ class BasketItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for BasketItemSerializer"""
+
         from payments.models import BasketItem
+
         model = BasketItem
         fields = [
             "basket",
@@ -124,7 +127,9 @@ class BasketItemWithProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for BasketItemWithProductSerializer"""
+
         from payments.models import BasketItem
+
         model = BasketItem
         fields = ["basket", "product", "id"]
         depth = 1
