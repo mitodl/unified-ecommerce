@@ -10,7 +10,7 @@ from payments.constants import (
     PAYMENT_HOOK_ACTION_POST_SALE,
     PAYMENT_HOOK_ACTIONS,
 )
-from payments.models import Line, Order
+from payments.models import Order
 from system_meta.models import Product
 from system_meta.serializers import ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
@@ -25,6 +25,7 @@ class WebhookOrder:
 
     This includes order completed and order refunded states.
     """
+    from payments.models import Line
 
     order: Order
     lines: list[Line]
@@ -173,6 +174,7 @@ class LineSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for LineSerializer"""
+        from payments.models import Line
 
         fields = [
             "id",
@@ -220,6 +222,7 @@ class WebhookBaseSerializer(DataclassSerializer):
 
     class Meta:
         """Meta options for WebhookBaseSerializer"""
+        from payments.models import Line
 
         dataclass = WebhookBase
         model = Line
