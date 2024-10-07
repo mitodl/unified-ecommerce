@@ -8,8 +8,8 @@ This application provides a central system to handle ecommerce activities across
   - [Initial Setup](#initial-setup)
     - [Configure required `.env` settings](#configure-required-env-settings)
     - [Loading and Accessing Data](#loading-and-accessing-data)
-    - [Run with API Gateway](#run-with-api-gateway)
     - [API Access](#api-access)
+    - [Managing APISIX](#managing-apisix)
   - [Code Generation](#code-generation)
   - [Committing \& Formatting](#committing--formatting)
   - [Optional Setup](#optional-setup)
@@ -39,9 +39,25 @@ The following settings must be configured before running the app:
 
   Sets the Django secret for the application. This just needs to be a random string.
 
+- `KEYCLOAK_REALM`
+
+  Sets the realm used by APISIX for Keycloak authentication. Defaults to `ol-local`.
+
+- `KEYCLOAK_DISCOVERY_URL`
+
+  Sets the discovery URL for the Keycloak OIDC service. (In Keycloak admin, navigate to the realm you're using, then go to Realm Settings under Configure, and the link is under OpenID Endpoint Configuration.) This defaults to a valid value for the pack-in Keycloak instance.
+
+- `KEYCLOAK_CLIENT_ID`
+
+  The client ID for the OIDC client for APISIX. Defaults to `apisix`.
+
+- `KEYCLOAK_CLIENT_SECRET`
+
+  The client secret for the OIDC client. No default - you will need to get this from the Keycloak admin, even if you're using the pack-in Keycloak instance.
+
 ### Loading and Accessing Data
 
-You'll need an integrated system and product for that system to be able to do much of anything. A management command exists to create the test data: `create_test_data`. This will create a system and add some products with random (but usable) prices in it.
+You'll need an integrated system and product for that system to be able to do much of anything. A management command exists to create the test data: `generate_test_data`. This will create a system and add some products with random (but usable) prices in it.
 
 Alternatively, you can create them manually:
 
@@ -52,95 +68,6 @@ The `add_system` command will generate an API key for the system's use. You can 
 
 > Alternatively, you can create these records through the Django Admin, but be advised that it won't create the API key for you. The management command uses a UUID for the key but any value will do, as long as it's unique.
 
-### Run with API Gateway
-
-As noted, you'll need to set up APISIX as the API gateway for this. The app comes with one and you'll need to set this up before you can access the app.
-
-> [!WARNING]
-> The APISIX configuration is not acceptable for production use.
-
-You'll need to define routes for APISIX before it will handle traffic for the appplication. These are defined using the API as some of the settings are instance-specific. Here are the steps to accomplish that:
-
-> The shell script below is also at `scripts/bootstrap_apisix.sh`. Set the variables listed below and run it to set up your routes.
-
-1. In your Keycloak instance, create a new Client in the realm you are going to use for UE.
-   1. The `Client ID` can be any valid string - a good choice is `apisix-client`. Set this in your shell as `CLIENT_ID`.
-   2. For local testing, it's OK to use `*` for both `Valid redirect URIs` and `Web origins`. This is not OK for anything attached to the Internet.
-   3. Make sure `Client authentication` is on, and `Standard flow` and `Implicit flow` are checked.
-   4. After you've saved the client, go to Credentials and copy out the `Client secret`. (You may need to manually cut and paste; the copy to clipboard button has never worked for me.) Set this in your shell as `CLIENT_SECRET`.
-2. Set the realm you're using in your shell as `OIDC_REALM`.
-3. In your Keycloak Realm Settings, you should be able to find the OpenID Endpoint Configuration link. Copy/paste this somewhere - you'll need it later. Set this in your shell as `DISCOVERY_URL`.
-4. From the `config/apisix/apisix.yml` file, get the `key` out. This should be on line 11. You can also reset it here if you wish. Set this as `API_KEY`.
-5. Start the entire thing: `docker compose up`. This will bring up Universal Ecommerce and the APISIX instance.
-6. Create an all-encompassing route for UE in APISIX. This uses the APISIX API - be sure to read this through before running it and fill out placeholders.
-```bash
-# Set variables - skip if you were doing this in each step above
-
-APISIX_ROOT=<root location for APISIX - no trailing slash>
-API_KEY=<api key>
-OIDC_REALM=<your Keycloak realm>
-CLIENT_ID=<your client ID>
-CLIENT_SECRET=<your client secret>
-DISCOVERY_URL=<OpenID Endpoint Configuration link>
-
-# Define upstream connection
-
-curl "http://127.0.0.1:9180/apisix/admin/upstreams/2" \
--H "X-API-KEY: $API_KEY" -X PUT -d '
-{
-  "type": "chash",
-  "hash_on": "consumer",
-  "nodes": {
-    "nginx:8073": 1
-  }
-}'
-
-# Define the Universal Ecommerce unauthenticated route
-# This is stuff that doesn't need a session - static resources, and the checkout result API
-
-postbody=$(cat << ROUTE_END
-{
-  "uris": [ "/checkout/result/", "/static/*", "/api/schema/*" ],
-  "plugins": {},
-  "upstream_id": 2,
-  "priority": 0,
-  "desc": "Unauthenticated routes, including assets and the checkout callback API",
-  "name": "ue-unauth"
-}
-ROUTE_END
-)
-
-curl http://127.0.0.1:9180/apisix/admin/routes/ue-unauth -H "X-API-KEY: $API_KEY" -X PUT -d "$postbody"
-
-# Define the Universal Ecommerce wildcard route
-
-postbody=$(cat << ROUTE_END
-{
-  "name": "ue-default",
-  "desc": "Wildcard route for the rest of the system - authentication required",
-  "priority": 1,
-  "uri": "/*",
-  "plugins":{
-    "openid-connect":{
-      "client_id": "${CLIENT_ID}",
-      "client_secret": "${CLIENT_SECRET}",
-      "discovery": "${DISCOVERY_URL}",
-      "scope": "openid profile",
-      "bearer_only": false,
-      "realm": "${OIDC_REALM}",
-      "introspection_endpoint_auth_method": "client_secret_post"
-    }
-  },
-  "upstream_id": 2
-}
-ROUTE_END
-)
-
-curl http://127.0.0.1:9180/apisix/admin/routes/ue -H "X-API-KEY: $API_KEY" -X PUT -d ${postbody}
-```
-
-You should now be able to get to the app via APISIX. There is an internal API at `http://ue.odl.local:9080/_/v0/meta/apisix_test_request/` that you can hit to see if it worked. The wildcard route above will route all UE traffic (or, more correctly, all traffic going into APISIX) through Keycloak and then into UE, so you should also be able to access the Django Admin through it if you've set your Keycloak user to be an admin.
-
 ### API Access
 
 You can interact with the API directly through the Swagger interface: `<root url>/api/schema/swagger-ui/`
@@ -149,7 +76,28 @@ The system also exposes a Redoc version of the API at `<root url>/api/schema/red
 
 Navigating to an API endpoint in the browser should also get you the normal DRF interface as well.
 
-> Most API endpoints require authentication, so you won't be able to get a lot of these to work without the API Gateway in place.
+> [!NOTE]
+> Most API endpoints require authentication, so you won't be able to get a lot of these to work without the API Gateway in place. The API documentation interfaces are accessible without authentication, though.
+
+### Managing APISIX
+
+If you have a need to adjust the APISIX settings (which would include routes), you can do so by modifying the configuration files in `config/apisix`.
+
+APISIX checks these files for changes _every second_ - you're supposed to add `#END` to the end of the file to signify that the data has changed. You should see some log entries once it's found changes and reloaded the data.
+
+The three files in here control different things:
+
+| File | Use |
+|---|---|
+| `config.yaml` | APISIX service configuration - TCP ports, deployment settings, plugin loading, SSL, etc. |
+| `apisix.yaml` | Data for the service - **routes**, **upstreams**, clients, plugin configs, etc. |
+| `debug.yaml` | Debugging settings. |
+
+The two files most likely to need to change are `apisix.yaml`, which controls routing to the underlying service, and `debug.yaml`, which allows you to configure debug logging for APISIX and its plugins.
+
+Use the documentation and the APISIX source code to determine what goes in each file.
+
+Note that, since APISIX is run in "decoupled"/"standalone" mode, you _cannot_ use the API to control it. All changes and state introspection is done from the yaml files.
 
 ## Code Generation
 

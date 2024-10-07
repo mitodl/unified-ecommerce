@@ -102,9 +102,7 @@ services:
     - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-apisix}
     - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
     - KEYCLOAK_DISCOVERY_URL=${KEYCLOAK_DISCOVERY_URL:-https://kc.odl.local:7443/realms/ol-local/.well-known/openid-configuration}
-    - APISIX_API_KEY=${APISIX_API_KEY}
     - APISIX_PORT=${APISIX_PORT:-9080}
-    - APISIX_ADMIN_PORT=${APISIX_ADMIN_PORT:-9180}
     ports:
       - 9080:9080
       - 9180:9180
