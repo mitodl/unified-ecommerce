@@ -10,6 +10,7 @@ from payments.constants import (
     PAYMENT_HOOK_ACTION_POST_SALE,
     PAYMENT_HOOK_ACTIONS,
 )
+from payments.models import Basket, BasketItem, Line, Order
 from system_meta.models import Product
 from system_meta.serializers import ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
@@ -24,7 +25,6 @@ class WebhookOrder:
 
     This includes order completed and order refunded states.
     """
-    from payments.models import Line, Order
 
     order: Order
     lines: list[Line]
@@ -69,7 +69,6 @@ class BasketItemSerializer(serializers.ModelSerializer):
         Returns:
             BasketItem: The created BasketItem instance.
         """
-        from payments.models import Basket, BasketItem
 
         basket = Basket.objects.get(user=validated_data["user"])
         # Product queryset returns active Products by default
@@ -79,8 +78,6 @@ class BasketItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for BasketItemSerializer"""
-
-        from payments.models import BasketItem
 
         model = BasketItem
         fields = [
@@ -105,8 +102,6 @@ class BasketSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta options for BasketSerializer"""
 
-        from payments.models import Basket
-
         fields = [
             "id",
             "user",
@@ -126,8 +121,6 @@ class BasketItemWithProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for BasketItemWithProductSerializer"""
-
-        from payments.models import BasketItem
 
         model = BasketItem
         fields = ["basket", "product", "id"]
@@ -158,8 +151,6 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta options for BasketWithProductSerializer"""
 
-        from payments.models import Basket
-
         fields = [
             "id",
             "user",
@@ -178,8 +169,6 @@ class LineSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for LineSerializer"""
-
-        from payments.models import Line
 
         fields = [
             "id",
@@ -228,8 +217,6 @@ class WebhookBaseSerializer(DataclassSerializer):
     class Meta:
         """Meta options for WebhookBaseSerializer"""
 
-        from payments.models import Line
-
         dataclass = WebhookBase
         model = Line
 
@@ -238,7 +225,6 @@ class OrderHistorySerializer(serializers.ModelSerializer):
     lines = LineSerializer(many=True)
 
     class Meta:
-        from payments.models import Order
         fields = [
             "id",
             "state",
