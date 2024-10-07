@@ -1,6 +1,5 @@
 """Post-sale hook implementations for payments."""
 
-
 import pluggy
 
 from payments.tasks import successful_order_payment_email_task
