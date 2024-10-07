@@ -17,7 +17,7 @@ class PostSaleSendEmails:
     """Send email when the order is fulfilled."""
 
     @hookimpl
-    def post_sale(self, order_id):
+    def post_sale(self, order_id, source):  # noqa: ARG002
         """Send email when the order is fulfilled."""
         successful_order_payment_email_task.delay(
             order_id,
