@@ -25,6 +25,7 @@ class WebhookOrder:
 
     This includes order completed and order refunded states.
     """
+
     from payments.models import Line
 
     order: Order
@@ -179,6 +180,7 @@ class LineSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for LineSerializer"""
+
         from payments.models import Line
 
         fields = [
@@ -227,6 +229,7 @@ class WebhookBaseSerializer(DataclassSerializer):
 
     class Meta:
         """Meta options for WebhookBaseSerializer"""
+
         from payments.models import Line
 
         dataclass = WebhookBase
