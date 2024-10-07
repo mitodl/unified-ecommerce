@@ -105,7 +105,7 @@ def generate_checkout_payload(request):
 
 
 def fulfill_completed_order(
-    order, payment_data, basket=None, source=POST_SALE_SOURCE_BACKOFFICE
+    order, payment_data, basket=None, source=POST_SALE_SOURCE_BACKOFFICE  # noqa: ARG001
 ):
     """Fulfill the order."""
     order.fulfill(payment_data)
