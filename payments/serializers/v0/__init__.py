@@ -178,6 +178,7 @@ class LineSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for LineSerializer"""
+
         from payments.models import Line
 
         fields = [
@@ -226,6 +227,7 @@ class WebhookBaseSerializer(DataclassSerializer):
 
     class Meta:
         """Meta options for WebhookBaseSerializer"""
+
         from payments.models import Line
 
         dataclass = WebhookBase
