@@ -18,11 +18,14 @@ from payments.models import (
     Order,
     PendingOrder,
 )
+from payments.tasks import send_post_sale_webhook
 from system_meta.models import IntegratedSystem
 from unified_ecommerce.constants import (
     CYBERSOURCE_ACCEPT_CODES,
     CYBERSOURCE_ERROR_CODES,
     CYBERSOURCE_REASON_CODE_SUCCESS,
+    POST_SALE_SOURCE_BACKOFFICE,
+    POST_SALE_SOURCE_REDIRECT,
     REFUND_SUCCESS_STATES,
     USER_MSG_TYPE_PAYMENT_ACCEPTED_NOVALUE,
     ZERO_PAYMENT_DATA,
@@ -101,7 +104,9 @@ def generate_checkout_payload(request):
     )
 
 
-def fulfill_completed_order(order, payment_data, basket=None):
+def fulfill_completed_order(
+    order, payment_data, basket=None, source=POST_SALE_SOURCE_BACKOFFICE
+):
     """Fulfill the order."""
     order.fulfill(payment_data)
 
@@ -124,7 +129,9 @@ def get_order_from_cybersource_payment_response(request):
     return order
 
 
-def process_cybersource_payment_response(request, order):
+def process_cybersource_payment_response(
+    request, order, source=POST_SALE_SOURCE_REDIRECT
+):
     """
     Update the order and basket based on the payment request from Cybersource.
     Returns the order state after applying update operations corresponding to
@@ -201,7 +208,7 @@ def process_cybersource_payment_response(request, order):
         try:
             msg = f"Transaction accepted!: {processor_response.message}"
             log.debug(msg)
-            fulfill_completed_order(order, request.POST, basket)
+            fulfill_completed_order(order, request.POST, basket, source)
         except ValidationError:
             msg = (
                 "Missing transaction id from transaction response: "
@@ -397,3 +404,32 @@ def check_and_process_pending_orders_for_resolution(refnos=None):
                 error_count += 1
 
     return (fulfilled_count, cancel_count, error_count)
+
+
+def process_post_sale_webhooks(order_id, source):
+    """
+    Send data to the webhooks for post-sale events.
+
+    If the system in question doesn't have a webhook URL, we will skip it.
+    """
+
+    log.info("Queueing webhook endpoints for order %s with source %s", order_id, source)
+
+    order = Order.objects.prefetch_related("lines", "lines__product_version").get(
+        pk=order_id
+    )
+
+    systems = [
+        product.system
+        for product in [
+            line.product_version._object_version.object  # noqa: SLF001
+            for line in order.lines.all()
+        ]
+    ]
+
+    for system in systems:
+        if not system.webhook_url:
+            log.warning("No webhook URL specified for system %s", system.slug)
+            continue
+
+        send_post_sale_webhook.delay(system.id, order.id, source)

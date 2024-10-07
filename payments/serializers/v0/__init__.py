@@ -27,7 +27,7 @@ class WebhookOrder:
     """
 
     order: Order
-    lines: Line
+    lines: list[Line]
 
 
 @dataclass
