@@ -48,13 +48,13 @@ def warnings_as_errors():  # noqa: PT004
         warnings.resetwarnings()
 
 
-@pytest.fixture()
+@pytest.fixture
 def randomness():  # noqa: PT004
     """Ensure a fixed seed for factoryboy"""
     factory.fuzzy.reseed_random("happy little clouds")
 
 
-@pytest.fixture()
+@pytest.fixture
 def mocked_celery(mocker):
     """Mock object that patches certain celery functions"""
     exception_class = TabError
@@ -72,13 +72,13 @@ def mocked_celery(mocker):
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_context(mocker, user):
     """Mock context for serializers"""
     return {"request": mocker.Mock(user=user)}
 
 
-@pytest.fixture()
+@pytest.fixture
 def mocked_responses():
     """Mock responses fixture"""
     with responses.RequestsMock() as rsps:
