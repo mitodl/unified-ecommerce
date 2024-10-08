@@ -14,14 +14,14 @@
 
 
 import type { Configuration } from './configuration';
-import type { AxiosPromise, AxiosInstance, AxiosRequestConfig } from 'axios';
+import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
 import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common';
 import type { RequestArgs } from './base';
 // @ts-ignore
-import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
+import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
 /**
  * Basket model serializer
@@ -104,6 +104,191 @@ export interface IntegratedSystem {
      */
     'description'?: string;
 }
+/**
+ * Serializes a line item for an order.
+ * @export
+ * @interface Line
+ */
+export interface Line {
+    /**
+     *
+     * @type {number}
+     * @memberof Line
+     */
+    'id': number;
+    /**
+     *
+     * @type {number}
+     * @memberof Line
+     */
+    'quantity': number;
+    /**
+     *
+     * @type {string}
+     * @memberof Line
+     */
+    'item_description': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Line
+     */
+    'unit_price': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Line
+     */
+    'total_price': string;
+    /**
+     *
+     * @type {Product}
+     * @memberof Line
+     */
+    'product': Product;
+}
+/**
+ *
+ * @export
+ * @interface Nested
+ */
+export interface Nested {
+    /**
+     *
+     * @type {number}
+     * @memberof Nested
+     */
+    'id': number;
+    /**
+     *
+     * @type {string}
+     * @memberof Nested
+     */
+    'password': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Nested
+     */
+    'last_login'?: string | null;
+    /**
+     * Designates that this user has all permissions without explicitly assigning them.
+     * @type {boolean}
+     * @memberof Nested
+     */
+    'is_superuser'?: boolean;
+    /**
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     * @type {string}
+     * @memberof Nested
+     */
+    'username': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Nested
+     */
+    'first_name'?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof Nested
+     */
+    'last_name'?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof Nested
+     */
+    'email'?: string;
+    /**
+     * Designates whether the user can log into this admin site.
+     * @type {boolean}
+     * @memberof Nested
+     */
+    'is_staff'?: boolean;
+    /**
+     * Designates whether this user should be treated as active. Unselect this instead of deleting accounts.
+     * @type {boolean}
+     * @memberof Nested
+     */
+    'is_active'?: boolean;
+    /**
+     *
+     * @type {string}
+     * @memberof Nested
+     */
+    'date_joined'?: string;
+    /**
+     * The groups this user belongs to. A user will get all permissions granted to each of their groups.
+     * @type {Array<number>}
+     * @memberof Nested
+     */
+    'groups'?: Array<number>;
+    /**
+     * Specific permissions for this user.
+     * @type {Array<number>}
+     * @memberof Nested
+     */
+    'user_permissions'?: Array<number>;
+}
+/**
+ *
+ * @export
+ * @interface OrderHistory
+ */
+export interface OrderHistory {
+    /**
+     *
+     * @type {number}
+     * @memberof OrderHistory
+     */
+    'id': number;
+    /**
+     *
+     * @type {StateEnum}
+     * @memberof OrderHistory
+     */
+    'state'?: StateEnum;
+    /**
+     *
+     * @type {string}
+     * @memberof OrderHistory
+     */
+    'reference_number'?: string;
+    /**
+     *
+     * @type {Nested}
+     * @memberof OrderHistory
+     */
+    'purchaser': Nested;
+    /**
+     *
+     * @type {string}
+     * @memberof OrderHistory
+     */
+    'total_price_paid': string;
+    /**
+     *
+     * @type {Array<Line>}
+     * @memberof OrderHistory
+     */
+    'lines': Array<Line>;
+    /**
+     *
+     * @type {string}
+     * @memberof OrderHistory
+     */
+    'created_on': string;
+    /**
+     *
+     * @type {string}
+     * @memberof OrderHistory
+     */
+    'updated_on': string;
+}
+
+
 /**
  *
  * @export
@@ -196,6 +381,37 @@ export interface PaginatedIntegratedSystemList {
      * @memberof PaginatedIntegratedSystemList
      */
     'results': Array<IntegratedSystem>;
+}
+/**
+ *
+ * @export
+ * @interface PaginatedOrderHistoryList
+ */
+export interface PaginatedOrderHistoryList {
+    /**
+     *
+     * @type {number}
+     * @memberof PaginatedOrderHistoryList
+     */
+    'count': number;
+    /**
+     *
+     * @type {string}
+     * @memberof PaginatedOrderHistoryList
+     */
+    'next'?: string | null;
+    /**
+     *
+     * @type {string}
+     * @memberof PaginatedOrderHistoryList
+     */
+    'previous'?: string | null;
+    /**
+     *
+     * @type {Array<OrderHistory>}
+     * @memberof PaginatedOrderHistoryList
+     */
+    'results': Array<OrderHistory>;
 }
 /**
  *
@@ -405,6 +621,35 @@ export interface Product {
      */
     'system': number;
 }
+/**
+ * * `pending` - Pending * `fulfilled` - Fulfilled * `canceled` - Canceled * `refunded` - Refunded * `declined` - Declined * `errored` - Errored * `review` - Review
+ * @export
+ * @enum {string}
+ */
+
+export const StateEnumDescriptions = {
+    'pending': "",
+    'fulfilled': "",
+    'canceled': "",
+    'refunded': "",
+    'declined': "",
+    'errored': "",
+    'review': "",
+} as const;
+
+export const StateEnum = {
+    Pending: 'pending',
+    Fulfilled: 'fulfilled',
+    Canceled: 'canceled',
+    Refunded: 'refunded',
+    Declined: 'declined',
+    Errored: 'errored',
+    Review: 'review'
+} as const;
+
+export type StateEnum = typeof StateEnum[keyof typeof StateEnum];
+
+
 
 /**
  * ApiApi - axios parameter creator
@@ -417,7 +662,7 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsClearDestroy: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiV0PaymentsBasketsClearDestroy: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v0/payments/baskets/clear/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -450,7 +695,7 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsCreateFromProductCreate: async (sku: string, system_slug: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiV0PaymentsBasketsCreateFromProductCreate: async (sku: string, system_slug: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'sku' is not null or undefined
             assertParamExists('apiV0PaymentsBasketsCreateFromProductCreate', 'sku', sku)
             // verify required parameter 'system_slug' is not null or undefined
@@ -489,7 +734,7 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsItemsCreate: async (basket: string, BasketItem: BasketItem, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiV0PaymentsBasketsItemsCreate: async (basket: string, BasketItem: BasketItem, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'basket' is not null or undefined
             assertParamExists('apiV0PaymentsBasketsItemsCreate', 'basket', basket)
             // verify required parameter 'BasketItem' is not null or undefined
@@ -530,7 +775,7 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsItemsDestroy: async (basket: string, id: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiV0PaymentsBasketsItemsDestroy: async (basket: string, id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'basket' is not null or undefined
             assertParamExists('apiV0PaymentsBasketsItemsDestroy', 'basket', basket)
             // verify required parameter 'id' is not null or undefined
@@ -570,7 +815,7 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsItemsList: async (basket: string, limit?: number, offset?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiV0PaymentsBasketsItemsList: async (basket: string, limit?: number, offset?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'basket' is not null or undefined
             assertParamExists('apiV0PaymentsBasketsItemsList', 'basket', basket)
             const localVarPath = `/api/v0/payments/baskets/{basket}/items/`
@@ -614,7 +859,7 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsList: async (limit?: number, offset?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiV0PaymentsBasketsList: async (limit?: number, offset?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v0/payments/baskets/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -654,7 +899,7 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsRetrieve: async (username: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiV0PaymentsBasketsRetrieve: async (username: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'username' is not null or undefined
             assertParamExists('apiV0PaymentsBasketsRetrieve', 'username', username)
             const localVarPath = `/api/v0/payments/baskets/{username}/`
@@ -688,7 +933,7 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsCheckoutCallbackCreate: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiV0PaymentsCheckoutCallbackCreate: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v0/payments/checkout/callback/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -717,7 +962,7 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsCheckoutStartCheckoutCreate: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        apiV0PaymentsCheckoutStartCheckoutCreate: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v0/payments/checkout/start_checkout/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -727,6 +972,82 @@ export const ApiApiAxiosParamCreator = function (configuration?: Configuration) 
             }
 
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         *
+         * @param {number} [limit] Number of results to return per page.
+         * @param {number} [offset] The initial index from which to return the results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsOrdersHistoryList: async (limit?: number, offset?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/payments/orders/history/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication cookieAuth required
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         *
+         * @param {string} id
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsOrdersHistoryRetrieve: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('apiV0PaymentsOrdersHistoryRetrieve', 'id', id)
+            const localVarPath = `/api/v0/payments/orders/history/{id}/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -758,9 +1079,11 @@ export const ApiApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiV0PaymentsBasketsClearDestroy(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async apiV0PaymentsBasketsClearDestroy(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsClearDestroy(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsBasketsClearDestroy']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Create a new basket item from a product for the currently logged in user. Reuse the existing basket object if it exists.  If the checkout flag is set in the POST data, then this will create the basket, then immediately flip the user to the checkout interstitial (which then redirects to the payment gateway).  Args:     system_slug (str): system slug     sku (str): product slug  POST Args:     quantity (int): quantity of the product to add to the basket (defaults to 1)     checkout (bool): redirect to checkout interstitial (defaults to False)  Returns:     Response: HTTP response
@@ -769,9 +1092,11 @@ export const ApiApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiV0PaymentsBasketsCreateFromProductCreate(sku: string, system_slug: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async apiV0PaymentsBasketsCreateFromProductCreate(sku: string, system_slug: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsCreateFromProductCreate(sku, system_slug, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsBasketsCreateFromProductCreate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Create a new basket item.  Args:     request (HttpRequest): HTTP request  Returns:     Response: HTTP response
@@ -780,9 +1105,11 @@ export const ApiApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiV0PaymentsBasketsItemsCreate(basket: string, BasketItem: BasketItem, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BasketItem>> {
+        async apiV0PaymentsBasketsItemsCreate(basket: string, BasketItem: BasketItem, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BasketItem>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsItemsCreate(basket, BasketItem, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsBasketsItemsCreate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * API view set for BasketItem
@@ -791,9 +1118,11 @@ export const ApiApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiV0PaymentsBasketsItemsDestroy(basket: string, id: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async apiV0PaymentsBasketsItemsDestroy(basket: string, id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsItemsDestroy(basket, id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsBasketsItemsDestroy']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * API view set for BasketItem
@@ -803,9 +1132,11 @@ export const ApiApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiV0PaymentsBasketsItemsList(basket: string, limit?: number, offset?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedBasketItemList>> {
+        async apiV0PaymentsBasketsItemsList(basket: string, limit?: number, offset?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedBasketItemList>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsItemsList(basket, limit, offset, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsBasketsItemsList']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * API view set for Basket
@@ -814,9 +1145,11 @@ export const ApiApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiV0PaymentsBasketsList(limit?: number, offset?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedBasketList>> {
+        async apiV0PaymentsBasketsList(limit?: number, offset?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedBasketList>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsList(limit, offset, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsBasketsList']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * API view set for Basket
@@ -824,27 +1157,58 @@ export const ApiApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiV0PaymentsBasketsRetrieve(username: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Basket>> {
+        async apiV0PaymentsBasketsRetrieve(username: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Basket>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsBasketsRetrieve(username, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsBasketsRetrieve']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Handle webhook call from the payment gateway when the user has completed a transaction.  Returns:     - HTTP_200_OK if the Order is found.  Raises:     - Http404 if the Order is not found.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiV0PaymentsCheckoutCallbackCreate(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async apiV0PaymentsCheckoutCallbackCreate(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsCheckoutCallbackCreate(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsCheckoutCallbackCreate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Start the checkout process. This assembles the basket items into an Order with Lines for each item, applies the attached basket discounts, and then calls the payment gateway to prepare for payment.  This is expected to be called from within the Ecommerce cart app, not from an integrated system.  Returns:     - JSON payload from the ol-django payment gateway app. The payment       gateway returns data necessary to construct a form that will       ultimately POST to the actual payment processor.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async apiV0PaymentsCheckoutStartCheckoutCreate(options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async apiV0PaymentsCheckoutStartCheckoutCreate(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsCheckoutStartCheckoutCreate(options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsCheckoutStartCheckoutCreate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         *
+         * @param {number} [limit] Number of results to return per page.
+         * @param {number} [offset] The initial index from which to return the results.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsOrdersHistoryList(limit?: number, offset?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedOrderHistoryList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsOrdersHistoryList(limit, offset, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsOrdersHistoryList']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         *
+         * @param {string} id
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async apiV0PaymentsOrdersHistoryRetrieve(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrderHistory>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.apiV0PaymentsOrdersHistoryRetrieve(id, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ApiApi.apiV0PaymentsOrdersHistoryRetrieve']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
     }
 };
@@ -861,7 +1225,7 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsClearDestroy(options?: AxiosRequestConfig): AxiosPromise<void> {
+        apiV0PaymentsBasketsClearDestroy(options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.apiV0PaymentsBasketsClearDestroy(options).then((request) => request(axios, basePath));
         },
         /**
@@ -870,7 +1234,7 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsCreateFromProductCreate(requestParameters: ApiApiApiV0PaymentsBasketsCreateFromProductCreateRequest, options?: AxiosRequestConfig): AxiosPromise<void> {
+        apiV0PaymentsBasketsCreateFromProductCreate(requestParameters: ApiApiApiV0PaymentsBasketsCreateFromProductCreateRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.apiV0PaymentsBasketsCreateFromProductCreate(requestParameters.sku, requestParameters.system_slug, options).then((request) => request(axios, basePath));
         },
         /**
@@ -879,7 +1243,7 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsItemsCreate(requestParameters: ApiApiApiV0PaymentsBasketsItemsCreateRequest, options?: AxiosRequestConfig): AxiosPromise<BasketItem> {
+        apiV0PaymentsBasketsItemsCreate(requestParameters: ApiApiApiV0PaymentsBasketsItemsCreateRequest, options?: RawAxiosRequestConfig): AxiosPromise<BasketItem> {
             return localVarFp.apiV0PaymentsBasketsItemsCreate(requestParameters.basket, requestParameters.BasketItem, options).then((request) => request(axios, basePath));
         },
         /**
@@ -888,7 +1252,7 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsItemsDestroy(requestParameters: ApiApiApiV0PaymentsBasketsItemsDestroyRequest, options?: AxiosRequestConfig): AxiosPromise<void> {
+        apiV0PaymentsBasketsItemsDestroy(requestParameters: ApiApiApiV0PaymentsBasketsItemsDestroyRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.apiV0PaymentsBasketsItemsDestroy(requestParameters.basket, requestParameters.id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -897,7 +1261,7 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsItemsList(requestParameters: ApiApiApiV0PaymentsBasketsItemsListRequest, options?: AxiosRequestConfig): AxiosPromise<PaginatedBasketItemList> {
+        apiV0PaymentsBasketsItemsList(requestParameters: ApiApiApiV0PaymentsBasketsItemsListRequest, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedBasketItemList> {
             return localVarFp.apiV0PaymentsBasketsItemsList(requestParameters.basket, requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
         },
         /**
@@ -906,7 +1270,7 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsList(requestParameters: ApiApiApiV0PaymentsBasketsListRequest = {}, options?: AxiosRequestConfig): AxiosPromise<PaginatedBasketList> {
+        apiV0PaymentsBasketsList(requestParameters: ApiApiApiV0PaymentsBasketsListRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedBasketList> {
             return localVarFp.apiV0PaymentsBasketsList(requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
         },
         /**
@@ -915,7 +1279,7 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsBasketsRetrieve(requestParameters: ApiApiApiV0PaymentsBasketsRetrieveRequest, options?: AxiosRequestConfig): AxiosPromise<Basket> {
+        apiV0PaymentsBasketsRetrieve(requestParameters: ApiApiApiV0PaymentsBasketsRetrieveRequest, options?: RawAxiosRequestConfig): AxiosPromise<Basket> {
             return localVarFp.apiV0PaymentsBasketsRetrieve(requestParameters.username, options).then((request) => request(axios, basePath));
         },
         /**
@@ -923,7 +1287,7 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsCheckoutCallbackCreate(options?: AxiosRequestConfig): AxiosPromise<void> {
+        apiV0PaymentsCheckoutCallbackCreate(options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.apiV0PaymentsCheckoutCallbackCreate(options).then((request) => request(axios, basePath));
         },
         /**
@@ -931,8 +1295,26 @@ export const ApiApiFactory = function (configuration?: Configuration, basePath?:
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        apiV0PaymentsCheckoutStartCheckoutCreate(options?: AxiosRequestConfig): AxiosPromise<void> {
+        apiV0PaymentsCheckoutStartCheckoutCreate(options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.apiV0PaymentsCheckoutStartCheckoutCreate(options).then((request) => request(axios, basePath));
+        },
+        /**
+         *
+         * @param {ApiApiApiV0PaymentsOrdersHistoryListRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsOrdersHistoryList(requestParameters: ApiApiApiV0PaymentsOrdersHistoryListRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedOrderHistoryList> {
+            return localVarFp.apiV0PaymentsOrdersHistoryList(requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
+        },
+        /**
+         *
+         * @param {ApiApiApiV0PaymentsOrdersHistoryRetrieveRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        apiV0PaymentsOrdersHistoryRetrieve(requestParameters: ApiApiApiV0PaymentsOrdersHistoryRetrieveRequest, options?: RawAxiosRequestConfig): AxiosPromise<OrderHistory> {
+            return localVarFp.apiV0PaymentsOrdersHistoryRetrieve(requestParameters.id, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1064,6 +1446,41 @@ export interface ApiApiApiV0PaymentsBasketsRetrieveRequest {
 }
 
 /**
+ * Request parameters for apiV0PaymentsOrdersHistoryList operation in ApiApi.
+ * @export
+ * @interface ApiApiApiV0PaymentsOrdersHistoryListRequest
+ */
+export interface ApiApiApiV0PaymentsOrdersHistoryListRequest {
+    /**
+     * Number of results to return per page.
+     * @type {number}
+     * @memberof ApiApiApiV0PaymentsOrdersHistoryList
+     */
+    readonly limit?: number
+
+    /**
+     * The initial index from which to return the results.
+     * @type {number}
+     * @memberof ApiApiApiV0PaymentsOrdersHistoryList
+     */
+    readonly offset?: number
+}
+
+/**
+ * Request parameters for apiV0PaymentsOrdersHistoryRetrieve operation in ApiApi.
+ * @export
+ * @interface ApiApiApiV0PaymentsOrdersHistoryRetrieveRequest
+ */
+export interface ApiApiApiV0PaymentsOrdersHistoryRetrieveRequest {
+    /**
+     *
+     * @type {string}
+     * @memberof ApiApiApiV0PaymentsOrdersHistoryRetrieve
+     */
+    readonly id: string
+}
+
+/**
  * ApiApi - object-oriented interface
  * @export
  * @class ApiApi
@@ -1076,7 +1493,7 @@ export class ApiApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ApiApi
      */
-    public apiV0PaymentsBasketsClearDestroy(options?: AxiosRequestConfig) {
+    public apiV0PaymentsBasketsClearDestroy(options?: RawAxiosRequestConfig) {
         return ApiApiFp(this.configuration).apiV0PaymentsBasketsClearDestroy(options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1087,7 +1504,7 @@ export class ApiApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ApiApi
      */
-    public apiV0PaymentsBasketsCreateFromProductCreate(requestParameters: ApiApiApiV0PaymentsBasketsCreateFromProductCreateRequest, options?: AxiosRequestConfig) {
+    public apiV0PaymentsBasketsCreateFromProductCreate(requestParameters: ApiApiApiV0PaymentsBasketsCreateFromProductCreateRequest, options?: RawAxiosRequestConfig) {
         return ApiApiFp(this.configuration).apiV0PaymentsBasketsCreateFromProductCreate(requestParameters.sku, requestParameters.system_slug, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1098,7 +1515,7 @@ export class ApiApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ApiApi
      */
-    public apiV0PaymentsBasketsItemsCreate(requestParameters: ApiApiApiV0PaymentsBasketsItemsCreateRequest, options?: AxiosRequestConfig) {
+    public apiV0PaymentsBasketsItemsCreate(requestParameters: ApiApiApiV0PaymentsBasketsItemsCreateRequest, options?: RawAxiosRequestConfig) {
         return ApiApiFp(this.configuration).apiV0PaymentsBasketsItemsCreate(requestParameters.basket, requestParameters.BasketItem, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1109,7 +1526,7 @@ export class ApiApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ApiApi
      */
-    public apiV0PaymentsBasketsItemsDestroy(requestParameters: ApiApiApiV0PaymentsBasketsItemsDestroyRequest, options?: AxiosRequestConfig) {
+    public apiV0PaymentsBasketsItemsDestroy(requestParameters: ApiApiApiV0PaymentsBasketsItemsDestroyRequest, options?: RawAxiosRequestConfig) {
         return ApiApiFp(this.configuration).apiV0PaymentsBasketsItemsDestroy(requestParameters.basket, requestParameters.id, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1120,7 +1537,7 @@ export class ApiApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ApiApi
      */
-    public apiV0PaymentsBasketsItemsList(requestParameters: ApiApiApiV0PaymentsBasketsItemsListRequest, options?: AxiosRequestConfig) {
+    public apiV0PaymentsBasketsItemsList(requestParameters: ApiApiApiV0PaymentsBasketsItemsListRequest, options?: RawAxiosRequestConfig) {
         return ApiApiFp(this.configuration).apiV0PaymentsBasketsItemsList(requestParameters.basket, requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1131,7 +1548,7 @@ export class ApiApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ApiApi
      */
-    public apiV0PaymentsBasketsList(requestParameters: ApiApiApiV0PaymentsBasketsListRequest = {}, options?: AxiosRequestConfig) {
+    public apiV0PaymentsBasketsList(requestParameters: ApiApiApiV0PaymentsBasketsListRequest = {}, options?: RawAxiosRequestConfig) {
         return ApiApiFp(this.configuration).apiV0PaymentsBasketsList(requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1142,7 +1559,7 @@ export class ApiApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ApiApi
      */
-    public apiV0PaymentsBasketsRetrieve(requestParameters: ApiApiApiV0PaymentsBasketsRetrieveRequest, options?: AxiosRequestConfig) {
+    public apiV0PaymentsBasketsRetrieve(requestParameters: ApiApiApiV0PaymentsBasketsRetrieveRequest, options?: RawAxiosRequestConfig) {
         return ApiApiFp(this.configuration).apiV0PaymentsBasketsRetrieve(requestParameters.username, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1152,7 +1569,7 @@ export class ApiApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ApiApi
      */
-    public apiV0PaymentsCheckoutCallbackCreate(options?: AxiosRequestConfig) {
+    public apiV0PaymentsCheckoutCallbackCreate(options?: RawAxiosRequestConfig) {
         return ApiApiFp(this.configuration).apiV0PaymentsCheckoutCallbackCreate(options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1162,10 +1579,33 @@ export class ApiApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ApiApi
      */
-    public apiV0PaymentsCheckoutStartCheckoutCreate(options?: AxiosRequestConfig) {
+    public apiV0PaymentsCheckoutStartCheckoutCreate(options?: RawAxiosRequestConfig) {
         return ApiApiFp(this.configuration).apiV0PaymentsCheckoutStartCheckoutCreate(options).then((request) => request(this.axios, this.basePath));
     }
+
+    /**
+     *
+     * @param {ApiApiApiV0PaymentsOrdersHistoryListRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsOrdersHistoryList(requestParameters: ApiApiApiV0PaymentsOrdersHistoryListRequest = {}, options?: RawAxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsOrdersHistoryList(requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     *
+     * @param {ApiApiApiV0PaymentsOrdersHistoryRetrieveRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiApi
+     */
+    public apiV0PaymentsOrdersHistoryRetrieve(requestParameters: ApiApiApiV0PaymentsOrdersHistoryRetrieveRequest, options?: RawAxiosRequestConfig) {
+        return ApiApiFp(this.configuration).apiV0PaymentsOrdersHistoryRetrieve(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
+    }
 }
+
 
 
 /**
@@ -1180,7 +1620,7 @@ export const IntegratedSystemApiAxiosParamCreator = function (configuration?: Co
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemCreate: async (IntegratedSystem: IntegratedSystem, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        integratedSystemCreate: async (IntegratedSystem: IntegratedSystem, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'IntegratedSystem' is not null or undefined
             assertParamExists('integratedSystemCreate', 'IntegratedSystem', IntegratedSystem)
             const localVarPath = `/integrated_system/`;
@@ -1217,7 +1657,7 @@ export const IntegratedSystemApiAxiosParamCreator = function (configuration?: Co
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemDestroy: async (id: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        integratedSystemDestroy: async (id: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('integratedSystemDestroy', 'id', id)
             const localVarPath = `/integrated_system/{id}/`
@@ -1253,7 +1693,7 @@ export const IntegratedSystemApiAxiosParamCreator = function (configuration?: Co
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemList: async (limit?: number, offset?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        integratedSystemList: async (limit?: number, offset?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/integrated_system/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1294,7 +1734,7 @@ export const IntegratedSystemApiAxiosParamCreator = function (configuration?: Co
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemPartialUpdate: async (id: number, PatchedIntegratedSystem?: PatchedIntegratedSystem, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        integratedSystemPartialUpdate: async (id: number, PatchedIntegratedSystem?: PatchedIntegratedSystem, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('integratedSystemPartialUpdate', 'id', id)
             const localVarPath = `/integrated_system/{id}/`
@@ -1332,7 +1772,7 @@ export const IntegratedSystemApiAxiosParamCreator = function (configuration?: Co
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemRetrieve: async (id: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        integratedSystemRetrieve: async (id: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('integratedSystemRetrieve', 'id', id)
             const localVarPath = `/integrated_system/{id}/`
@@ -1368,7 +1808,7 @@ export const IntegratedSystemApiAxiosParamCreator = function (configuration?: Co
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemUpdate: async (id: number, IntegratedSystem: IntegratedSystem, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        integratedSystemUpdate: async (id: number, IntegratedSystem: IntegratedSystem, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('integratedSystemUpdate', 'id', id)
             // verify required parameter 'IntegratedSystem' is not null or undefined
@@ -1418,9 +1858,11 @@ export const IntegratedSystemApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async integratedSystemCreate(IntegratedSystem: IntegratedSystem, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
+        async integratedSystemCreate(IntegratedSystem: IntegratedSystem, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemCreate(IntegratedSystem, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['IntegratedSystemApi.integratedSystemCreate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Viewset for IntegratedSystem model.
@@ -1428,9 +1870,11 @@ export const IntegratedSystemApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async integratedSystemDestroy(id: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async integratedSystemDestroy(id: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemDestroy(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['IntegratedSystemApi.integratedSystemDestroy']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Viewset for IntegratedSystem model.
@@ -1439,9 +1883,11 @@ export const IntegratedSystemApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async integratedSystemList(limit?: number, offset?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedIntegratedSystemList>> {
+        async integratedSystemList(limit?: number, offset?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedIntegratedSystemList>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemList(limit, offset, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['IntegratedSystemApi.integratedSystemList']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Viewset for IntegratedSystem model.
@@ -1450,9 +1896,11 @@ export const IntegratedSystemApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async integratedSystemPartialUpdate(id: number, PatchedIntegratedSystem?: PatchedIntegratedSystem, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
+        async integratedSystemPartialUpdate(id: number, PatchedIntegratedSystem?: PatchedIntegratedSystem, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemPartialUpdate(id, PatchedIntegratedSystem, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['IntegratedSystemApi.integratedSystemPartialUpdate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Viewset for IntegratedSystem model.
@@ -1460,9 +1908,11 @@ export const IntegratedSystemApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async integratedSystemRetrieve(id: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
+        async integratedSystemRetrieve(id: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemRetrieve(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['IntegratedSystemApi.integratedSystemRetrieve']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Viewset for IntegratedSystem model.
@@ -1471,9 +1921,11 @@ export const IntegratedSystemApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async integratedSystemUpdate(id: number, IntegratedSystem: IntegratedSystem, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
+        async integratedSystemUpdate(id: number, IntegratedSystem: IntegratedSystem, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<IntegratedSystem>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.integratedSystemUpdate(id, IntegratedSystem, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['IntegratedSystemApi.integratedSystemUpdate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
     }
 };
@@ -1491,7 +1943,7 @@ export const IntegratedSystemApiFactory = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemCreate(requestParameters: IntegratedSystemApiIntegratedSystemCreateRequest, options?: AxiosRequestConfig): AxiosPromise<IntegratedSystem> {
+        integratedSystemCreate(requestParameters: IntegratedSystemApiIntegratedSystemCreateRequest, options?: RawAxiosRequestConfig): AxiosPromise<IntegratedSystem> {
             return localVarFp.integratedSystemCreate(requestParameters.IntegratedSystem, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1500,7 +1952,7 @@ export const IntegratedSystemApiFactory = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemDestroy(requestParameters: IntegratedSystemApiIntegratedSystemDestroyRequest, options?: AxiosRequestConfig): AxiosPromise<void> {
+        integratedSystemDestroy(requestParameters: IntegratedSystemApiIntegratedSystemDestroyRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.integratedSystemDestroy(requestParameters.id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1509,7 +1961,7 @@ export const IntegratedSystemApiFactory = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemList(requestParameters: IntegratedSystemApiIntegratedSystemListRequest = {}, options?: AxiosRequestConfig): AxiosPromise<PaginatedIntegratedSystemList> {
+        integratedSystemList(requestParameters: IntegratedSystemApiIntegratedSystemListRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedIntegratedSystemList> {
             return localVarFp.integratedSystemList(requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1518,7 +1970,7 @@ export const IntegratedSystemApiFactory = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemPartialUpdate(requestParameters: IntegratedSystemApiIntegratedSystemPartialUpdateRequest, options?: AxiosRequestConfig): AxiosPromise<IntegratedSystem> {
+        integratedSystemPartialUpdate(requestParameters: IntegratedSystemApiIntegratedSystemPartialUpdateRequest, options?: RawAxiosRequestConfig): AxiosPromise<IntegratedSystem> {
             return localVarFp.integratedSystemPartialUpdate(requestParameters.id, requestParameters.PatchedIntegratedSystem, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1527,7 +1979,7 @@ export const IntegratedSystemApiFactory = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemRetrieve(requestParameters: IntegratedSystemApiIntegratedSystemRetrieveRequest, options?: AxiosRequestConfig): AxiosPromise<IntegratedSystem> {
+        integratedSystemRetrieve(requestParameters: IntegratedSystemApiIntegratedSystemRetrieveRequest, options?: RawAxiosRequestConfig): AxiosPromise<IntegratedSystem> {
             return localVarFp.integratedSystemRetrieve(requestParameters.id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1536,7 +1988,7 @@ export const IntegratedSystemApiFactory = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        integratedSystemUpdate(requestParameters: IntegratedSystemApiIntegratedSystemUpdateRequest, options?: AxiosRequestConfig): AxiosPromise<IntegratedSystem> {
+        integratedSystemUpdate(requestParameters: IntegratedSystemApiIntegratedSystemUpdateRequest, options?: RawAxiosRequestConfig): AxiosPromise<IntegratedSystem> {
             return localVarFp.integratedSystemUpdate(requestParameters.id, requestParameters.IntegratedSystem, options).then((request) => request(axios, basePath));
         },
     };
@@ -1661,7 +2113,7 @@ export class IntegratedSystemApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof IntegratedSystemApi
      */
-    public integratedSystemCreate(requestParameters: IntegratedSystemApiIntegratedSystemCreateRequest, options?: AxiosRequestConfig) {
+    public integratedSystemCreate(requestParameters: IntegratedSystemApiIntegratedSystemCreateRequest, options?: RawAxiosRequestConfig) {
         return IntegratedSystemApiFp(this.configuration).integratedSystemCreate(requestParameters.IntegratedSystem, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1672,7 +2124,7 @@ export class IntegratedSystemApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof IntegratedSystemApi
      */
-    public integratedSystemDestroy(requestParameters: IntegratedSystemApiIntegratedSystemDestroyRequest, options?: AxiosRequestConfig) {
+    public integratedSystemDestroy(requestParameters: IntegratedSystemApiIntegratedSystemDestroyRequest, options?: RawAxiosRequestConfig) {
         return IntegratedSystemApiFp(this.configuration).integratedSystemDestroy(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1683,7 +2135,7 @@ export class IntegratedSystemApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof IntegratedSystemApi
      */
-    public integratedSystemList(requestParameters: IntegratedSystemApiIntegratedSystemListRequest = {}, options?: AxiosRequestConfig) {
+    public integratedSystemList(requestParameters: IntegratedSystemApiIntegratedSystemListRequest = {}, options?: RawAxiosRequestConfig) {
         return IntegratedSystemApiFp(this.configuration).integratedSystemList(requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1694,7 +2146,7 @@ export class IntegratedSystemApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof IntegratedSystemApi
      */
-    public integratedSystemPartialUpdate(requestParameters: IntegratedSystemApiIntegratedSystemPartialUpdateRequest, options?: AxiosRequestConfig) {
+    public integratedSystemPartialUpdate(requestParameters: IntegratedSystemApiIntegratedSystemPartialUpdateRequest, options?: RawAxiosRequestConfig) {
         return IntegratedSystemApiFp(this.configuration).integratedSystemPartialUpdate(requestParameters.id, requestParameters.PatchedIntegratedSystem, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1705,7 +2157,7 @@ export class IntegratedSystemApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof IntegratedSystemApi
      */
-    public integratedSystemRetrieve(requestParameters: IntegratedSystemApiIntegratedSystemRetrieveRequest, options?: AxiosRequestConfig) {
+    public integratedSystemRetrieve(requestParameters: IntegratedSystemApiIntegratedSystemRetrieveRequest, options?: RawAxiosRequestConfig) {
         return IntegratedSystemApiFp(this.configuration).integratedSystemRetrieve(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -1716,10 +2168,11 @@ export class IntegratedSystemApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof IntegratedSystemApi
      */
-    public integratedSystemUpdate(requestParameters: IntegratedSystemApiIntegratedSystemUpdateRequest, options?: AxiosRequestConfig) {
+    public integratedSystemUpdate(requestParameters: IntegratedSystemApiIntegratedSystemUpdateRequest, options?: RawAxiosRequestConfig) {
         return IntegratedSystemApiFp(this.configuration).integratedSystemUpdate(requestParameters.id, requestParameters.IntegratedSystem, options).then((request) => request(this.axios, this.basePath));
     }
 }
+
 
 
 /**
@@ -1734,7 +2187,7 @@ export const ProductApiAxiosParamCreator = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productCreate: async (Product: Product, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        productCreate: async (Product: Product, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'Product' is not null or undefined
             assertParamExists('productCreate', 'Product', Product)
             const localVarPath = `/product/`;
@@ -1771,7 +2224,7 @@ export const ProductApiAxiosParamCreator = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productDestroy: async (id: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        productDestroy: async (id: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('productDestroy', 'id', id)
             const localVarPath = `/product/{id}/`
@@ -1809,7 +2262,7 @@ export const ProductApiAxiosParamCreator = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productList: async (limit?: number, name?: string, offset?: number, system__slug?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        productList: async (limit?: number, name?: string, offset?: number, system__slug?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/product/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1858,7 +2311,7 @@ export const ProductApiAxiosParamCreator = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productPartialUpdate: async (id: number, PatchedProduct?: PatchedProduct, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        productPartialUpdate: async (id: number, PatchedProduct?: PatchedProduct, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('productPartialUpdate', 'id', id)
             const localVarPath = `/product/{id}/`
@@ -1896,7 +2349,7 @@ export const ProductApiAxiosParamCreator = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productRetrieve: async (id: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        productRetrieve: async (id: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('productRetrieve', 'id', id)
             const localVarPath = `/product/{id}/`
@@ -1932,7 +2385,7 @@ export const ProductApiAxiosParamCreator = function (configuration?: Configurati
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productUpdate: async (id: number, Product: Product, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        productUpdate: async (id: number, Product: Product, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('productUpdate', 'id', id)
             // verify required parameter 'Product' is not null or undefined
@@ -1982,9 +2435,11 @@ export const ProductApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async productCreate(Product: Product, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
+        async productCreate(Product: Product, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.productCreate(Product, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ProductApi.productCreate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Viewset for Product model.
@@ -1992,9 +2447,11 @@ export const ProductApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async productDestroy(id: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async productDestroy(id: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.productDestroy(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ProductApi.productDestroy']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Viewset for Product model.
@@ -2005,9 +2462,11 @@ export const ProductApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async productList(limit?: number, name?: string, offset?: number, system__slug?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedProductList>> {
+        async productList(limit?: number, name?: string, offset?: number, system__slug?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedProductList>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.productList(limit, name, offset, system__slug, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ProductApi.productList']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Viewset for Product model.
@@ -2016,9 +2475,11 @@ export const ProductApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async productPartialUpdate(id: number, PatchedProduct?: PatchedProduct, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
+        async productPartialUpdate(id: number, PatchedProduct?: PatchedProduct, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.productPartialUpdate(id, PatchedProduct, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ProductApi.productPartialUpdate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Viewset for Product model.
@@ -2026,9 +2487,11 @@ export const ProductApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async productRetrieve(id: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
+        async productRetrieve(id: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.productRetrieve(id, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ProductApi.productRetrieve']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
          * Viewset for Product model.
@@ -2037,9 +2500,11 @@ export const ProductApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async productUpdate(id: number, Product: Product, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
+        async productUpdate(id: number, Product: Product, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.productUpdate(id, Product, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['ProductApi.productUpdate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
     }
 };
@@ -2057,7 +2522,7 @@ export const ProductApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productCreate(requestParameters: ProductApiProductCreateRequest, options?: AxiosRequestConfig): AxiosPromise<Product> {
+        productCreate(requestParameters: ProductApiProductCreateRequest, options?: RawAxiosRequestConfig): AxiosPromise<Product> {
             return localVarFp.productCreate(requestParameters.Product, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2066,7 +2531,7 @@ export const ProductApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productDestroy(requestParameters: ProductApiProductDestroyRequest, options?: AxiosRequestConfig): AxiosPromise<void> {
+        productDestroy(requestParameters: ProductApiProductDestroyRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.productDestroy(requestParameters.id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2075,7 +2540,7 @@ export const ProductApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productList(requestParameters: ProductApiProductListRequest = {}, options?: AxiosRequestConfig): AxiosPromise<PaginatedProductList> {
+        productList(requestParameters: ProductApiProductListRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedProductList> {
             return localVarFp.productList(requestParameters.limit, requestParameters.name, requestParameters.offset, requestParameters.system__slug, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2084,7 +2549,7 @@ export const ProductApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productPartialUpdate(requestParameters: ProductApiProductPartialUpdateRequest, options?: AxiosRequestConfig): AxiosPromise<Product> {
+        productPartialUpdate(requestParameters: ProductApiProductPartialUpdateRequest, options?: RawAxiosRequestConfig): AxiosPromise<Product> {
             return localVarFp.productPartialUpdate(requestParameters.id, requestParameters.PatchedProduct, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2093,7 +2558,7 @@ export const ProductApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productRetrieve(requestParameters: ProductApiProductRetrieveRequest, options?: AxiosRequestConfig): AxiosPromise<Product> {
+        productRetrieve(requestParameters: ProductApiProductRetrieveRequest, options?: RawAxiosRequestConfig): AxiosPromise<Product> {
             return localVarFp.productRetrieve(requestParameters.id, options).then((request) => request(axios, basePath));
         },
         /**
@@ -2102,7 +2567,7 @@ export const ProductApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        productUpdate(requestParameters: ProductApiProductUpdateRequest, options?: AxiosRequestConfig): AxiosPromise<Product> {
+        productUpdate(requestParameters: ProductApiProductUpdateRequest, options?: RawAxiosRequestConfig): AxiosPromise<Product> {
             return localVarFp.productUpdate(requestParameters.id, requestParameters.Product, options).then((request) => request(axios, basePath));
         },
     };
@@ -2241,7 +2706,7 @@ export class ProductApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ProductApi
      */
-    public productCreate(requestParameters: ProductApiProductCreateRequest, options?: AxiosRequestConfig) {
+    public productCreate(requestParameters: ProductApiProductCreateRequest, options?: RawAxiosRequestConfig) {
         return ProductApiFp(this.configuration).productCreate(requestParameters.Product, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -2252,7 +2717,7 @@ export class ProductApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ProductApi
      */
-    public productDestroy(requestParameters: ProductApiProductDestroyRequest, options?: AxiosRequestConfig) {
+    public productDestroy(requestParameters: ProductApiProductDestroyRequest, options?: RawAxiosRequestConfig) {
         return ProductApiFp(this.configuration).productDestroy(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -2263,7 +2728,7 @@ export class ProductApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ProductApi
      */
-    public productList(requestParameters: ProductApiProductListRequest = {}, options?: AxiosRequestConfig) {
+    public productList(requestParameters: ProductApiProductListRequest = {}, options?: RawAxiosRequestConfig) {
         return ProductApiFp(this.configuration).productList(requestParameters.limit, requestParameters.name, requestParameters.offset, requestParameters.system__slug, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -2274,7 +2739,7 @@ export class ProductApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ProductApi
      */
-    public productPartialUpdate(requestParameters: ProductApiProductPartialUpdateRequest, options?: AxiosRequestConfig) {
+    public productPartialUpdate(requestParameters: ProductApiProductPartialUpdateRequest, options?: RawAxiosRequestConfig) {
         return ProductApiFp(this.configuration).productPartialUpdate(requestParameters.id, requestParameters.PatchedProduct, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -2285,7 +2750,7 @@ export class ProductApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ProductApi
      */
-    public productRetrieve(requestParameters: ProductApiProductRetrieveRequest, options?: AxiosRequestConfig) {
+    public productRetrieve(requestParameters: ProductApiProductRetrieveRequest, options?: RawAxiosRequestConfig) {
         return ProductApiFp(this.configuration).productRetrieve(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
     }
 
@@ -2296,7 +2761,7 @@ export class ProductApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof ProductApi
      */
-    public productUpdate(requestParameters: ProductApiProductUpdateRequest, options?: AxiosRequestConfig) {
+    public productUpdate(requestParameters: ProductApiProductUpdateRequest, options?: RawAxiosRequestConfig) {
         return ProductApiFp(this.configuration).productUpdate(requestParameters.id, requestParameters.Product, options).then((request) => request(this.axios, this.basePath));
     }
 }
