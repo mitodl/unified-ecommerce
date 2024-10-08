@@ -94,27 +94,22 @@ services:
       - .:/src
       - django_media:/var/media
 
-  etcd:
-    image: 'bitnami/etcd:latest'
-    environment:
-      - ALLOW_NONE_AUTHENTICATION=yes
-      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
-    ports:
-      - 2379:2379
-      - 2380:2380
-    volumes:
-      - ./config/etcd/etcd.conf.yml:/opt/bitnami/Etcd/conf/etcd.conf.yml bitnami/etcd:latest
-
   api:
     image: apache/apisix
     platform: linux/amd64
+    environment:
+    - KEYCLOAK_REALM=${KEYCLOAK_REALM:-ol-local}
+    - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-apisix}
+    - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+    - KEYCLOAK_DISCOVERY_URL=${KEYCLOAK_DISCOVERY_URL:-https://kc.odl.local:7443/realms/ol-local/.well-known/openid-configuration}
+    - APISIX_PORT=${APISIX_PORT:-9080}
     ports:
       - 9080:9080
       - 9180:9180
     volumes:
-      - ./config/apisix/apisix.yml:/usr/local/apisix/conf/config.yaml
-    depends_on:
-      - etcd
+      - ./config/apisix/config.yaml:/usr/local/apisix/conf/config.yaml
+      - ./config/apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
+      - ./config/apisix/debug.yaml:/usr/local/apisix/conf/debug.yaml
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
