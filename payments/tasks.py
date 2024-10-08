@@ -1,17 +1,26 @@
-"""Tasks for the payments app."""
-
 import logging
 
 import requests
 from django.conf import settings
 
 from payments.constants import PAYMENT_HOOK_ACTION_POST_SALE
-from payments.models import Order
+from payments.mail_api import send_successful_order_payment_email
 from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer, WebhookOrder
 from system_meta.models import IntegratedSystem
 from unified_ecommerce.celery import app
 
+"""Tasks for the payments app."""
+
+
 log = logging.getLogger(__name__)
+
+
+@app.task
+def successful_order_payment_email_task(order_id, email_subject, email_body):
+    from payments.models import Order
+
+    order = Order.objects.get(id=order_id)
+    send_successful_order_payment_email(order, email_subject, email_body)
 
 
 @app.task()
@@ -21,6 +30,7 @@ def send_post_sale_webhook(system_id, order_id, source, attempt_count=0):
 
     This is split out so we can queue the webhook requests individually.
     """
+    from payments.models import Order
 
     order = Order.objects.get(pk=order_id)
     system = IntegratedSystem.objects.get(pk=system_id)

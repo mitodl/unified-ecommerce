@@ -1,0 +1,9 @@
+{% extends "mail/email_base.html" %}
+{% block content %}
+    <br>
+    <div style="text-align: left; font-weight: normal; margin: 0 0 20px;">
+        <p>Dear {{ first_name }},</p>
+        <p>{{ message }}</p>
+        <p>Thank you</p>
+    </div>
+{% endblock %}

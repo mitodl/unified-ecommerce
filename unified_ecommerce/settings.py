@@ -15,6 +15,7 @@ import datetime
 import logging
 import os
 import platform
+from pathlib import Path
 from urllib.parse import urljoin
 
 import dj_database_url
@@ -51,7 +52,7 @@ BASE_DIR = os.path.dirname(  # noqa: PTH120
 SECRET_KEY = get_string("SECRET_KEY", "terribly_unsafe_default_secret_key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_bool("DEBUG", False)  # noqa: FBT003
+DEBUG = get_bool(name="DEBUG", default=False)
 
 ALLOWED_HOSTS = ["*"]
 
@@ -89,6 +90,7 @@ INSTALLED_APPS = [
     "safedelete",
     "reversion",
     "oauth2_provider",
+    "mitol.mail.apps.MailApp",
     # Application modules
     "unified_ecommerce",
     "system_meta",
@@ -133,7 +135,7 @@ ROOT_URLCONF = "unified_ecommerce.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [Path(BASE_DIR) / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -147,6 +149,7 @@ TEMPLATES = [
         },
     },
 ]
+MITOL_MAIL_MESSAGE_CLASSES = ["payments.messages.SuccessfulOrderPaymentMessage"]
 
 WSGI_APPLICATION = "unified_ecommerce.wsgi.application"
 
@@ -218,7 +221,7 @@ INTERNAL_IPS = (get_string("HOST_IP", "127.0.0.1"),)
 
 # Configure e-mail settings
 EMAIL_BACKEND = get_string(
-    "MITOL_UE_EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+    "MITOL_UE_EMAIL_BACKEND", "anymail.backends.mailgun.EmailBackend"
 )
 EMAIL_HOST = get_string("MITOL_UE_EMAIL_HOST", "localhost")
 EMAIL_PORT = get_int("MITOL_UE_EMAIL_PORT", 25)
@@ -234,11 +237,19 @@ MAILGUN_RECIPIENT_OVERRIDE = get_string("MAILGUN_RECIPIENT_OVERRIDE", None)
 MAILGUN_FROM_EMAIL = get_string("MITOL_UE_FROM_EMAIL", "no-reply@example.com")
 MAILGUN_BCC_TO_EMAIL = get_string("MITOL_UE_BCC_EMAIL", None)
 
+# mitol-django-mail
+MITOL_MAIL_FROM_EMAIL = MAILGUN_FROM_EMAIL
+MITOL_MAIL_RECIPIENT_OVERRIDE = MAILGUN_RECIPIENT_OVERRIDE
+MITOL_MAIL_FORMAT_RECIPIENT_FUNC = "payments.mail_api.format_recipient"
+MITOL_MAIL_ENABLE_EMAIL_DEBUGGER = get_bool(  # NOTE: this will override the legacy mail debugger defined in this project  # noqa: E501
+    name="MITOL_MAIL_ENABLE_EMAIL_DEBUGGER",
+    default=DEBUG,
+)
+
 ANYMAIL = {
     "MAILGUN_API_KEY": MAILGUN_KEY,
     "MAILGUN_SENDER_DOMAIN": MAILGUN_SENDER_DOMAIN,
 }
-
 # e-mail configurable admins
 ADMIN_EMAIL = get_string("MITOL_UE_ADMIN_EMAIL", "")
 ADMINS = (("Admins", ADMIN_EMAIL),) if ADMIN_EMAIL != "" else ()
@@ -384,6 +395,16 @@ MITOL_UE_UNSUBSCRIBE_TOKEN_MAX_AGE_SECONDS = get_int(
     60 * 60 * 24 * 7,  # 7 days
 )
 
+MITOL_MAIL_REPLY_TO_ADDRESS = get_string(
+    name="MITOL_MAIL_REPLY_TO_ADDRESS",
+    default="webmaster@localhost.com",
+)
+
+SITE_NAME = get_string(
+    name="SITE_NAME",
+    default="Unified Ecommerce",
+)
+
 JWT_AUTH = {
     "JWT_SECRET_KEY": MITOL_UE_JWT_SECRET,
     "JWT_VERIFY": True,
@@ -445,7 +466,7 @@ MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string(
     "MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitol-"
 )
 MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG = get_bool(
-    "MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG", DEBUG
+    name="MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG", default=DEBUG
 )
 MITOL_UE_WEBHOOK_RETRY_COOLDOWN = get_int("MITOL_UE_WEBHOOK_RETRY_COOLDOWN", 60)
 MITOL_UE_WEBHOOK_RETRY_MAX = get_int("MITOL_UE_WEBHOOK_RETRY_MAX", 4)

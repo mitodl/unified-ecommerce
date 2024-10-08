@@ -7,6 +7,7 @@ from payments.views.v0 import (
     BasketItemViewSet,
     BasketViewSet,
     CheckoutApiViewSet,
+    OrderHistoryViewSet,
     clear_basket,
     create_basket_from_product,
 )
@@ -21,6 +22,8 @@ basket_router.register(
     basename="basket-items",
     parents_query_lookups=["basket"],
 )
+
+router.register(r"orders/history", OrderHistoryViewSet, basename="orderhistory_api")
 
 router.register(r"checkout", CheckoutApiViewSet, basename="checkout")
 

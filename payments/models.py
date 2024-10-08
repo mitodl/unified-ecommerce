@@ -181,12 +181,16 @@ class Order(TimestampedModel):
             # trigger post-sale events
             self.handle_post_sale(source=source)
 
+            self.state = Order.STATE.FULFILLED
+            self.save()
+
             # send the receipt emails
             self.send_ecommerce_order_receipt()
         except Exception as e:  # pylint: disable=broad-except
             log.exception(
                 "Error occurred fulfilling order %s", self.reference_number, exc_info=e
             )
+
             self.errored()
 
     def cancel(self):

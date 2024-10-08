@@ -69,6 +69,7 @@ class BasketItemSerializer(serializers.ModelSerializer):
         Returns:
             BasketItem: The created BasketItem instance.
         """
+
         basket = Basket.objects.get(user=validated_data["user"])
         # Product queryset returns active Products by default
         product = Product.objects.get(id=validated_data["product"])
@@ -217,3 +218,22 @@ class WebhookBaseSerializer(DataclassSerializer):
         """Meta options for WebhookBaseSerializer"""
 
         dataclass = WebhookBase
+        model = Line
+
+
+class OrderHistorySerializer(serializers.ModelSerializer):
+    lines = LineSerializer(many=True)
+
+    class Meta:
+        fields = [
+            "id",
+            "state",
+            "reference_number",
+            "purchaser",
+            "total_price_paid",
+            "lines",
+            "created_on",
+            "updated_on",
+        ]
+        model = Order
+        depth = 1

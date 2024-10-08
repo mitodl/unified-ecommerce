@@ -105,11 +105,13 @@ def generate_checkout_payload(request):
 
 
 def fulfill_completed_order(
-    order, payment_data, basket=None, source=POST_SALE_SOURCE_BACKOFFICE
+    order,
+    payment_data,
+    basket=None,
+    source=POST_SALE_SOURCE_BACKOFFICE,  # noqa: ARG001
 ):
     """Fulfill the order."""
-    order.fulfill(payment_data, source)
-    order.save()
+    order.fulfill(payment_data)
 
     if basket and basket.compare_to_order(order):
         basket.delete()
@@ -179,14 +181,12 @@ def process_cybersource_payment_response(
         msg = f"Transaction declined: {processor_response.message}"
         log.debug(msg)
         order.decline()
-        order.save()
         return_message = order.state
     elif processor_response.state == ProcessorResponse.STATE_ERROR:
         # Error - something went wrong with the request
         msg = f"Error happened submitting the transaction: {processor_response.message}"
         log.debug(msg)
-        order.error()
-        order.save()
+        order.errored()
         return_message = order.state
     elif processor_response.state in [
         ProcessorResponse.STATE_CANCELLED,
@@ -200,7 +200,6 @@ def process_cybersource_payment_response(
         msg = f"Transaction cancelled/reviewed: {processor_response.message}"
         log.debug(msg)
         order.cancel()
-        order.save()
         return_message = order.state
 
     elif (
@@ -230,7 +229,6 @@ def process_cybersource_payment_response(
         )
         log.error(msg)
         order.cancel()
-        order.save()
         return_message = order.state
 
     return return_message
@@ -373,7 +371,6 @@ def check_and_process_pending_orders_for_resolution(refnos=None):
                 ).get()
 
                 order.fulfill(payload)
-                order.save()
                 fulfilled_count += 1
 
                 msg = f"Fulfilled order {order.reference_number}."

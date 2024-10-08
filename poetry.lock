@@ -725,6 +725,17 @@ test = ["certifi", "cryptography-vectors (==43.0.1)", "pretend", "pytest (>=6.2.
 test-randomorder = ["pytest-randomly"]
 
 [[package]]
+name = "cssselect"
+version = "1.2.0"
+description = "cssselect parses CSS3 Selectors and translates them to XPath 1.0"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "cssselect-1.2.0-py2.py3-none-any.whl", hash = "sha256:da1885f0c10b60c03ed5eccbb6b68d6eff248d91976fcde348f395d54c9fd35e"},
+    {file = "cssselect-1.2.0.tar.gz", hash = "sha256:666b19839cfaddb9ce9d36bfe4c969132c647b92fc9088c4e23f786b30f1b3dc"},
+]
+
+[[package]]
 name = "cssselect2"
 version = "0.7.0"
 description = "CSS selectors for Python ElementTree"
@@ -742,6 +753,24 @@ webencodings = "*"
 [package.extras]
 doc = ["sphinx", "sphinx_rtd_theme"]
 test = ["flake8", "isort", "pytest"]
+
+[[package]]
+name = "cssutils"
+version = "2.11.1"
+description = "A CSS Cascading Style Sheets library for Python"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "cssutils-2.11.1-py3-none-any.whl", hash = "sha256:a67bfdfdff4f3867fab43698ec4897c1a828eca5973f4073321b3bccaf1199b1"},
+    {file = "cssutils-2.11.1.tar.gz", hash = "sha256:0563a76513b6af6eebbe788c3bf3d01c920e46b3f90c8416738c5cfc773ff8e2"},
+]
+
+[package.dependencies]
+more-itertools = "*"
+
+[package.extras]
+doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
+test = ["cssselect", "importlib-resources", "jaraco.test (>=5.1)", "lxml", "pytest (>=6,!=8.1.*)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
 
 [[package]]
 name = "curtsies"
@@ -2156,6 +2185,26 @@ setuptools = "*"
 typing-extensions = "*"
 
 [[package]]
+name = "mitol-django-mail"
+version = "2023.12.19"
+description = "MIT Open Learning django app extensions for mail"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mitol-django-mail-2023.12.19.tar.gz", hash = "sha256:824f6ff0a7fb7b996962e608c61e5d02d06c174e466d00896eb43fdac864148f"},
+    {file = "mitol_django_mail-2023.12.19-py3-none-any.whl", hash = "sha256:a32853bfe7da39d4c34651d7e5bddc547678c1b5b3a54e56e492879276eab371"},
+]
+
+[package.dependencies]
+beautifulsoup4 = ">=4.6.0"
+django = ">=3.0"
+django-anymail = ">=6.0"
+html5lib = ">=1.1"
+mitol-django-common = "*"
+premailer = ">=3.7.0"
+toolz = ">=0.10.0"
+
+[[package]]
 name = "mitol-django-payment-gateway"
 version = "2023.12.19"
 description = "Django application to handle payment processing"
@@ -2171,6 +2220,17 @@ cybersource-rest-client-python = ">=0.0.36"
 django = ">=3.0"
 mitol-django-common = "*"
 setuptools = "*"
+
+[[package]]
+name = "more-itertools"
+version = "10.5.0"
+description = "More routines for operating on iterables, beyond itertools"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "more-itertools-10.5.0.tar.gz", hash = "sha256:5482bfef7849c25dc3c6dd53a6173ae4795da2a41a80faea6700d9f5846c5da6"},
+    {file = "more_itertools-10.5.0-py3-none-any.whl", hash = "sha256:037b0d3203ce90cca8ab1defbbdac29d5f993fc20131f3664dc8d6acfa872aef"},
+]
 
 [[package]]
 name = "moto"
@@ -2536,6 +2596,28 @@ files = [
 [package.extras]
 dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
+
+[[package]]
+name = "premailer"
+version = "3.10.0"
+description = "Turns CSS blocks into style attributes"
+optional = false
+python-versions = "*"
+files = [
+    {file = "premailer-3.10.0-py2.py3-none-any.whl", hash = "sha256:021b8196364d7df96d04f9ade51b794d0b77bcc19e998321c515633a2273be1a"},
+    {file = "premailer-3.10.0.tar.gz", hash = "sha256:d1875a8411f5dc92b53ef9f193db6c0f879dc378d618e0ad292723e388bfe4c2"},
+]
+
+[package.dependencies]
+cachetools = "*"
+cssselect = "*"
+cssutils = "*"
+lxml = "*"
+requests = "*"
+
+[package.extras]
+dev = ["black", "flake8", "therapist", "tox", "twine", "wheel"]
+test = ["mock", "nose"]
 
 [[package]]
 name = "prettytable"
@@ -4115,4 +4197,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11.0"
-content-hash = "084508218f325c3596e886c2d426b3df8f6652b7c03c2326d7f3bc793a27d720"
+content-hash = "0d63e792c8442e009630abd38f7d284864c303cf0d5e9335f41a8b44670fbb2c"

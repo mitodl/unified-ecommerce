@@ -9,6 +9,7 @@ import factory
 import pytest
 import responses
 from pytest_mock import PytestMockWarning
+from rest_framework.test import APIClient
 from urllib3.exceptions import InsecureRequestWarning
 
 
@@ -83,3 +84,11 @@ def mocked_responses():
     """Mock responses fixture"""
     with responses.RequestsMock() as rsps:
         yield rsps
+
+
+@pytest.fixture()
+def admin_drf_client(admin_user):
+    """DRF API test client with admin user"""
+    client = APIClient()
+    client.force_authenticate(user=admin_user)
+    return client
