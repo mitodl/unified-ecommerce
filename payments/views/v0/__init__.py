@@ -19,6 +19,10 @@ from rest_framework.viewsets import (
     ReadOnlyModelViewSet,
     ViewSet,
 )
+from django.views.generic import View
+from django.http import HttpResponse
+from django.urls import reverse
+from mitol.payment_gateway.api import PaymentGateway
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from payments import api
@@ -29,7 +33,9 @@ from payments.serializers.v0 import (
     OrderHistorySerializer,
 )
 from system_meta.models import IntegratedSystem, Product
-from unified_ecommerce.constants import POST_SALE_SOURCE_BACKOFFICE
+from unified_ecommerce import settings
+from unified_ecommerce.constants import POST_SALE_SOURCE_BACKOFFICE, POST_SALE_SOURCE_REDIRECT, USER_MSG_TYPE_PAYMENT_ACCEPTED, USER_MSG_TYPE_PAYMENT_CANCELLED, USER_MSG_TYPE_PAYMENT_DECLINED, USER_MSG_TYPE_PAYMENT_ERROR, USER_MSG_TYPE_PAYMENT_ERROR_UNKNOWN
+from unified_ecommerce.utils import redirect_with_user_message
 
 log = logging.getLogger(__name__)
 
@@ -199,8 +205,113 @@ class CheckoutApiViewSet(ViewSet):
         except ObjectDoesNotExist:
             return Response("No basket", status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        return Response(payload)
+        if (
+            "country_blocked" in payload
+            or "no_checkout" in payload
+            or "purchased_same_courserun" in payload
+            or "purchased_non_upgradeable_courserun" in payload
+            or "invalid_discounts" in payload
+        ):
+            return payload["response"]
 
+        return Response(payload)
+    
+@method_decorator(csrf_exempt, name="dispatch")
+class CheckoutCallbackView(View):
+    """
+    Handles the redirect from the payment gateway after the user has completed
+    checkout. This may not always happen as the redirect back to the app
+    occasionally fails. If it does, then the payment gateway should trigger
+    things via the backoffice webhook.
+    """
+
+    def post_checkout_redirect(self, order_state, request):
+        """
+        Redirect the user with a message depending on the provided state.
+
+        Args:
+            - order_state (str): the order state to consider
+            - order (Order): the order itself
+            - request (HttpRequest): the request
+
+        Returns: HttpResponse
+        """
+        if order_state == Order.STATE.CANCELED:
+            return redirect_with_user_message(
+                reverse("cart"), {"type": USER_MSG_TYPE_PAYMENT_CANCELLED}
+            )
+        elif order_state == Order.STATE.ERRORED:
+            return redirect_with_user_message(
+                reverse("cart"), {"type": USER_MSG_TYPE_PAYMENT_ERROR}
+            )
+        elif order_state == Order.STATE.DECLINED:
+            return redirect_with_user_message(
+                reverse("cart"), {"type": USER_MSG_TYPE_PAYMENT_DECLINED}
+            )
+        elif order_state == Order.STATE.FULFILLED:
+            return redirect_with_user_message(
+                reverse("cart"),
+                {
+                    "type": USER_MSG_TYPE_PAYMENT_ACCEPTED,
+                },
+            )
+        else:
+            if not PaymentGateway.validate_processor_response(
+                settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, request
+            ):
+                log.info("Could not validate payment response for order")
+            else:
+                processor_response = PaymentGateway.get_formatted_response(
+                    settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, request
+                )
+            log.error(
+                (
+                    "Checkout callback unknown error for transaction_id %s, state"
+                    " %s, reason_code %s, message %s, and ProcessorResponse %s"
+                ),
+                processor_response.transaction_id,
+                order_state,
+                processor_response.response_code,
+                processor_response.message,
+                processor_response,
+            )
+            return redirect_with_user_message(
+                reverse("cart"),
+                {"type": USER_MSG_TYPE_PAYMENT_ERROR_UNKNOWN},
+            )
+
+    def post(self, request):
+        """
+        Handle successfully completed transactions.
+
+        This does a handful of things:
+        1. Verifies the incoming payload, which should be signed by the
+        processor
+        2. Finds and fulfills the order in the system (which should also then
+        clear out the stored basket)
+        3. Perform any enrollments, account status changes, etc.
+        """
+
+        with transaction.atomic():
+            order = api.get_order_from_cybersource_payment_response(request)
+            if order is None:
+                return HttpResponse("Order not found")
+
+            # Only process the response if the database record in pending status
+            # If it is, then we can process the response as per usual.
+            # If it isn't, then we just need to redirect the user with the
+            # proper message.
+
+            if order.state == Order.STATE.PENDING:
+                processed_order_state = api.process_cybersource_payment_response(
+                    request,
+                    order,
+                    POST_SALE_SOURCE_REDIRECT,
+                )
+
+                return self.post_checkout_redirect(processed_order_state, request)
+            else:
+                return self.post_checkout_redirect(order.state, request)
 
 @method_decorator(csrf_exempt, name="dispatch")
 class BackofficeCallbackView(APIView):

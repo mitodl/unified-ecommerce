@@ -7,6 +7,7 @@ from payments.views.v0 import (
     BasketItemViewSet,
     BasketViewSet,
     CheckoutApiViewSet,
+    CheckoutCallbackView,
     OrderHistoryViewSet,
     clear_basket,
     create_basket_from_product,
@@ -44,4 +45,9 @@ urlpatterns = [
         name="checkout-callback",
     ),
     re_path("^", include(router.urls)),
+    path(
+        r"checkout/result/",
+        CheckoutCallbackView.as_view(),
+        name="checkout-result-callback",
+    ),
 ]
