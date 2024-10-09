@@ -83,11 +83,6 @@ class BasketItemViewSet(
         """
         return BasketItem.objects.filter(basket__user=self.request.user)
 
-    @extend_schema(
-        parameters=[
-            OpenApiParameter("product", int),
-        ],
-    )
     def create(self, request):
         """
         Create a new basket item.
@@ -98,7 +93,7 @@ class BasketItemViewSet(
         Returns:
             Response: HTTP response
         """
-        basket = Basket.establish_basket(request)
+        basket = Basket.objects.get(user=request.user)
         product_id = request.data.get("product")
         serializer = self.get_serializer(
             data={"product": product_id, "basket": basket.id}
@@ -174,7 +169,7 @@ def create_basket_from_product(request, system_slug: str, sku: str):
     auth=IsAuthenticated,
     methods=["DELETE"],
     versions=["v0"],
-    responses=[OpenApiResponse(Response(None, status=status.HTTP_204_NO_CONTENT))],
+    responses=OpenApiResponse(Response(None, status=status.HTTP_204_NO_CONTENT)),
 )
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
@@ -269,6 +264,11 @@ class BackofficeCallbackView(APIView):
             return Response(status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    request=None,
+    responses=OrderHistorySerializer,
+    parameters=[OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH)],
+)
 class OrderHistoryViewSet(ReadOnlyModelViewSet):
     """Provides APIs for displaying the users's order history."""
 

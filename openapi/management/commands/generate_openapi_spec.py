@@ -15,6 +15,8 @@ class Command(BaseCommand):
     help = "Generate OpenAPI specs for our APIs."
 
     def add_arguments(self, parser):
+        """Add arguments to the command"""
+
         parser.add_argument(
             "--directory",
             dest="directory",
@@ -32,6 +34,8 @@ class Command(BaseCommand):
         super().add_arguments(parser)
 
     def handle(self, **options):
+        """Run the command"""
+
         directory = options["directory"]
         for version in settings.REST_FRAMEWORK["ALLOWED_VERSIONS"]:
             filename = version + ".yaml"

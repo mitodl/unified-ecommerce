@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework_dataclasses.serializers import DataclassSerializer
 
@@ -59,24 +60,6 @@ class WebhookBase:
 class BasketItemSerializer(serializers.ModelSerializer):
     """BasketItem model serializer"""
 
-    def perform_create(self, validated_data):
-        """
-        Create a BasketItem instance based on the validated data.
-
-        Args:
-            validated_data (dict): The validated data with which to create the
-            BasketIteminstance.
-
-        Returns:
-            BasketItem: The created BasketItem instance.
-        """
-
-        basket = Basket.objects.get(user=validated_data["user"])
-        # Product queryset returns active Products by default
-        product = Product.objects.get(id=validated_data["product"])
-        item, _ = BasketItem.objects.get_or_create(basket=basket, product=product)
-        return item
-
     class Meta:
         """Meta options for BasketItemSerializer"""
 
@@ -93,6 +76,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
     basket_items = serializers.SerializerMethodField()
 
+    @extend_schema_field(BasketItemSerializer(many=True))
     def get_basket_items(self, instance: Basket) -> list[BasketItemSerializer]:
         """Get items in the basket"""
         return [
