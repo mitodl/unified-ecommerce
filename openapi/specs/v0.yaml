@@ -377,6 +377,10 @@ paths:
         schema:
           type: string
         required: true
+      - in: query
+        name: product
+        schema:
+          type: integer
       tags:
       - payments
       requestBody:
@@ -503,7 +507,13 @@ paths:
       - payments
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+                description: Unspecified response body
+          description: ''
   /api/v0/payments/checkout/start_checkout/:
     post:
       operationId: payments_checkout_start_checkout_create
@@ -527,6 +537,7 @@ paths:
   /api/v0/payments/orders/history/:
     get:
       operationId: payments_orders_history_list
+      description: Provides APIs for displaying the users's order history.
       parameters:
       - name: limit
         required: false
@@ -552,6 +563,7 @@ paths:
   /api/v0/payments/orders/history/{id}/:
     get:
       operationId: payments_orders_history_retrieve
+      description: Provides APIs for displaying the users's order history.
       parameters:
       - in: path
         name: id
@@ -741,6 +753,7 @@ components:
       - username
     OrderHistory:
       type: object
+      description: Serializer for order history.
       properties:
         id:
           type: integer
