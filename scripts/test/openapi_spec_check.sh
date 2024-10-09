@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-TMPFILE=$(mktemp)
+set -eo pipefail
 
-./manage.py spectacular \
-	--urlconf=unified_ecommerce.urls_spectacular \
-	--file $TMPFILE
+TMPDIR="$(mktemp -d)"
+SPECS_DIR=./openapi/specs/
 
-diff $TMPFILE ./openapi.yaml
+./manage.py generate_openapi_spec \
+	--directory=$TMPDIR --fail-on-warn
+
+diff $TMPDIR $SPECS_DIR
 
 if [ $? -eq 0 ]; then
 	echo "OpenAPI spec is up to date!"
