@@ -46,7 +46,7 @@ urlpatterns = [
     ),
     re_path("^", include(router.urls)),
     path(
-        r"checkout/result/",
+        "checkout/result/",
         CheckoutCallbackView.as_view(),
         name="checkout-result-callback",
     ),
