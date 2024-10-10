@@ -2,14 +2,9 @@
 
 from django.urls import path
 
-from cart.views import CartView, CheckoutCallbackView, CheckoutInterstitialView
+from cart.views import CartView, CheckoutInterstitialView
 
 urlpatterns = [
-    path(
-        r"checkout/result/",
-        CheckoutCallbackView.as_view(),
-        name="checkout-result-callback",
-    ),
     path(
         "checkout/to_payment",
         CheckoutInterstitialView.as_view(),
