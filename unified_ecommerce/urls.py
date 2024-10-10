@@ -20,36 +20,21 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
 
 urlpatterns = [
     path("", include("cart.urls")),
     path("", include("django.contrib.auth.urls")),
     path("admin/", admin.site.urls),
     path("hijack/", include("hijack.urls")),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    # Optional UI:
-    path(
-        "api/schema/swagger-ui/",
-        SpectacularSwaggerView.as_view(url_name="schema"),
-        name="swagger-ui",
-    ),
-    path(
-        "api/schema/redoc/",
-        SpectacularRedocView.as_view(url_name="schema"),
-        name="redoc",
-    ),
     # OAuth2 Paths
     path("o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
     # App Paths
-    re_path(r"^api/v0/meta/", include("system_meta.urls")),
+    re_path(r"", include("openapi.urls")),
     # Private Paths
     re_path(r"^_/v0/meta/", include("system_meta.private_urls")),
-    re_path(r"^api/v0/payments/", include("payments.urls")),
+    # API Paths
+    re_path(r"", include("payments.urls")),
+    re_path(r"", include("system_meta.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:

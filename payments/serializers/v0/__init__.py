@@ -1,8 +1,10 @@
 """Serializers for payments."""
 
 from dataclasses import dataclass
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework_dataclasses.serializers import DataclassSerializer
 
@@ -58,24 +60,6 @@ class WebhookBase:
 class BasketItemSerializer(serializers.ModelSerializer):
     """BasketItem model serializer"""
 
-    def perform_create(self, validated_data):
-        """
-        Create a BasketItem instance based on the validated data.
-
-        Args:
-            validated_data (dict): The validated data with which to create the
-            BasketIteminstance.
-
-        Returns:
-            BasketItem: The created BasketItem instance.
-        """
-
-        basket = Basket.objects.get(user=validated_data["user"])
-        # Product queryset returns active Products by default
-        product = Product.objects.get(id=validated_data["product"])
-        item, _ = BasketItem.objects.get_or_create(basket=basket, product=product)
-        return item
-
     class Meta:
         """Meta options for BasketItemSerializer"""
 
@@ -92,7 +76,8 @@ class BasketSerializer(serializers.ModelSerializer):
 
     basket_items = serializers.SerializerMethodField()
 
-    def get_basket_items(self, instance):
+    @extend_schema_field(BasketItemSerializer(many=True))
+    def get_basket_items(self, instance: Basket) -> list[BasketItemSerializer]:
         """Get items in the basket"""
         return [
             BasketItemSerializer(instance=basket, context=self.context).data
@@ -115,7 +100,7 @@ class BasketItemWithProductSerializer(serializers.ModelSerializer):
 
     product = serializers.SerializerMethodField()
 
-    def get_product(self, instance):
+    def get_product(self, instance) -> ProductSerializer:
         """Get the product associated with the basket item"""
         return ProductSerializer(instance=instance.product, context=self.context).data
 
@@ -135,14 +120,14 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
     discounted_price = serializers.SerializerMethodField()
     discounts = serializers.SerializerMethodField()
 
-    def get_basket_items(self, instance):
+    def get_basket_items(self, instance) -> list[BasketItemWithProductSerializer]:
         """Get the items in the basket"""
         return [
             BasketItemWithProductSerializer(instance=basket, context=self.context).data
             for basket in instance.basket_items.all()
         ]
 
-    def get_total_price(self, instance):
+    def get_total_price(self, instance) -> Decimal:
         """Get the total price for the basket"""
         return sum(
             basket_item.base_price for basket_item in instance.basket_items.all()
@@ -222,9 +207,13 @@ class WebhookBaseSerializer(DataclassSerializer):
 
 
 class OrderHistorySerializer(serializers.ModelSerializer):
+    """Serializer for order history."""
+
     lines = LineSerializer(many=True)
 
     class Meta:
+        """Meta options for OrderHistorySerializer"""
+
         fields = [
             "id",
             "state",

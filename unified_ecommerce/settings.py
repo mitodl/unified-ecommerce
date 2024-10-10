@@ -22,6 +22,7 @@ import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 from mitol.common.envs import get_bool, get_int, get_string, import_settings_modules
 
+from openapi.settings_spectacular import open_spectacular_settings
 from unified_ecommerce.envs import get_list_of_str
 from unified_ecommerce.sentry import init_sentry
 from unified_ecommerce.settings_celery import *  # noqa: F403
@@ -97,6 +98,7 @@ INSTALLED_APPS = [
     "payments",
     "cart",
     "mitol.payment_gateway.apps.PaymentGatewayApp",
+    "openapi",
 ]
 
 MIDDLEWARE = [
@@ -437,7 +439,11 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.MultiPartRenderer",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
     "ORDERING_PARAM": "sortby",
+    "ALLOWED_VERSIONS": [
+        "v0",
+    ],
 }
 
 USE_X_FORWARDED_PORT = get_bool("USE_X_FORWARDED_PORT", False)  # noqa: FBT003
@@ -479,3 +485,5 @@ KEYCLOAK_ADMIN_CLIENT_SECRET = get_string("KEYCLOAK_ADMIN_CLIENT_SECRET", False)
 KEYCLOAK_REALM = get_string("KEYCLOAK_REALM", False)  # noqa: FBT003
 KEYCLOAK_ADMIN_URL = get_string("KEYCLOAK_ADMIN_URL", False)  # noqa: FBT003
 KEYCLOAK_ADMIN_SECURE = get_bool("KEYCLOAK_ADMIN_SECURE", True)  # noqa: FBT003
+
+SPECTACULAR_SETTINGS = open_spectacular_settings
