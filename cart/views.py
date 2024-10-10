@@ -5,28 +5,14 @@ import logging
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction
 from django.http import HttpResponse
 from django.http.request import HttpRequest
 from django.shortcuts import render
-from django.urls import reverse
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView, View
-from mitol.payment_gateway.api import PaymentGateway
+from django.views.generic import TemplateView
 
 from payments import api
-from payments.models import Basket, Order
+from payments.models import Basket
 from system_meta.models import Product
-from unified_ecommerce.constants import (
-    POST_SALE_SOURCE_REDIRECT,
-    USER_MSG_TYPE_PAYMENT_ACCEPTED,
-    USER_MSG_TYPE_PAYMENT_CANCELLED,
-    USER_MSG_TYPE_PAYMENT_DECLINED,
-    USER_MSG_TYPE_PAYMENT_ERROR,
-    USER_MSG_TYPE_PAYMENT_ERROR_UNKNOWN,
-)
-from unified_ecommerce.utils import redirect_with_user_message
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +44,7 @@ class CartView(LoginRequiredMixin, TemplateView):
                 "debug_mode": settings.MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG,
             },
         )
+
 
 class CheckoutInterstitialView(LoginRequiredMixin, TemplateView):
     """
