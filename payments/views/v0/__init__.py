@@ -4,10 +4,13 @@ import logging
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import View
+from mitol.payment_gateway.api import PaymentGateway
 from rest_framework import mixins, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import ListCreateAPIView
@@ -19,10 +22,6 @@ from rest_framework.viewsets import (
     ReadOnlyModelViewSet,
     ViewSet,
 )
-from django.views.generic import View
-from django.http import HttpResponse
-from django.urls import reverse
-from mitol.payment_gateway.api import PaymentGateway
 from rest_framework_extensions.mixins import NestedViewSetMixin
 
 from payments import api
@@ -34,7 +33,15 @@ from payments.serializers.v0 import (
 )
 from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce import settings
-from unified_ecommerce.constants import POST_SALE_SOURCE_BACKOFFICE, POST_SALE_SOURCE_REDIRECT, USER_MSG_TYPE_PAYMENT_ACCEPTED, USER_MSG_TYPE_PAYMENT_CANCELLED, USER_MSG_TYPE_PAYMENT_DECLINED, USER_MSG_TYPE_PAYMENT_ERROR, USER_MSG_TYPE_PAYMENT_ERROR_UNKNOWN
+from unified_ecommerce.constants import (
+    POST_SALE_SOURCE_BACKOFFICE,
+    POST_SALE_SOURCE_REDIRECT,
+    USER_MSG_TYPE_PAYMENT_ACCEPTED,
+    USER_MSG_TYPE_PAYMENT_CANCELLED,
+    USER_MSG_TYPE_PAYMENT_DECLINED,
+    USER_MSG_TYPE_PAYMENT_ERROR,
+    USER_MSG_TYPE_PAYMENT_ERROR_UNKNOWN,
+)
 from unified_ecommerce.utils import redirect_with_user_message
 
 log = logging.getLogger(__name__)
@@ -215,7 +222,8 @@ class CheckoutApiViewSet(ViewSet):
             return payload["response"]
 
         return Response(payload)
-    
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 class CheckoutCallbackView(View):
     """
@@ -312,6 +320,7 @@ class CheckoutCallbackView(View):
                 return self.post_checkout_redirect(processed_order_state, request)
             else:
                 return self.post_checkout_redirect(order.state, request)
+
 
 @method_decorator(csrf_exempt, name="dispatch")
 class BackofficeCallbackView(APIView):
