@@ -95,7 +95,6 @@ INSTALLED_APPS = [
     "unified_ecommerce",
     "system_meta",
     "payments",
-    "cart",
     "mitol.payment_gateway.apps.PaymentGatewayApp",
 ]
 
