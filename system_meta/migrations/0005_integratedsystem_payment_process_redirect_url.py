@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="integratedsystem",
             name="payment_process_redirect_url",
-            field=models.URLField(blank=True, default=''),
+            field=models.URLField(blank=True, default=""),
         ),
     ]
