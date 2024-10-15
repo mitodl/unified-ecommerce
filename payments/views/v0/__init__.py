@@ -6,7 +6,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
-from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
@@ -259,15 +258,18 @@ class CheckoutCallbackView(View):
         """
         if order_state == Order.STATE.CANCELED:
             return redirect_with_user_message(
-                self._get_payment_process_redirect_url_from_line_items(request), {"type": USER_MSG_TYPE_PAYMENT_CANCELLED}
+                self._get_payment_process_redirect_url_from_line_items(request),
+                {"type": USER_MSG_TYPE_PAYMENT_CANCELLED},
             )
         elif order_state == Order.STATE.ERRORED:
             return redirect_with_user_message(
-                self._get_payment_process_redirect_url_from_line_items(request), {"type": USER_MSG_TYPE_PAYMENT_ERROR}
+                self._get_payment_process_redirect_url_from_line_items(request),
+                {"type": USER_MSG_TYPE_PAYMENT_ERROR},
             )
         elif order_state == Order.STATE.DECLINED:
             return redirect_with_user_message(
-                self._get_payment_process_redirect_url_from_line_items(request), {"type": USER_MSG_TYPE_PAYMENT_DECLINED}
+                self._get_payment_process_redirect_url_from_line_items(request),
+                {"type": USER_MSG_TYPE_PAYMENT_DECLINED},
             )
         elif order_state == Order.STATE.FULFILLED:
             return redirect_with_user_message(
