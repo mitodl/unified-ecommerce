@@ -8,11 +8,15 @@ from system_meta.views import (
     ProductViewSet,
 )
 
-router = routers.DefaultRouter()
+v0_router = routers.DefaultRouter()
 
-router.register(r"integrated_system", IntegratedSystemViewSet)
-router.register(r"product", ProductViewSet)
+v0_router.register(
+    r"^meta/integrated_system",
+    IntegratedSystemViewSet,
+    basename="meta_integratedsystems_api",
+)
+v0_router.register(r"^meta/product", ProductViewSet, basename="meta_products_api")
 
 urlpatterns = [
-    re_path("^", include(router.urls)),
+    re_path("^api/v0/", include((v0_router.urls, "v0"))),
 ]

@@ -10,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from mitol.payment_gateway.api import PaymentGateway
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import ListCreateAPIView
@@ -117,9 +118,19 @@ class BasketItemViewSet(
         )
 
 
+@extend_schema(
+    description=(
+        "Creates or updates a basket for the current user, "
+        "adding the selected product."
+    ),
+    auth=IsAuthenticated,
+    methods=["POST"],
+    request=None,
+    responses=BasketSerializer,
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def create_basket_from_product(request, system_slug, sku):
+def create_basket_from_product(request, system_slug: str, sku: str):
     """
     Create a new basket item from a product for the currently logged in user. Reuse
     the existing basket object if it exists.
@@ -165,6 +176,13 @@ def create_basket_from_product(request, system_slug, sku):
     )
 
 
+@extend_schema(
+    description="Clears the basket for the current user.",
+    auth=IsAuthenticated,
+    methods=["DELETE"],
+    versions=["v0"],
+    responses=OpenApiResponse(Response(None, status=status.HTTP_204_NO_CONTENT)),
+)
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def clear_basket(request):
@@ -185,10 +203,16 @@ def clear_basket(request):
 
 
 class CheckoutApiViewSet(ViewSet):
-    """Handles checkout."""
+    """
+    Handles checkout.
+
+    This is excluded from the APIs, but we may want to have this return a proper
+    API response at some point.
+    """
 
     permission_classes = (IsAuthenticated,)
 
+    @extend_schema(exclude=True)
     @action(
         detail=False, methods=["post"], name="Start Checkout", url_name="start_checkout"
     )
@@ -350,6 +374,7 @@ class BackofficeCallbackView(APIView):
     authentication_classes = []  # disables authentication
     permission_classes = []  # disables permission
 
+    @extend_schema(exclude=True)
     def post(self, request):
         """
         Handle webhook call from the payment gateway when the user has
@@ -377,11 +402,20 @@ class BackofficeCallbackView(APIView):
             return Response(status=status.HTTP_200_OK)
 
 
+@extend_schema(
+    request=None,
+    responses=OrderHistorySerializer,
+    parameters=[OpenApiParameter(name="id", type=int, location=OpenApiParameter.PATH)],
+)
 class OrderHistoryViewSet(ReadOnlyModelViewSet):
+    """Provides APIs for displaying the users's order history."""
+
     serializer_class = OrderHistorySerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """Return the queryset for completed orders."""
+
         return (
             Order.objects.filter(purchaser=self.request.user)
             .filter(state__in=[Order.STATE.FULFILLED, Order.STATE.REFUNDED])

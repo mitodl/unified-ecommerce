@@ -12,9 +12,6 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         or if the user is logged in. Otherwise, return False.
         """
 
-        if request.method in permissions.SAFE_METHODS or (
+        return request.method in permissions.SAFE_METHODS or (
             request.user.is_authenticated and request.user.is_staff
-        ):
-            return True
-
-        return False
+        )

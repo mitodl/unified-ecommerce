@@ -4,6 +4,7 @@
 import logging
 import re
 import uuid
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -554,27 +555,27 @@ class Line(TimestampedModel):
         ]
 
     @property
-    def item_description(self):
+    def item_description(self) -> str:
         """Return the item description"""
         return self.product_version.field_dict["description"]
 
     @property
-    def unit_price(self):
+    def unit_price(self) -> Decimal:
         """Return the price of the product"""
         return self.product_version.field_dict["price"]
 
     @cached_property
-    def total_price(self):
+    def total_price(self) -> Decimal:
         """Return the price of the product"""
         return self.unit_price * self.quantity
 
     @cached_property
-    def discounted_price(self):
+    def discounted_price(self) -> Decimal:
         """Return the price of the product with discounts"""
         return self.total_price
 
     @cached_property
-    def product(self):
+    def product(self) -> Product:
         """Return the product associated with the line"""
         return Product.resolve_product_version(
             Product.all_objects.get(pk=self.product_version.field_dict["id"]),

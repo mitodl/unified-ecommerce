@@ -14,7 +14,7 @@ routes:
     uris:
     - "/api/v0/payments/checkout/result/*"
     - "/static/*"
-    - "/api/schema/*"
+    - "/api/v0/schema/*"
   - id: 2
     name: "ue-default"
     desc: "Wildcard route for the rest of the system - authentication required"

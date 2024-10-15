@@ -32,8 +32,6 @@ class AuthVariegatedModelViewSet(viewsets.ModelViewSet):
         if hasattr(self, "request") and (
             self.request.user.is_staff or self.request.user.is_superuser
         ):
-            log.debug("get_serializer_class returning the Admin one")
             return self.read_write_serializer_class
 
-        log.debug("get_serializer_class returning the regular one")
         return self.read_only_serializer_class
