@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('system_meta', '0004_rename_sale_succeeded_webhook_url_integratedsystem_webhook_url_and_more'),
+        ("system_meta", "0004_rename_sale_succeeded_webhook_url_integratedsystem_webhook_url_and_more"),  # noqa: E501
     ]
 
     operations = [
         migrations.AddField(
-            model_name='integratedsystem',
-            name='payment_process_redirect_url',
+            model_name="integratedsystem",
+            name="payment_process_redirect_url",
             field=models.URLField(blank=True, default=''),
         ),
     ]

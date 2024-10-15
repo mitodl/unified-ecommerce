@@ -234,14 +234,17 @@ class CheckoutCallbackView(View):
 
     def _get_payment_process_redirect_url_from_line_items(self, request):
         """
-        Returns the payment process redirect URL from the line item added most recently to the order.
+        Returns the payment process redirect URL
+        from the line item added most recently to the order.
 
         Args:
-            request: Callback request from Cybersource after completing the payment process.
+            request: Callback request from Cybersource
+            after completing the payment process.
 
         Returns:
-            URLField: The Line item's payment process redirect URL from the line item added most recently to the order.
-        """
+            URLField: The Line item's payment process
+            redirect URL from the line item added most recently to the order.
+        """  # noqa: D401
         order = api.get_order_from_cybersource_payment_response(request)
         return order.lines.last().product.system.payment_process_redirect_url
 
