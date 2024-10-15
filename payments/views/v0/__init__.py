@@ -233,6 +233,19 @@ class CheckoutCallbackView(View):
     things via the backoffice webhook.
     """
 
+    def _get_payment_process_redirect_url_from_line_items(self, request):
+        """
+        Returns the payment process redirect URL from the line item added most recently to the order.
+
+        Args:
+            request: Callback request from Cybersource after completing the payment process.
+
+        Returns:
+            URLField: The Line item's payment process redirect URL from the line item added most recently to the order.
+        """
+        order = api.get_order_from_cybersource_payment_response(request)
+        return order.lines.last().product.system.payment_process_redirect_url
+
     def post_checkout_redirect(self, order_state, request):
         """
         Redirect the user with a message depending on the provided state.
@@ -246,19 +259,19 @@ class CheckoutCallbackView(View):
         """
         if order_state == Order.STATE.CANCELED:
             return redirect_with_user_message(
-                reverse("cart"), {"type": USER_MSG_TYPE_PAYMENT_CANCELLED}
+                self._get_payment_process_redirect_url_from_line_items(request), {"type": USER_MSG_TYPE_PAYMENT_CANCELLED}
             )
         elif order_state == Order.STATE.ERRORED:
             return redirect_with_user_message(
-                reverse("cart"), {"type": USER_MSG_TYPE_PAYMENT_ERROR}
+                self._get_payment_process_redirect_url_from_line_items(request), {"type": USER_MSG_TYPE_PAYMENT_ERROR}
             )
         elif order_state == Order.STATE.DECLINED:
             return redirect_with_user_message(
-                reverse("cart"), {"type": USER_MSG_TYPE_PAYMENT_DECLINED}
+                self._get_payment_process_redirect_url_from_line_items(request), {"type": USER_MSG_TYPE_PAYMENT_DECLINED}
             )
         elif order_state == Order.STATE.FULFILLED:
             return redirect_with_user_message(
-                reverse("cart"),
+                self._get_payment_process_redirect_url_from_line_items(request),
                 {
                     "type": USER_MSG_TYPE_PAYMENT_ACCEPTED,
                 },
@@ -284,7 +297,7 @@ class CheckoutCallbackView(View):
                 processor_response,
             )
             return redirect_with_user_message(
-                reverse("cart"),
+                self._get_payment_process_redirect_url_from_line_items(request),
                 {"type": USER_MSG_TYPE_PAYMENT_ERROR_UNKNOWN},
             )
 
