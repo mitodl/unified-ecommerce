@@ -91,7 +91,7 @@ def generate_checkout_payload(request):
                 ),
             }
 
-    callback_uri = request.build_absolute_uri(reverse("checkout-result-callback"))
+    callback_uri = request.build_absolute_uri(reverse("v0:checkout-result-callback"))
 
     log.debug("Gateway order for %s: %s", order.reference_number, gateway_order)
 
