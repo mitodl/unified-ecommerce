@@ -35,6 +35,7 @@ class Basket(TimestampedModel):
     integrated_system = models.ForeignKey(
         IntegratedSystem, on_delete=models.CASCADE, related_name="basket"
     )
+
     def compare_to_order(self, order):
         """
         Compare this basket with the specified order. An order is considered
@@ -68,9 +69,9 @@ class Basket(TimestampedModel):
         system (IntegratedSystem): The system to associate with the basket.
         """
         user = request.user
-        (basket, is_new) = Basket.objects.filter(user=user, integrated_system=integrated_system).get_or_create(
-            defaults={"user": user, "integrated_system": integrated_system}
-        )
+        (basket, is_new) = Basket.objects.filter(
+            user=user, integrated_system=integrated_system
+        ).get_or_create(defaults={"user": user, "integrated_system": integrated_system})
 
         if is_new:
             basket.save()

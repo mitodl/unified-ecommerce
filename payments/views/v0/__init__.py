@@ -188,7 +188,7 @@ def create_basket_from_product(request, system_slug: str, sku: str):
 def clear_basket(request, system_slug: str):
     """
     Clear the basket for the current user.
-    
+
     Args:
         system_slug (str): system slug
 
@@ -235,7 +235,7 @@ class CheckoutApiViewSet(ViewSet):
               ultimately POST to the actual payment processor.
         """
         try:
-            system = IntegratedSystem.objects.get(slug=self.kwargs['system_slug'])
+            system = IntegratedSystem.objects.get(slug=self.kwargs["system_slug"])
             payload = api.generate_checkout_payload(request, system)
         except ObjectDoesNotExist:
             return Response("No basket", status=status.HTTP_406_NOT_ACCEPTABLE)
