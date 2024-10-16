@@ -12,7 +12,7 @@ routes:
     upstream_id: 1
     plugins: {}
     uris:
-    - "/checkout/result/*"
+    - "/api/v0/payments/checkout/result/*"
     - "/static/*"
     - "/api/v0/schema/*"
   - id: 2

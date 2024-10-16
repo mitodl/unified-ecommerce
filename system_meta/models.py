@@ -32,6 +32,7 @@ class IntegratedSystem(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel)
 
     # Webhook URLs
     webhook_url = models.URLField(blank=True, default="")
+    payment_process_redirect_url = models.URLField(blank=True, default="")
 
     objects = SafeDeleteManager()
     all_objects = models.Manager()

@@ -428,7 +428,7 @@ def test_process_cybersource_payment_response(rf, mocker, user, products):
 
     assert order.reference_number == payload["req_reference_number"]
 
-    request = rf.post(reverse("checkout-result-callback"), payload)
+    request = rf.post(reverse("v0:checkout-result-callback"), payload)
 
     # This is checked on the BackofficeCallbackView and CheckoutCallbackView
     # POST endpoints since we expect to receive a response to both from
@@ -467,7 +467,7 @@ def test_process_cybersource_payment_decline_response(
 
     assert order.reference_number == payload["req_reference_number"]
 
-    request = rf.post(reverse("checkout-result-callback"), payload)
+    request = rf.post(reverse("v0:checkout-result-callback"), payload)
 
     # This is checked on the BackofficeCallbackView and CheckoutCallbackView
     # POST endpoints since we expect to receive a response to both from
