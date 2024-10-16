@@ -14,7 +14,7 @@ from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
 from reversion.models import Version
 
-from system_meta.models import Product
+from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce.constants import (
     POST_SALE_SOURCE_REDIRECT,
     TRANSACTION_TYPE_PAYMENT,
@@ -31,8 +31,10 @@ pm = get_plugin_manager()
 class Basket(TimestampedModel):
     """Represents a User's basket."""
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="basket")
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="basket")
+    integrated_system = models.ForeignKey(
+        IntegratedSystem, on_delete=models.CASCADE, related_name="basket"
+    )
     def compare_to_order(self, order):
         """
         Compare this basket with the specified order. An order is considered
@@ -57,7 +59,7 @@ class Basket(TimestampedModel):
         return [item.product for item in self.basket_items.all()]
 
     @staticmethod
-    def establish_basket(request):
+    def establish_basket(request, integrated_system: IntegratedSystem):
         """
         Get or create the user's basket.
 
@@ -66,14 +68,21 @@ class Basket(TimestampedModel):
         system (IntegratedSystem): The system to associate with the basket.
         """
         user = request.user
-        (basket, is_new) = Basket.objects.filter(user=user).get_or_create(
-            defaults={"user": user}
+        (basket, is_new) = Basket.objects.filter(user=user, integrated_system=integrated_system).get_or_create(
+            defaults={"user": user, "integrated_system": integrated_system}
         )
 
         if is_new:
             basket.save()
 
         return basket
+
+    constraints = [
+        models.UniqueConstraint(
+            fields=["user", "integrated_system"],
+            name="unique_user_integrated_system",
+        ),
+    ]
 
 
 class BasketItem(TimestampedModel):

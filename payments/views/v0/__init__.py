@@ -151,7 +151,7 @@ def create_basket_from_product(request, system_slug: str, sku: str):
         Response: HTTP response
     """
     system = IntegratedSystem.objects.get(slug=system_slug)
-    basket = Basket.establish_basket(request)
+    basket = Basket.establish_basket(request, system)
     quantity = request.data.get("quantity", 1)
     checkout = request.data.get("checkout", False)
 
@@ -168,7 +168,7 @@ def create_basket_from_product(request, system_slug: str, sku: str):
     basket.refresh_from_db()
 
     if checkout:
-        return redirect("checkout_interstitial_page")
+        return redirect("checkout_interstitial_page", system_slug=system.slug)
 
     return Response(
         BasketSerializer(basket).data,
@@ -185,14 +185,18 @@ def create_basket_from_product(request, system_slug: str, sku: str):
 )
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
-def clear_basket(request):
+def clear_basket(request, system_slug: str):
     """
     Clear the basket for the current user.
+    
+    Args:
+        system_slug (str): system slug
 
     Returns:
         Response: HTTP response
     """
-    basket = Basket.establish_basket(request)
+    system = IntegratedSystem.objects.get(slug=system_slug)
+    basket = Basket.establish_basket(request, system)
 
     basket.delete()
 
@@ -231,7 +235,8 @@ class CheckoutApiViewSet(ViewSet):
               ultimately POST to the actual payment processor.
         """
         try:
-            payload = api.generate_checkout_payload(request)
+            system = IntegratedSystem.objects.get(slug=self.kwargs['system_slug'])
+            payload = api.generate_checkout_payload(request, system)
         except ObjectDoesNotExist:
             return Response("No basket", status=status.HTTP_406_NOT_ACCEPTABLE)
 
