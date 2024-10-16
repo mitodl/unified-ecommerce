@@ -81,7 +81,7 @@ class BasketItemViewSet(
         Returns:
             QuerySet: all basket items for the authenticated user
         """
-        return BasketItem.objects.filter(basket__user=self.request.user)
+        return Basket.establish_basket(self.request).basket_items.all()
 
     def create(self, request):
         """
