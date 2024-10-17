@@ -7,6 +7,46 @@ hookspec = pluggy.HookspecMarker("unified_ecommerce")
 
 
 @hookspec
+def basket_add(basket_id: int, basket_item: int, location: dict):
+    """
+    Complete actions that need to be taken when items are added to the basket.
+
+    When a user adds an item to the basket, we'll want to be able to make some
+    decisions or do some processing. This will usually fall into these categories:
+    - Eligibility: we'll need to make sure the user is allowed to purchase the
+      item in question.
+    - Tax assessment: we'll need to make sure the user is charged tax for the
+      item if they happen to be in a locale that requires us to collect it.
+    - Discount application: we may have a discount code that should apply to the
+      user, system, and item combination being added. If so, we'll need to apply
+      that discount.
+    - Enrollment: some systems automatically grant an enrollment for users when
+      they simply add the item to the basket, so we should alert the system when
+      the item is added. (MITx Online does this - adding to basket should
+      automatically create an audit enrollment in the course/program.)
+
+    Args:
+    basket_id (int): the ID of the basket the item is being added to
+    basket_item (int): the ID of the item that will be added
+    location (dict): dict of location information for the user
+    """
+
+
+@hookspec
+def pre_sale(basket_id: int, location: dict):
+    """
+    Complete actions that need to be taken before the basket turns into an order.
+
+    This event will fire before the basket is about to be transformed into an
+    order (and sent out for payment). The things we may want to check here should
+    be pretty close to what we'll check when the item is added to the basket.
+
+    Args:
+    basket_id (int): the ID of the basket to process
+    """
+
+
+@hookspec
 def post_sale(order_id, source):
     """
     Trigger post-sale events.
