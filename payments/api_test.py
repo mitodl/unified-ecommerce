@@ -146,7 +146,8 @@ def create_basket(user, products):
     Bootstrap a basket with a product in it for testing the discount
     redemption APIs
     """
-    basket = Basket(user=user)
+    integrated_system = products[0].system
+    basket = Basket(user=user, integrated_system=integrated_system)
     basket.save()
 
     basket_item = BasketItem(
@@ -414,7 +415,7 @@ def test_process_cybersource_payment_response(rf, mocker, user, products):
         return_value=True,
     )
     create_basket(user, products)
-    resp = generate_checkout_payload(generate_mocked_request(user))
+    resp = generate_checkout_payload(generate_mocked_request(user), products[0].system)
 
     payload = resp["payload"]
     payload = {
@@ -453,7 +454,7 @@ def test_process_cybersource_payment_decline_response(
     )
     create_basket(user, products)
 
-    resp = generate_checkout_payload(generate_mocked_request(user))
+    resp = generate_checkout_payload(generate_mocked_request(user), products[0].system)
 
     payload = resp["payload"]
     payload = {

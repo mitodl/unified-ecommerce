@@ -5,7 +5,7 @@ from factory import SubFactory, fuzzy
 from factory.django import DjangoModelFactory
 
 from payments import models
-from system_meta.factories import ProductFactory
+from system_meta.factories import IntegratedSystemFactory, ProductFactory
 from unified_ecommerce.factories import UserFactory
 
 FAKE = faker.Factory.create()
@@ -15,7 +15,7 @@ class BasketFactory(DjangoModelFactory):
     """Factory for Basket"""
 
     user = SubFactory(UserFactory)
-
+    integrated_system = SubFactory(IntegratedSystemFactory)
     class Meta:
         """Meta options for BasketFactory"""
 
