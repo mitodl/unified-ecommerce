@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework_dataclasses.serializers import DataclassSerializer
 
@@ -74,15 +73,7 @@ class BasketItemSerializer(serializers.ModelSerializer):
 class BasketSerializer(serializers.ModelSerializer):
     """Basket model serializer"""
 
-    basket_items = serializers.SerializerMethodField()
-
-    @extend_schema_field(BasketItemSerializer(many=True))
-    def get_basket_items(self, instance: Basket) -> list[BasketItemSerializer]:
-        """Get items in the basket"""
-        return [
-            BasketItemSerializer(instance=basket, context=self.context).data
-            for basket in instance.basket_items.all()
-        ]
+    basket_items = BasketItemSerializer(many=True)
 
     class Meta:
         """Meta options for BasketSerializer"""
@@ -98,11 +89,7 @@ class BasketSerializer(serializers.ModelSerializer):
 class BasketItemWithProductSerializer(serializers.ModelSerializer):
     """Basket item model serializer with product information"""
 
-    product = serializers.SerializerMethodField()
-
-    def get_product(self, instance) -> ProductSerializer:
-        """Get the product associated with the basket item"""
-        return ProductSerializer(instance=instance.product, context=self.context).data
+    product = ProductSerializer()
 
     class Meta:
         """Meta options for BasketItemWithProductSerializer"""
@@ -115,17 +102,8 @@ class BasketItemWithProductSerializer(serializers.ModelSerializer):
 class BasketWithProductSerializer(serializers.ModelSerializer):
     """Basket model serializer with items and products"""
 
-    basket_items = serializers.SerializerMethodField()
+    basket_items = BasketItemWithProductSerializer(many=True)
     total_price = serializers.SerializerMethodField()
-    discounted_price = serializers.SerializerMethodField()
-    discounts = serializers.SerializerMethodField()
-
-    def get_basket_items(self, instance) -> list[BasketItemWithProductSerializer]:
-        """Get the items in the basket"""
-        return [
-            BasketItemWithProductSerializer(instance=basket, context=self.context).data
-            for basket in instance.basket_items.all()
-        ]
 
     def get_total_price(self, instance) -> Decimal:
         """Get the total price for the basket"""
@@ -225,4 +203,3 @@ class OrderHistorySerializer(serializers.ModelSerializer):
             "updated_on",
         ]
         model = Order
-        depth = 1

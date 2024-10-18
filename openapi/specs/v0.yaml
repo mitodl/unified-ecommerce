@@ -307,7 +307,7 @@ paths:
   /api/v0/payments/baskets/:
     get:
       operationId: payments_baskets_list
-      description: API view set for Basket
+      description: Retrives the current user's baskets, one per system.
       parameters:
       - name: limit
         required: false
@@ -328,109 +328,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedBasketList'
+                $ref: '#/components/schemas/PaginatedBasketWithProductList'
           description: ''
-  /api/v0/payments/baskets/{basket}/items/:
+  /api/v0/payments/baskets/{id}/:
     get:
-      operationId: payments_baskets_items_list
-      description: API view set for BasketItem
+      operationId: payments_baskets_retrieve
+      description: Retrieve a basket for the current user.
       parameters:
-      - in: path
-        name: basket
-        schema:
-          type: string
-        required: true
-      - name: limit
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - name: offset
-        required: false
-        in: query
-        description: The initial index from which to return the results.
-        schema:
-          type: integer
-      tags:
-      - payments
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedBasketItemList'
-          description: ''
-    post:
-      operationId: payments_baskets_items_create
-      description: |-
-        Create a new basket item.
-
-        Args:
-            request (HttpRequest): HTTP request
-
-        Returns:
-            Response: HTTP response
-      parameters:
-      - in: path
-        name: basket
-        schema:
-          type: string
-        required: true
-      - in: query
-        name: product
-        schema:
-          type: integer
-      tags:
-      - payments
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BasketItemRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/BasketItemRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/BasketItemRequest'
-        required: true
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BasketItem'
-          description: ''
-  /api/v0/payments/baskets/{basket}/items/{id}/:
-    delete:
-      operationId: payments_baskets_items_destroy
-      description: API view set for BasketItem
-      parameters:
-      - in: path
-        name: basket
-        schema:
-          type: string
-        required: true
       - in: path
         name: id
         schema:
-          type: string
-        required: true
-      tags:
-      - payments
-      responses:
-        '204':
-          description: No response body
-  /api/v0/payments/baskets/{username}/:
-    get:
-      operationId: payments_baskets_retrieve
-      description: API view set for Basket
-      parameters:
-      - in: path
-        name: username
-        schema:
-          type: string
+          type: integer
         required: true
       tags:
       - payments
@@ -439,16 +347,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Basket'
+                $ref: '#/components/schemas/BasketWithProduct'
           description: ''
   /api/v0/payments/baskets/clear/:
     delete:
       operationId: payments_baskets_clear_destroy
-      description: |-
-        Clear the basket for the current user.
-
-        Returns:
-            Response: HTTP response
+      description: Clears the basket for the current user.
       tags:
       - payments
       responses:
@@ -457,24 +361,8 @@ paths:
   /api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/:
     post:
       operationId: payments_baskets_create_from_product_create
-      description: |-
-        Create a new basket item from a product for the currently logged in user. Reuse
-        the existing basket object if it exists.
-
-        If the checkout flag is set in the POST data, then this will create the
-        basket, then immediately flip the user to the checkout interstitial (which
-        then redirects to the payment gateway).
-
-        Args:
-            system_slug (str): system slug
-            sku (str): product slug
-
-        POST Args:
-            quantity (int): quantity of the product to add to the basket (defaults to 1)
-            checkout (bool): redirect to checkout interstitial (defaults to False)
-
-        Returns:
-            Response: HTTP response
+      description: Creates or updates a basket for the current user, adding the selected
+        product.
       parameters:
       - in: path
         name: sku
@@ -490,54 +378,15 @@ paths:
       - payments
       responses:
         '200':
-          description: No response body
-  /api/v0/payments/checkout/callback/:
-    post:
-      operationId: payments_checkout_callback_create
-      description: |-
-        Handle webhook call from the payment gateway when the user has
-        completed a transaction.
-
-        Returns:
-            - HTTP_200_OK if the Order is found.
-
-        Raises:
-            - Http404 if the Order is not found.
-      tags:
-      - payments
-      responses:
-        '200':
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
-                description: Unspecified response body
+                $ref: '#/components/schemas/BasketWithProduct'
           description: ''
-  /api/v0/payments/checkout/start_checkout/:
-    post:
-      operationId: payments_checkout_start_checkout_create
-      description: |-
-        Start the checkout process. This assembles the basket items
-        into an Order with Lines for each item, applies the attached basket
-        discounts, and then calls the payment gateway to prepare for payment.
-
-        This is expected to be called from within the Ecommerce cart app, not
-        from an integrated system.
-
-        Returns:
-            - JSON payload from the ol-django payment gateway app. The payment
-              gateway returns data necessary to construct a form that will
-              ultimately POST to the actual payment processor.
-      tags:
-      - payments
-      responses:
-        '200':
-          description: No response body
   /api/v0/payments/orders/history/:
     get:
       operationId: payments_orders_history_list
-      description: Provides APIs for displaying the users's order history.
+      description: Retrives the current user's completed orders.
       parameters:
       - name: limit
         required: false
@@ -563,12 +412,12 @@ paths:
   /api/v0/payments/orders/history/{id}/:
     get:
       operationId: payments_orders_history_retrieve
-      description: Provides APIs for displaying the users's order history.
+      description: Retrieve a completed order for the current user.
       parameters:
       - in: path
         name: id
         schema:
-          type: string
+          type: integer
         required: true
       tags:
       - payments
@@ -581,9 +430,26 @@ paths:
           description: ''
 components:
   schemas:
-    Basket:
+    BasketItemWithProduct:
       type: object
-      description: Basket model serializer
+      description: Basket item model serializer with product information
+      properties:
+        basket:
+          allOf:
+          - $ref: '#/components/schemas/Nested'
+          readOnly: true
+        product:
+          $ref: '#/components/schemas/Product'
+        id:
+          type: integer
+          readOnly: true
+      required:
+      - basket
+      - id
+      - product
+    BasketWithProduct:
+      type: object
+      description: Basket model serializer with items and products
       properties:
         id:
           type: integer
@@ -591,38 +457,19 @@ components:
         user:
           type: integer
         basket_items:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/BasketItemWithProduct'
+        total_price:
+          type: number
+          format: double
+          description: Get the total price for the basket
           readOnly: true
       required:
       - basket_items
       - id
+      - total_price
       - user
-    BasketItem:
-      type: object
-      description: BasketItem model serializer
-      properties:
-        basket:
-          type: integer
-        product:
-          type: integer
-        id:
-          type: integer
-          readOnly: true
-      required:
-      - basket
-      - id
-      - product
-    BasketItemRequest:
-      type: object
-      description: BasketItem model serializer
-      properties:
-        basket:
-          type: integer
-        product:
-          type: integer
-      required:
-      - basket
-      - product
     IntegratedSystem:
       type: object
       description: Serializer for IntegratedSystem model.
@@ -671,6 +518,7 @@ components:
           minimum: 0
         item_description:
           type: string
+          description: Return the item description
           readOnly: true
         unit_price:
           type: string
@@ -695,62 +543,21 @@ components:
         id:
           type: integer
           readOnly: true
-        password:
-          type: string
-          maxLength: 128
-        last_login:
+        created_on:
           type: string
           format: date-time
-          nullable: true
-        is_superuser:
-          type: boolean
-          title: Superuser status
-          description: Designates that this user has all permissions without explicitly
-            assigning them.
-        username:
-          type: string
-          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
-            only.
-          pattern: ^[\w.@+-]+$
-          maxLength: 150
-        first_name:
-          type: string
-          maxLength: 150
-        last_name:
-          type: string
-          maxLength: 150
-        email:
-          type: string
-          format: email
-          title: Email address
-          maxLength: 254
-        is_staff:
-          type: boolean
-          title: Staff status
-          description: Designates whether the user can log into this admin site.
-        is_active:
-          type: boolean
-          title: Active
-          description: Designates whether this user should be treated as active. Unselect
-            this instead of deleting accounts.
-        date_joined:
+          readOnly: true
+        updated_on:
           type: string
           format: date-time
-        groups:
-          type: array
-          items:
-            type: integer
-          description: The groups this user belongs to. A user will get all permissions
-            granted to each of their groups.
-        user_permissions:
-          type: array
-          items:
-            type: integer
-          description: Specific permissions for this user.
+          readOnly: true
+        user:
+          type: integer
       required:
+      - created_on
       - id
-      - password
-      - username
+      - updated_on
+      - user
     OrderHistory:
       type: object
       description: Serializer for order history.
@@ -764,9 +571,7 @@ components:
           type: string
           maxLength: 255
         purchaser:
-          allOf:
-          - $ref: '#/components/schemas/Nested'
-          readOnly: true
+          type: integer
         total_price_paid:
           type: string
           format: decimal
@@ -790,7 +595,7 @@ components:
       - purchaser
       - total_price_paid
       - updated_on
-    PaginatedBasketItemList:
+    PaginatedBasketWithProductList:
       type: object
       required:
       - count
@@ -812,30 +617,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/BasketItem'
-    PaginatedBasketList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=400&limit=100
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?offset=200&limit=100
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Basket'
+            $ref: '#/components/schemas/BasketWithProduct'
     PaginatedIntegratedSystemList:
       type: object
       required:
