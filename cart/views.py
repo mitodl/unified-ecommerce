@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 
 from payments import api
 from payments.models import Basket
-from system_meta.models import Product
+from system_meta.models import IntegratedSystem, Product
 
 log = logging.getLogger(__name__)
 
@@ -23,9 +23,10 @@ class CartView(LoginRequiredMixin, TemplateView):
     template_name = "cart.html"
     extra_context = {"title": "Cart", "innertitle": "Cart"}
 
-    def get(self, request: HttpRequest) -> HttpResponse:
+    def get(self, request: HttpRequest, system_slug: str) -> HttpResponse:
         """Render the cart page."""
-        basket = Basket.establish_basket(request)
+        system = IntegratedSystem.objects.get(slug=system_slug)
+        basket = Basket.establish_basket(request, system)
         products = Product.objects.all()
 
         if not request.user.is_authenticated:
@@ -57,10 +58,11 @@ class CheckoutInterstitialView(LoginRequiredMixin, TemplateView):
 
     template_name = "checkout_interstitial.html"
 
-    def get(self, request):
+    def get(self, request, system_slug):
         """Render the checkout interstitial page."""
         try:
-            checkout_payload = api.generate_checkout_payload(request)
+            system = IntegratedSystem.objects.get(slug=system_slug)
+            checkout_payload = api.generate_checkout_payload(request, system)
         except ObjectDoesNotExist:
             return HttpResponse("No basket")
         if (

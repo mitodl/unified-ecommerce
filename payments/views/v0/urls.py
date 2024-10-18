@@ -19,7 +19,9 @@ basket_router = router.register(r"baskets", BasketViewSet, basename="basket")
 
 router.register(r"orders/history", OrderHistoryViewSet, basename="orderhistory_api")
 
-router.register(r"checkout", CheckoutApiViewSet, basename="checkout")
+router.register(
+    r"checkout/r'<str:system_slug>'", CheckoutApiViewSet, basename="checkout"
+)
 
 urlpatterns = [
     path(
@@ -28,7 +30,7 @@ urlpatterns = [
         name="create_from_product",
     ),
     path(
-        "baskets/clear/",
+        "baskets/clear/<str:system_slug>/",
         clear_basket,
         name="clear_basket",
     ),
