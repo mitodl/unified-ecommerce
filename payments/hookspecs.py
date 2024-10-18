@@ -7,7 +7,7 @@ hookspec = pluggy.HookspecMarker("unified_ecommerce")
 
 
 @hookspec
-def basket_add(basket_id: int, basket_item: int, location: dict):
+def basket_add(basket_id: int, basket_item: int):
     """
     Complete actions that need to be taken when items are added to the basket.
 
@@ -28,12 +28,11 @@ def basket_add(basket_id: int, basket_item: int, location: dict):
     Args:
     basket_id (int): the ID of the basket the item is being added to
     basket_item (int): the ID of the item that will be added
-    location (dict): dict of location information for the user
     """
 
 
 @hookspec
-def pre_sale(basket_id: int, location: dict):
+def pre_sale(basket_id: int):
     """
     Complete actions that need to be taken before the basket turns into an order.
 
