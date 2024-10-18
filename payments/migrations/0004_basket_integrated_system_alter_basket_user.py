@@ -12,6 +12,10 @@ class Migration(migrations.Migration):
         ("payments", "0003_alter_order_state"),
     ]
 
+    def _delete_existing_baskets(apps, scheme_editor):
+        model = apps.get_model("payments", "basket")
+        model.objects.all().delete()
+
     operations = [
         migrations.AddField(
             model_name="basket",
