@@ -16,6 +16,7 @@ class BasketFactory(DjangoModelFactory):
 
     user = SubFactory(UserFactory)
     integrated_system = SubFactory(IntegratedSystemFactory)
+
     class Meta:
         """Meta options for BasketFactory"""
 
