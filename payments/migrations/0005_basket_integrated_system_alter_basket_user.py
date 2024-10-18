@@ -9,12 +9,8 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("system_meta", "0005_integratedsystem_payment_process_redirect_url"),
-        ("payments", "0003_alter_order_state"),
+        ("payments", "0004_remove_existing_baskets"),
     ]
-
-    def _delete_existing_baskets(apps, scheme_editor):
-        model = apps.get_model("payments", "basket")
-        model.objects.all().delete()
 
     operations = [
         migrations.AddField(
