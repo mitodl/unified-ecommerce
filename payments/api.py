@@ -35,9 +35,9 @@ from unified_ecommerce.utils import redirect_with_user_message
 log = logging.getLogger(__name__)
 
 
-def generate_checkout_payload(request):
+def generate_checkout_payload(request, system):
     """Generate the payload to send to the payment gateway."""
-    basket = Basket.establish_basket(request)
+    basket = Basket.establish_basket(request, system)
 
     # Notes for future implementation: this used to check for
     # * Blocked products (by country)

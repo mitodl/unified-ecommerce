@@ -6,9 +6,9 @@ from cart.views import CartView, CheckoutInterstitialView
 
 urlpatterns = [
     path(
-        "checkout/to_payment",
+        "checkout/to_payment/<str:system_slug>/",
         CheckoutInterstitialView.as_view(),
         name="checkout_interstitial_page",
     ),
-    path("", CartView.as_view(), name="cart"),
+    path("cart/<str:system_slug>/", CartView.as_view(), name="cart"),
 ]
