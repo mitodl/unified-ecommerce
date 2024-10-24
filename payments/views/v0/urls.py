@@ -20,7 +20,7 @@ basket_router = router.register(r"baskets", BasketViewSet, basename="basket")
 router.register(r"orders/history", OrderHistoryViewSet, basename="orderhistory_api")
 
 router.register(
-    r"checkout/r'<str:system_slug>'", CheckoutApiViewSet, basename="checkout"
+    r"checkout/<str:system_slug>", CheckoutApiViewSet, basename="checkout"
 )
 
 urlpatterns = [
