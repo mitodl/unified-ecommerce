@@ -16,7 +16,10 @@ from reversion.models import Version
 
 from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce.constants import (
+    DISCOUNT_TYPES,
+    PAYMENT_TYPES,
     POST_SALE_SOURCE_REDIRECT,
+    REDEMPTION_TYPES,
     TRANSACTION_TYPE_PAYMENT,
     TRANSACTION_TYPE_REFUND,
     TRANSACTION_TYPES,
@@ -618,3 +621,45 @@ class Transaction(TimestampedModel):
         max_length=20,
     )
     reason = models.CharField(max_length=255, blank=True)
+
+class Discount(TimestampedModel):
+    """Discount model"""
+
+    amount = models.DecimalField(
+        decimal_places=5,
+        max_digits=20,
+    )
+    automatic = models.BooleanField(default=False)
+    discount_type = models.CharField(choices=DISCOUNT_TYPES, max_length=30)
+    redemption_type = models.CharField(choices=REDEMPTION_TYPES, max_length=30)
+    payment_type = models.CharField(null=True, choices=PAYMENT_TYPES, max_length=30)  # noqa: DJ001
+    max_redemptions = models.PositiveIntegerField(null=True, default=0)
+    discount_code = models.CharField(max_length=100)
+    activation_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, this discount code will not be redeemable before this date.",
+    )
+    expiration_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, this discount code will not be redeemable after this date.",
+    )
+    is_bulk = models.BooleanField(default=False)
+    integrated_system = models.ForeignKey(
+        IntegratedSystem,
+        on_delete=models.PROTECT,
+        related_name="discounts",
+        blank=False,
+        null=False,
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name="discounts",
+        blank=True,
+        null=True,
+    )
+
+    def __str__(self):
+        return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
