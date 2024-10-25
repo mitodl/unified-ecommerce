@@ -1,10 +1,10 @@
 """Models for payment processing."""
 # ruff: noqa: TD002,TD003,FIX002
 
-from datetime import timezone
 import logging
 import re
 import uuid
+from datetime import timezone
 from decimal import Decimal
 
 from django.conf import settings
@@ -122,13 +122,18 @@ class BasketItem(TimestampedModel):
         if self.basket.discounts.exists():
             applicable_discounts = []
             for discount in self.basket.discounts.all():
-                if (discount.product is None or discount.product == self.product
-                    or discount.integrated_system is not None and
-                    discount.integrated_system == self.basket.integrated_system):
+                if (
+                    discount.product is None
+                    or discount.product == self.product
+                    or discount.integrated_system is not None
+                    and discount.integrated_system == self.basket.integrated_system
+                ):
                     applicable_discounts.append(discount)  # noqa: PERF401
-            return min(applicable_discounts, key=lambda discount: discount.product_price_with_discount(self.product))  # noqa: E501
+            return min(
+                applicable_discounts,
+                key=lambda discount: discount.product_price_with_discount(self.product),
+            )
         return None
-
 
     @cached_property
     def base_price(self):
@@ -411,7 +416,7 @@ class PendingOrder(Order):
         products = basket.get_products()
 
         log.debug("Products to add to order: %s", products)
-        
+
         for discount in basket.discounts.all():
             RedeemedDiscount.objects.create(
                 discount=discount,
@@ -663,6 +668,7 @@ class Transaction(TimestampedModel):
     )
     reason = models.CharField(max_length=255, blank=True)
 
+
 class Discount(TimestampedModel):
     """Discount model"""
 
@@ -711,14 +717,20 @@ class Discount(TimestampedModel):
 
     def is_valid(self, basket):
         """Check if the discount is valid"""
+
         def _discount_product_in_basket():
             return self.product is None or self.product in basket.get_products()
 
         def _discount_user_has_discount():
-            return self.assigned_users is None or basket.user in self.assigned_users.all()
+            return (
+                self.assigned_users is None or basket.user in self.assigned_users.all()
+            )
 
         def _discount_redemption_limit_valid():
-            return self.max_redemptions == 0 or self.redeemed_discounts.count() < self.max_redemptions  # noqa: E501
+            return (
+                self.max_redemptions == 0
+                or self.redeemed_discounts.count() < self.max_redemptions
+            )
 
         def _discount_activation_date_valid():
             now = timezone.now()
@@ -729,12 +741,19 @@ class Discount(TimestampedModel):
             return self.expiration_date is None or now <= self.expiration_date
 
         def _discount_integrated_system_found_in_basket_or_none():
-            return self.integrated_system is None or self.integrated_system == basket.integrated_system  # noqa: E501
+            return (
+                self.integrated_system is None
+                or self.integrated_system == basket.integrated_system
+            )
 
-        return (_discount_product_in_basket() and _discount_user_has_discount() and
-                _discount_redemption_limit_valid() and
-                _discount_activation_date_valid() and _discount_expiration_date_valid()
-                and _discount_integrated_system_found_in_basket_or_none())
+        return (
+            _discount_product_in_basket()
+            and _discount_user_has_discount()
+            and _discount_redemption_limit_valid()
+            and _discount_activation_date_valid()
+            and _discount_expiration_date_valid()
+            and _discount_integrated_system_found_in_basket_or_none()
+        )
 
     def product_price_with_discount(self, product):
         """Return the price of the product with the discount applied"""
@@ -748,8 +767,10 @@ class Discount(TimestampedModel):
     def __str__(self):
         return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
 
+
 class RedeemedDiscount(TimestampedModel):
     """Redeemed Discount model"""
+
     discount = models.ForeignKey(
         Discount, on_delete=models.PROTECT, related_name="redeemed_discounts"
     )
