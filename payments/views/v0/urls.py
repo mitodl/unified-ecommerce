@@ -8,6 +8,7 @@ from payments.views.v0 import (
     CheckoutApiViewSet,
     CheckoutCallbackView,
     OrderHistoryViewSet,
+    add_discount_to_basket,
     clear_basket,
     create_basket_from_product,
 )

@@ -119,14 +119,15 @@ class BasketItem(TimestampedModel):
         # check if the discount is applicable to the product
         # check if the discount is applicable to the the product's integrated system
         # if discount doesn't have product or integrated system, apply it
-
         if self.basket.discounts.exists():
+            applicable_discounts = []
             for discount in self.basket.discounts.all():
                 if (discount.product is None or discount.product == self.product
                     or discount.integrated_system is not None and
                     discount.integrated_system == self.basket.integrated_system):
-                    return self.product.price - discount.amount
-        return self.product.price
+                    applicable_discounts.append(discount)  # noqa: PERF401
+            return min(applicable_discounts, key=lambda discount: discount.product_price_with_discount(self.product))  # noqa: E501
+        return None
 
 
     @cached_property
@@ -314,6 +315,10 @@ class Order(TimestampedModel):
         TODO: add email
         """
 
+    def delete_redeemed_discounts(self):
+        """Delete redeemed discounts"""
+        self.redeemed_discounts.all().delete()
+
 
 class PendingOrder(Order):
     """An order that is pending payment"""
@@ -406,6 +411,13 @@ class PendingOrder(Order):
         products = basket.get_products()
 
         log.debug("Products to add to order: %s", products)
+        
+        for discount in basket.discounts.all():
+            RedeemedDiscount.objects.create(
+                discount=discount,
+                order=cls,
+                user=basket.user,
+            )
 
         return cls._get_or_create(cls, products, basket.user)
 
@@ -500,6 +512,9 @@ class CanceledOrder(Order):
     The state of this can't be altered further.
     """
 
+    def __init__(self):
+        self.delete_redeemed_discounts()
+
     class Meta:
         """Model meta options."""
 
@@ -526,6 +541,9 @@ class DeclinedOrder(Order):
     The state of this can't be altered further.
     """
 
+    def __init__(self):
+        self.delete_redeemed_discounts()
+
     class Meta:
         """Model meta options."""
 
@@ -538,6 +556,9 @@ class ErroredOrder(Order):
 
     The state of this can't be altered further.
     """
+
+    def __init__(self):
+        self.delete_redeemed_discounts()
 
     class Meta:
         """Model meta options."""
@@ -687,33 +708,42 @@ class Discount(TimestampedModel):
         blank=True,
         null=True,
     )
-    
+
     def is_valid(self, basket):
         """Check if the discount is valid"""
         def _discount_product_in_basket():
             return self.product is None or self.product in basket.get_products()
-        
+
         def _discount_user_has_discount():
             return self.assigned_users is None or basket.user in self.assigned_users.all()
-        
+
         def _discount_redemption_limit_valid():
             return self.max_redemptions == 0 or self.redeemed_discounts.count() < self.max_redemptions  # noqa: E501
-        
+
         def _discount_activation_date_valid():
             now = timezone.now()
             return self.activation_date is None or now >= self.activation_date
-        
+
         def _discount_expiration_date_valid():
             now = timezone.now()
             return self.expiration_date is None or now <= self.expiration_date
-        
+
         def _discount_integrated_system_found_in_basket_or_none():
             return self.integrated_system is None or self.integrated_system == basket.integrated_system  # noqa: E501
-        
+
         return (_discount_product_in_basket() and _discount_user_has_discount() and
                 _discount_redemption_limit_valid() and
                 _discount_activation_date_valid() and _discount_expiration_date_valid()
                 and _discount_integrated_system_found_in_basket_or_none())
+
+    def product_price_with_discount(self, product):
+        """Return the price of the product with the discount applied"""
+        if self.redemption_type == DISCOUNT_TYPES.PERCENTAGE:
+            return product.price * (1 - self.amount)
+        if self.redemption_type == DISCOUNT_TYPES.DISCOUNT_TYPE_DOLLARS_OFF:
+            return product.price - self.amount
+        if self.redemption_type == DISCOUNT_TYPES.DISCOUNT_TYPE_FIXED_PRICE:
+            return self.amount
 
     def __str__(self):
         return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
