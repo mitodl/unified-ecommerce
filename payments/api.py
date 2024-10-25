@@ -451,3 +451,16 @@ def apply_discount_to_basket(basket_id, discount_id):
     if discount.is_valid(basket):
         basket = Basket.objects.get(pk=basket_id)
         basket.apply_discount(discount_id)
+
+def get_auto_apply_discounts_for_basket(basket_id):
+    """
+    Get the auto-apply discounts that can be applied to a basket.
+
+    Args:
+        basket_id (int): The ID of the basket to get the auto-apply discounts for.
+
+    Returns:
+        QuerySet: The auto-apply discounts that can be applied to the basket.
+    """
+    basket = Basket.objects.get(pk=basket_id)
+    return Discount.objects.filter(automatic=True).filter(is_valid=True).filter(basket=basket)

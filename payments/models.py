@@ -715,7 +715,7 @@ class Discount(TimestampedModel):
             return self.product is None or self.product in basket.get_products()
 
         def _discount_user_has_discount():
-            return self.assigned_users is None or basket.user in self.assigned_users.all()
+            return self.assigned_users is None or basket.user in self.assigned_users.all()  # noqa: E501
 
         def _discount_redemption_limit_valid():
             return self.max_redemptions == 0 or self.redeemed_discounts.count() < self.max_redemptions  # noqa: E501
