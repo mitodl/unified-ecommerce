@@ -1,6 +1,7 @@
 """Models for payment processing."""
 # ruff: noqa: TD002,TD003,FIX002
 
+from datetime import timezone
 import logging
 import re
 import uuid
@@ -88,6 +89,17 @@ class Basket(TimestampedModel):
         ),
     ]
 
+    def apply_discount(self, discount_id):
+        """
+        Apply a discount to the order.
+
+        Args:
+        - discount (Discount): the discount to apply.
+        """
+        self.discounts.add(Discount.objects.get(pk=discount_id))
+        self.save()
+        return self
+
 
 class BasketItem(TimestampedModel):
     """Represents one or more products in a user's basket."""
@@ -102,12 +114,20 @@ class BasketItem(TimestampedModel):
 
     @cached_property
     def discounted_price(self):
-        """
-        Return the price of the product with discounts.
+        """Return the price of the basket item with applicable discounts."""
+        # Check if discounts exist
+        # check if the discount is applicable to the product
+        # check if the discount is applicable to the the product's integrated system
+        # if discount doesn't have product or integrated system, apply it
 
-        TODO: we don't have discounts yet, so this needs to be filled out when we do.
-        """
-        return self.base_price
+        if self.basket.discounts.exists():
+            for discount in self.basket.discounts.all():
+                if (discount.product is None or discount.product == self.product
+                    or discount.integrated_system is not None and
+                    discount.integrated_system == self.basket.integrated_system):
+                    return self.product.price - discount.amount
+        return self.product.price
+
 
     @cached_property
     def base_price(self):
@@ -650,8 +670,8 @@ class Discount(TimestampedModel):
         IntegratedSystem,
         on_delete=models.PROTECT,
         related_name="discounts",
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
     )
     product = models.ForeignKey(
         Product,
@@ -660,6 +680,57 @@ class Discount(TimestampedModel):
         blank=True,
         null=True,
     )
+    assigned_users = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name="discounts",
+        blank=True,
+        null=True,
+    )
+    
+    def is_valid(self, basket):
+        """Check if the discount is valid"""
+        def _discount_product_in_basket():
+            return self.product is None or self.product in basket.get_products()
+        
+        def _discount_user_has_discount():
+            return self.assigned_users is None or basket.user in self.assigned_users.all()
+        
+        def _discount_redemption_limit_valid():
+            return self.max_redemptions == 0 or self.redeemed_discounts.count() < self.max_redemptions  # noqa: E501
+        
+        def _discount_activation_date_valid():
+            now = timezone.now()
+            return self.activation_date is None or now >= self.activation_date
+        
+        def _discount_expiration_date_valid():
+            now = timezone.now()
+            return self.expiration_date is None or now <= self.expiration_date
+        
+        def _discount_integrated_system_found_in_basket_or_none():
+            return self.integrated_system is None or self.integrated_system == basket.integrated_system  # noqa: E501
+        
+        return (_discount_product_in_basket() and _discount_user_has_discount() and
+                _discount_redemption_limit_valid() and
+                _discount_activation_date_valid() and _discount_expiration_date_valid()
+                and _discount_integrated_system_found_in_basket_or_none())
 
     def __str__(self):
         return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
+
+class RedeemedDiscount(TimestampedModel):
+    """Redeemed Discount model"""
+    discount = models.ForeignKey(
+        Discount, on_delete=models.PROTECT, related_name="redeemed_discounts"
+    )
+    order = models.ForeignKey(
+        Order, on_delete=models.PROTECT, related_name="redeemed_discounts"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="redeemed_discounts",
+    )
+
+    def __str__(self):
+        return f"{self.discount} {self.user}"
