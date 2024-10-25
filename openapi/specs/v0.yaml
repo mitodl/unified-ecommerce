@@ -349,10 +349,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/BasketWithProduct'
           description: ''
-  /api/v0/payments/baskets/clear/:
+  /api/v0/payments/baskets/clear/{system_slug}/:
     delete:
       operationId: payments_baskets_clear_destroy
       description: Clears the basket for the current user.
+      parameters:
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
       tags:
       - payments
       responses:
@@ -553,9 +559,12 @@ components:
           readOnly: true
         user:
           type: integer
+        integrated_system:
+          type: integer
       required:
       - created_on
       - id
+      - integrated_system
       - updated_on
       - user
     OrderHistory:
