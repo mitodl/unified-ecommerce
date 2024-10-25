@@ -35,6 +35,11 @@ urlpatterns = [
         name="clear_basket",
     ),
     path(
+        "baskets/add_discount/<str:system_slug>/",
+        add_discount_to_basket,
+        name="add_discount",
+    ),
+    path(
         "checkout/callback/",
         BackofficeCallbackView.as_view(),
         name="checkout-callback",

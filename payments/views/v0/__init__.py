@@ -28,7 +28,7 @@ from rest_framework.viewsets import (
 )
 
 from payments import api
-from payments.models import Basket, BasketItem, Order
+from payments.models import Basket, BasketItem, Discount, Order
 from payments.serializers.v0 import (
     BasketWithProductSerializer,
     OrderHistorySerializer,
@@ -385,3 +385,49 @@ class OrderHistoryViewSet(ReadOnlyModelViewSet):
             .order_by("-created_on")
             .all()
         )
+
+@extend_schema(
+    description=(
+        "Creates or updates a basket for the current user, "
+        "adding the discount if valid."
+    ),
+    methods=["POST"],
+    request=None,
+    responses=BasketWithProductSerializer,
+)
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def add_discount_to_basket(request, system_slug: str):
+    """
+    Add a discount to the basket for the currently logged in user.
+
+    Args:
+        system_slug (str): system slug
+
+    POST Args:
+        discount_code (str): discount code to apply to the basket
+
+    Returns:
+        Response: HTTP response
+    """
+    system = IntegratedSystem.objects.get(slug=system_slug)
+    basket = Basket.establish_basket(request, system)
+    discount_code = request.data.get("discount_code")
+
+    try:
+        discount_id = Discount.objects.get(code=discount_code).id
+    except Discount.DoesNotExist:
+        return Response(
+            {"error": "Discount not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    try:
+        api.apply_discount_to_basket(basket, discount_id)
+    except ValueError as exc:
+        return Response(
+            {"error": str(exc)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    return Response(BasketWithProductSerializer(basket).data)
