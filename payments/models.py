@@ -5,9 +5,9 @@ import logging
 import re
 import uuid
 from datetime import datetime
-import pytz
 from decimal import Decimal
 
+import pytz
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -130,6 +130,7 @@ class Discount(TimestampedModel):
 
     def __str__(self):
         return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
+
 
 class Basket(TimestampedModel):
     """Represents a User's basket."""
@@ -767,6 +768,7 @@ class Transaction(TimestampedModel):
         max_length=20,
     )
     reason = models.CharField(max_length=255, blank=True)
+
 
 class RedeemedDiscount(TimestampedModel):
     """Redeemed Discount model"""
