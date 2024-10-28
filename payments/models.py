@@ -13,11 +13,13 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.functional import cached_property
+from django_countries.fields import CountryField
 from mitol.common.models import TimestampedModel
 from reversion.models import Version
 
 from payments.utils import product_price_with_discount
 from system_meta.models import IntegratedSystem, Product
+from payments.constants import GEOLOCATION_TYPE_NONE, GEOLOCATION_TYPES
 from unified_ecommerce.constants import (
     DISCOUNT_TYPES,
     PAYMENT_TYPES,
@@ -182,6 +184,21 @@ class Basket(TimestampedModel):
         IntegratedSystem, on_delete=models.CASCADE, related_name="basket"
     )
     discounts = models.ManyToManyField(Discount, related_name="basket")
+    user_ipv6 = models.CharField(
+        blank=True, maxlength=46, help_text="The IPv6 address of the user."
+    )
+    user_ipv4 = models.CharField(
+        blank=True, maxlength=22, help_text="The IPv4 address of the user."
+    )
+    user_country_code = CountryField(
+        help_text="The country code for the user for this basket."
+    )
+    user_geolocation_type = models.CharField(
+        default=GEOLOCATION_TYPE_NONE,
+        choices=GEOLOCATION_TYPES,
+        help_text="How the user's location was determined.",
+        maxlength=15,
+    )
 
     def compare_to_order(self, order):
         """

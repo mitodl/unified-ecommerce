@@ -16,6 +16,7 @@ from django.db import models
 from django.http import HttpResponseRedirect
 from mitol.common.utils.datetime import now_in_utc
 
+from authentication.models import UserProfile
 from unified_ecommerce.constants import USER_MSG_COOKIE_MAX_AGE, USER_MSG_COOKIE_NAME
 
 log = logging.getLogger(__name__)
@@ -334,8 +335,32 @@ def decode_x_header(request, header):
     return json.loads(decoded_x_userinfo)
 
 
-def decode_apisix_headers(request):
-    """Decode the APISIX-specific headers."""
+def decode_apisix_headers(request, model="auth_user"):
+    """
+    Decode the APISIX-specific headers.
+
+    APISIX delivers user information via the X-User-Info header that it
+    attaches to the request. This data can contain an arbitrary amount of
+    information, so this returns just the data that we care about, normalized
+    into a structure we expect (or rather ones that match Django objects).
+
+    This mapping can be adjusted by changing the APISIX_USERDATA_MAP setting.
+    This is a nested dict: the top level is the model that the mapping belongs
+    to, and it is set to a dict of the mappings of model field names to APISIX
+    field names. Model names are in app_model form (like the table name).
+
+    Args:
+    - request (Request): the current HTTP request object
+    - model (string): the model data to retrieve (defaults to "auth_user")
+
+    Returns: dict of applicable data or None if no data
+    """
+
+    if model not in settings.APISIX_USERDATA_MAP:
+        error = "Model %s is invalid"
+        raise ValueError(error, model)
+
+    data_mapping = settings.APISIX_USERDATA_MAP[model]
 
     try:
         apisix_result = decode_x_header(request, "HTTP_X_USERINFO")
@@ -355,10 +380,9 @@ def decode_apisix_headers(request):
     log.debug("decode_apisix_headers: Got %s", apisix_result)
 
     return {
-        "email": apisix_result["email"],
-        "preferred_username": apisix_result["sub"],
-        "given_name": apisix_result["given_name"],
-        "family_name": apisix_result["family_name"],
+        modelKey: apisix_result[data_mapping[modelKey]]
+        for modelKey in data_mapping
+        if data_mapping[modelKey] in apisix_result
     }
 
 
@@ -405,5 +429,19 @@ def get_user_from_apisix_headers(request):
         user.first_name = given_name
         user.last_name = family_name
         user.save()
+
+    profile_data = decode_apisix_headers(request, "authentication_userprofile")
+
+    if profile_data:
+        log.debug(
+            "get_user_from_apisix_headers: Setting up additional profile for %s",
+            preferred_username,
+        )
+
+        _, profile = UserProfile.objects.filter(user=user).get_or_create(
+            defaults=profile_data
+        )
+        profile.save()
+        user.refresh_from_db()
 
     return user

@@ -92,8 +92,10 @@ INSTALLED_APPS = [
     "reversion",
     "oauth2_provider",
     "mitol.mail.apps.MailApp",
+    "django_countries",
     # Application modules
     "unified_ecommerce",
+    "authentication",
     "system_meta",
     "payments",
     "cart",
@@ -465,6 +467,19 @@ if DEBUG:
 DRF_NESTED_PARENT_LOOKUP_PREFIX = get_string("DRF_NESTED_PARENT_LOOKUP_PREFIX", "")
 REST_FRAMEWORK_EXTENSIONS = {
     "DEFAULT_PARENT_LOOKUP_KWARG_NAME_PREFIX": DRF_NESTED_PARENT_LOOKUP_PREFIX
+}
+
+# APISIX middleware settings
+APISIX_USERDATA_MAP = {
+    "auth_user": {
+        "email": "email",
+        "preferred_username": "sub",
+        "given_name": "given_name",
+        "family_name": "family_name",
+    },
+    "authentication_userprofile": {
+        "country_code": None,
+    },
 }
 
 # ecommerce settings
