@@ -185,19 +185,20 @@ class Basket(TimestampedModel):
     )
     discounts = models.ManyToManyField(Discount, related_name="basket")
     user_ipv6 = models.CharField(
-        blank=True, maxlength=46, help_text="The IPv6 address of the user."
+        blank=True, max_length=46, help_text="The IPv6 address of the user."
     )
     user_ipv4 = models.CharField(
-        blank=True, maxlength=22, help_text="The IPv4 address of the user."
+        blank=True, max_length=22, help_text="The IPv4 address of the user."
     )
     user_country_code = CountryField(
-        help_text="The country code for the user for this basket."
+        help_text="The country code for the user for this basket.",
+        blank=True,
     )
     user_geolocation_type = models.CharField(
         default=GEOLOCATION_TYPE_NONE,
-        choices=GEOLOCATION_TYPES,
+        choices=GEOLOCATION_CHOICES,
         help_text="How the user's location was determined.",
-        maxlength=15,
+        max_length=15,
     )
 
     def compare_to_order(self, order):
@@ -354,6 +355,22 @@ class Order(TimestampedModel):
         User,
         on_delete=models.CASCADE,
         related_name="orders",
+    )
+    purchaser_ipv6 = models.CharField(
+        blank=True, max_length=46, help_text="The IPv6 address of the user."
+    )
+    purchaser_ipv4 = models.CharField(
+        blank=True, max_length=22, help_text="The IPv4 address of the user."
+    )
+    purchaser_country_code = CountryField(
+        help_text="The country code for the user for this basket.",
+        blank=True,
+    )
+    purchaser_geolocation_type = models.CharField(
+        default=GEOLOCATION_TYPE_NONE,
+        choices=GEOLOCATION_CHOICES,
+        help_text="How the user's location was determined.",
+        max_length=15,
     )
     total_price_paid = models.DecimalField(
         decimal_places=5,
@@ -882,3 +899,70 @@ class RedeemedDiscount(TimestampedModel):
 
     def __str__(self):
         return f"{self.discount} {self.user}"
+
+
+class BlockedCountry(TimestampedModel):
+    """
+    Represents a country that is blocked from purchasing.
+
+    This can either be for a particular product, or a system-wide block.
+    """
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="blocked_countries",
+        null=True,
+        blank=True,
+        default=None,
+    )
+    country_code = CountryField()
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        """Meta options for the model"""
+
+        verbose_name_plural = "blocked countries"
+        unique_together = ("product", "country_code")
+
+    def __str__(self):
+        """Return model data as a string"""
+
+        return (
+            f"product='{self.product.sku if self.product else 'global'}';"
+            f" country='{self.country_code.name}'"
+        )
+
+
+class TaxRate(TimestampedModel):
+    """
+    Stores tax rates for countries. Generally, this should be a VAT rate, but
+    a text field is supplied to store the name of the tax assessed
+    """
+
+    country_code = CountryField()
+    tax_rate = models.DecimalField(max_digits=6, decimal_places=4, default=0)
+    tax_rate_name = models.CharField(max_length=100, blank=True, default="VAT")
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        """Meta options for the model"""
+
+        constraints = [
+            models.UniqueConstraint(fields=["country_code"], name="unique_country")
+        ]
+
+    def to_dict(self):
+        """Return object data as dict"""
+
+        return {
+            "country_code": self.country_code,
+            "tax_rate": self.tax_rate,
+            "tax_rate_name": self.tax_rate_name,
+            "active": self.active,
+        }
+
+    def __str__(self):
+        """Return model data as a string"""
+
+        return f"{self.tax_rate}% {self.tax_rate_name} for {self.country_code}"
