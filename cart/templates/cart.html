@@ -116,7 +116,7 @@ function add_discount(event) {
     var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
     var pathArray = window.location.pathname.split('/');
     var system_slug = pathArray[2];
-    axios.post(`/api/v0/payments/add_discount/${system_slug}/`, {discount_code: discount_code}, { headers: { "X-CSRFToken": csrfmiddlewaretoken }})
+    axios.post(`/api/v0/payments/baskets/add_discount/${system_slug}/`, {discount_code: discount_code}, { headers: { "X-CSRFToken": csrfmiddlewaretoken }})
         .then(function (response) {
             window.location.reload();
         })

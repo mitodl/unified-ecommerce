@@ -4,7 +4,8 @@
 import logging
 import re
 import uuid
-from datetime import timezone
+from datetime import datetime
+import pytz
 from decimal import Decimal
 
 from django.conf import settings
@@ -32,6 +33,104 @@ log = logging.getLogger(__name__)
 pm = get_plugin_manager()
 
 
+class Discount(TimestampedModel):
+    """Discount model"""
+
+    amount = models.DecimalField(
+        decimal_places=5,
+        max_digits=20,
+    )
+    automatic = models.BooleanField(default=False)
+    discount_type = models.CharField(choices=DISCOUNT_TYPES, max_length=30)
+    redemption_type = models.CharField(choices=REDEMPTION_TYPES, max_length=30)
+    payment_type = models.CharField(null=True, choices=PAYMENT_TYPES, max_length=30)  # noqa: DJ001
+    max_redemptions = models.PositiveIntegerField(null=True, default=0)
+    discount_code = models.CharField(max_length=100)
+    activation_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, this discount code will not be redeemable before this date.",
+    )
+    expiration_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, this discount code will not be redeemable after this date.",
+    )
+    is_bulk = models.BooleanField(default=False)
+    integrated_system = models.ForeignKey(
+        IntegratedSystem,
+        on_delete=models.PROTECT,
+        related_name="discounts",
+        blank=True,
+        null=True,
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name="discounts",
+        blank=True,
+        null=True,
+    )
+    assigned_users = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name="discounts",
+        blank=True,
+        null=True,
+    )
+
+    def is_valid(self, basket):
+        """Check if the discount is valid"""
+
+        def _discount_product_in_basket():
+            return self.product is None or self.product in basket.get_products()
+
+        def _discount_user_has_discount():
+            return (
+                self.assigned_users is None or basket.user in self.assigned_users.all()
+            )
+
+        def _discount_redemption_limit_valid():
+            return (
+                self.max_redemptions == 0
+                or self.redeemed_discounts.count() < self.max_redemptions
+            )
+
+        def _discount_activation_date_valid():
+            now = datetime.now(tz=pytz.timezone(settings.TIME_ZONE))
+            return self.activation_date is None or now >= self.activation_date
+
+        def _discount_expiration_date_valid():
+            now = datetime.now(tz=pytz.timezone(settings.TIME_ZONE))
+            return self.expiration_date is None or now <= self.expiration_date
+
+        def _discount_integrated_system_found_in_basket_or_none():
+            return (
+                self.integrated_system is None
+                or self.integrated_system == basket.integrated_system
+            )
+
+        return (
+            _discount_product_in_basket()
+            and _discount_user_has_discount()
+            and _discount_redemption_limit_valid()
+            and _discount_activation_date_valid()
+            and _discount_expiration_date_valid()
+            and _discount_integrated_system_found_in_basket_or_none()
+        )
+
+    def product_price_with_discount(self, product):
+        """Return the price of the product with the discount applied"""
+        if self.redemption_type == DISCOUNT_TYPES.PERCENTAGE:
+            return product.price * (1 - self.amount)
+        if self.redemption_type == DISCOUNT_TYPES.DISCOUNT_TYPE_DOLLARS_OFF:
+            return product.price - self.amount
+        if self.redemption_type == DISCOUNT_TYPES.DISCOUNT_TYPE_FIXED_PRICE:
+            return self.amount
+
+    def __str__(self):
+        return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
+
 class Basket(TimestampedModel):
     """Represents a User's basket."""
 
@@ -39,6 +138,7 @@ class Basket(TimestampedModel):
     integrated_system = models.ForeignKey(
         IntegratedSystem, on_delete=models.CASCADE, related_name="basket"
     )
+    discounts = models.ManyToManyField(Discount, related_name="basket")
 
     def compare_to_order(self, order):
         """
@@ -667,106 +767,6 @@ class Transaction(TimestampedModel):
         max_length=20,
     )
     reason = models.CharField(max_length=255, blank=True)
-
-
-class Discount(TimestampedModel):
-    """Discount model"""
-
-    amount = models.DecimalField(
-        decimal_places=5,
-        max_digits=20,
-    )
-    automatic = models.BooleanField(default=False)
-    discount_type = models.CharField(choices=DISCOUNT_TYPES, max_length=30)
-    redemption_type = models.CharField(choices=REDEMPTION_TYPES, max_length=30)
-    payment_type = models.CharField(null=True, choices=PAYMENT_TYPES, max_length=30)  # noqa: DJ001
-    max_redemptions = models.PositiveIntegerField(null=True, default=0)
-    discount_code = models.CharField(max_length=100)
-    activation_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="If set, this discount code will not be redeemable before this date.",
-    )
-    expiration_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="If set, this discount code will not be redeemable after this date.",
-    )
-    is_bulk = models.BooleanField(default=False)
-    integrated_system = models.ForeignKey(
-        IntegratedSystem,
-        on_delete=models.PROTECT,
-        related_name="discounts",
-        blank=True,
-        null=True,
-    )
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.PROTECT,
-        related_name="discounts",
-        blank=True,
-        null=True,
-    )
-    assigned_users = models.ForeignKey(
-        User,
-        on_delete=models.PROTECT,
-        related_name="discounts",
-        blank=True,
-        null=True,
-    )
-
-    def is_valid(self, basket):
-        """Check if the discount is valid"""
-
-        def _discount_product_in_basket():
-            return self.product is None or self.product in basket.get_products()
-
-        def _discount_user_has_discount():
-            return (
-                self.assigned_users is None or basket.user in self.assigned_users.all()
-            )
-
-        def _discount_redemption_limit_valid():
-            return (
-                self.max_redemptions == 0
-                or self.redeemed_discounts.count() < self.max_redemptions
-            )
-
-        def _discount_activation_date_valid():
-            now = timezone.now()
-            return self.activation_date is None or now >= self.activation_date
-
-        def _discount_expiration_date_valid():
-            now = timezone.now()
-            return self.expiration_date is None or now <= self.expiration_date
-
-        def _discount_integrated_system_found_in_basket_or_none():
-            return (
-                self.integrated_system is None
-                or self.integrated_system == basket.integrated_system
-            )
-
-        return (
-            _discount_product_in_basket()
-            and _discount_user_has_discount()
-            and _discount_redemption_limit_valid()
-            and _discount_activation_date_valid()
-            and _discount_expiration_date_valid()
-            and _discount_integrated_system_found_in_basket_or_none()
-        )
-
-    def product_price_with_discount(self, product):
-        """Return the price of the product with the discount applied"""
-        if self.redemption_type == DISCOUNT_TYPES.PERCENTAGE:
-            return product.price * (1 - self.amount)
-        if self.redemption_type == DISCOUNT_TYPES.DISCOUNT_TYPE_DOLLARS_OFF:
-            return product.price - self.amount
-        if self.redemption_type == DISCOUNT_TYPES.DISCOUNT_TYPE_FIXED_PRICE:
-            return self.amount
-
-    def __str__(self):
-        return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
-
 
 class RedeemedDiscount(TimestampedModel):
     """Redeemed Discount model"""
