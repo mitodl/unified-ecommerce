@@ -120,11 +120,10 @@ def create_basket_from_product(request, system_slug: str, sku: str):
     (_, created) = BasketItem.objects.update_or_create(
         basket=basket, product=product, defaults={"quantity": quantity}
     )
-    auto_apply_discount_discounts = Discount.objects.filter(automatic=True).filter(
-        is_valid=True
-    )
+    auto_apply_discount_discounts = Discount.objects.filter(automatic=True)
     for discount in auto_apply_discount_discounts:
-        basket.apply_discount(discount)
+        if discount.is_valid(basket):
+            basket.apply_discount(discount)
     basket.refresh_from_db()
 
     if checkout:
@@ -436,4 +435,7 @@ def add_discount_to_basket(request, system_slug: str):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    return Response(BasketWithProductSerializer(basket).data)
+    return Response(
+        BasketWithProductSerializer(basket).data,
+        status=status.HTTP_200_OK,
+    )

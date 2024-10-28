@@ -73,6 +73,17 @@
             </div>
         </form>
     </div>
+    <div class="col-12">
+        <p>Add a discount code to the basket:</p>
+
+        <form method="post" id="discountform">
+            {% csrf_token %}
+            <input name="discount_code" id="discount_code"/>
+            <div class="form-group d-flex align-items-end mt-2">
+                <button type="submit" class="wl-auto btn btn-primary me-2">Add discount</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -100,6 +111,24 @@ function add_to_cart(event) {
     return false;
 }
 
+function add_discount(event) {
+    var discount_code = encodeURIComponent(document.getElementById("discount_code").value);
+    var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
+    var pathArray = window.location.pathname.split('/');
+    var system_slug = pathArray[2];
+    console.log(discount_code);
+    console.log(system_slug);
+    axios.post(`/api/v0/payments/add_discount/${system_slug}/`, {discount_code: discount_code}, { headers: { "X-CSRFToken": csrfmiddlewaretoken }})
+        .then(function (response) {
+            window.location.reload();
+        })
+     .catch(function (error) {
+            alert(error);
+        });
+
+    return false;
+}
+
 function clear_cart(event) {
     event.preventDefault();
 
@@ -117,6 +146,7 @@ function clear_cart(event) {
 }
 
 document.getElementById("cartform").addEventListener("submit", add_to_cart);
+document.getElementById("discountform").addEventListener("submit", add_discount);
 document.getElementById("clear-button").addEventListener("click", clear_cart);
 </script>
 {% endblock body %}
