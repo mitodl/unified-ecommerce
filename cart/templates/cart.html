@@ -21,6 +21,7 @@
                     <th scope="col">Product</th>
                     <th scope="col">Price</th>
                     <th scope="col">Quantity</th>
+                    <th scope="col">Discount code</th>
                     <th scope="col">Total</th>
                 </tr>
             </thead>
@@ -35,6 +36,7 @@
                     <td>{{ item.product }}</td>
                     <td>{{ item.product.price }}</td>
                     <td>{{ item.quantity }}</td>
+                    <td>{{ item.best_discount_for_item_from_basket.discount_code }}</td>
                     <td>{{ item.price }}</td>
                 </tr>
                 {% endfor %}
@@ -83,6 +85,20 @@
                 <button type="submit" class="wl-auto btn btn-primary me-2">Add discount</button>
             </div>
         </form>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Discount codes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for discount in basket.discounts.all %}
+                <tr>
+                    <td>{{ discount }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 

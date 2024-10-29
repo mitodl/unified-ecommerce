@@ -3,7 +3,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("payments", "0003_alter_order_state"),
+        ("payments", "0006_discount_line_discounted_price_redeemeddiscount_and_more"),
     ]
 
     def _populate_existing_line_discount_price(apps, scheme_editor):  # noqa: ARG002, N805
