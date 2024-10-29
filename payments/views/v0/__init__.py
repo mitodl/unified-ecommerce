@@ -419,8 +419,6 @@ def add_discount_to_basket(request, system_slug: str):
     basket = Basket.establish_basket(request, system)
     discount_code = request.data.get("discount_code")
 
-    print("CP")
-    print(discount_code)
     try:
         discount_id = Discount.objects.get(discount_code=discount_code).id
     except Discount.DoesNotExist:

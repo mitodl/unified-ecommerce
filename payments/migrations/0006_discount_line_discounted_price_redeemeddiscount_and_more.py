@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
                     "activation_date",
                     models.DateTimeField(
                         blank=True,
-                        help_text="If set, this discount code will not be redeemable before this date.",
+                        help_text="If set, this discount code will not be redeemable before this date.",  # noqa: E501
                         null=True,
                     ),
                 ),
@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
                     "expiration_date",
                     models.DateTimeField(
                         blank=True,
-                        help_text="If set, this discount code will not be redeemable after this date.",
+                        help_text="If set, this discount code will not be redeemable after this date.",  # noqa: E501
                         null=True,
                     ),
                 ),
