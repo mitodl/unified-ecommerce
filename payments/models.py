@@ -15,6 +15,10 @@ from django.db import models, transaction
 from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
 from reversion.models import Version
+from drf_spectacular.utils import (
+    OpenApiTypes,
+    extend_schema_field,
+)
 
 from payments.utils import product_price_with_discount
 from system_meta.models import IntegratedSystem, Product
@@ -205,6 +209,7 @@ class BasketItem(TimestampedModel):
     )
     quantity = models.PositiveIntegerField(default=1)
 
+    @extend_schema_field(OpenApiTypes.Decimal)
     @cached_property
     def discounted_price(self):
         """Return the price of the basket item with applicable discounts."""
@@ -235,6 +240,7 @@ class BasketItem(TimestampedModel):
                     best_discount_price = discounted_price
         return best_discount
 
+    @extend_schema_field(OpenApiTypes.Decimal)
     @cached_property
     def base_price(self):
         """Return the total price of the basket item without discounts."""
