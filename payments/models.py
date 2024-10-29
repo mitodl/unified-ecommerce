@@ -13,10 +13,6 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.functional import cached_property
-from drf_spectacular.utils import (
-    OpenApiTypes,
-    extend_schema_field,
-)
 from mitol.common.models import TimestampedModel
 from reversion.models import Version
 
