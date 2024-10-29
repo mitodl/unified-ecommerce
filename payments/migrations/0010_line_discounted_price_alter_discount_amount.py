@@ -4,21 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0009_basket_discounts'),
+        ("payments", "0009_basket_discounts"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='line',
-            name='discounted_price',
+            model_name="line",
+            name="discounted_price",
             field=models.DecimalField(decimal_places=2, default=0, max_digits=20),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='discount',
-            name='amount',
+            model_name="discount",
+            name="amount",
             field=models.DecimalField(decimal_places=2, max_digits=20),
         ),
     ]
