@@ -5,18 +5,18 @@ import logging
 import re
 import uuid
 from datetime import datetime
-import pytz
 from decimal import Decimal
 
+import pytz
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
-from payments.utils import product_price_with_discount
 from reversion.models import Version
 
+from payments.utils import product_price_with_discount
 from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce.constants import (
     DISCOUNT_TYPES,

@@ -1,5 +1,9 @@
 
-from unified_ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_FIXED_PRICE
+from unified_ecommerce.constants import (
+    DISCOUNT_TYPE_DOLLARS_OFF,
+    DISCOUNT_TYPE_FIXED_PRICE,
+    DISCOUNT_TYPE_PERCENT_OFF,
+)
 
 
 def product_price_with_discount(discount, product):
