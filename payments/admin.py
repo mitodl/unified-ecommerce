@@ -153,3 +153,15 @@ class DiscountAdmin(admin.ModelAdmin):
         "payment_type",
     ]
     list_filter = ["discount_type", "redemption_type", "payment_type"]
+
+@admin.register(models.RedeemedDiscount)
+class RedeemedDiscountAdmin(admin.ModelAdmin):
+    model = models.RedeemedDiscount
+    search_fields = ["discount", "order", "user"]
+    list_display = [
+        "id",
+        "discount",
+        "order",
+        "user",
+    ]
+    list_filter = ["discount", "order", "user"]

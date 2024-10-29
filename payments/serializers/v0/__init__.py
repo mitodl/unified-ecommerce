@@ -95,7 +95,7 @@ class BasketItemWithProductSerializer(serializers.ModelSerializer):
         """Meta options for BasketItemWithProductSerializer"""
 
         model = BasketItem
-        fields = ["basket", "product", "id"]
+        fields = ["basket", "product", "id", "price", "discounted_price"]
         depth = 1
 
 

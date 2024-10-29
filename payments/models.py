@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
+from payments.utils import product_price_with_discount
 from reversion.models import Version
 
 from system_meta.models import IntegratedSystem, Product
@@ -37,7 +38,7 @@ class Discount(TimestampedModel):
     """Discount model"""
 
     amount = models.DecimalField(
-        decimal_places=5,
+        decimal_places=2,
         max_digits=20,
     )
     automatic = models.BooleanField(default=False)
@@ -118,15 +119,6 @@ class Discount(TimestampedModel):
             and _discount_expiration_date_valid()
             and _discount_integrated_system_found_in_basket_or_none()
         )
-
-    def product_price_with_discount(self, product):
-        """Return the price of the product with the discount applied"""
-        if self.redemption_type == DISCOUNT_TYPES.PERCENTAGE:
-            return product.price * (1 - self.amount)
-        if self.redemption_type == DISCOUNT_TYPES.DISCOUNT_TYPE_DOLLARS_OFF:
-            return product.price - self.amount
-        if self.redemption_type == DISCOUNT_TYPES.DISCOUNT_TYPE_FIXED_PRICE:
-            return self.amount
 
     def __str__(self):
         return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
@@ -219,26 +211,39 @@ class BasketItem(TimestampedModel):
         # check if the discount is applicable to the product
         # check if the discount is applicable to the the product's integrated system
         # if discount doesn't have product or integrated system, apply it
-        if self.basket.discounts.exists():
-            applicable_discounts = []
-            for discount in self.basket.discounts.all():
-                if (
-                    discount.product is None
-                    or discount.product == self.product
-                    or discount.integrated_system is not None
-                    and discount.integrated_system == self.basket.integrated_system
-                ):
-                    applicable_discounts.append(discount)  # noqa: PERF401
-            return min(
-                applicable_discounts,
-                key=lambda discount: discount.product_price_with_discount(self.product),
-            )
-        return None
+        price_with_best_discount = self.product.price
+        if self.best_discount_for_item_from_basket:
+            price_with_best_discount = product_price_with_discount(
+                self.best_discount_for_item_from_basket, self.product)
+        return round(price_with_best_discount, 2)
+
+    @cached_property
+    def best_discount_for_item_from_basket(self):
+        """Return the best discount from the basket"""
+        best_discount = None
+        best_discount_price = self.product.price
+        for discount in self.basket.discounts.all():
+            if (
+                (discount.product is None
+                or discount.product == self.product) and
+                (discount.integrated_system is None
+                or discount.integrated_system == self.basket.integrated_system)
+            ):
+                discounted_price = product_price_with_discount(discount, self.product)
+                if best_discount is None or discounted_price < best_discount_price:
+                    best_discount = discount
+                    best_discount_price = discounted_price
+        return best_discount
 
     @cached_property
     def base_price(self):
         """Return the total price of the basket item without discounts."""
         return self.product.price * self.quantity
+
+    @cached_property
+    def price(self):
+        """Return the total price of the basket item with discounts."""
+        return self.discounted_price * self.quantity
 
 
 class Order(TimestampedModel):
@@ -429,7 +434,7 @@ class PendingOrder(Order):
     """An order that is pending payment"""
 
     @transaction.atomic
-    def _get_or_create(self, products: list[Product], user: User):
+    def _get_or_create(self, basket: Basket):
         """
         Return a singleton PendingOrder for the given products and user.
 
@@ -445,6 +450,7 @@ class PendingOrder(Order):
             PendingOrder: the retrieved or created PendingOrder.
         """
         try:
+            products = basket.get_products()
             # Get the details from each Product.
             product_versions = [
                 Version.objects.get_for_object(product).first() for product in products
@@ -455,7 +461,7 @@ class PendingOrder(Order):
             orders = Order.objects.select_for_update().filter(
                 lines__product_version__in=product_versions,
                 state=Order.STATE.PENDING,
-                purchaser=user,
+                purchaser=basket.user,
             )
             # Previously, multiple PendingOrders could be created for a single user
             # for the same product, if multiple exist, grab the first.
@@ -467,7 +473,7 @@ class PendingOrder(Order):
             else:
                 order = Order.objects.create(
                     state=Order.STATE.PENDING,
-                    purchaser=user,
+                    purchaser=basket.user,
                     total_price_paid=0,
                 )
 
@@ -476,14 +482,18 @@ class PendingOrder(Order):
             # Create or get Line for each product.
             # Calculate the Order total based on Lines and discount.
             total = 0
+            used_discounts = []
             for product_version in product_versions:
+                basket_item = basket.basket_items.get(product=product_version.field_dict["id"])
                 line, created = order.lines.get_or_create(
                     order=order,
                     product_version=product_version,
                     defaults={
                         "quantity": 1,
+                        "discounted_price": basket_item.discounted_price,
                     },
                 )
+                used_discounts.append(basket_item.best_discount_for_item_from_basket)
                 total += line.discounted_price
                 log.debug(
                     "%s line %s product %s",
@@ -499,6 +509,11 @@ class PendingOrder(Order):
             order.state = Order.STATE.ERRORED
 
         order.save()
+
+        #delete unused discounts from basket
+        for discount in basket.discounts.all():
+            if discount not in used_discounts:
+                basket.discounts.remove(discount)
 
         return order
 
@@ -516,15 +531,17 @@ class PendingOrder(Order):
         products = basket.get_products()
 
         log.debug("Products to add to order: %s", products)
+        
+        order = cls._get_or_create(cls, basket)
 
         for discount in basket.discounts.all():
             RedeemedDiscount.objects.create(
                 discount=discount,
-                order=cls,
+                order=order,
                 user=basket.user,
             )
 
-        return cls._get_or_create(cls, products, basket.user)
+        return order
 
     @classmethod
     def create_from_product(cls, product: Product, user: User):
@@ -702,6 +719,7 @@ class Line(TimestampedModel):
         on_delete=models.CASCADE,
     )
     quantity = models.PositiveIntegerField()
+    discounted_price = models.DecimalField(decimal_places=2, max_digits=20,)
 
     class Meta:
         """Model meta options."""
@@ -727,11 +745,6 @@ class Line(TimestampedModel):
     def total_price(self) -> Decimal:
         """Return the price of the product"""
         return self.unit_price * self.quantity
-
-    @cached_property
-    def discounted_price(self) -> Decimal:
-        """Return the price of the product with discounts"""
-        return self.total_price
 
     @cached_property
     def product(self) -> Product:
