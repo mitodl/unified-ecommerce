@@ -209,9 +209,8 @@ class BasketItem(TimestampedModel):
     )
     quantity = models.PositiveIntegerField(default=1)
 
-    @extend_schema_field(OpenApiTypes.DECIMAL)
     @cached_property
-    def discounted_price(self):
+    def discounted_price(self) -> Decimal:
         """Return the price of the basket item with applicable discounts."""
         # Check if discounts exist
         # check if the discount is applicable to the product
@@ -240,14 +239,13 @@ class BasketItem(TimestampedModel):
                     best_discount_price = discounted_price
         return best_discount
 
-    @extend_schema_field(OpenApiTypes.DECIMAL)
     @cached_property
     def base_price(self):
         """Return the total price of the basket item without discounts."""
         return self.product.price * self.quantity
 
     @cached_property
-    def price(self):
+    def price(self) -> Decimal:
         """Return the total price of the basket item with discounts."""
         return self.discounted_price * self.quantity
 
