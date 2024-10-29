@@ -5,6 +5,12 @@ from django.db.models import Q
 from ipware import get_client_ip
 from mitol.geoip.api import ip_to_country_code
 
+from authentication.dataclasses import CustomerCalculatedLocation
+from payments.constants import (
+    GEOLOCATION_TYPE_GEOIP,
+    GEOLOCATION_TYPE_NONE,
+    GEOLOCATION_TYPE_PROFILE,
+)
 from payments.models import BlockedCountry, TaxRate
 from unified_ecommerce.constants import (
     FLAGGED_COUNTRY_BLOCKED,
@@ -48,7 +54,9 @@ def get_flagged_countries(flag_type, product=None):
     return qset.values_list("country_code", flat=True).all() if qset else []
 
 
-def determine_user_location(request, flagged_countries=None):
+def determine_user_location(
+    request, flagged_countries=None
+) -> CustomerCalculatedLocation:
     """
     Determine where the user is, based on various details.
 
@@ -71,7 +79,9 @@ def determine_user_location(request, flagged_countries=None):
     - request (Request): the current request
     - flagged_countries (None or list): a list of flagged countries
 
-    Returns: ISO country code (ISO 3166 alpha2)
+    Returns:
+    - CustomerCalculatedLocation:
+        ISO country code (ISO 3166 alpha2) and one of the GEOLOCATION_TYPE constants
     """
 
     if not request.user.is_authenticated:
@@ -83,15 +93,28 @@ def determine_user_location(request, flagged_countries=None):
     )
 
     if settings.MITOL_UE_FORCE_PROFILE_COUNTRY:
-        return profile_code
+        return (profile_code, GEOLOCATION_TYPE_PROFILE)
 
     user_ip, _ = get_client_ip(request)
     geoip_code = ip_to_country_code(user_ip)
 
     if flagged_countries:
         if profile_code in flagged_countries:
-            return profile_code
+            return CustomerCalculatedLocation(
+                profile_code, GEOLOCATION_TYPE_PROFILE, user_ip
+            )
         if geoip_code in flagged_countries:
-            return geoip_code
+            return CustomerCalculatedLocation(
+                geoip_code, GEOLOCATION_TYPE_GEOIP, user_ip
+            )
 
-    return geoip_code if geoip_code else profile_code
+    if profile_code:
+        return (
+            CustomerCalculatedLocation(geoip_code, GEOLOCATION_TYPE_GEOIP, user_ip)
+            if geoip_code
+            else CustomerCalculatedLocation(
+                profile_code, GEOLOCATION_TYPE_PROFILE, user_ip
+            )
+        )
+
+    return CustomerCalculatedLocation(None, GEOLOCATION_TYPE_NONE, user_ip)

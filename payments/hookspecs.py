@@ -2,12 +2,16 @@
 # ruff: noqa: ARG001
 
 import pluggy
+from django.http import HttpRequest
+
+from payments.dataclasses import CustomerLocationMetadata
+from system_meta.models import Product
 
 hookspec = pluggy.HookspecMarker("unified_ecommerce")
 
 
 @hookspec
-def basket_add(basket_id: int, basket_item: int):
+def basket_add(request: HttpRequest, basket_item: Product) -> CustomerLocationMetadata:
     """
     Complete actions that need to be taken when items are added to the basket.
 
@@ -26,8 +30,11 @@ def basket_add(basket_id: int, basket_item: int):
       automatically create an audit enrollment in the course/program.)
 
     Args:
-    basket_id (int): the ID of the basket the item is being added to
-    basket_item (int): the ID of the item that will be added
+    request (HttpRequest): the current request
+    basket_item (Product): the product to add to the basket
+
+    Returns:
+    - CustomerLocationMetadata: the user's location metadata
     """
 
 

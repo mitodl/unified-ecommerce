@@ -102,7 +102,7 @@ def test_determine_user_location(profile_netblock_match, flag_type, with_product
     [flag_factory.create(country_code=FAKE.unique.country_code()) for _ in range(5)]
 
     assert (
-        determine_user_location(request, get_flagged_countries(flag_type))
+        determine_user_location(request, get_flagged_countries(flag_type)).country_code
         == user.profile.country_code
         if profile_netblock_match
         else geoname.country_iso_code
@@ -110,9 +110,9 @@ def test_determine_user_location(profile_netblock_match, flag_type, with_product
 
     flagged_country = flag_factory.create(country_code=country_code)
 
-    assert determine_user_location(request, get_flagged_countries(flag_type)) == str(
-        flagged_country.country_code
-    )
+    assert determine_user_location(
+        request, get_flagged_countries(flag_type)
+    ).country_code == str(flagged_country.country_code)
 
     if with_product:
         # Create a blocked country for the product that doesn't match the user
@@ -121,7 +121,7 @@ def test_determine_user_location(profile_netblock_match, flag_type, with_product
         )
         assert determine_user_location(
             request, get_flagged_countries(flag_type, product)
-        ) != str(flagged_country_product.country_code)
+        ).country_code != str(flagged_country_product.country_code)
 
         # Now, create a blocked country w/ product that does match
         flagged_country_product = flag_factory.create(
@@ -129,7 +129,7 @@ def test_determine_user_location(profile_netblock_match, flag_type, with_product
         )
         assert determine_user_location(
             request, get_flagged_countries(flag_type, product)
-        ) == str(flagged_country_product.country_code)
+        ).country_code == str(flagged_country_product.country_code)
 
 
 def test_determine_user_location_logged_out():

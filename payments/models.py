@@ -184,20 +184,27 @@ class Basket(TimestampedModel):
         IntegratedSystem, on_delete=models.CASCADE, related_name="basket"
     )
     discounts = models.ManyToManyField(Discount, related_name="basket")
-    user_ipv6 = models.CharField(
-        blank=True, max_length=46, help_text="The IPv6 address of the user."
+    user_ip = models.CharField(
+        blank=True, max_length=46, help_text="The IP address of the user."
     )
-    user_ipv4 = models.CharField(
-        blank=True, max_length=22, help_text="The IPv4 address of the user."
-    )
-    user_country_code = CountryField(
-        help_text="The country code for the user for this basket.",
+    user_taxable_country_code = CountryField(
+        help_text="The country code for the user for this basket for tax purposes.",
         blank=True,
     )
-    user_geolocation_type = models.CharField(
+    user_taxable_geolocation_type = models.CharField(
         default=GEOLOCATION_TYPE_NONE,
         choices=GEOLOCATION_CHOICES,
-        help_text="How the user's location was determined.",
+        help_text="How the user's location was determined for tax purposes.",
+        max_length=15,
+    )
+    user_blockable_country_code = CountryField(
+        help_text="The country code for the user for this basket for blocked items.",
+        blank=True,
+    )
+    user_blockable_geolocation_type = models.CharField(
+        default=GEOLOCATION_TYPE_NONE,
+        choices=GEOLOCATION_CHOICES,
+        help_text="How the user's location was determined for blocked items.",
         max_length=15,
     )
 
@@ -223,6 +230,18 @@ class Basket(TimestampedModel):
         """
 
         return [item.product for item in self.basket_items.all()]
+
+    def set_customer_location(self, customer_location):
+        """Ingest a CustomerLocationMetadata object."""
+
+        self.user_ip = customer_location.location_block.ip
+
+        self.user_blockable_country_code = customer_location.location_block.country_code
+        self.user_blockable_geolocation_type = (
+            customer_location.location_block.lookup_type
+        )
+        self.user_taxable_country_code = customer_location.location_tax.country_code
+        self.user_taxable_geolocation_type = customer_location.location_tax.lookup_type
 
     @staticmethod
     def establish_basket(request, integrated_system: IntegratedSystem):
