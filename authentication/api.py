@@ -42,11 +42,10 @@ def get_flagged_countries(flag_type, product=None):
         else:
             qset = qset.filter(product__isnull=True)
 
-        qset = qset.values_list("country_code")
     elif flag_type == FLAGGED_COUNTRY_TAX:
-        qset = TaxRate.objects.filter(active=True).values_list("country_code")
+        qset = TaxRate.objects.filter(active=True)
 
-    return qset.all() if qset else []
+    return qset.values_list("country_code", flat=True).all() if qset else []
 
 
 def determine_user_location(request, flagged_countries=None):
@@ -75,11 +74,13 @@ def determine_user_location(request, flagged_countries=None):
     Returns: ISO country code (ISO 3166 alpha2)
     """
 
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         errmsg = "User is unauthenticated, can't determine location"
         raise ValueError(errmsg)
 
-    profile_code = request.user.user_profile.country_code
+    profile_code = (
+        str(request.user.profile.country_code) if request.user.profile else None
+    )
 
     if settings.MITOL_UE_FORCE_PROFILE_COUNTRY:
         return profile_code

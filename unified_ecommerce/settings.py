@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     "oauth2_provider",
     "mitol.mail.apps.MailApp",
     "django_countries",
+    "mitol.geoip",
     # Application modules
     "unified_ecommerce",
     "authentication",
