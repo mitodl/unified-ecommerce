@@ -215,7 +215,8 @@ class BasketItem(TimestampedModel):
         price_with_best_discount = self.product.price
         if self.best_discount_for_item_from_basket:
             price_with_best_discount = product_price_with_discount(
-                self.best_discount_for_item_from_basket, self.product)
+                self.best_discount_for_item_from_basket, self.product
+            )
         return round(price_with_best_discount, 2)
 
     @cached_property
@@ -224,11 +225,9 @@ class BasketItem(TimestampedModel):
         best_discount = None
         best_discount_price = self.product.price
         for discount in self.basket.discounts.all():
-            if (
-                (discount.product is None
-                or discount.product == self.product) and
-                (discount.integrated_system is None
-                or discount.integrated_system == self.basket.integrated_system)
+            if (discount.product is None or discount.product == self.product) and (
+                discount.integrated_system is None
+                or discount.integrated_system == self.basket.integrated_system
             ):
                 discounted_price = product_price_with_discount(discount, self.product)
                 if best_discount is None or discounted_price < best_discount_price:
@@ -485,7 +484,9 @@ class PendingOrder(Order):
             total = 0
             used_discounts = []
             for product_version in product_versions:
-                basket_item = basket.basket_items.get(product=product_version.field_dict["id"])
+                basket_item = basket.basket_items.get(
+                    product=product_version.field_dict["id"]
+                )
                 line, created = order.lines.get_or_create(
                     order=order,
                     product_version=product_version,
@@ -511,7 +512,7 @@ class PendingOrder(Order):
 
         order.save()
 
-        #delete unused discounts from basket
+        # delete unused discounts from basket
         for discount in basket.discounts.all():
             if discount not in used_discounts:
                 basket.discounts.remove(discount)
@@ -532,7 +533,7 @@ class PendingOrder(Order):
         products = basket.get_products()
 
         log.debug("Products to add to order: %s", products)
-        
+
         order = cls._get_or_create(cls, basket)
 
         for discount in basket.discounts.all():
@@ -720,7 +721,10 @@ class Line(TimestampedModel):
         on_delete=models.CASCADE,
     )
     quantity = models.PositiveIntegerField()
-    discounted_price = models.DecimalField(decimal_places=2, max_digits=20,)
+    discounted_price = models.DecimalField(
+        decimal_places=2,
+        max_digits=20,
+    )
 
     class Meta:
         """Model meta options."""

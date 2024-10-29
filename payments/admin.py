@@ -156,6 +156,7 @@ class DiscountAdmin(admin.ModelAdmin):
     ]
     list_filter = ["discount_type", "redemption_type", "payment_type"]
 
+
 @admin.register(models.RedeemedDiscount)
 class RedeemedDiscountAdmin(admin.ModelAdmin):
     model = models.RedeemedDiscount
