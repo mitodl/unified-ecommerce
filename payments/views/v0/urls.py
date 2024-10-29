@@ -20,9 +20,7 @@ basket_router = router.register(r"baskets", BasketViewSet, basename="basket")
 
 router.register(r"orders/history", OrderHistoryViewSet, basename="orderhistory_api")
 
-router.register(
-    r"checkout/r'<str:system_slug>'", CheckoutApiViewSet, basename="checkout"
-)
+router.register(r"checkout", CheckoutApiViewSet, basename="checkout")
 
 urlpatterns = [
     path(
@@ -45,7 +43,12 @@ urlpatterns = [
         BackofficeCallbackView.as_view(),
         name="checkout-callback",
     ),
-    re_path("^", include(router.urls)),
+    re_path(
+        r"^",
+        include(
+            router.urls,
+        ),
+    ),
     path(
         "checkout/result/",
         CheckoutCallbackView.as_view(),
