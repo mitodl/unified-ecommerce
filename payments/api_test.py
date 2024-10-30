@@ -627,7 +627,11 @@ def test_integrated_system_webhook_multisystem(
         product = ProductFactory.create()
 
     product_version = Version.objects.get_for_object(product).first()
-    LineFactory.create(order=fulfilled_complete_order, product_version=product_version, discounted_price=product_version.field_dict["price"])
+    LineFactory.create(
+        order=fulfilled_complete_order,
+        product_version=product_version,
+        discounted_price=product_version.field_dict["price"],
+    )
 
     mocked_request = mocker.patch("requests.post")
 
