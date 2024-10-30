@@ -120,10 +120,13 @@ def create_basket_from_product(request, system_slug: str, sku: str):
     (_, created) = BasketItem.objects.update_or_create(
         basket=basket, product=product, defaults={"quantity": quantity}
     )
-    auto_apply_discount_discounts = Discount.objects.filter(automatic=True)
+    auto_apply_discount_discounts = api.get_auto_apply_discounts_for_basket(basket.id)
+    print(auto_apply_discount_discounts)
+    print("CP")
     for discount in auto_apply_discount_discounts:
+        print(discount.is_valid(basket))
         if discount.is_valid(basket):
-            basket.apply_discount(discount)
+            basket.apply_discount(discount.id)
     basket.refresh_from_db()
 
     if checkout:

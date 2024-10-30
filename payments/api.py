@@ -10,6 +10,8 @@ from ipware import get_client_ip
 from mitol.payment_gateway.api import CartItem as GatewayCartItem
 from mitol.payment_gateway.api import Order as GatewayOrder
 from mitol.payment_gateway.api import PaymentGateway, ProcessorResponse
+from django.db.models import Q
+
 
 from payments.exceptions import PaymentGatewayError, PaypalRefundError
 from payments.models import (
@@ -466,7 +468,5 @@ def get_auto_apply_discounts_for_basket(basket_id):
     """
     basket = Basket.objects.get(pk=basket_id)
     return (
-        Discount.objects.filter(automatic=True)
-        .filter(is_valid=True)
-        .filter(basket=basket)
+        Discount.objects.filter(Q(product__in=basket.get_products()) | Q(product__isnull=True)).filter(Q(integrated_system=basket.integrated_system) | Q(integrated_system__isnull=True)).filter(Q(assigned_users=basket.user) | Q(assigned_users__isnull=True)).filter(automatic=True)
     )
