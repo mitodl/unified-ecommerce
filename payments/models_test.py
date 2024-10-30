@@ -54,7 +54,9 @@ def test_basket_compare_to_order_line_mismatch(add_or_del, in_basket):
         if add_or_del:
             product_version = ProductVersionFactory.create()
             LineFactory.create(
-                order=order, product_version=ProductVersionFactory.create(), discounted_price=product_version.field_dict["price"]
+                order=order,
+                product_version=ProductVersionFactory.create(),
+                discounted_price=product_version.field_dict["price"],
             )
         else:
             order.lines.first().delete()
