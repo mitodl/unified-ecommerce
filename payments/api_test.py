@@ -108,7 +108,7 @@ def fulfilled_complete_order():
         product = ProductFactory.create()
 
     product_version = Version.objects.get_for_object(product).first()
-    LineFactory.create(order=order, product_version=product_version)
+    LineFactory.create(order=order, product_version=product_version, discounted_price=product_version.field_dict["price"])
 
     return order
 
