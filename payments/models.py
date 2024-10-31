@@ -72,9 +72,8 @@ class Discount(TimestampedModel):
         blank=True,
         null=True,
     )
-    assigned_users = models.ForeignKey(
+    assigned_users = models.ManyToManyField(
         User,
-        on_delete=models.PROTECT,
         related_name="discounts",
         blank=True,
         null=True,
@@ -88,7 +87,7 @@ class Discount(TimestampedModel):
 
         def _discount_user_has_discount():
             return (
-                self.assigned_users is None or basket.user in self.assigned_users.all()
+                self.assigned_users.count() == 0 or self.assigned_users.contains(basket.user)
             )
 
         def _discount_redemption_limit_valid():
