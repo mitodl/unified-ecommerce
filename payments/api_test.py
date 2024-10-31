@@ -668,9 +668,10 @@ def test_integrated_system_webhook_multisystem(
 
     assert mocked_request.call_count == 2
     mocked_request.assert_has_calls(serialized_calls, any_order=True)
-    
+
+
 def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_system(
-    mocker
+    mocker,
 ):
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
@@ -686,10 +687,9 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_
 
     discount = get_auto_apply_discounts_for_basket(basket.id)
     assert discount[0] == auto_discount
-    
-def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product(
-    mocker
-):
+
+
+def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product(mocker):
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
     when it exists for the basket's - basket item - product.
@@ -704,10 +704,9 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product(
 
     discount = get_auto_apply_discounts_for_basket(basket_item.basket.id)
     assert discount[0] == auto_discount
-    
-def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user(
-    mocker
-):
+
+
+def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user(mocker):
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
     when it exists for the basket's user.
@@ -722,9 +721,10 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user(
 
     discount = get_auto_apply_discounts_for_basket(basket.id)
     assert discount[0] == auto_discount
-    
+
+
 def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_user_product_system(
-    mocker
+    mocker,
 ):
     """
     Test that get_auto_apply_discount_for_basket returns multiple auto discount
@@ -752,10 +752,9 @@ def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_us
 
     discount = get_auto_apply_discounts_for_basket(basket_item.basket.id)
     assert discount.count() == 3
-    
-def test_get_auto_apply_discount_for_basket_no_auto_discount_exists(
-    mocker
-):
+
+
+def test_get_auto_apply_discount_for_basket_no_auto_discount_exists(mocker):
     """
     Test that get_auto_apply_discount_for_basket returns the no discount
     when no auto discount exists for the basket.
