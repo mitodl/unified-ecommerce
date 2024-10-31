@@ -42,6 +42,7 @@ def test_basket_compare_to_order_match():
 
     assert basket.compare_to_order(order)
 
+
 def test_redeemed_discounts_created_when_creating_pending_order_from_basket():
     """
     Test that redeemed discounts are created when creating a pending order from a basket.
@@ -57,8 +58,11 @@ def test_redeemed_discounts_created_when_creating_pending_order_from_basket():
     basket.discounts.add(discount)
     order = models.PendingOrder.create_from_basket(basket)
 
-    assert models.RedeemedDiscount.objects.filter(discount=discount, user=basket.user, order=order).exists()
-    
+    assert models.RedeemedDiscount.objects.filter(
+        discount=discount, user=basket.user, order=order
+    ).exists()
+
+
 def test_unused_discounts_do_not_create_redeemed_discounts_when_creating_pending_order_from_basket():
     """
     Test that redeemed discounts are not created when creating a pending order from a basket if the discount is not used.
@@ -81,7 +85,8 @@ def test_unused_discounts_do_not_create_redeemed_discounts_when_creating_pending
 
     assert models.RedeemedDiscount.objects.filter(user=basket.user).count() == 1
     assert basket.discounts.count() == 1
-    
+
+
 def test_only_best_discounts_create_redeemed_discounts_when_creating_pending_order_from_basket():
     """
     Test that only the best discounts result in RedeemedDiscounts when creating a pending order from a basket.
@@ -104,6 +109,7 @@ def test_only_best_discounts_create_redeemed_discounts_when_creating_pending_ord
     order = models.PendingOrder.create_from_basket(basket)
 
     assert models.RedeemedDiscount.objects.filter(user=basket.user).count() == 1
+
 
 @pytest.mark.parametrize(
     ("add_or_del", "in_basket"),
