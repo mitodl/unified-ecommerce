@@ -130,8 +130,7 @@ function add_to_cart(event) {
 function add_discount(event) {
     var discount_code = encodeURIComponent(document.getElementById("discount_code").value);
     var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
-    var pathArray = window.location.pathname.split('/');
-    var system_slug = pathArray[2];
+    var system_slug = "{{ basket.integrated_system.slug }}";
     axios.post(`/api/v0/payments/baskets/add_discount/${system_slug}/`, {discount_code: discount_code}, { headers: { "X-CSRFToken": csrfmiddlewaretoken }})
         .then(function (response) {
             window.location.reload();
@@ -147,8 +146,7 @@ function clear_cart(event) {
     event.preventDefault();
 
     var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
-    var pathArray = window.location.pathname.split('/');
-    var system_slug = pathArray[2];
+    var system_slug = "{{ basket.integrated_system.slug }}";
     axios.delete(`/api/v0/payments/baskets/clear/${system_slug}/`, { headers: { "X-CSRFToken": csrfmiddlewaretoken } })
         .then(function (response) {
             window.location.reload();

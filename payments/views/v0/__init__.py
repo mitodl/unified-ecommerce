@@ -122,8 +122,7 @@ def create_basket_from_product(request, system_slug: str, sku: str):
     )
     auto_apply_discount_discounts = api.get_auto_apply_discounts_for_basket(basket.id)
     for discount in auto_apply_discount_discounts:
-        if discount.is_valid(basket):
-            basket.apply_discount(discount.id)
+        basket.apply_discount_to_basket(discount)
     basket.refresh_from_db()
 
     if checkout:

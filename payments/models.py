@@ -175,23 +175,23 @@ class Basket(TimestampedModel):
 
         return basket
 
+    def apply_discount_to_basket(self, discount):
+        """
+        Apply a discount to a basket.
+
+        Args:
+            discount (Discount): The Discount to apply to the basket.
+        """
+        if discount.is_valid(self):
+            self.discounts.add(discount)
+            self.save()
+
     constraints = [
         models.UniqueConstraint(
             fields=["user", "integrated_system"],
             name="unique_user_integrated_system",
         ),
     ]
-
-    def apply_discount(self, discount_id):
-        """
-        Apply a discount to the order.
-
-        Args:
-        - discount (Discount): the discount to apply.
-        """
-        self.discounts.add(Discount.objects.get(pk=discount_id))
-        self.save()
-        return self
 
 
 class BasketItem(TimestampedModel):

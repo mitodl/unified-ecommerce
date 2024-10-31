@@ -451,8 +451,8 @@ def apply_discount_to_basket(basket_id, discount_id):
     discount = Discount.objects.get(pk=discount_id)
     basket = Basket.objects.get(pk=basket_id)
     if discount.is_valid(basket):
-        basket = Basket.objects.get(pk=basket_id)
-        basket.apply_discount(discount_id)
+        basket.discounts.add(discount)
+        basket.save()
 
 
 def get_auto_apply_discounts_for_basket(basket_id):
