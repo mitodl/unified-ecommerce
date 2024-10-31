@@ -1,4 +1,4 @@
-"""Models for authentication and profiles."""
+"""Models for users and profiles."""
 # ruff: noqa: TD002,TD003,FIX002
 
 import logging

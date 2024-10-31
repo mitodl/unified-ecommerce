@@ -96,7 +96,7 @@ INSTALLED_APPS = [
     "mitol.geoip",
     # Application modules
     "unified_ecommerce",
-    "authentication",
+    "users",
     "system_meta",
     "payments",
     "cart",

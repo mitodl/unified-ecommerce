@@ -1,4 +1,4 @@
-"""Dataclasses for the authentication app."""
+"""Dataclasses for the users app."""
 
 from dataclasses import dataclass
 

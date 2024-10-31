@@ -2,16 +2,12 @@
 # ruff: noqa: ARG001
 
 import pluggy
-from django.http import HttpRequest
-
-from payments.dataclasses import CustomerLocationMetadata
-from system_meta.models import Product
 
 hookspec = pluggy.HookspecMarker("unified_ecommerce")
 
 
 @hookspec
-def basket_add(request: HttpRequest, basket_item: Product) -> CustomerLocationMetadata:
+def basket_add(request, basket, basket_item):
     """
     Complete actions that need to be taken when items are added to the basket.
 
@@ -31,6 +27,7 @@ def basket_add(request: HttpRequest, basket_item: Product) -> CustomerLocationMe
 
     Args:
     request (HttpRequest): the current request
+    basket (Basket): the current basket
     basket_item (Product): the product to add to the basket
 
     Returns:

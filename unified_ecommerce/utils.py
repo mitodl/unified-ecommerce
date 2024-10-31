@@ -16,8 +16,8 @@ from django.db import models
 from django.http import HttpResponseRedirect
 from mitol.common.utils.datetime import now_in_utc
 
-from authentication.models import UserProfile
 from unified_ecommerce.constants import USER_MSG_COOKIE_MAX_AGE, USER_MSG_COOKIE_NAME
+from users.models import UserProfile
 
 log = logging.getLogger(__name__)
 

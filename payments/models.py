@@ -16,6 +16,8 @@ from django.utils.functional import cached_property
 from django_countries.fields import CountryField
 from mitol.common.models import TimestampedModel
 from reversion.models import Version
+from safedelete.managers import SafeDeleteManager
+from safedelete.models import SafeDeleteModel
 
 from payments.utils import product_price_with_discount
 from system_meta.models import IntegratedSystem, Product
@@ -30,6 +32,7 @@ from unified_ecommerce.constants import (
     TRANSACTION_TYPES,
 )
 from unified_ecommerce.plugin_manager import get_plugin_manager
+from unified_ecommerce.utils import SoftDeleteActiveModel
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -176,6 +179,77 @@ class Discount(TimestampedModel):
         return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
 
 
+class BlockedCountry(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
+    """
+    Represents a country that is blocked from purchasing.
+
+    This can either be for a particular product, or a system-wide block.
+    """
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="blocked_countries",
+        null=True,
+        blank=True,
+        default=None,
+    )
+    country_code = CountryField()
+
+    objects = SafeDeleteManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        """Meta options for the model"""
+
+        verbose_name_plural = "blocked countries"
+        unique_together = ("product", "country_code")
+
+    def __str__(self):
+        """Return model data as a string"""
+
+        return (
+            f"product='{self.product.sku if self.product else 'global'}';"
+            f" country='{self.country_code.name}'"
+        )
+
+
+class TaxRate(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
+    """
+    Stores tax rates for countries. Generally, this should be a VAT rate, but
+    a text field is supplied to store the name of the tax assessed
+    """
+
+    country_code = CountryField()
+    tax_rate = models.DecimalField(max_digits=6, decimal_places=4, default=0)
+    tax_rate_name = models.CharField(max_length=100, blank=True, default="VAT")
+
+    objects = SafeDeleteManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        """Meta options for the model"""
+
+        constraints = [
+            models.UniqueConstraint(fields=["country_code"], name="unique_country")
+        ]
+
+    def to_dict(self):
+        """Return object data as dict"""
+
+        return {
+            "country_code": self.country_code,
+            "tax_rate": self.tax_rate,
+            "tax_rate_name": self.tax_rate_name,
+            "active": self.active,
+        }
+
+    def __str__(self):
+        """Return model data as a string"""
+
+        return f"{self.tax_rate}% {self.tax_rate_name} for {self.country_code}"
+
+
 class Basket(TimestampedModel):
     """Represents a User's basket."""
 
@@ -206,6 +280,14 @@ class Basket(TimestampedModel):
         choices=GEOLOCATION_CHOICES,
         help_text="How the user's location was determined for blocked items.",
         max_length=15,
+    )
+    tax_rate = models.ForeignKey(
+        TaxRate,
+        on_delete=models.DO_NOTHING,
+        related_name="+",
+        help_text="The tax rate assessed for this basket.",
+        null=True,
+        blank=True,
     )
 
     def compare_to_order(self, order):
@@ -242,6 +324,24 @@ class Basket(TimestampedModel):
         )
         self.user_taxable_country_code = customer_location.location_tax.country_code
         self.user_taxable_geolocation_type = customer_location.location_tax.lookup_type
+
+    @property
+    def subtotal(self):
+        """Return the subtotal amount for the basket."""
+
+        return Decimal(sum([item.discounted_price for item in self.basket_items.all()]))
+
+    @property
+    def tax(self):
+        """Return the aggregate tax for the basket."""
+
+        return Decimal(sum([item.tax for item in self.basket_items.all()]))
+
+    @property
+    def total(self):
+        """Return the total for the basket, including discounts and tax."""
+
+        return Decimal(sum([item.total_price for item in self.basket_items.all()]))
 
     @staticmethod
     def establish_basket(request, integrated_system: IntegratedSystem):
@@ -334,14 +434,35 @@ class BasketItem(TimestampedModel):
         return best_discount
 
     @cached_property
+    def tax(self):
+        """
+        Return the total tax assessed for this basket item.
+
+        This considers the discounted price, not the base price of the item.
+        """
+
+        return (
+            self.discounted_price * self.basket.tax_rate.tax_rate
+            if self.basket.tax_rate
+            else Decimal(0)
+        )
+
+    @cached_property
     def base_price(self):
         """Return the total price of the basket item without discounts."""
         return self.product.price * self.quantity
 
     @cached_property
+<<<<<<< HEAD
     def price(self) -> Decimal:
         """Return the total price of the basket item with discounts."""
         return self.discounted_price * self.quantity
+=======
+    def total_price(self):
+        """Return the total with discounts and assessed tax."""
+
+        return self.discounted_price - self.tax
+>>>>>>> 0e2719a (Fleshing out blocked country/tax hook points)
 
 
 class Order(TimestampedModel):
@@ -375,22 +496,38 @@ class Order(TimestampedModel):
         on_delete=models.CASCADE,
         related_name="orders",
     )
-    purchaser_ipv6 = models.CharField(
-        blank=True, max_length=46, help_text="The IPv6 address of the user."
+    purchaser_ip = models.CharField(
+        blank=True, max_length=46, help_text="The IP address of the user."
     )
-    purchaser_ipv4 = models.CharField(
-        blank=True, max_length=22, help_text="The IPv4 address of the user."
-    )
-    purchaser_country_code = CountryField(
-        help_text="The country code for the user for this basket.",
+    purchaser_taxable_country_code = CountryField(
+        help_text="The country code for the user for this order for tax purposes.",
         blank=True,
     )
-    purchaser_geolocation_type = models.CharField(
+    purchaser_taxable_geolocation_type = models.CharField(
         default=GEOLOCATION_TYPE_NONE,
         choices=GEOLOCATION_CHOICES,
-        help_text="How the user's location was determined.",
+        help_text="How the user's location was determined for tax purposes.",
         max_length=15,
     )
+    purchaser_blockable_country_code = CountryField(
+        help_text="The country code for the user for this order for blocked items.",
+        blank=True,
+    )
+    purchaser_blockable_geolocation_type = models.CharField(
+        default=GEOLOCATION_TYPE_NONE,
+        choices=GEOLOCATION_CHOICES,
+        help_text="How the user's location was determined for blocked items.",
+        max_length=15,
+    )
+    tax_rate = models.ForeignKey(
+        TaxRate,
+        on_delete=models.DO_NOTHING,
+        related_name="+",
+        help_text="The tax rate assessed for this order.",
+        null=True,
+        blank=True,
+    )
+
     total_price_paid = models.DecimalField(
         decimal_places=5,
         max_digits=20,
@@ -918,70 +1055,3 @@ class RedeemedDiscount(TimestampedModel):
 
     def __str__(self):
         return f"{self.discount} {self.user}"
-
-
-class BlockedCountry(TimestampedModel):
-    """
-    Represents a country that is blocked from purchasing.
-
-    This can either be for a particular product, or a system-wide block.
-    """
-
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        related_name="blocked_countries",
-        null=True,
-        blank=True,
-        default=None,
-    )
-    country_code = CountryField()
-    active = models.BooleanField(default=True)
-
-    class Meta:
-        """Meta options for the model"""
-
-        verbose_name_plural = "blocked countries"
-        unique_together = ("product", "country_code")
-
-    def __str__(self):
-        """Return model data as a string"""
-
-        return (
-            f"product='{self.product.sku if self.product else 'global'}';"
-            f" country='{self.country_code.name}'"
-        )
-
-
-class TaxRate(TimestampedModel):
-    """
-    Stores tax rates for countries. Generally, this should be a VAT rate, but
-    a text field is supplied to store the name of the tax assessed
-    """
-
-    country_code = CountryField()
-    tax_rate = models.DecimalField(max_digits=6, decimal_places=4, default=0)
-    tax_rate_name = models.CharField(max_length=100, blank=True, default="VAT")
-    active = models.BooleanField(default=True)
-
-    class Meta:
-        """Meta options for the model"""
-
-        constraints = [
-            models.UniqueConstraint(fields=["country_code"], name="unique_country")
-        ]
-
-    def to_dict(self):
-        """Return object data as dict"""
-
-        return {
-            "country_code": self.country_code,
-            "tax_rate": self.tax_rate,
-            "tax_rate_name": self.tax_rate_name,
-            "active": self.active,
-        }
-
-    def __str__(self):
-        """Return model data as a string"""
-
-        return f"{self.tax_rate}% {self.tax_rate_name} for {self.country_code}"

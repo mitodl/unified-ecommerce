@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from authentication.dataclasses import CustomerCalculatedLocation
+from users.dataclasses import CustomerCalculatedLocation
 
 
 @dataclass

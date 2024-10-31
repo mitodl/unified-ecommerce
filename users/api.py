@@ -1,11 +1,10 @@
-"""API functions for Authentication"""
+"""API functions for users"""
 
 from django.conf import settings
 from django.db.models import Q
 from ipware import get_client_ip
 from mitol.geoip.api import ip_to_country_code
 
-from authentication.dataclasses import CustomerCalculatedLocation
 from payments.constants import (
     GEOLOCATION_TYPE_GEOIP,
     GEOLOCATION_TYPE_NONE,
@@ -17,6 +16,7 @@ from unified_ecommerce.constants import (
     FLAGGED_COUNTRY_TAX,
     FLAGGED_COUNTRY_TYPES,
 )
+from users.dataclasses import CustomerCalculatedLocation
 
 
 def get_flagged_countries(flag_type, product=None):
@@ -41,7 +41,7 @@ def get_flagged_countries(flag_type, product=None):
     qset = None
 
     if flag_type == FLAGGED_COUNTRY_BLOCKED:
-        qset = BlockedCountry.objects.filter(active=True)
+        qset = BlockedCountry.objects
 
         if product:
             qset = qset.filter(Q(product__isnull=True) | Q(product=product))
@@ -49,7 +49,7 @@ def get_flagged_countries(flag_type, product=None):
             qset = qset.filter(product__isnull=True)
 
     elif flag_type == FLAGGED_COUNTRY_TAX:
-        qset = TaxRate.objects.filter(active=True)
+        qset = TaxRate.objects
 
     return qset.values_list("country_code", flat=True).all() if qset else []
 

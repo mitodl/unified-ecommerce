@@ -1,4 +1,4 @@
-"""Tests for the authentication app APIs"""
+"""Tests for the user APIs"""
 
 import ipaddress
 import random
@@ -9,11 +9,11 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
 from mitol.geoip.factories import GeonameFactory, NetBlockIPv4Factory
 
-from authentication.api import determine_user_location, get_flagged_countries
-from authentication.models import UserProfile
 from payments.factories import BlockedCountryFactory, ProductFactory, TaxRateFactory
 from unified_ecommerce.constants import FLAGGED_COUNTRY_BLOCKED, FLAGGED_COUNTRY_TAX
 from unified_ecommerce.factories import UserFactory
+from users.api import determine_user_location, get_flagged_countries
+from users.models import UserProfile
 
 pytestmark = [pytest.mark.django_db]
 FAKE = faker.Faker()

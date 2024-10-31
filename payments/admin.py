@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.admin.decorators import display
 from mitol.common.admin import TimestampedModelAdmin
 from reversion.admin import VersionAdmin
+from safedelete.admin import SafeDeleteAdmin
 
 from payments import models
 
@@ -168,3 +169,17 @@ class RedeemedDiscountAdmin(admin.ModelAdmin):
         "user",
     ]
     list_filter = ["discount", "order", "user"]
+
+
+@admin.register(models.BlockedCountry)
+class BlockedCountryAdmin(SafeDeleteAdmin):
+    """Admin for BlockedCountry"""
+
+    model = models.BlockedCountry
+
+
+@admin.register(models.TaxRate)
+class TaxRateAdmin(SafeDeleteAdmin):
+    """Admin for TaxRate"""
+
+    model = models.TaxRate
