@@ -671,7 +671,6 @@ def test_integrated_system_webhook_multisystem(
 
 
 def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_system(
-    mocker,
 ):
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
@@ -689,7 +688,7 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_
     assert discount[0] == auto_discount
 
 
-def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product(mocker):
+def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product():
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
     when it exists for the basket's - basket item - product.
@@ -706,7 +705,7 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product(moc
     assert discount[0] == auto_discount
 
 
-def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user(mocker):
+def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user():
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
     when it exists for the basket's user.
@@ -724,26 +723,25 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user(mocker
 
 
 def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_user_product_system(
-    mocker,
 ):
     """
     Test that get_auto_apply_discount_for_basket returns multiple auto discount
     when they exist for the basket's - basket item - product, basket's user, and basket's integrated system.
     """
     basket_item = BasketItemFactory.create()
-    auto_discount_1 = Discount.objects.create(
+    Discount.objects.create(
         automatic=True,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
         assigned_users=basket_item.basket.user,
     )
-    auto_discount_2 = Discount.objects.create(
+    Discount.objects.create(
         automatic=True,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
         integrated_system=basket_item.basket.integrated_system,
     )
-    auto_discount_3 = Discount.objects.create(
+    Discount.objects.create(
         automatic=True,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
@@ -754,25 +752,25 @@ def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_us
     assert discount.count() == 3
 
 
-def test_get_auto_apply_discount_for_basket_no_auto_discount_exists(mocker):
+def test_get_auto_apply_discount_for_basket_no_auto_discount_exists():
     """
     Test that get_auto_apply_discount_for_basket returns the no discount
     when no auto discount exists for the basket.
     """
     basket_item = BasketItemFactory.create()
-    auto_discount_1 = Discount.objects.create(
+    Discount.objects.create(
         automatic=False,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
         assigned_users=basket_item.basket.user,
     )
-    auto_discount_2 = Discount.objects.create(
+    Discount.objects.create(
         automatic=False,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
         integrated_system=basket_item.basket.integrated_system,
     )
-    auto_discount_3 = Discount.objects.create(
+    Discount.objects.create(
         automatic=False,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
