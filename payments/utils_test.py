@@ -10,7 +10,11 @@ from unified_ecommerce.constants import (
 
 pytestmark = [pytest.mark.django_db]
 
-@pytest.mark.parametrize("discount_type", [DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_FIXED_PRICE])
+
+@pytest.mark.parametrize(
+    "discount_type",
+    [DISCOUNT_TYPE_PERCENT_OFF, DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_FIXED_PRICE],
+)
 def test_product_price_with_discount(discount_type):
     """
     Test that the product price with discount is calculated correctly.
