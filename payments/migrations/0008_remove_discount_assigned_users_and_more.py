@@ -5,20 +5,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('payments', '0007_populate_line_discount_price'),
+        ("payments", "0007_populate_line_discount_price"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='discount',
-            name='assigned_users',
+            model_name="discount",
+            name="assigned_users",
         ),
         migrations.AddField(
-            model_name='discount',
-            name='assigned_users',
-            field=models.ManyToManyField(blank=True, null=True, related_name='discounts', to=settings.AUTH_USER_MODEL),
+            model_name="discount",
+            name="assigned_users",
+            field=models.ManyToManyField(
+                blank=True,
+                null=True,
+                related_name="discounts",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

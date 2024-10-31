@@ -86,8 +86,8 @@ class Discount(TimestampedModel):
             return self.product is None or self.product in basket.get_products()
 
         def _discount_user_has_discount():
-            return (
-                self.assigned_users.count() == 0 or self.assigned_users.contains(basket.user)
+            return self.assigned_users.count() == 0 or self.assigned_users.contains(
+                basket.user
             )
 
         def _discount_redemption_limit_valid():
