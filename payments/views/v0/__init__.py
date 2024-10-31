@@ -419,7 +419,7 @@ def add_discount_to_basket(request, system_slug: str):
     discount_code = request.data.get("discount_code")
 
     try:
-        discount_id = Discount.objects.get(discount_code=discount_code).id
+        discount = Discount.objects.get(discount_code=discount_code)
     except Discount.DoesNotExist:
         return Response(
             {"error": "Discount not found"},
@@ -427,7 +427,7 @@ def add_discount_to_basket(request, system_slug: str):
         )
 
     try:
-        api.apply_discount_to_basket(basket.id, discount_id)
+        basket.apply_discount_to_basket(discount)
     except ValueError as exc:
         return Response(
             {"error": str(exc)},

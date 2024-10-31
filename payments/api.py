@@ -440,21 +440,6 @@ def process_post_sale_webhooks(order_id, source):
         send_post_sale_webhook.delay(system.id, order.id, source)
 
 
-def apply_discount_to_basket(basket_id, discount_id):
-    """
-    Apply a discount to a basket.
-
-    Args:
-        basket_id (int): The ID of the basket to apply the discount to.
-        discount_id (int): The ID of the discount to apply to the basket.
-    """
-    discount = Discount.objects.get(pk=discount_id)
-    basket = Basket.objects.get(pk=basket_id)
-    if discount.is_valid(basket):
-        basket.discounts.add(discount)
-        basket.save()
-
-
 def get_auto_apply_discounts_for_basket(basket_id):
     """
     Get the auto-apply discounts that can be applied to a basket.
