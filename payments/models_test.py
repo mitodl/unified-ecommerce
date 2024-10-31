@@ -19,6 +19,7 @@ from system_meta.factories import (
     ProductVersionFactory,
 )
 from unified_ecommerce import settings
+from unified_ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF
 from unified_ecommerce.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db]
@@ -247,3 +248,41 @@ def test_discount_with_expiration_date_in_past_is_not_valid_for_basket():
         amount=10,
     )
     assert not discount.is_valid(basket_item.basket)
+    
+def test_discounted_price_for_multiple_discounts_for_product():
+    """Test that the discounted price is calculated correctly."""
+    basket_item = BasketItemFactory.create()
+    basket = BasketFactory.create()
+    basket.basket_items.add(basket_item)
+    discount_1 = models.Discount.objects.create(
+        amount=10,
+        product=basket_item.product,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+    )
+    discount_2 = models.Discount.objects.create(
+        amount=5,
+        product=basket_item.product,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+    )
+    basket.discounts.add(discount_1, discount_2)
+    
+    assert basket_item.discounted_price == (basket_item.base_price - discount_1.amount)
+    
+def test_discounted_price_for_multiple_discounts_for_integrated_system():
+    """Test that the discounted price is calculated correctly."""
+    basket_item = BasketItemFactory.create()
+    basket = BasketFactory.create()
+    basket.basket_items.add(basket_item)
+    discount_1 = models.Discount.objects.create(
+        amount=10,
+        integrated_system=basket.integrated_system,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+    )
+    discount_2 = models.Discount.objects.create(
+        amount=5,
+        integrated_system=basket.integrated_system,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+    )
+    basket.discounts.add(discount_1, discount_2)
+    
+    assert basket_item.discounted_price == (basket_item.base_price - discount_1.amount)
