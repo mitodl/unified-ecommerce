@@ -254,7 +254,8 @@ def test_discount_with_expiration_date_in_past_is_not_valid_for_basket():
         amount=10,
     )
     assert not discount.is_valid(basket_item.basket)
-    
+
+
 def test_discounted_price_for_multiple_discounts_for_product():
     """Test that the discounted price is calculated correctly."""
     basket_item = BasketItemFactory.create()
@@ -271,9 +272,10 @@ def test_discounted_price_for_multiple_discounts_for_product():
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
     )
     basket.discounts.add(discount_1, discount_2)
-    
+
     assert basket_item.discounted_price == (basket_item.base_price - discount_1.amount)
-    
+
+
 def test_discounted_price_for_multiple_discounts_for_integrated_system():
     """Test that the discounted price is calculated correctly."""
     basket_item = BasketItemFactory.create()
@@ -290,5 +292,5 @@ def test_discounted_price_for_multiple_discounts_for_integrated_system():
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
     )
     basket.discounts.add(discount_1, discount_2)
-    
+
     assert basket_item.discounted_price == (basket_item.base_price - discount_1.amount)
