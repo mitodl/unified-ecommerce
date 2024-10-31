@@ -175,6 +175,7 @@ def test_discount_with_expiration_date_in_future_is_valid_for_basket(is_none):
     )
     assert discount.is_valid(basket_item.basket)
 
+
 def test_discount_with_unmatched_product_value_is_not_valid_for_basket():
     """Test that a discount is not valid for a basket."""
     basket_item = BasketItemFactory.create()
@@ -186,6 +187,7 @@ def test_discount_with_unmatched_product_value_is_not_valid_for_basket():
     )
     assert not discount.is_valid(basket_item.basket)
 
+
 def test_discount_with_unmatched_user_value_is_not_valid_for_basket():
     """Test that a discount is not valid for a basket."""
     basket_item = BasketItemFactory.create()
@@ -196,7 +198,8 @@ def test_discount_with_unmatched_user_value_is_not_valid_for_basket():
     user = UserFactory.create()
     user.discounts.add(discount)
     assert not discount.is_valid(basket_item.basket)
-  
+
+
 def test_discount_with_unmatched_integrated_system_value_is_not_valid_for_basket():
     """Test that a discount is not valid for a basket."""
     basket_item = BasketItemFactory.create()
@@ -207,6 +210,7 @@ def test_discount_with_unmatched_integrated_system_value_is_not_valid_for_basket
         amount=10,
     )
     assert not discount.is_valid(basket_item.basket)
+
 
 def test_discount_with_max_redemptions_is_not_valid_for_basket():
     """Test that a discount is not valid for a basket."""
@@ -225,6 +229,7 @@ def test_discount_with_max_redemptions_is_not_valid_for_basket():
     )
     assert not discount.is_valid(basket_item.basket)
 
+
 def test_discount_with_activation_date_in_future_is_not_valid_for_basket():
     """Test that a discount is not valid for a basket."""
     basket_item = BasketItemFactory.create()
@@ -236,6 +241,7 @@ def test_discount_with_activation_date_in_future_is_not_valid_for_basket():
         amount=10,
     )
     assert not discount.is_valid(basket_item.basket)
+
 
 def test_discount_with_expiration_date_in_past_is_not_valid_for_basket():
     """Test that a discount is not valid for a basket."""
