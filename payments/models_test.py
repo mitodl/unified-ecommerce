@@ -290,7 +290,7 @@ def test_discount_with_max_redemptions_is_not_valid_for_basket():
     )
 
     order = OrderFactory.create(purchaser=basket_item.basket.user)
-    redeemed_discount = models.RedeemedDiscount.objects.create(
+    models.RedeemedDiscount.objects.create(
         discount=discount,
         user=basket_item.basket.user,
         order=order,
