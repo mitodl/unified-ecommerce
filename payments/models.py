@@ -15,6 +15,7 @@ from django.db import models, transaction
 from django.utils.functional import cached_property
 from django_countries.fields import CountryField
 from mitol.common.models import TimestampedModel
+from moneyed import Money
 from reversion.models import Version
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
@@ -25,6 +26,7 @@ from payments.constants import GEOLOCATION_TYPE_NONE, GEOLOCATION_TYPES
 from unified_ecommerce.constants import (
     DISCOUNT_TYPES,
     PAYMENT_TYPES,
+    DEFAULT_CURRENCY,
     POST_SALE_SOURCE_REDIRECT,
     REDEMPTION_TYPES,
     TRANSACTION_TYPE_PAYMENT,
@@ -329,19 +331,30 @@ class Basket(TimestampedModel):
     def subtotal(self):
         """Return the subtotal amount for the basket."""
 
-        return Decimal(sum([item.discounted_price for item in self.basket_items.all()]))
+        return Money(
+            amount=Decimal(
+                sum([item.discounted_price for item in self.basket_items.all()])
+            ),
+            currency=DEFAULT_CURRENCY,
+        )
 
     @property
     def tax(self):
         """Return the aggregate tax for the basket."""
 
-        return Decimal(sum([item.tax for item in self.basket_items.all()]))
+        return Money(
+            amount=Decimal(sum([item.tax for item in self.basket_items.all()])),
+            currency=DEFAULT_CURRENCY,
+        )
 
     @property
     def total(self):
         """Return the total for the basket, including discounts and tax."""
 
-        return Decimal(sum([item.total_price for item in self.basket_items.all()]))
+        return Money(
+            amount=Decimal(sum([item.total_price for item in self.basket_items.all()])),
+            currency=DEFAULT_CURRENCY,
+        )
 
     @staticmethod
     def establish_basket(request, integrated_system: IntegratedSystem):
@@ -434,6 +447,12 @@ class BasketItem(TimestampedModel):
         return best_discount
 
     @cached_property
+    def discounted_price_money(self):
+        """Return the total with discounts and assessed tax, as a Money object."""
+
+        return Money(amount=self.discounted_price, currency=DEFAULT_CURRENCY)
+
+    @cached_property
     def tax(self):
         """
         Return the total tax assessed for this basket item.
@@ -448,21 +467,42 @@ class BasketItem(TimestampedModel):
         )
 
     @cached_property
+    def tax_money(self):
+        """Return the tax amount as a Money object."""
+
+        return Money(amount=self.tax, currency=DEFAULT_CURRENCY)
+
+    @cached_property
     def base_price(self):
         """Return the total price of the basket item without discounts."""
         return self.product.price * self.quantity
 
     @cached_property
 <<<<<<< HEAD
+<<<<<<< HEAD
     def price(self) -> Decimal:
         """Return the total price of the basket item with discounts."""
         return self.discounted_price * self.quantity
 =======
+=======
+    def base_price_money(self):
+        """Return the total with discounts and assessed tax, as a Money object."""
+
+        return Money(amount=self.base_price, currency=DEFAULT_CURRENCY)
+
+    @cached_property
+>>>>>>> 2ca96bc (Fixing some minor issues with the basket_add hook code)
     def total_price(self):
         """Return the total with discounts and assessed tax."""
 
         return self.discounted_price - self.tax
 >>>>>>> 0e2719a (Fleshing out blocked country/tax hook points)
+
+    @cached_property
+    def total_price_money(self):
+        """Return the total with discounts and assessed tax, as a Money object."""
+
+        return Money(amount=self.total_price, currency=DEFAULT_CURRENCY)
 
 
 class Order(TimestampedModel):

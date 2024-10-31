@@ -111,4 +111,5 @@ class CustomerVerificationHooks:
         if taxable_qset.exists():
             taxrate = taxable_qset.first()
             basket.tax_rate = taxrate
+            basket.save()
             log.debug("taxable_check: charging the tax for %s", taxrate)

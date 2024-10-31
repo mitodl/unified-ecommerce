@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.admin.decorators import display
 from mitol.common.admin import TimestampedModelAdmin
 from reversion.admin import VersionAdmin
-from safedelete.admin import SafeDeleteAdmin
+from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
 
 from payments import models
 
@@ -176,6 +176,12 @@ class BlockedCountryAdmin(SafeDeleteAdmin):
     """Admin for BlockedCountry"""
 
     model = models.BlockedCountry
+    list_display = ["country_code", "product"]
+    list_filter = [
+        SafeDeleteAdminFilter,
+        "product",
+        "country_code",
+    ]
 
 
 @admin.register(models.TaxRate)
@@ -183,3 +189,9 @@ class TaxRateAdmin(SafeDeleteAdmin):
     """Admin for TaxRate"""
 
     model = models.TaxRate
+    list_display = ["tax_rate", "tax_rate_name", "country_code"]
+    list_filter = [
+        SafeDeleteAdminFilter,
+        "tax_rate_name",
+        "country_code",
+    ]

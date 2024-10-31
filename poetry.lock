@@ -88,6 +88,20 @@ tests-mypy = ["mypy (>=1.6)", "pytest-mypy-plugins"]
 tests-no-zope = ["attrs[tests-mypy]", "cloudpickle", "hypothesis", "pympler", "pytest (>=4.3.0)", "pytest-xdist[psutil]"]
 
 [[package]]
+name = "babel"
+version = "2.16.0"
+description = "Internationalization utilities"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "babel-2.16.0-py3-none-any.whl", hash = "sha256:368b5b98b37c06b7daf6696391c3240c938b37767d4584413e8438c5c435fa8b"},
+    {file = "babel-2.16.0.tar.gz", hash = "sha256:d1f3554ca26605fe173f3de0c65f750f5a42f924499bf134de6423582298e316"},
+]
+
+[package.extras]
+dev = ["freezegun (>=1.0,<2.0)", "pytest (>=6.0)", "pytest-cov"]
+
+[[package]]
 name = "base36"
 version = "0.1.1"
 description = "Yet another implementation for the positional numeral system using 36 as the radix."
@@ -2812,6 +2826,25 @@ files = [
 tests = ["pytest"]
 
 [[package]]
+name = "py-moneyed"
+version = "3.0"
+description = "Provides Currency and Money classes for use in your Python code."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "py-moneyed-3.0.tar.gz", hash = "sha256:4906f0f02cf2b91edba2e156f2d4e9a78f224059ab8c8fa2ff26230c75d894e8"},
+    {file = "py_moneyed-3.0-py3-none-any.whl", hash = "sha256:9583a14f99c05b46196193d8185206e9b73c8439fc8a5eee9cfc7e733676d9bb"},
+]
+
+[package.dependencies]
+babel = ">=2.8.0"
+typing-extensions = ">=3.7.4.3"
+
+[package.extras]
+tests = ["pytest (>=2.3.0)", "tox (>=1.6.0)"]
+type-tests = ["mypy (>=0.812)", "pytest (>=2.3.0)", "pytest-mypy-plugins"]
+
+[[package]]
 name = "pyasn1"
 version = "0.6.1"
 description = "Pure-Python implementation of ASN.1 types and DER/BER/CER codecs (X.208)"
@@ -4285,4 +4318,4 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11.0"
-content-hash = "e7449767908302a5bc5ef4057fc9fd7b4e0a0921844936a162d17c197ca6eed7"
+content-hash = "43adb5becce2dd425d017965abf2090688b3e3109cae90b51c31610b27acfb19"

@@ -22,6 +22,7 @@
                     <th scope="col">Price</th>
                     <th scope="col">Quantity</th>
                     <th scope="col">Discount code</th>
+                    <th scope="col">Tax</th>
                     <th scope="col">Total</th>
                 </tr>
             </thead>
@@ -34,10 +35,17 @@
                 {% for item in basket_items %}
                 <tr>
                     <td>{{ item.product }}</td>
-                    <td>{{ item.product.price }}</td>
+                    <td>${{ item.product.price }}</td>
                     <td>{{ item.quantity }}</td>
                     <td>{{ item.best_discount_for_item_from_basket.discount_code }}</td>
                     <td>{{ item.price }}</td>
+                    <td>
+                        {% if item.basket.tax_rate %}
+                        ${{ item.tax_money }}
+                        {% else %}
+                        <em>None</em>
+                        {% endif %}
+                    <td>${{ item.total_price_money }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -45,6 +53,8 @@
                 <tr>
                     <td colspan="4">
                         <a href="{% url 'checkout_interstitial_page' system_slug=basket.integrated_system.slug %}" class="btn btn-primary float-end">Check Out</a>
+                    <td colspan="5">
+                        <a href="{% url 'checkout_interstitial_page' %}" class="btn btn-primary float-end">Check Out</a>
                     </td>
                 </tr>
             </tfoot>
