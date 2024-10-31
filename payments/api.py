@@ -11,6 +11,7 @@ from ipware import get_client_ip
 from mitol.payment_gateway.api import CartItem as GatewayCartItem
 from mitol.payment_gateway.api import Order as GatewayOrder
 from mitol.payment_gateway.api import PaymentGateway, ProcessorResponse
+from django.db.models import QuerySet
 
 from payments.exceptions import PaymentGatewayError, PaypalRefundError
 from payments.models import (
@@ -440,7 +441,7 @@ def process_post_sale_webhooks(order_id, source):
         send_post_sale_webhook.delay(system.id, order.id, source)
 
 
-def get_auto_apply_discounts_for_basket(basket_id):
+def get_auto_apply_discounts_for_basket(basket_id: int) -> QuerySet[Discount]:
     """
     Get the auto-apply discounts that can be applied to a basket.
 

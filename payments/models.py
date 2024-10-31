@@ -79,32 +79,75 @@ class Discount(TimestampedModel):
         null=True,
     )
 
-    def is_valid(self, basket):
-        """Check if the discount is valid"""
+    def is_valid(self, basket) -> bool:
+        """
+        Check if the discount is valid for the basket.
 
-        def _discount_product_in_basket():
+        Args:
+            basket (Basket): The basket to check the discount against.
+        Returns:
+            bool: True if the discount is valid for the basket, False otherwise.
+
+        """
+
+        def _discount_product_in_basket() -> bool:
+            """
+            Check if the discount is associated to the product in the basket.
+
+            Returns:
+                bool: True if the discount is associated to the product in the basket, or not associated with any product.
+            """
             return self.product is None or self.product in basket.get_products()
 
-        def _discount_user_has_discount():
+        def _discount_user_has_discount() -> bool:
+            """
+            Check if the discount is associated with the basket's user.
+
+            Returns:
+                bool: True if the discount is associated with the basket's user, or not associated with any user.
+            """
             return self.assigned_users.count() == 0 or self.assigned_users.contains(
                 basket.user
             )
 
-        def _discount_redemption_limit_valid():
+        def _discount_redemption_limit_valid() -> bool:
+            """
+            Check if the discount has been redeemed less than the maximum number of times.
+
+            Returns:
+                bool: True if the discount has been redeemed less than the maximum number of times, or the maximum number of redemptions is 0.
+            """
             return (
                 self.max_redemptions == 0
                 or self.redeemed_discounts.count() < self.max_redemptions
             )
 
-        def _discount_activation_date_valid():
+        def _discount_activation_date_valid() -> bool:
+            """
+            Check if the discount's activation date is in the past.
+
+            Returns:
+                bool: True if the discount's activation date is in the past, or the activation date is None.
+            """
             now = datetime.now(tz=pytz.timezone(settings.TIME_ZONE))
             return self.activation_date is None or now >= self.activation_date
 
-        def _discount_expiration_date_valid():
+        def _discount_expiration_date_valid() -> bool:
+            """
+            Check if the discount's expiration date is in the future.
+
+            Returns:
+                bool: True if the discount's expiration date is in the future, or the expiration date is None.
+            """
             now = datetime.now(tz=pytz.timezone(settings.TIME_ZONE))
             return self.expiration_date is None or now <= self.expiration_date
 
-        def _discount_integrated_system_found_in_basket_or_none():
+        def _discount_integrated_system_found_in_basket_or_none() -> bool:
+            """
+            Check if the discount's integrated system is the same as the basket's integrated system.
+            Returns:
+                bool: True if the discount's integrated system is the same as the basket's integrated system, or the discount's integrated system is None.
+            """
             return (
                 self.integrated_system is None
                 or self.integrated_system == basket.integrated_system
@@ -174,7 +217,7 @@ class Basket(TimestampedModel):
 
         return basket
 
-    def apply_discount_to_basket(self, discount):
+    def apply_discount_to_basket(self, discount: Discount):
         """
         Apply a discount to a basket.
 
@@ -206,7 +249,12 @@ class BasketItem(TimestampedModel):
 
     @cached_property
     def discounted_price(self) -> Decimal:
-        """Return the price of the basket item with applicable discounts."""
+        """
+            Get the price of the basket item with applicable discounts.
+
+            Returns:
+                Decimal: The price of the basket item reduced by an applicable discount.
+        """
         # Check if discounts exist
         # check if the discount is applicable to the product
         # check if the discount is applicable to the the product's integrated system
@@ -219,8 +267,13 @@ class BasketItem(TimestampedModel):
         return round(price_with_best_discount, 2)
 
     @cached_property
-    def best_discount_for_item_from_basket(self):
-        """Return the best discount from the basket"""
+    def best_discount_for_item_from_basket(self) -> Discount:
+        """
+            Get the best discount from the basket
+            
+            Returns:
+                Discount: The best discount, associated with the basket, for the basket item.
+        """
         best_discount = None
         best_discount_price = self.product.price
         for discount in self.basket.discounts.all():
