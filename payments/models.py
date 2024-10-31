@@ -250,10 +250,10 @@ class BasketItem(TimestampedModel):
     @cached_property
     def discounted_price(self) -> Decimal:
         """
-            Get the price of the basket item with applicable discounts.
+        Get the price of the basket item with applicable discounts.
 
-            Returns:
-                Decimal: The price of the basket item reduced by an applicable discount.
+        Returns:
+            Decimal: The price of the basket item reduced by an applicable discount.
         """
         # Check if discounts exist
         # check if the discount is applicable to the product
@@ -269,10 +269,10 @@ class BasketItem(TimestampedModel):
     @cached_property
     def best_discount_for_item_from_basket(self) -> Discount:
         """
-            Get the best discount from the basket
-            
-            Returns:
-                Discount: The best discount, associated with the basket, for the basket item.
+        Get the best discount from the basket
+
+        Returns:
+            Discount: The best discount, associated with the basket, for the basket item.
         """
         best_discount = None
         best_discount_price = self.product.price
