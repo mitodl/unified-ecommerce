@@ -81,7 +81,7 @@ def test_unused_discounts_do_not_create_redeemed_discounts_when_creating_pending
         product=unused_product,
     )
     basket.discounts.add(discount_used, discount_not_used)
-    order = models.PendingOrder.create_from_basket(basket)
+    models.PendingOrder.create_from_basket(basket)
 
     assert models.RedeemedDiscount.objects.filter(user=basket.user).count() == 1
     assert basket.discounts.count() == 1
@@ -106,7 +106,7 @@ def test_only_best_discounts_create_redeemed_discounts_when_creating_pending_ord
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
     )
     basket.discounts.add(discount_used, discount_not_used)
-    order = models.PendingOrder.create_from_basket(basket)
+    models.PendingOrder.create_from_basket(basket)
 
     assert models.RedeemedDiscount.objects.filter(user=basket.user).count() == 1
 
@@ -204,7 +204,7 @@ def test_discount_with_max_redemptions_is_valid_for_basket(is_none):
     )
     if not is_none:
         order = OrderFactory.create(purchaser=basket_item.basket.user)
-        redeemed_discount = models.RedeemedDiscount.objects.create(
+        models.RedeemedDiscount.objects.create(
             discount=discount,
             user=basket_item.basket.user,
             order=order,
