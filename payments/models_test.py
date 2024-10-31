@@ -7,8 +7,9 @@ import pytz
 
 from payments import models
 from payments.factories import BasketFactory, BasketItemFactory, LineFactory, OrderFactory
-from system_meta.factories import ProductVersionFactory
+from system_meta.factories import IntegratedSystemFactory, ProductFactory, ProductVersionFactory
 from unified_ecommerce import settings
+from unified_ecommerce.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -164,3 +165,77 @@ def test_discount_with_expiration_date_in_future_is_valid_for_basket(is_none):
         amount=10,
     )
     assert discount.is_valid(basket_item.basket)
+
+def test_discount_with_unmatched_product_value_is_not_valid_for_basket():
+    """Test that a discount is not valid for a basket."""
+    basket_item = BasketItemFactory.create()
+
+    product = ProductFactory.create()
+    discount = models.Discount.objects.create(
+        product=product,
+        amount=10,
+    )
+    assert not discount.is_valid(basket_item.basket)
+
+def test_discount_with_unmatched_user_value_is_not_valid_for_basket():
+    """Test that a discount is not valid for a basket."""
+    basket_item = BasketItemFactory.create()
+
+    discount = models.Discount.objects.create(
+        amount=10,
+    )
+    user = UserFactory.create()
+    user.discounts.add(discount)
+    assert not discount.is_valid(basket_item.basket)
+  
+def test_discount_with_unmatched_integrated_system_value_is_not_valid_for_basket():
+    """Test that a discount is not valid for a basket."""
+    basket_item = BasketItemFactory.create()
+    integrated_system = IntegratedSystemFactory.create()
+
+    discount = models.Discount.objects.create(
+        integrated_system=integrated_system,
+        amount=10,
+    )
+    assert not discount.is_valid(basket_item.basket)
+
+def test_discount_with_max_redemptions_is_not_valid_for_basket():
+    """Test that a discount is not valid for a basket."""
+    basket_item = BasketItemFactory.create()
+
+    discount = models.Discount.objects.create(
+        max_redemptions=1,
+        amount=10,
+    )
+
+    order = OrderFactory.create(purchaser=basket_item.basket.user)
+    redeemed_discount = models.RedeemedDiscount.objects.create(
+        discount=discount,
+        user=basket_item.basket.user,
+        order=order,
+    )
+    assert not discount.is_valid(basket_item.basket)
+
+def test_discount_with_activation_date_in_future_is_not_valid_for_basket():
+    """Test that a discount is not valid for a basket."""
+    basket_item = BasketItemFactory.create()
+    activation_date = datetime.now(tz=pytz.timezone(settings.TIME_ZONE)) + timedelta(
+        days=100
+    )
+    discount = models.Discount.objects.create(
+        activation_date=activation_date,
+        amount=10,
+    )
+    assert not discount.is_valid(basket_item.basket)
+
+def test_discount_with_expiration_date_in_past_is_not_valid_for_basket():
+    """Test that a discount is not valid for a basket."""
+    basket_item = BasketItemFactory.create()
+    expiration_date = datetime.now(tz=pytz.timezone(settings.TIME_ZONE)) - timedelta(
+        days=100
+    )
+    discount = models.Discount.objects.create(
+        expiration_date=expiration_date,
+        amount=10,
+    )
+    assert not discount.is_valid(basket_item.basket)
