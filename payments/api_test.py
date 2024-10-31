@@ -670,8 +670,7 @@ def test_integrated_system_webhook_multisystem(
     mocked_request.assert_has_calls(serialized_calls, any_order=True)
 
 
-def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_system(
-):
+def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_system():
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
     when it exists for the basket's integrated system.
@@ -722,8 +721,7 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user():
     assert discount[0] == auto_discount
 
 
-def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_user_product_system(
-):
+def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_user_product_system():
     """
     Test that get_auto_apply_discount_for_basket returns multiple auto discount
     when they exist for the basket's - basket item - product, basket's user, and basket's integrated system.
