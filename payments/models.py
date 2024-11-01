@@ -95,7 +95,8 @@ class Discount(TimestampedModel):
             Check if the discount is associated to the product in the basket.
 
             Returns:
-                bool: True if the discount is associated to the product in the basket, or not associated with any product.
+                bool: True if the discount is associated to the product in the basket,
+                or not associated with any product.
             """
             return self.product is None or self.product in basket.get_products()
 
@@ -104,7 +105,8 @@ class Discount(TimestampedModel):
             Check if the discount is associated with the basket's user.
 
             Returns:
-                bool: True if the discount is associated with the basket's user, or not associated with any user.
+                bool: True if the discount is associated with the basket's user,
+                or not associated with any user.
             """
             return self.assigned_users.count() == 0 or self.assigned_users.contains(
                 basket.user
@@ -112,10 +114,12 @@ class Discount(TimestampedModel):
 
         def _discount_redemption_limit_valid() -> bool:
             """
-            Check if the discount has been redeemed less than the maximum number of times.
+            Check if the discount has been redeemed less than the maximum number
+            of times.
 
             Returns:
-                bool: True if the discount has been redeemed less than the maximum number of times, or the maximum number of redemptions is 0.
+                bool: True if the discount has been redeemed less than the maximum
+                number of times, or the maximum number of redemptions is 0.
             """
             return (
                 self.max_redemptions == 0
@@ -127,7 +131,8 @@ class Discount(TimestampedModel):
             Check if the discount's activation date is in the past.
 
             Returns:
-                bool: True if the discount's activation date is in the past, or the activation date is None.
+                bool: True if the discount's activation date is in the past, or the
+                activation date is None.
             """
             now = datetime.now(tz=pytz.timezone(settings.TIME_ZONE))
             return self.activation_date is None or now >= self.activation_date
@@ -137,16 +142,19 @@ class Discount(TimestampedModel):
             Check if the discount's expiration date is in the future.
 
             Returns:
-                bool: True if the discount's expiration date is in the future, or the expiration date is None.
+                bool: True if the discount's expiration date is in the future, or the
+                expiration date is None.
             """
             now = datetime.now(tz=pytz.timezone(settings.TIME_ZONE))
             return self.expiration_date is None or now <= self.expiration_date
 
         def _discount_integrated_system_found_in_basket_or_none() -> bool:
             """
-            Check if the discount's integrated system is the same as the basket's integrated system.
+            Check if the discount's integrated system is the same as the basket's
+            integrated system.
             Returns:
-                bool: True if the discount's integrated system is the same as the basket's integrated system, or the discount's integrated system is None.
+                bool: True if the discount's integrated system is the same as the
+                basket's integrated system, or the discount's integrated system is None.
             """
             return (
                 self.integrated_system is None
@@ -272,7 +280,8 @@ class BasketItem(TimestampedModel):
         Get the best discount from the basket
 
         Returns:
-            Discount: The best discount, associated with the basket, for the basket item.
+            Discount: The best discount, associated with the basket, for the basket
+            item.
         """
         best_discount = None
         best_discount_price = self.product.price
