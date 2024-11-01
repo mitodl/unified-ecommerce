@@ -15,7 +15,8 @@ def product_price_with_discount(discount: Discount, product: Product) -> float:
         discount (Discount): The discount to apply to the product
         product (Product): The product to apply the discount to
     Returns:
-        float: The price of the product with the discount applied, or the price of the product if the discount type is not recognized
+        float: The price of the product with the discount applied, or the price of the
+        product if the discount type is not recognized.
     """
     if discount.discount_type == DISCOUNT_TYPE_PERCENT_OFF:
         return product.price * (1 - discount.amount / 100)
