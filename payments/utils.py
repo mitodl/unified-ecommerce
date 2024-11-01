@@ -1,4 +1,3 @@
-from payments.models import Discount
 from system_meta.models import Product
 from unified_ecommerce.constants import (
     DISCOUNT_TYPE_DOLLARS_OFF,
@@ -7,7 +6,7 @@ from unified_ecommerce.constants import (
 )
 
 
-def product_price_with_discount(discount: Discount, product: Product) -> float:
+def product_price_with_discount(discount, product: Product) -> float:
     """
     Return the price of the product with the discount applied
 
