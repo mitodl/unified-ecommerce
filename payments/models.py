@@ -20,13 +20,13 @@ from reversion.models import Version
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 
+from payments.constants import GEOLOCATION_CHOICES, GEOLOCATION_TYPE_NONE
 from payments.utils import product_price_with_discount
 from system_meta.models import IntegratedSystem, Product
-from payments.constants import GEOLOCATION_TYPE_NONE, GEOLOCATION_TYPES
 from unified_ecommerce.constants import (
+    DEFAULT_CURRENCY,
     DISCOUNT_TYPES,
     PAYMENT_TYPES,
-    DEFAULT_CURRENCY,
     POST_SALE_SOURCE_REDIRECT,
     REDEMPTION_TYPES,
     TRANSACTION_TYPE_PAYMENT,
@@ -178,6 +178,8 @@ class Discount(TimestampedModel):
         )
 
     def __str__(self):
+        """Return the discount as a string."""
+
         return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
 
 
@@ -478,25 +480,27 @@ class BasketItem(TimestampedModel):
         return self.product.price * self.quantity
 
     @cached_property
-<<<<<<< HEAD
-<<<<<<< HEAD
-    def price(self) -> Decimal:
-        """Return the total price of the basket item with discounts."""
-        return self.discounted_price * self.quantity
-=======
-=======
     def base_price_money(self):
         """Return the total with discounts and assessed tax, as a Money object."""
 
         return Money(amount=self.base_price, currency=DEFAULT_CURRENCY)
 
     @cached_property
->>>>>>> 2ca96bc (Fixing some minor issues with the basket_add hook code)
+    def price(self) -> Decimal:
+        """Return the total price of the basket item with discounts."""
+        return self.discounted_price * self.quantity
+
+    @cached_property
+    def price_money(self):
+        """Return the total with discounts, as a Money object."""
+
+        return Money(amount=self.price, currency=DEFAULT_CURRENCY)
+
+    @cached_property
     def total_price(self):
         """Return the total with discounts and assessed tax."""
 
         return self.discounted_price - self.tax
->>>>>>> 0e2719a (Fleshing out blocked country/tax hook points)
 
     @cached_property
     def total_price_money(self):
@@ -928,6 +932,8 @@ class CanceledOrder(Order):
     """
 
     def __init__(self):
+        """Initialize the cancelled order."""
+
         self.delete_redeemed_discounts()
 
     class Meta:
@@ -957,6 +963,8 @@ class DeclinedOrder(Order):
     """
 
     def __init__(self):
+        """Initialize the cancelled order."""
+
         self.delete_redeemed_discounts()
 
     class Meta:
@@ -973,6 +981,8 @@ class ErroredOrder(Order):
     """
 
     def __init__(self):
+        """Initialize the cancelled order."""
+
         self.delete_redeemed_discounts()
 
     class Meta:
@@ -1094,4 +1104,6 @@ class RedeemedDiscount(TimestampedModel):
     )
 
     def __str__(self):
+        """Return the redeemed discount as a string."""
+
         return f"{self.discount} {self.user}"

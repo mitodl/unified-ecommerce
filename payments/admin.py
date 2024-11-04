@@ -145,6 +145,8 @@ class RefundedOrderAdmin(BaseOrderAdmin):
 
 @admin.register(models.Discount)
 class DiscountAdmin(admin.ModelAdmin):
+    """Admin for Discount"""
+
     model = models.Discount
     search_fields = ["discount_type", "redemption_type", "discount_code"]
     list_display = [
@@ -160,6 +162,8 @@ class DiscountAdmin(admin.ModelAdmin):
 
 @admin.register(models.RedeemedDiscount)
 class RedeemedDiscountAdmin(admin.ModelAdmin):
+    """Admin for RedeemedDiscount"""
+
     model = models.RedeemedDiscount
     search_fields = ["discount", "order", "user"]
     list_display = [

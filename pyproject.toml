@@ -194,7 +194,8 @@ ignore = [
 ]
 exclude = [
     "docs",
-    "pants-plugins"
+    "pants-plugins",
+    "repl.py"
 ]
 typing-modules = ["colour.hints"]
 
@@ -208,3 +209,4 @@ inline-quotes = "double"
 "*_test.py" = ["ARG001", "E501", "S101", "PLR2004", "PLR0913",]
 "test_*.py" = ["ARG001", "E501", "S101", "PLR2004", "PLR0913",]
 "**/migrations/**" = ["ARG001", "D100", "D101", "E501"]
+"openapi/**" = ["D101"]

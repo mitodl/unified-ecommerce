@@ -1,3 +1,5 @@
+"""Utility functions for payments."""
+
 from system_meta.models import Product
 from unified_ecommerce.constants import (
     DISCOUNT_TYPE_DOLLARS_OFF,
