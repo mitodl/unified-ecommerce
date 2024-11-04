@@ -21,6 +21,7 @@
                     <th scope="col">Product</th>
                     <th scope="col">Price</th>
                     <th scope="col">Quantity</th>
+                    <th scope="col">Discount code</th>
                     <th scope="col">Total</th>
                 </tr>
             </thead>
@@ -35,7 +36,8 @@
                     <td>{{ item.product }}</td>
                     <td>{{ item.product.price }}</td>
                     <td>{{ item.quantity }}</td>
-                    <td>{{ item.product.price }}</td>
+                    <td>{{ item.best_discount_for_item_from_basket.discount_code }}</td>
+                    <td>{{ item.price }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -73,6 +75,31 @@
             </div>
         </form>
     </div>
+    <div class="col-12">
+        <p>Add a discount code to the basket:</p>
+
+        <form method="post" id="discountform">
+            {% csrf_token %}
+            <input name="discount_code" id="discount_code"/>
+            <div class="form-group d-flex align-items-end mt-2">
+                <button type="submit" class="wl-auto btn btn-primary me-2">Add discount</button>
+            </div>
+        </form>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Discount codes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for discount in basket.discounts.all %}
+                <tr>
+                    <td>{{ discount }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -100,12 +127,28 @@ function add_to_cart(event) {
     return false;
 }
 
+function add_discount(event) {
+    event.preventDefault();
+    var discount_code = encodeURIComponent(document.getElementById("discount_code").value);
+    var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
+    var system_slug = "{{ basket.integrated_system.slug }}";
+    axios.post(`/api/v0/payments/baskets/add_discount/${system_slug}/`, {discount_code: discount_code}, { headers: { "X-CSRFToken": csrfmiddlewaretoken }})
+        .then(function (response) {
+            window.location.reload();
+        })
+     .catch(function (error) {
+            alert(error);
+        });
+
+    return false;
+}
+
 function clear_cart(event) {
     event.preventDefault();
 
     var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
-
-    axios.delete(`/api/v0/payments/baskets/clear/`, { headers: { "X-CSRFToken": csrfmiddlewaretoken } })
+    var system_slug = "{{ basket.integrated_system.slug }}";
+    axios.delete(`/api/v0/payments/baskets/clear/${system_slug}/`, { headers: { "X-CSRFToken": csrfmiddlewaretoken } })
         .then(function (response) {
             window.location.reload();
         })
@@ -117,6 +160,7 @@ function clear_cart(event) {
 }
 
 document.getElementById("cartform").addEventListener("submit", add_to_cart);
+document.getElementById("discountform").addEventListener("submit", add_discount);
 document.getElementById("clear-button").addEventListener("click", clear_cart);
 </script>
 {% endblock body %}

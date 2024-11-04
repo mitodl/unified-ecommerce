@@ -5,6 +5,7 @@ import logging
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
+from django.db.models import Q, QuerySet
 from django.urls import reverse
 from ipware import get_client_ip
 from mitol.payment_gateway.api import CartItem as GatewayCartItem
@@ -14,6 +15,7 @@ from mitol.payment_gateway.api import PaymentGateway, ProcessorResponse
 from payments.exceptions import PaymentGatewayError, PaypalRefundError
 from payments.models import (
     Basket,
+    Discount,
     FulfilledOrder,
     Order,
     PendingOrder,
@@ -436,3 +438,27 @@ def process_post_sale_webhooks(order_id, source):
             continue
 
         send_post_sale_webhook.delay(system.id, order.id, source)
+
+
+def get_auto_apply_discounts_for_basket(basket_id: int) -> QuerySet[Discount]:
+    """
+    Get the auto-apply discounts that can be applied to a basket.
+
+    Args:
+        basket_id (int): The ID of the basket to get the auto-apply discounts for.
+
+    Returns:
+        QuerySet: The auto-apply discounts that can be applied to the basket.
+    """
+    basket = Basket.objects.get(pk=basket_id)
+    return (
+        Discount.objects.filter(
+            Q(product__in=basket.get_products()) | Q(product__isnull=True)
+        )
+        .filter(
+            Q(integrated_system=basket.integrated_system)
+            | Q(integrated_system__isnull=True)
+        )
+        .filter(Q(assigned_users=basket.user) | Q(assigned_users__isnull=True))
+        .filter(automatic=True)
+    )

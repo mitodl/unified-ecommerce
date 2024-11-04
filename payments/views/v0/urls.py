@@ -8,6 +8,7 @@ from payments.views.v0 import (
     CheckoutApiViewSet,
     CheckoutCallbackView,
     OrderHistoryViewSet,
+    add_discount_to_basket,
     clear_basket,
     create_basket_from_product,
 )
@@ -31,6 +32,11 @@ urlpatterns = [
         "baskets/clear/<str:system_slug>/",
         clear_basket,
         name="clear_basket",
+    ),
+    path(
+        "baskets/add_discount/<str:system_slug>/",
+        add_discount_to_basket,
+        name="add_discount",
     ),
     path(
         "checkout/callback/",

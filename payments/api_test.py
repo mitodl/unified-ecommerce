@@ -15,6 +15,7 @@ from reversion.models import Version
 from payments.api import (
     check_and_process_pending_orders_for_resolution,
     generate_checkout_payload,
+    get_auto_apply_discounts_for_basket,
     process_cybersource_payment_response,
     process_post_sale_webhooks,
     refund_order,
@@ -22,6 +23,8 @@ from payments.api import (
 from payments.constants import PAYMENT_HOOK_ACTION_POST_SALE
 from payments.exceptions import PaymentGatewayError, PaypalRefundError
 from payments.factories import (
+    BasketFactory,
+    BasketItemFactory,
     LineFactory,
     OrderFactory,
     TransactionFactory,
@@ -29,6 +32,7 @@ from payments.factories import (
 from payments.models import (
     Basket,
     BasketItem,
+    Discount,
     FulfilledOrder,
     Order,
     Transaction,
@@ -37,6 +41,7 @@ from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer, WebhookO
 from system_meta.factories import ProductFactory
 from system_meta.models import IntegratedSystem
 from unified_ecommerce.constants import (
+    DISCOUNT_TYPE_DOLLARS_OFF,
     POST_SALE_SOURCE_BACKOFFICE,
     POST_SALE_SOURCE_REDIRECT,
     TRANSACTION_TYPE_PAYMENT,
@@ -108,7 +113,11 @@ def fulfilled_complete_order():
         product = ProductFactory.create()
 
     product_version = Version.objects.get_for_object(product).first()
-    LineFactory.create(order=order, product_version=product_version)
+    LineFactory.create(
+        order=order,
+        product_version=product_version,
+        discounted_price=product_version.field_dict["price"],
+    )
 
     return order
 
@@ -623,7 +632,11 @@ def test_integrated_system_webhook_multisystem(
         product = ProductFactory.create()
 
     product_version = Version.objects.get_for_object(product).first()
-    LineFactory.create(order=fulfilled_complete_order, product_version=product_version)
+    LineFactory.create(
+        order=fulfilled_complete_order,
+        product_version=product_version,
+        discounted_price=product_version.field_dict["price"],
+    )
 
     mocked_request = mocker.patch("requests.post")
 
@@ -655,3 +668,111 @@ def test_integrated_system_webhook_multisystem(
 
     assert mocked_request.call_count == 2
     mocked_request.assert_has_calls(serialized_calls, any_order=True)
+
+
+def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_system():
+    """
+    Test that get_auto_apply_discount_for_basket returns the auto discount
+    when it exists for the basket's integrated system.
+    """
+    basket = BasketFactory.create()
+    auto_discount = Discount.objects.create(
+        automatic=True,
+        amount=10,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        integrated_system=basket.integrated_system,
+    )
+
+    discount = get_auto_apply_discounts_for_basket(basket.id)
+    assert discount[0] == auto_discount
+
+
+def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product():
+    """
+    Test that get_auto_apply_discount_for_basket returns the auto discount
+    when it exists for the basket's - basket item - product.
+    """
+    basket_item = BasketItemFactory.create()
+    auto_discount = Discount.objects.create(
+        automatic=True,
+        amount=10,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        product=basket_item.product,
+    )
+
+    discount = get_auto_apply_discounts_for_basket(basket_item.basket.id)
+    assert discount[0] == auto_discount
+
+
+def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user():
+    """
+    Test that get_auto_apply_discount_for_basket returns the auto discount
+    when it exists for the basket's user.
+    """
+    basket = BasketFactory.create()
+    auto_discount = Discount.objects.create(
+        automatic=True,
+        amount=10,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+    )
+    basket.user.discounts.add(auto_discount)
+    discount = get_auto_apply_discounts_for_basket(basket.id)
+    assert discount[0] == auto_discount
+
+
+def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_user_product_system():
+    """
+    Test that get_auto_apply_discount_for_basket returns multiple auto discount
+    when they exist for the basket's - basket item - product, basket's user, and basket's integrated system.
+    """
+    basket_item = BasketItemFactory.create()
+    user_discount = Discount.objects.create(
+        automatic=True,
+        amount=10,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+    )
+    basket_item.basket.user.discounts.add(user_discount)
+    Discount.objects.create(
+        automatic=True,
+        amount=10,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        integrated_system=basket_item.basket.integrated_system,
+    )
+    Discount.objects.create(
+        automatic=True,
+        amount=10,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        product=basket_item.product,
+    )
+
+    discount = get_auto_apply_discounts_for_basket(basket_item.basket.id)
+    assert discount.count() == 3
+
+
+def test_get_auto_apply_discount_for_basket_no_auto_discount_exists():
+    """
+    Test that get_auto_apply_discount_for_basket returns the no discount
+    when no auto discount exists for the basket.
+    """
+    basket_item = BasketItemFactory.create()
+    user_discount = Discount.objects.create(
+        automatic=False,
+        amount=10,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+    )
+    basket_item.basket.user.discounts.add(user_discount)
+    Discount.objects.create(
+        automatic=False,
+        amount=10,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        integrated_system=basket_item.basket.integrated_system,
+    )
+    Discount.objects.create(
+        automatic=False,
+        amount=10,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        product=basket_item.product,
+    )
+
+    discount = get_auto_apply_discounts_for_basket(basket_item.basket.id)
+    assert discount.count() == 0
