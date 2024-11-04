@@ -428,9 +428,9 @@ def add_discount_to_basket(request, system_slug: str):
 
     try:
         basket.apply_discount_to_basket(discount)
-    except ValueError as exc:
+    except ValueError:
         return Response(
-            {"error": str(exc)},
+            {"error": "An error occurred while applying the discount."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
