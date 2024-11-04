@@ -128,6 +128,7 @@ function add_to_cart(event) {
 }
 
 function add_discount(event) {
+    event.preventDefault();
     var discount_code = encodeURIComponent(document.getElementById("discount_code").value);
     var csrfmiddlewaretoken = encodeURIComponent(document.querySelector("input[name='csrfmiddlewaretoken']").value);
     var system_slug = "{{ basket.integrated_system.slug }}";
