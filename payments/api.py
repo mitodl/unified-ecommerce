@@ -71,11 +71,11 @@ def generate_checkout_payload(request, system):
                 name=field_dict["description"],
                 quantity=1,
                 sku=sku,
-                unitprice=line_item.discounted_price,
+                unitprice=line_item.base_price,
                 taxable=line_item.tax,
             )
         )
-        total_price += line_item.discounted_price
+        total_price += line_item.base_price
 
     if total_price == 0:
         with transaction.atomic():

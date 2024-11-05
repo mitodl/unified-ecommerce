@@ -4,7 +4,7 @@ Factory for Users
 
 import ulid
 from django.contrib.auth.models import Group, User
-from factory import LazyFunction, Trait
+from factory import LazyFunction
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
 
@@ -22,11 +22,6 @@ class UserFactory(DjangoModelFactory):
 
         model = User
         skip_postgeneration_save = True
-
-    class Params:
-        """Params for UserFactory"""
-
-        no_profile = Trait(profile=None)
 
 
 class GroupFactory(DjangoModelFactory):

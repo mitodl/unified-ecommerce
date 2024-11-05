@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import pytest
 import pytz
 import reversion
+from reversion.models import Version
 
 from payments import models
 from payments.factories import (
@@ -12,6 +13,7 @@ from payments.factories import (
     BasketItemFactory,
     LineFactory,
     OrderFactory,
+    TaxRateFactory,
 )
 from system_meta.factories import (
     IntegratedSystemFactory,
@@ -21,6 +23,7 @@ from system_meta.factories import (
 from unified_ecommerce import settings
 from unified_ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF
 from unified_ecommerce.factories import UserFactory
+from users.factories import UserProfileFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -362,3 +365,81 @@ def test_discounted_price_for_multiple_discounts_for_integrated_system():
     basket.discounts.add(discount_1, discount_2)
 
     assert basket_item.discounted_price == (basket_item.base_price - discount_1.amount)
+
+
+@pytest.mark.parametrize("user_is_in_taxed_country", [True, False])
+def test_basket_tax_calculation(user_is_in_taxed_country):
+    """Test that the tax is calculated correctly."""
+
+    user = UserProfileFactory.create().user
+
+    if user_is_in_taxed_country:
+        tax_rate = TaxRateFactory.create(country_code=user.profile.country_code)
+    else:
+        tax_rate = TaxRateFactory.create()
+
+    basket = BasketFactory.create(user=user)
+
+    if user_is_in_taxed_country:
+        basket.tax_rate = tax_rate
+        basket.save()
+
+    with reversion.create_revision():
+        BasketItemFactory.create_batch(2, basket=basket)
+
+    basket.refresh_from_db()
+
+    for item in basket.basket_items.all():
+        assert item.tax == (
+            item.base_price * tax_rate.tax_rate if user_is_in_taxed_country else 0
+        )
+
+    if user_is_in_taxed_country:
+        assert basket.tax == sum(
+            [item.base_price * tax_rate.tax_rate for item in basket.basket_items.all()]
+        )
+    else:
+        assert basket.tax == 0
+
+
+@pytest.mark.parametrize("user_is_in_taxed_country", [True, False])
+def test_order_tax_calculation(user_is_in_taxed_country):
+    """Test that the tax is calculated correctly."""
+
+    user = UserProfileFactory.create().user
+
+    if user_is_in_taxed_country:
+        tax_rate = TaxRateFactory.create(country_code=user.profile.country_code)
+    else:
+        tax_rate = TaxRateFactory.create()
+
+    order = OrderFactory.create(purchaser=user)
+
+    if user_is_in_taxed_country:
+        order.tax_rate = tax_rate
+        order.save()
+
+    with reversion.create_revision():
+        product = ProductFactory.create()
+
+    product_version = Version.objects.get_for_object(product).first()
+
+    LineFactory.create(
+        order=order,
+        product_version=product_version,
+        discounted_price=product_version.field_dict["price"],
+    )
+
+    order.refresh_from_db()
+
+    for item in order.lines.all():
+        assert item.tax == (
+            item.base_price * tax_rate.tax_rate if user_is_in_taxed_country else 0
+        )
+
+    if user_is_in_taxed_country:
+        assert order.tax == sum(
+            [item.base_price * tax_rate.tax_rate for item in order.lines.all()]
+        )
+    else:
+        assert order.tax == 0
