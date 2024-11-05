@@ -5,11 +5,14 @@ import logging
 import reversion
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
+from moneyed import Money
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 from slugify import slugify
 
+from unified_ecommerce.constants import DEFAULT_CURRENCY
 from unified_ecommerce.utils import SoftDeleteActiveModel
 
 User = get_user_model()
@@ -128,3 +131,9 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
 
         exception_message = "Invalid product version specified"
         raise TypeError(exception_message)
+
+    @cached_property
+    def price_money(self):
+        """Return the item price as a Money."""
+
+        return Money(amount=self.price, currency=DEFAULT_CURRENCY)

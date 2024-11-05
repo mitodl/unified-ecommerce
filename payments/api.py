@@ -72,7 +72,7 @@ def generate_checkout_payload(request, system):
                 quantity=1,
                 sku=sku,
                 unitprice=line_item.discounted_price,
-                taxable=0,
+                taxable=line_item.tax,
             )
         )
         total_price += line_item.discounted_price

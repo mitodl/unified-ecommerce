@@ -424,7 +424,7 @@ class BasketItem(TimestampedModel):
             price_with_best_discount = product_price_with_discount(
                 self.best_discount_for_item_from_basket, self.product
             )
-        return round(price_with_best_discount, 2)
+        return price_with_best_discount
 
     @cached_property
     def best_discount_for_item_from_basket(self) -> Discount:
@@ -468,41 +468,41 @@ class BasketItem(TimestampedModel):
             else Decimal(0)
         )
 
-    @cached_property
+    @property
     def tax_money(self):
         """Return the tax amount as a Money object."""
 
         return Money(amount=self.tax, currency=DEFAULT_CURRENCY)
 
-    @cached_property
+    @property
     def base_price(self):
         """Return the total price of the basket item without discounts."""
         return self.product.price * self.quantity
 
-    @cached_property
+    @property
     def base_price_money(self):
         """Return the total with discounts and assessed tax, as a Money object."""
 
         return Money(amount=self.base_price, currency=DEFAULT_CURRENCY)
 
-    @cached_property
+    @property
     def price(self) -> Decimal:
         """Return the total price of the basket item with discounts."""
         return self.discounted_price * self.quantity
 
-    @cached_property
+    @property
     def price_money(self):
         """Return the total with discounts, as a Money object."""
 
         return Money(amount=self.price, currency=DEFAULT_CURRENCY)
 
-    @cached_property
+    @property
     def total_price(self):
         """Return the total with discounts and assessed tax."""
 
-        return self.discounted_price - self.tax
+        return self.discounted_price + self.tax
 
-    @cached_property
+    @property
     def total_price_money(self):
         """Return the total with discounts and assessed tax, as a Money object."""
 
@@ -774,6 +774,20 @@ class PendingOrder(Order):
 
             # TODO: Apply any discounts to the PendingOrder
 
+            # Manually set these so that we get updated data if it changes
+            # (this re-uses a PendingOrder if it exists, so it might now be wrong)
+            order.tax_rate = basket.tax_rate
+            order.purchaser_ip = basket.user_ip
+            order.purchaser_taxable_country_code = basket.user_taxable_country_code
+            order.purchaser_taxable_geolocation_type = (
+                basket.user_taxable_geolocation_type
+            )
+            order.purchaser_blockable_country_code = basket.user_blockable_country_code
+            order.purchaser_blockable_geolocation_type = (
+                basket.user_blockable_geolocation_type
+            )
+            order.save()
+
             # Create or get Line for each product.
             # Calculate the Order total based on Lines and discount.
             total = 0
@@ -1042,7 +1056,7 @@ class Line(TimestampedModel):
         """Return the item description"""
         return self.product_version.field_dict["description"]
 
-    @property
+    @cached_property
     def unit_price(self) -> Decimal:
         """Return the price of the product"""
         return self.product_version.field_dict["price"]
@@ -1051,6 +1065,30 @@ class Line(TimestampedModel):
     def total_price(self) -> Decimal:
         """Return the price of the product"""
         return self.unit_price * self.quantity
+
+    @cached_property
+    def tax(self) -> Decimal:
+        """Return the tax assessed for the item"""
+        return (
+            (self.total_price * self.order.tax_rate.tax_rate)
+            if self.order.tax_rate
+            else 0
+        )
+
+    @cached_property
+    def unit_price_money(self) -> Money:
+        """Return the price of the product"""
+        return Money(amount=self.unit_price, currency=DEFAULT_CURRENCY)
+
+    @cached_property
+    def total_price_money(self) -> Money:
+        """Return the price of the product"""
+        return Money(amount=self.total_price, currency=DEFAULT_CURRENCY)
+
+    @cached_property
+    def tax_money(self) -> Money:
+        """Return the tax assessed, as Money"""
+        return Money(amount=self.tax, currency=DEFAULT_CURRENCY)
 
     @cached_property
     def product(self) -> Product:
