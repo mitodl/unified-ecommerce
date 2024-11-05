@@ -265,7 +265,8 @@ class Basket(TimestampedModel):
     user_ip = models.CharField(
         blank=True, max_length=46, help_text="The IP address of the user."
     )
-    user_taxable_country_code = CountryField(
+    user_taxable_country_code = models.CharField(
+        max_length=2,
         help_text="The country code for the user for this basket for tax purposes.",
         blank=True,
     )
@@ -275,7 +276,8 @@ class Basket(TimestampedModel):
         help_text="How the user's location was determined for tax purposes.",
         max_length=15,
     )
-    user_blockable_country_code = CountryField(
+    user_blockable_country_code = models.CharField(
+        max_length=2,
         help_text="The country code for the user for this basket for blocked items.",
         blank=True,
     )
@@ -543,7 +545,8 @@ class Order(TimestampedModel):
     purchaser_ip = models.CharField(
         blank=True, max_length=46, help_text="The IP address of the user."
     )
-    purchaser_taxable_country_code = CountryField(
+    purchaser_taxable_country_code = models.CharField(
+        max_length=2,
         help_text="The country code for the user for this order for tax purposes.",
         blank=True,
     )
@@ -553,7 +556,8 @@ class Order(TimestampedModel):
         help_text="How the user's location was determined for tax purposes.",
         max_length=15,
     )
-    purchaser_blockable_country_code = CountryField(
+    purchaser_blockable_country_code = models.CharField(
+        max_length=2,
         help_text="The country code for the user for this order for blocked items.",
         blank=True,
     )
