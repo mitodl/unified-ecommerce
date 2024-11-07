@@ -52,7 +52,7 @@ def generate_checkout_payload(request, system):
     basket = Basket.establish_basket(request, system)
 
     # Notes for future implementation: this used to check for
-    # * Blocked products (by country)
+    # * ~~Blocked products (by country)~~ (now handled in the basket_add hook)
     # * Re-purchases of the same product
     # * Purchasing a product that is expired
     # These are all cleared for now, but will need to go back here later.
@@ -75,17 +75,19 @@ def generate_checkout_payload(request, system):
         field_dict = line_item.product_version.field_dict
         system = IntegratedSystem.objects.get(pk=field_dict["system_id"])
         sku = f"{system.slug}!{field_dict['sku']}"
+        # Using the py-moneyed objects here for quantization.
+        # It will do it correctly and then we get a Decimal out of it.
         gateway_order.items.append(
             GatewayCartItem(
                 code=sku,
                 name=field_dict["description"],
                 quantity=1,
                 sku=sku,
-                unitprice=line_item.base_price,
-                taxable=line_item.tax,
+                unitprice=line_item.unit_price_money.amount,
+                taxable=line_item.tax_money.amount,
             )
         )
-        total_price += line_item.base_price
+        total_price += line_item.total_price
 
     if total_price == 0:
         with transaction.atomic():

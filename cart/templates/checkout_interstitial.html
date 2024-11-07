@@ -21,6 +21,8 @@
 
                                 <div>
                                     <button class="btn btn-primary" type="submit">Redirect to CyberSource in <span id="countdown-time">5</span></button>
+
+                                    <button class="btn btn-danger" type="button" onclick="clearInterval(checkoutInterval);">Cancel Redirect</button>
                                 </div>
                             {% else %}
                                 {% for key, value in form.items %}
@@ -33,7 +35,7 @@
                         <script type="text/javascript">
                     var counter = 5;
 
-                    setInterval(function() {
+                    var checkoutInterval = setInterval(function() {
                         counter--;
 
                         document.getElementById('countdown-time').innerHTML = counter;

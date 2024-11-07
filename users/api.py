@@ -17,6 +17,7 @@ from unified_ecommerce.constants import (
     FLAGGED_COUNTRY_TYPES,
 )
 from users.dataclasses import CustomerCalculatedLocation
+from users.models import UserProfile
 
 
 def get_flagged_countries(flag_type, product=None):
@@ -88,9 +89,9 @@ def determine_user_location(
         errmsg = "User is unauthenticated, can't determine location"
         raise ValueError(errmsg)
 
-    profile_code = (
-        str(request.user.profile.country_code) if request.user.profile else None
-    )
+    profile, _ = UserProfile.objects.filter(user=request.user).get_or_create(defaults={"user": request.user})
+
+    profile_code = str(profile.country_code)
 
     if settings.MITOL_UE_FORCE_PROFILE_COUNTRY:
         return (profile_code, GEOLOCATION_TYPE_PROFILE)

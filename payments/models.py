@@ -265,10 +265,11 @@ class Basket(TimestampedModel):
     user_ip = models.CharField(
         blank=True, max_length=46, help_text="The IP address of the user."
     )
-    user_taxable_country_code = models.CharField(
+    user_taxable_country_code = models.CharField(  # noqa: DJ001
         max_length=2,
         help_text="The country code for the user for this basket for tax purposes.",
         blank=True,
+        null=True,
         default="",
     )
     user_taxable_geolocation_type = models.CharField(
@@ -277,10 +278,11 @@ class Basket(TimestampedModel):
         help_text="How the user's location was determined for tax purposes.",
         max_length=15,
     )
-    user_blockable_country_code = models.CharField(
+    user_blockable_country_code = models.CharField(  # noqa: DJ001
         max_length=2,
         help_text="The country code for the user for this basket for blocked items.",
         blank=True,
+        null=True, 
         default="",
     )
     user_blockable_geolocation_type = models.CharField(
@@ -520,7 +522,7 @@ class BasketItem(TimestampedModel):
     def total_price(self) -> Decimal:
         """Return the total with discounts and assessed tax."""
 
-        return self.discounted_price + self.tax
+        return self.price + self.tax
 
     @property
     def total_price_money(self) -> Money:
