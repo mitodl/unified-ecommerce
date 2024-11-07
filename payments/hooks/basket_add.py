@@ -3,11 +3,6 @@
 import logging
 
 import pluggy
-from django.db.models import Q
-
-from payments.dataclasses import CustomerLocationMetadata
-from payments.exceptions import ProductBlockedError
-from unified_ecommerce.constants import FLAGGED_COUNTRY_BLOCKED, FLAGGED_COUNTRY_TAX
 
 hookimpl = pluggy.HookimplMarker("unified_ecommerce")
 log = logging.getLogger(__name__)
@@ -31,22 +26,9 @@ class CustomerVerificationHooks:
         - basket_item (Product): the item to add to the basket
         """
 
-        from users.api import determine_user_location, get_flagged_countries
+        from payments.api import locate_customer_for_basket
 
-        log.debug("locate_customer: running for %s", request.user)
-
-        location_meta = CustomerLocationMetadata(
-            determine_user_location(
-                request,
-                get_flagged_countries(FLAGGED_COUNTRY_BLOCKED, product=basket_item),
-            ),
-            determine_user_location(
-                request, get_flagged_countries(FLAGGED_COUNTRY_TAX)
-            ),
-        )
-
-        basket.set_customer_location(location_meta)
-        basket.save()
+        locate_customer_for_basket(request, basket, basket_item)
 
         return (yield)
 
@@ -66,21 +48,11 @@ class CustomerVerificationHooks:
         - basket (Basket): the current basket
         - basket_item (Product): the item to add to the basket
         """
+        from payments.api import (
+            check_blocked_countries,
+        )
 
-        from payments.models import BlockedCountry
-
-        log.debug("blocked_country_check: checking for blockages for %s", basket.user)
-
-        blocked_qset = BlockedCountry.objects.filter(
-            country_code=basket.user_blockable_country_code
-        ).filter(Q(product__isnull=True) | Q(product=basket_item))
-
-        if blocked_qset.exists():
-            log.debug("blocked_country_check: user is blocked")
-            errmsg = "Product %s blocked from purchase in country %s"
-            raise ProductBlockedError(
-                errmsg, basket_item, basket.user_blockable_country_code
-            )
+        check_blocked_countries(basket, basket_item)
 
     @hookimpl(specname="basket_add", trylast=True)
     def taxable_check(self, request, basket, basket_item):  # noqa: ARG002
@@ -99,17 +71,8 @@ class CustomerVerificationHooks:
         Returns:
         - Applicable TaxRate object or None
         """
-
-        from payments.models import TaxRate
-
-        log.debug("taxable_check: checking for tax for %s", basket.user)
-
-        taxable_qset = TaxRate.objects.filter(
-            country_code=basket.user_blockable_country_code
+        from payments.api import (
+            check_taxable,
         )
 
-        if taxable_qset.exists():
-            taxrate = taxable_qset.first()
-            basket.tax_rate = taxrate
-            basket.save()
-            log.debug("taxable_check: charging the tax for %s", taxrate)
+        check_taxable(basket)

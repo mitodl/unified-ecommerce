@@ -4,7 +4,7 @@ Factory for Users
 
 import ulid
 from django.contrib.auth.models import Group, User
-from factory import LazyFunction
+from factory import LazyFunction, RelatedFactory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
 
@@ -16,6 +16,8 @@ class UserFactory(DjangoModelFactory):
     email = FuzzyText(suffix="@example.com")
     first_name = FuzzyText()
     last_name = FuzzyText()
+
+    profile = RelatedFactory("users.factories.UserProfileFactory", "user")
 
     class Meta:
         """Meta options for UserFactory"""

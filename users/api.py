@@ -108,13 +108,12 @@ def determine_user_location(
                 geoip_code, GEOLOCATION_TYPE_GEOIP, user_ip
             )
 
+    if geoip_code:
+        return CustomerCalculatedLocation(geoip_code, GEOLOCATION_TYPE_GEOIP, user_ip)
+
     if profile_code:
-        return (
-            CustomerCalculatedLocation(geoip_code, GEOLOCATION_TYPE_GEOIP, user_ip)
-            if geoip_code
-            else CustomerCalculatedLocation(
-                profile_code, GEOLOCATION_TYPE_PROFILE, user_ip
-            )
+        return CustomerCalculatedLocation(
+            profile_code, GEOLOCATION_TYPE_PROFILE, user_ip
         )
 
     return CustomerCalculatedLocation(None, GEOLOCATION_TYPE_NONE, user_ip)
