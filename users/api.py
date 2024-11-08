@@ -89,7 +89,9 @@ def determine_user_location(
         errmsg = "User is unauthenticated, can't determine location"
         raise ValueError(errmsg)
 
-    profile, _ = UserProfile.objects.filter(user=request.user).get_or_create(defaults={"user": request.user})
+    profile, _ = UserProfile.objects.filter(user=request.user).get_or_create(
+        defaults={"user": request.user}
+    )
 
     profile_code = str(profile.country_code)
 
