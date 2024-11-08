@@ -1,7 +1,9 @@
-from datetime import timezone
+import pytz
+from datetime import datetime
 from payments.api import update_discount_codes
 from django.core.management import BaseCommand
 
+from unified_ecommerce import settings
 
 class Command(BaseCommand):
     """
@@ -81,11 +83,13 @@ class Command(BaseCommand):
         parser.add_argument(
             "--expire-now",
             help="Expire the discount code(s) immediately.",
+            action="store_true",
         )
 
     def handle(self, *args, **options) -> None:
         if options.get("expire_now"):
-            options["expires"] = timezone.now().date()
+            #convert date to string
+            options["expires"] = datetime.now(tz=pytz.timezone(settings.TIME_ZONE)).strftime("%Y-%m-%d")
 
         number_of_updated_codes = 0
         try:

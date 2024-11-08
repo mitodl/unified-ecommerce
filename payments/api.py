@@ -657,6 +657,9 @@ def update_discount_codes(**kwargs):  # noqa: C901
     * integrated_system - ID or slug of the integrated system to associate with the discount
     * product - ID or SKU of the product to associate with the discount
     * users - list of user IDs or emails to associate with the discount
+    
+    Returns:
+    * Number of discounts updated
 
     """
     discount_ids_to_update = kwargs["discount_ids"]
