@@ -757,9 +757,10 @@ def update_discount_codes(**kwargs):  # noqa: C901
     for discount in discounts_to_update:
         if discount.redemption_type in [REDEMPTION_TYPE_ONE_TIME, REDEMPTION_TYPE_ONE_TIME_PER_USER]:
             if discount.redeemed_discounts.exists():
-                discounts_to_update.exclude(pk=discount.pk)
-        elif discount.max_redemptions and discount.redeemed_discounts.count() >= discount.max_redemptions:
-            discounts_to_update.exclude(pk=discount.pk)
+                discounts_to_update = discounts_to_update.exclude(pk=discount.pk)
+        elif discount.max_redemptions and discount.redeemed_discounts.count() == discount.max_redemptions:
+            discounts_to_update = discounts_to_update.exclude(pk=discount.pk)
+
     discount_attributes_dict = {
             "discount_type": discount_type,
             "redemption_type": redemption_type,
