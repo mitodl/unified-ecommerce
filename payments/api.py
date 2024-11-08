@@ -638,3 +638,140 @@ def generate_discount_code(**kwargs):  # noqa: C901
         generated_codes.append(discount)
 
     return generated_codes
+
+def update_discount_codes(**kwargs):  # noqa: C901
+    """
+    Updates a discount code (or a batch of discount codes) as specified by the
+    arguments passed.
+    
+    Keyword Args:
+    * codes_to_update - list of discount IDs to update
+    * discount_type - one of the valid discount types
+    * payment_type - one of the valid payment types
+    * redemption_type - one of the valid redemption types (overrules use of the flags)
+    * amount - the value of the discount
+    * one_time - boolean; discount can only be redeemed once
+    * one_time_per_user - boolean; discount can only be redeemed once per user
+    * activates - date to activate
+    * expires - date to expire the code
+    * integrated_system - ID or slug of the integrated system to associate with the discount
+    * product - ID or SKU of the product to associate with the discount
+    * users - list of user IDs or emails to associate with the discount
+
+    """
+    discount_ids_to_update = kwargs["codes_to_update"]
+    discount_type = kwargs["discount_type"]
+    redemption_type = REDEMPTION_TYPE_UNLIMITED
+    payment_type = kwargs["payment_type"]
+    amount = Decimal(kwargs["amount"])
+    if kwargs["discount_type"] not in ALL_DISCOUNT_TYPES:
+        raise Exception(f"Discount type {kwargs['discount_type']} is not valid.")  # noqa: EM102, TRY002
+    
+    if payment_type not in ALL_PAYMENT_TYPES:
+        raise Exception(f"Payment type {payment_type} is not valid.")  # noqa: EM102, TRY002
+
+    if kwargs["discount_type"] == DISCOUNT_TYPE_PERCENT_OFF and amount > 100:  # noqa: PLR2004
+        raise Exception(  # noqa: TRY002
+            f"Discount amount {amount} not valid for discount type {DISCOUNT_TYPE_PERCENT_OFF}."  # noqa: EM102
+        )
+
+    if kwargs.get("one_time"):
+        redemption_type = REDEMPTION_TYPE_ONE_TIME
+
+    if kwargs.get("once_per_user"):
+        redemption_type = REDEMPTION_TYPE_ONE_TIME_PER_USER
+
+    if (
+        "redemption_type" in kwargs
+        and kwargs["redemption_type"] in ALL_REDEMPTION_TYPES
+    ):
+        redemption_type = kwargs["redemption_type"]
+
+    if "expires" in kwargs and kwargs["expires"] is not None:
+        expiration_date = parse_supplied_date(kwargs["expires"])
+    else:
+        expiration_date = None
+
+    if "activates" in kwargs and kwargs["activates"] is not None:
+        activation_date = parse_supplied_date(kwargs["activates"])
+    else:
+        activation_date = None
+
+    if "integrated_system" in kwargs and kwargs["integrated_system"] is not None:
+        # Try to get the integrated system via ID or slug.  Raise an exception if it doesn't exist.
+        # check if integrated_system is an integer or a slug
+        integrated_system_missing_msg = f"Integrated system {kwargs['integrated_system']} does not exist."
+        if kwargs["integrated_system"].isdigit():
+            try:
+                integrated_system = IntegratedSystem.objects.get(pk=kwargs["integrated_system"])
+            except IntegratedSystem.DoesNotExist:
+                raise Exception(integrated_system_missing_msg) # noqa: B904, TRY002
+        else:
+            try:
+                integrated_system = IntegratedSystem.objects.get(slug=kwargs["integrated_system"])
+            except IntegratedSystem.DoesNotExist:
+                raise Exception(integrated_system_missing_msg)  # noqa: B904, TRY002 
+    else:
+        integrated_system = None
+
+    if "product" in kwargs and kwargs["product"] is not None:
+        # Try to get the product via ID or SKU.  Raise an exception if it doesn't exist.
+        product_missing_msg = f"Product {kwargs['product']} does not exist."
+        if kwargs["product"].isdigit():
+            try:
+                product = Product.objects.get(pk=kwargs["product"])
+            except Product.DoesNotExist:
+                raise Exception(product_missing_msg) # noqa: B904, TRY002
+        else:
+            try:
+                product = Product.objects.get(sku=kwargs["product"])
+            except Product.DoesNotExist:
+                raise Exception(product_missing_msg)  # noqa: B904, TRY002
+    else:
+        product = None
+
+    if "users" in kwargs and kwargs["users"] is not None:
+        # Try to get the users via ID or email.  Raise an exception if it doesn't exist.
+        users = []
+        user_missing_msg = "User %s does not exist."
+        for user in kwargs["users"]:
+            if user.isdigit():
+                try:
+                    users.append(User.objects.get(pk=user))
+                except User.DoesNotExist:
+                    raise Exception(user_missing_msg % user)
+            else:
+                try:
+                    user = User.objects.get(email=user)
+                    users.append(user)
+                except User.DoesNotExist:
+                    raise Exception(user_missing_msg % user)
+    else:
+        users = None
+
+    discounts_to_update = Discount.objects.filter(pk__in=discount_ids_to_update)
+
+    # Don't include any discounts with one time or one time per user redemption types
+    # if there is a matching RedeemedDiscount, or if the max_redemptions has been reached.
+    for discount in discounts_to_update:
+        if discount.redemption_type in [REDEMPTION_TYPE_ONE_TIME, REDEMPTION_TYPE_ONE_TIME_PER_USER]:
+            if discount.redeemed_discounts.exists():
+                discounts_to_update.exclude(pk=discount.pk)
+        elif discount.max_redemptions and discount.redeemed_discounts.count() >= discount.max_redemptions:
+            discounts_to_update.exclude(pk=discount.pk)
+
+    Discount.objects.bulk_update(
+        discounts_to_update,
+        {
+            "discount_type": discount_type,
+            "redemption_type": redemption_type,
+            "payment_type": payment_type,
+            "expiration_date": expiration_date,
+            "activation_date": activation_date,
+            "amount": amount,
+            "integrated_system": integrated_system,
+            "product": product,
+        }
+    )
+    return discounts_to_update.count()
+    
