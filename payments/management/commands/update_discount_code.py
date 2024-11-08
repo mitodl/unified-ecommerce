@@ -1,11 +1,13 @@
+from datetime import timezone
 from payments.api import update_discount_codes
-from payments.models import Discount
-from unified_ecommerce.constants import DISCOUNT_TYPES, REDEMPTION_TYPES
+from django.core.management import BaseCommand
 
 
 class Command(BaseCommand):
     """
     Updates one or multiple discount codes using the Discount IDs.
+    example usage of this command:
+    python manage.py update_discount_code 1 2 3 --expires 2023-01-01 --amount 10 --discount-type dollars-off --payment-type marketing --one-time --once-per
     """
 
     help = "Updates one or multiple discount codes using the Discount IDs."
@@ -34,14 +36,12 @@ class Command(BaseCommand):
             "--discount-type",
             type=str,
             help="Sets the discount type (dollars-off, percent-off, fixed-price; default percent-off)",
-            default="dollars-off",
         )
 
         parser.add_argument(
             "--payment-type",
             type=str,
             help="Sets the payment type (marketing, sales, financial-assistance, customer-support, staff)",
-            required=True,
         )
 
         parser.add_argument(
@@ -49,16 +49,6 @@ class Command(BaseCommand):
             type=str,
             nargs="?",
             help="Sets the discount amount",
-            required=True,
-        )
-
-        parser.add_argument(
-            "--count",
-            type=int,
-            nargs="?",
-            help="Number of codes to produce",
-            default=1,
-            required=True,
         )
 
         parser.add_argument(
@@ -88,13 +78,21 @@ class Command(BaseCommand):
             help="List of user IDs or emails to associate with the discount.",
         )
 
+        parser.add_argument(
+            "--expire-now",
+            help="Expire the discount code(s) immediately.",
+        )
+
     def handle(self, *args, **options) -> None:
-        updated_codes = []
+        if options.get("expire_now"):
+            options["expires"] = timezone.now().date()
+
+        number_of_updated_codes = 0
         try:
-            updated_codes = update_discount_codes(**options)
+            number_of_updated_codes = update_discount_codes(**options)
         except Exception as e:  # noqa: BLE001
             self.stderr.write(self.style.ERROR(e))
 
         self.stdout.write(
-            self.style.SUCCESS(f"Successfully updated {updated_codes.count()} discounts.")
+            self.style.SUCCESS(f"Successfully updated {number_of_updated_codes} discounts.")
         )

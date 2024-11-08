@@ -97,6 +97,17 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **kwargs):  # pylint: disable=unused-argument  # noqa: ARG002
+
+        # Don't allow the creation of bulk unlimited discounts.
+        if not kwargs.get("one_time") and kwargs.get("bulk"):
+            self.stderr.write(
+                self.style.ERROR(
+                    "Bulk discounts must be one-time redemptions. "
+                    "Please specify the --one-time flag."
+                )
+            )
+            return
+
         generated_codes = []
         try:
             generated_codes = generate_discount_code(**kwargs)
