@@ -33,7 +33,12 @@ class OrderLineInline(admin.TabularInline):
     """Inline editor for lines"""
 
     model = models.Line
-    readonly_fields = ["unit_price", "total_price", "discounted_price"]
+    readonly_fields = [
+        "unit_price",
+        "discounted_price",
+        "tax_money",
+        "total_price",
+    ]
     min_num = 1
     extra = 0
 
@@ -62,11 +67,48 @@ class BaseOrderAdmin(TimestampedModelAdmin):
         "purchaser__username",
         "reference_number",
     ]
-    list_display = ["id", "state", "get_purchaser", "total_price_paid"]
+    list_display = ["id", "state", "get_purchaser", "total_price_paid", "tax"]
     list_fields = ["state"]
     list_filter = ["state"]
     inlines = [OrderLineInline, OrderTransactionInline]
     readonly_fields = ["reference_number"]
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": [
+                    "state",
+                    "reference_number",
+                    "created_on",
+                    "updated_on",
+                ]
+            },
+        ),
+        (
+            "Purchaser",
+            {
+                "fields": [
+                    "purchaser",
+                    "purchaser_ip",
+                    "purchaser_taxable_country_code",
+                    "purchaser_taxable_geolocation_type",
+                    "purchaser_blockable_country_code",
+                    "purchaser_blockable_geolocation_type",
+                ],
+            },
+        ),
+        (
+            "Value",
+            {
+                "fields": [
+                    "subtotal",
+                    "discounts_applied",
+                    "tax",
+                    "total_price_paid",
+                ]
+            },
+        ),
+    ]
 
     def has_change_permission(self, request, obj=None):  # noqa: ARG002
         """Disable adding orders"""
@@ -76,6 +118,11 @@ class BaseOrderAdmin(TimestampedModelAdmin):
     def get_purchaser(self, obj: models.Order):
         """Return the purchaser information for the order"""
         return f"{obj.purchaser.email}"
+
+    @display(description="Tax")
+    def get_tax(self, obj: models.Order):
+        """Return the tax for the order"""
+        return obj.tax
 
     def get_queryset(self, request):
         """Filter only to pending orders"""

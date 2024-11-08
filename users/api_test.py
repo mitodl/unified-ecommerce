@@ -13,7 +13,6 @@ from payments.factories import BlockedCountryFactory, ProductFactory, TaxRateFac
 from unified_ecommerce.constants import FLAGGED_COUNTRY_BLOCKED, FLAGGED_COUNTRY_TAX
 from unified_ecommerce.factories import UserFactory
 from users.api import determine_user_location, get_flagged_countries
-from users.models import UserProfile
 
 pytestmark = [pytest.mark.django_db]
 FAKE = faker.Faker()
@@ -88,8 +87,7 @@ def test_determine_user_location(profile_netblock_match, flag_type, with_product
     if not profile_netblock_match:
         country_code = FAKE.unique.country_code()
 
-    user = UserFactory.create()
-    UserProfile.objects.create(country_code=country_code, user=user).save()
+    user = UserFactory.create(profile__country_code=country_code)
     user.refresh_from_db()
 
     request = RequestFactory().get("/request")

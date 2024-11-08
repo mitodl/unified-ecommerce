@@ -15,7 +15,7 @@ from django.db import models, transaction
 from django.utils.functional import cached_property
 from django_countries.fields import CountryField
 from mitol.common.models import TimestampedModel
-from moneyed import Money
+from mitol.payment_gateway.payment_utils import quantize_decimal
 from reversion.models import Version
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
@@ -24,7 +24,6 @@ from payments.constants import GEOLOCATION_CHOICES, GEOLOCATION_TYPE_NONE
 from payments.utils import product_price_with_discount
 from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce.constants import (
-    DEFAULT_CURRENCY,
     DISCOUNT_TYPES,
     PAYMENT_TYPES,
     POST_SALE_SOURCE_REDIRECT,
@@ -282,7 +281,7 @@ class Basket(TimestampedModel):
         max_length=2,
         help_text="The country code for the user for this basket for blocked items.",
         blank=True,
-        null=True, 
+        null=True,
         default="",
     )
     user_blockable_geolocation_type = models.CharField(
@@ -354,31 +353,22 @@ class Basket(TimestampedModel):
         return Decimal(sum([item.total_price for item in self.basket_items.all()]))
 
     @property
-    def subtotal_money(self) -> Money:
+    def subtotal_money(self) -> Decimal:
         """Return the subtotal amount for the basket."""
 
-        return Money(
-            amount=self.subtotal,
-            currency=DEFAULT_CURRENCY,
-        )
+        return quantize_decimal(self.subtotal)
 
     @property
-    def tax_money(self) -> Money:
+    def tax_money(self) -> Decimal:
         """Return the aggregate tax for the basket."""
 
-        return Money(
-            amount=self.tax,
-            currency=DEFAULT_CURRENCY,
-        )
+        return quantize_decimal(self.tax)
 
     @property
-    def total_money(self) -> Money:
+    def total_money(self) -> Decimal:
         """Return the total for the basket, including discounts and tax."""
 
-        return Money(
-            amount=self.total_money,
-            currency=DEFAULT_CURRENCY,
-        )
+        return quantize_decimal(self.total_money)
 
     @staticmethod
     def establish_basket(request, integrated_system: IntegratedSystem):
@@ -471,10 +461,10 @@ class BasketItem(TimestampedModel):
         return best_discount
 
     @cached_property
-    def discounted_price_money(self) -> Money:
+    def discounted_price_money(self) -> Decimal:
         """Return the total with discounts and assessed tax, as a Money object."""
 
-        return Money(amount=self.discounted_price, currency=DEFAULT_CURRENCY)
+        return quantize_decimal(self.discounted_price)
 
     @cached_property
     def tax(self) -> Decimal:
@@ -491,10 +481,10 @@ class BasketItem(TimestampedModel):
         )
 
     @property
-    def tax_money(self) -> Money:
+    def tax_money(self) -> Decimal:
         """Return the tax amount as a Money object."""
 
-        return Money(amount=self.tax, currency=DEFAULT_CURRENCY)
+        return quantize_decimal(self.tax)
 
     @property
     def base_price(self) -> Decimal:
@@ -502,10 +492,10 @@ class BasketItem(TimestampedModel):
         return self.product.price * self.quantity
 
     @property
-    def base_price_money(self) -> Money:
+    def base_price_money(self) -> Decimal:
         """Return the total with discounts and assessed tax, as a Money object."""
 
-        return Money(amount=self.base_price, currency=DEFAULT_CURRENCY)
+        return quantize_decimal(self.base_price)
 
     @property
     def price(self) -> Decimal:
@@ -513,10 +503,10 @@ class BasketItem(TimestampedModel):
         return self.discounted_price * self.quantity
 
     @property
-    def price_money(self) -> Money:
+    def price_money(self) -> Decimal:
         """Return the total with discounts, as a Money object."""
 
-        return Money(amount=self.price, currency=DEFAULT_CURRENCY)
+        return quantize_decimal(self.price)
 
     @property
     def total_price(self) -> Decimal:
@@ -525,10 +515,10 @@ class BasketItem(TimestampedModel):
         return self.price + self.tax
 
     @property
-    def total_price_money(self) -> Money:
+    def total_price_money(self) -> Decimal:
         """Return the total with discounts and assessed tax, as a Money object."""
 
-        return Money(amount=self.total_price, currency=DEFAULT_CURRENCY)
+        return quantize_decimal(self.total_price)
 
 
 class Order(TimestampedModel):
@@ -639,7 +629,21 @@ class Order(TimestampedModel):
     def tax(self):
         """Return the aggregated tax amount for this order"""
 
-        return Decimal(sum([line.tax for line in self.lines.all()]))
+        return quantize_decimal(sum([line.tax for line in self.lines.all()]))
+
+    @property
+    def subtotal(self):
+        """Return the aggregated subtotal for the order"""
+
+        return quantize_decimal(sum([line.base_price for line in self.lines.all()]))
+
+    @property
+    def discounts_applied(self):
+        """Return the aggregated discounts applied to the order"""
+
+        return quantize_decimal(
+            sum([line.base_price - line.discounted_price for line in self.lines.all()])
+        )
 
     def fulfill(self, payment_data, source=POST_SALE_SOURCE_REDIRECT):
         """Fufill the order."""
@@ -822,7 +826,7 @@ class PendingOrder(Order):
 
             # Create or get Line for each product.
             # Calculate the Order total based on Lines and discount.
-            total = 0
+            total = Decimal(0)
             used_discounts = []
             for product_version in product_versions:
                 basket_item = basket.basket_items.get(
@@ -837,7 +841,7 @@ class PendingOrder(Order):
                     },
                 )
                 used_discounts.append(basket_item.best_discount_for_item_from_basket)
-                total += line.discounted_price
+                total += line.total_price_money
                 log.debug(
                     "%s line %s product %s",
                     ("Created" if created else "Updated"),
@@ -1110,27 +1114,27 @@ class Line(TimestampedModel):
     @cached_property
     def total_price(self) -> Decimal:
         """Return the price of the product"""
-        return self.unit_price * self.quantity - self.tax
+        return self.unit_price * self.quantity + self.tax
 
     @cached_property
-    def unit_price_money(self) -> Money:
+    def unit_price_money(self) -> Decimal:
         """Return the price of the product"""
-        return Money(amount=self.unit_price, currency=DEFAULT_CURRENCY)
+        return quantize_decimal(self.unit_price)
 
     @cached_property
-    def tax_money(self) -> Money:
+    def tax_money(self) -> Decimal:
         """Return the tax assessed, as Money"""
-        return Money(amount=self.tax, currency=DEFAULT_CURRENCY)
+        return quantize_decimal(self.tax)
 
     @cached_property
-    def base_price_money(self) -> Money:
+    def base_price_money(self) -> Decimal:
         """Return the price of the product"""
-        return Money(amount=self.base_price, currency=DEFAULT_CURRENCY)
+        return quantize_decimal(self.base_price)
 
     @cached_property
-    def total_price_money(self) -> Money:
+    def total_price_money(self) -> Decimal:
         """Return the price of the product"""
-        return Money(amount=self.total_price, currency=DEFAULT_CURRENCY)
+        return quantize_decimal(self.total_price)
 
     @cached_property
     def product(self) -> Product:

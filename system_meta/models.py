@@ -7,12 +7,11 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
-from moneyed import Money
+from mitol.payment_gateway.payment_utils import quantize_decimal
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 from slugify import slugify
 
-from unified_ecommerce.constants import DEFAULT_CURRENCY
 from unified_ecommerce.utils import SoftDeleteActiveModel
 
 User = get_user_model()
@@ -134,6 +133,6 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
 
     @cached_property
     def price_money(self):
-        """Return the item price as a Money."""
+        """Return the item price as a quantized decimal."""
 
-        return Money(amount=self.price, currency=DEFAULT_CURRENCY)
+        return quantize_decimal(self.price)

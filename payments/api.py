@@ -83,8 +83,8 @@ def generate_checkout_payload(request, system):
                 name=field_dict["description"],
                 quantity=1,
                 sku=sku,
-                unitprice=line_item.unit_price_money.amount,
-                taxable=line_item.tax_money.amount,
+                unitprice=line_item.unit_price_money,
+                taxable=line_item.tax_money,
             )
         )
         total_price += line_item.total_price

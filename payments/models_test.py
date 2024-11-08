@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import pytest
 import pytz
 import reversion
+from mitol.payment_gateway.payment_utils import quantize_decimal
 from reversion.models import Version
 
 from payments import models
@@ -23,7 +24,6 @@ from system_meta.factories import (
 from unified_ecommerce import settings
 from unified_ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF
 from unified_ecommerce.factories import UserFactory
-from users.factories import UserProfileFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -368,10 +368,8 @@ def test_discounted_price_for_multiple_discounts_for_integrated_system():
 
 
 @pytest.mark.parametrize("user_is_in_taxed_country", [True, False])
-def test_basket_tax_calculation(user_is_in_taxed_country):
+def test_basket_tax_calculation(user, user_is_in_taxed_country):
     """Test that the tax is calculated correctly."""
-
-    user = UserProfileFactory.create().user
 
     if user_is_in_taxed_country:
         tax_rate = TaxRateFactory.create(country_code=user.profile.country_code)
@@ -403,10 +401,8 @@ def test_basket_tax_calculation(user_is_in_taxed_country):
 
 
 @pytest.mark.parametrize("user_is_in_taxed_country", [True, False])
-def test_order_tax_calculation(user_is_in_taxed_country):
+def test_order_tax_calculation(user, user_is_in_taxed_country):
     """Test that the tax is calculated correctly."""
-
-    user = UserProfileFactory.create().user
 
     if user_is_in_taxed_country:
         tax_rate = TaxRateFactory.create(country_code=user.profile.country_code)
@@ -433,13 +429,13 @@ def test_order_tax_calculation(user_is_in_taxed_country):
     order.refresh_from_db()
 
     for item in order.lines.all():
-        assert item.tax == (
+        assert item.tax_money == quantize_decimal(
             item.base_price * tax_rate.tax_rate if user_is_in_taxed_country else 0
         )
 
     if user_is_in_taxed_country:
-        assert order.tax == sum(
-            [item.base_price * tax_rate.tax_rate for item in order.lines.all()]
+        assert order.tax == quantize_decimal(
+            sum([item.base_price * tax_rate.tax_rate for item in order.lines.all()])
         )
     else:
         assert order.tax == 0
