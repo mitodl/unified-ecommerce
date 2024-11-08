@@ -4,6 +4,10 @@ from unified_ecommerce.constants import (
     DISCOUNT_TYPE_FIXED_PRICE,
     DISCOUNT_TYPE_PERCENT_OFF,
 )
+import dateutil
+import pytz
+
+from unified_ecommerce.settings import TIME_ZONE
 
 
 def product_price_with_discount(discount, product: Product) -> float:
@@ -24,3 +28,20 @@ def product_price_with_discount(discount, product: Product) -> float:
     if discount.discount_type == DISCOUNT_TYPE_FIXED_PRICE:
         return discount.amount
     return product.price
+
+def parse_supplied_date(datearg):
+    """
+    Creates a datetime with timezone from a user-supplied date. For use in
+    management commands.
+
+    Args:
+    - datearg (string): the date supplied by the user.
+    Returns:
+    - datetime
+    """
+    retDate = dateutil.parser.parse(datearg)
+    if retDate.utcoffset() is not None:
+        retDate = retDate - retDate.utcoffset()
+
+    retDate = retDate.replace(tzinfo=pytz.timezone(TIME_ZONE))
+    return retDate  # noqa: RET504

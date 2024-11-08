@@ -140,10 +140,8 @@ class RefundedOrderAdmin(BaseOrderAdmin):
     def get_queryset(self, request):
         """Filter only to refunded orders"""
         return super().get_queryset(request).filter(state=models.Order.STATE.REFUNDED)
-
-
 @admin.register(models.Discount)
-class DiscountAdmin(admin.ModelAdmin):
+class DiscountAdmin(VersionAdmin):
     model = models.Discount
     search_fields = ["discount_type", "redemption_type", "discount_code"]
     list_display = [

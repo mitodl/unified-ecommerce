@@ -1,8 +1,12 @@
 """Ecommerce APIs"""
 
 import logging
+import uuid
+from decimal import Decimal
 
+import reversion
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import Q, QuerySet
@@ -21,13 +25,21 @@ from payments.models import (
     PendingOrder,
 )
 from payments.tasks import send_post_sale_webhook
-from system_meta.models import IntegratedSystem
+from payments.utils import parse_supplied_date
+from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce.constants import (
+    ALL_DISCOUNT_TYPES,
+    ALL_PAYMENT_TYPES,
+    ALL_REDEMPTION_TYPES,
     CYBERSOURCE_ACCEPT_CODES,
     CYBERSOURCE_ERROR_CODES,
     CYBERSOURCE_REASON_CODE_SUCCESS,
+    DISCOUNT_TYPE_PERCENT_OFF,
     POST_SALE_SOURCE_BACKOFFICE,
     POST_SALE_SOURCE_REDIRECT,
+    REDEMPTION_TYPE_ONE_TIME,
+    REDEMPTION_TYPE_ONE_TIME_PER_USER,
+    REDEMPTION_TYPE_UNLIMITED,
     REFUND_SUCCESS_STATES,
     USER_MSG_TYPE_PAYMENT_ACCEPTED_NOVALUE,
     ZERO_PAYMENT_DATA,
@@ -35,6 +47,7 @@ from unified_ecommerce.constants import (
 from unified_ecommerce.utils import redirect_with_user_message
 
 log = logging.getLogger(__name__)
+User = get_user_model()
 
 
 def generate_checkout_payload(request, system):
@@ -462,3 +475,166 @@ def get_auto_apply_discounts_for_basket(basket_id: int) -> QuerySet[Discount]:
         .filter(Q(assigned_users=basket.user) | Q(assigned_users__isnull=True))
         .filter(automatic=True)
     )
+
+def generate_discount_code(**kwargs):  # noqa: C901
+    """
+    Generates a discount code (or a batch of discount codes) as specified by the
+    arguments passed.
+
+    Note that the prefix argument will not add any characters between it and the
+    UUID - if you want one (the convention is a -), you need to ensure it's
+    there in the prefix (and that counts against the limit)
+
+    If you specify redemption_type, specifying one_time or one_time_per_user will not be
+    honored.
+
+    Keyword Args:
+    * discount_type - one of the valid discount types
+    * payment_type - one of the valid payment types
+    * redemption_type - one of the valid redemption types (overrules use of the flags)
+    * amount - the value of the discount
+    * one_time - boolean; discount can only be redeemed once
+    * one_time_per_user - boolean; discount can only be redeemed once per user
+    * activates - date to activate
+    * expires - date to expire the code
+    * count - number of codes to create (requires prefix)
+    * prefix - prefix to append to the codes (max 63 characters)
+
+    Returns:
+    * List of generated codes, with the following fields:
+      code, type, amount, expiration_date
+
+    """
+    codes_to_generate = []
+    discount_type = kwargs["discount_type"]
+    redemption_type = REDEMPTION_TYPE_UNLIMITED
+    payment_type = kwargs["payment_type"]
+    amount = Decimal(kwargs["amount"])
+    if kwargs["discount_type"] not in ALL_DISCOUNT_TYPES:
+        raise Exception(f"Discount type {kwargs['discount_type']} is not valid.")  # noqa: EM102, TRY002
+    
+    if payment_type not in ALL_PAYMENT_TYPES:
+        raise Exception(f"Payment type {payment_type} is not valid.")  # noqa: EM102, TRY002
+
+    if kwargs["discount_type"] == DISCOUNT_TYPE_PERCENT_OFF and amount > 100:  # noqa: PLR2004
+        raise Exception(  # noqa: TRY002
+            f"Discount amount {amount} not valid for discount type {DISCOUNT_TYPE_PERCENT_OFF}."  # noqa: EM102
+        )
+
+    if kwargs["count"] > 1 and "prefix" not in kwargs:
+        raise Exception("You must specify a prefix to create a batch of codes.")  # noqa: EM101, TRY002
+
+    if kwargs["count"] > 1:
+        prefix = kwargs["prefix"]
+
+        # upped the discount code limit to 100 characters - this used to be 13 (50 - 37 for the UUID)
+        if len(prefix) > 63:  # noqa: PLR2004
+            raise Exception(  # noqa: TRY002
+                f"Prefix {prefix} is {len(prefix)} - prefixes must be 63 characters or less."  # noqa: EM102
+            )
+
+        for i in range(kwargs["count"]):  # noqa: B007
+            generated_uuid = uuid.uuid4()
+            code = f"{prefix}{generated_uuid}"
+
+            codes_to_generate.append(code)
+    else:
+        codes_to_generate = kwargs["codes"]
+
+    if kwargs.get("one_time"):
+        redemption_type = REDEMPTION_TYPE_ONE_TIME
+
+    if kwargs.get("once_per_user"):
+        redemption_type = REDEMPTION_TYPE_ONE_TIME_PER_USER
+
+    if (
+        "redemption_type" in kwargs
+        and kwargs["redemption_type"] in ALL_REDEMPTION_TYPES
+    ):
+        redemption_type = kwargs["redemption_type"]
+
+    if "expires" in kwargs and kwargs["expires"] is not None:
+        expiration_date = parse_supplied_date(kwargs["expires"])
+    else:
+        expiration_date = None
+
+    if "activates" in kwargs and kwargs["activates"] is not None:
+        activation_date = parse_supplied_date(kwargs["activates"])
+    else:
+        activation_date = None
+
+    if "integrated_system" in kwargs and kwargs["integrated_system"] is not None:
+        # Try to get the integrated system via ID or slug.  Raise an exception if it doesn't exist.
+        # check if integrated_system is an integer or a slug
+        integrated_system_missing_msg = f"Integrated system {kwargs['integrated_system']} does not exist."
+        if kwargs["integrated_system"].isdigit():
+            try:
+                integrated_system = IntegratedSystem.objects.get(pk=kwargs["integrated_system"])
+            except IntegratedSystem.DoesNotExist:
+                raise Exception(integrated_system_missing_msg) # noqa: B904, TRY002
+        else:
+            try:
+                integrated_system = IntegratedSystem.objects.get(slug=kwargs["integrated_system"])
+            except IntegratedSystem.DoesNotExist:
+                raise Exception(integrated_system_missing_msg)  # noqa: B904, TRY002 
+    else:
+        integrated_system = None
+
+    if "product" in kwargs and kwargs["product"] is not None:
+        # Try to get the product via ID or SKU.  Raise an exception if it doesn't exist.
+        product_missing_msg = f"Product {kwargs['product']} does not exist."
+        if kwargs["product"].isdigit():
+            try:
+                product = Product.objects.get(pk=kwargs["product"])
+            except Product.DoesNotExist:
+                raise Exception(product_missing_msg) # noqa: B904, TRY002
+        else:
+            try:
+                product = Product.objects.get(sku=kwargs["product"])
+            except Product.DoesNotExist:
+                raise Exception(product_missing_msg)  # noqa: B904, TRY002
+    else:
+        product = None
+
+    if "users" in kwargs and kwargs["users"] is not None:
+        # Try to get the users via ID or email.  Raise an exception if it doesn't exist.
+        users = []
+        user_missing_msg = "User %s does not exist."
+        for user in kwargs["users"]:
+            if user.isdigit():
+                try:
+                    users.append(User.objects.get(pk=user))
+                except User.DoesNotExist:
+                    raise Exception(user_missing_msg % user)
+            else:
+                try:
+                    user = User.objects.get(email=user)
+                    users.append(user)
+                except User.DoesNotExist:
+                    raise Exception(user_missing_msg % user)
+    else:
+        users = None
+
+
+    generated_codes = []
+
+    for code_to_generate in codes_to_generate:
+        with reversion.create_revision():
+            discount = Discount.objects.create(
+                discount_type=discount_type,
+                redemption_type=redemption_type,
+                payment_type=payment_type,
+                expiration_date=expiration_date,
+                activation_date=activation_date,
+                discount_code=code_to_generate,
+                amount=amount,
+                is_bulk=True,
+                integrated_system=integrated_system,
+                product=product,
+            )
+        if users:
+            discount.assigned_users.set(users)
+
+        generated_codes.append(discount)
+
+    return generated_codes
