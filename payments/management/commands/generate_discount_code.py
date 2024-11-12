@@ -1,3 +1,7 @@
+"""
+This module contains the management command to generate discount codes.
+"""
+
 import csv
 
 from django.core.management import BaseCommand
