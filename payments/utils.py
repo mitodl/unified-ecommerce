@@ -32,7 +32,7 @@ def product_price_with_discount(discount, product: Product) -> float:
 
 def parse_supplied_date(datearg):
     """
-    Creates a datetime with timezone from a user-supplied date. For use in
+    Create a datetime with timezone from a user-supplied date. For use in
     management commands.
 
     Args:

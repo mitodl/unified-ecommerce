@@ -12,6 +12,9 @@ class Command(BaseCommand):
     help = "Deletes multiple discounts using the Discount IDs."
 
     def add_arguments(self, parser) -> None:
+        """
+        Add arguments to the command parser.
+        """
         parser.add_argument(
             "discount_ids",
             type=int,
@@ -19,7 +22,10 @@ class Command(BaseCommand):
             help="The IDs of the discounts to delete.",
         )
 
-    def handle(self, *args, **options) -> None:
+    def handle(self, **options) -> None:
+        """
+        Handle the deletion of discounts based on provided discount IDs.
+        """
         discount_ids = options["discount_ids"]
         discounts = Discount.objects.filter(id__in=discount_ids)
         count, _ = discounts.delete()

@@ -9,12 +9,16 @@ class Command(BaseCommand):
     """
     Generates discount codes.
     An example usage of this command:
-    python manage.py generate_discount_code --payment-type marketing --amount 10 --count 5 --one-time
+    python manage.py generate_discount_code --payment-type marketing \
+    --amount 10 --count 5 --one-time
     """
 
     help = "Generates discount codes."
 
     def add_arguments(self, parser) -> None:
+        """
+        Add command line arguments to the parser.
+        """
         parser.add_argument(
             "--prefix",
             type=str,
@@ -24,26 +28,38 @@ class Command(BaseCommand):
         parser.add_argument(
             "--expires",
             type=str,
-            help="Optional expiration date for the code, in ISO-8601 (YYYY-MM-DD) format.",
+            help=(
+                "Optional expiration date for the code, "
+                "in ISO-8601 (YYYY-MM-DD) format."
+            ),
         )
 
         parser.add_argument(
             "--activates",
             type=str,
-            help="Optional activation date for the code, in ISO-8601 (YYYY-MM-DD) format.",
+            help=(
+                "Optional activation date for the code, "
+                "in ISO-8601 (YYYY-MM-DD) format."
+            ),
         )
 
         parser.add_argument(
             "--discount-type",
             type=str,
-            help="Sets the discount type (dollars-off, percent-off, fixed-price; default percent-off)",
+            help=(
+                "Sets the discount type (dollars-off, percent-off, fixed-price; "
+                "default percent-off)"
+            ),
             default="dollars-off",
         )
 
         parser.add_argument(
             "--payment-type",
             type=str,
-            help="Sets the payment type (marketing, sales, financial-assistance, customer-support, staff)",
+            help=(
+                "Sets the payment type (marketing, sales, financial-assistance, "
+                "customer-support, staff)"
+            ),
             required=True,
         )
 
@@ -66,13 +82,19 @@ class Command(BaseCommand):
 
         parser.add_argument(
             "--one-time",
-            help="Make the resulting code(s) one-time redemptions (otherwise, default to unlimited)",
+            help=(
+                "Make the resulting code(s) one-time redemptions "
+                "(otherwise, default to unlimited)"
+            ),
             action="store_true",
         )
 
         parser.add_argument(
             "--once-per-user",
-            help="Make the resulting code(s) one-time per user redemptions (otherwise, default to unlimited)",
+            help=(
+                "Make the resulting code(s) one-time per user redemptions "
+                "(otherwise, default to unlimited)"
+            ),
             action="store_true",
         )
 
@@ -99,6 +121,9 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **kwargs):  # pylint: disable=unused-argument  # noqa: ARG002
+        """
+        Handle the generation of discount codes based on the provided arguments.
+        """
         # Don't allow the creation of bulk unlimited discounts.
         if not kwargs.get("one_time") and kwargs.get("bulk"):
             self.stderr.write(
@@ -112,7 +137,7 @@ class Command(BaseCommand):
         generated_codes = []
         try:
             generated_codes = generate_discount_code(**kwargs)
-        except Exception as e:  # noqa: BLE001
+        except (ValueError, TypeError) as e:
             self.stderr.write(self.style.ERROR(e))
 
         with open("generated-codes.csv", mode="w") as output_file:  # noqa: PTH123

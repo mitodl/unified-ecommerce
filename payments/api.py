@@ -663,7 +663,8 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     * one_time_per_user - boolean; discount can only be redeemed once per user
     * activates - date to activate
     * expires - date to expire the code
-    * integrated_system - ID or slug of the integrated system to associate with the discount
+    * integrated_system - ID or slug of the integrated system to associate
+      with the discount
     * product - ID or SKU of the product to associate with the discount
     * users - list of user IDs or emails to associate with the discount
 
