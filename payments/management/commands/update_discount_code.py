@@ -120,7 +120,7 @@ class Command(BaseCommand):
         number_of_updated_codes = 0
         try:
             number_of_updated_codes = update_discount_codes(**options)
-        except (ValueError, KeyError, TypeError) as e:  # noqa: BLE001
+        except (ValueError, KeyError, TypeError) as e:
             self.stderr.write(self.style.ERROR(e))
 
         self.stdout.write(
