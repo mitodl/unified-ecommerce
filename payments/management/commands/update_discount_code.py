@@ -9,7 +9,7 @@ class Command(BaseCommand):
     """
     Updates one or multiple discount codes using the Discount IDs.
     example usage of this command:
-    python manage.py update_discount_code 1 2 3 --expires 2023-01-01 --amount 10 --discount-type dollars-off --payment-type marketing --one-time --once-per
+    python manage.py update_discount_code 1 2 3 --expires 2023-01-01 --amount 10 --discount-type dollars-off --payment-type marketing
     """
 
     help = "Updates one or multiple discount codes using the Discount IDs."

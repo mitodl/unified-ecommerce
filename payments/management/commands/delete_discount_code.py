@@ -6,6 +6,7 @@ from payments.models import Discount
 class Command(BaseCommand):
     """
     Deletes multiple discounts using the Discount IDs.
+    An example usage of this command: python manage.py delete_discount_code 1 2 3
     """
 
     help = "Deletes multiple discounts using the Discount IDs."

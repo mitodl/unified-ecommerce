@@ -8,6 +8,8 @@ from payments.api import generate_discount_code
 class Command(BaseCommand):
     """
     Generates discount codes.
+    An example usage of this command:
+    python manage.py generate_discount_code --payment-type marketing --amount 10 --count 5 --one-time
     """
 
     help = "Generates discount codes."
