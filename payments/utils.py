@@ -1,12 +1,12 @@
+import dateutil
+import pytz
+
 from system_meta.models import Product
 from unified_ecommerce.constants import (
     DISCOUNT_TYPE_DOLLARS_OFF,
     DISCOUNT_TYPE_FIXED_PRICE,
     DISCOUNT_TYPE_PERCENT_OFF,
 )
-import dateutil
-import pytz
-
 from unified_ecommerce.settings import TIME_ZONE
 
 
@@ -28,6 +28,7 @@ def product_price_with_discount(discount, product: Product) -> float:
     if discount.discount_type == DISCOUNT_TYPE_FIXED_PRICE:
         return discount.amount
     return product.price
+
 
 def parse_supplied_date(datearg):
     """

@@ -476,6 +476,7 @@ def get_auto_apply_discounts_for_basket(basket_id: int) -> QuerySet[Discount]:
         .filter(automatic=True)
     )
 
+
 def generate_discount_code(**kwargs):  # noqa: C901
     """
     Generates a discount code (or a batch of discount codes) as specified by the
@@ -512,7 +513,7 @@ def generate_discount_code(**kwargs):  # noqa: C901
     amount = Decimal(kwargs["amount"])
     if kwargs["discount_type"] not in ALL_DISCOUNT_TYPES:
         raise Exception(f"Discount type {kwargs['discount_type']} is not valid.")  # noqa: EM102, TRY002
-    
+
     if payment_type not in ALL_PAYMENT_TYPES:
         raise Exception(f"Payment type {payment_type} is not valid.")  # noqa: EM102, TRY002
 
@@ -566,17 +567,23 @@ def generate_discount_code(**kwargs):  # noqa: C901
     if "integrated_system" in kwargs and kwargs["integrated_system"] is not None:
         # Try to get the integrated system via ID or slug.  Raise an exception if it doesn't exist.
         # check if integrated_system is an integer or a slug
-        integrated_system_missing_msg = f"Integrated system {kwargs['integrated_system']} does not exist."
+        integrated_system_missing_msg = (
+            f"Integrated system {kwargs['integrated_system']} does not exist."
+        )
         if kwargs["integrated_system"].isdigit():
             try:
-                integrated_system = IntegratedSystem.objects.get(pk=kwargs["integrated_system"])
+                integrated_system = IntegratedSystem.objects.get(
+                    pk=kwargs["integrated_system"]
+                )
             except IntegratedSystem.DoesNotExist:
-                raise Exception(integrated_system_missing_msg) # noqa: B904, TRY002
+                raise Exception(integrated_system_missing_msg)  # noqa: B904, TRY002
         else:
             try:
-                integrated_system = IntegratedSystem.objects.get(slug=kwargs["integrated_system"])
+                integrated_system = IntegratedSystem.objects.get(
+                    slug=kwargs["integrated_system"]
+                )
             except IntegratedSystem.DoesNotExist:
-                raise Exception(integrated_system_missing_msg)  # noqa: B904, TRY002 
+                raise Exception(integrated_system_missing_msg)  # noqa: B904, TRY002
     else:
         integrated_system = None
 
@@ -587,7 +594,7 @@ def generate_discount_code(**kwargs):  # noqa: C901
             try:
                 product = Product.objects.get(pk=kwargs["product"])
             except Product.DoesNotExist:
-                raise Exception(product_missing_msg) # noqa: B904, TRY002
+                raise Exception(product_missing_msg)  # noqa: B904, TRY002
         else:
             try:
                 product = Product.objects.get(sku=kwargs["product"])
@@ -615,7 +622,6 @@ def generate_discount_code(**kwargs):  # noqa: C901
     else:
         users = None
 
-
     generated_codes = []
 
     for code_to_generate in codes_to_generate:
@@ -639,11 +645,12 @@ def generate_discount_code(**kwargs):  # noqa: C901
 
     return generated_codes
 
+
 def update_discount_codes(**kwargs):  # noqa: C901
     """
     Updates a discount code (or a batch of discount codes) as specified by the
     arguments passed.
-    
+
     Keyword Args:
     * discount_ids - list of discount IDs to update
     * discount_type - one of the valid discount types
@@ -657,7 +664,7 @@ def update_discount_codes(**kwargs):  # noqa: C901
     * integrated_system - ID or slug of the integrated system to associate with the discount
     * product - ID or SKU of the product to associate with the discount
     * users - list of user IDs or emails to associate with the discount
-    
+
     Returns:
     * Number of discounts updated
 
@@ -666,11 +673,11 @@ def update_discount_codes(**kwargs):  # noqa: C901
     if kwargs.get("discount_type"):
         if kwargs["discount_type"] not in ALL_DISCOUNT_TYPES:
             raise Exception(f"Discount type {kwargs['discount_type']} is not valid.")
-        else :
+        else:
             discount_type = kwargs["discount_type"]
     else:
         discount_type = None
-        
+
     if kwargs.get("payment_type"):
         if kwargs["payment_type"] not in ALL_PAYMENT_TYPES:
             raise Exception(f"Payment type {kwargs['payment_type']} is not valid.")
@@ -678,41 +685,49 @@ def update_discount_codes(**kwargs):  # noqa: C901
             payment_type = kwargs["payment_type"]
     else:
         payment_type = None
-        
+
     if kwargs.get("redemption_type"):
         if kwargs["redemption_type"] not in ALL_REDEMPTION_TYPES:
-            raise Exception(f"Redemption type {kwargs['redemption_type']} is not valid.")
+            raise Exception(
+                f"Redemption type {kwargs['redemption_type']} is not valid."
+            )
         else:
             redemption_type = kwargs["redemption_type"]
     else:
         redemption_type = None
-        
+
     if kwargs.get("amount"):
         amount = Decimal(kwargs["amount"])
     else:
         amount = None
-        
+
     if kwargs.get("activates"):
         activation_date = parse_supplied_date(kwargs["activates"])
     else:
         activation_date = None
-        
+
     if kwargs.get("expires"):
         expiration_date = parse_supplied_date(kwargs["expires"])
     else:
         expiration_date = None
-    
+
     if kwargs.get("integrated_system"):
         # Try to get the integrated system via ID or slug.  Raise an exception if it doesn't exist.
-        integrated_system_missing_msg = f"Integrated system {kwargs['integrated_system']} does not exist."
+        integrated_system_missing_msg = (
+            f"Integrated system {kwargs['integrated_system']} does not exist."
+        )
         if kwargs["integrated_system"].isdigit():
             try:
-                integrated_system = IntegratedSystem.objects.get(pk=kwargs["integrated_system"])
+                integrated_system = IntegratedSystem.objects.get(
+                    pk=kwargs["integrated_system"]
+                )
             except IntegratedSystem.DoesNotExist:
                 raise Exception(integrated_system_missing_msg)
         else:
             try:
-                integrated_system = IntegratedSystem.objects.get(slug=kwargs["integrated_system"])
+                integrated_system = IntegratedSystem.objects.get(
+                    slug=kwargs["integrated_system"]
+                )
             except IntegratedSystem.DoesNotExist:
                 raise Exception(integrated_system_missing_msg)
     else:
@@ -758,25 +773,37 @@ def update_discount_codes(**kwargs):  # noqa: C901
     # Don't include any discounts with one time or one time per user redemption types
     # if there is a matching RedeemedDiscount, or if the max_redemptions has been reached.
     for discount in discounts_to_update:
-        if discount.redemption_type in [REDEMPTION_TYPE_ONE_TIME, REDEMPTION_TYPE_ONE_TIME_PER_USER]:
+        if discount.redemption_type in [
+            REDEMPTION_TYPE_ONE_TIME,
+            REDEMPTION_TYPE_ONE_TIME_PER_USER,
+        ]:
             if discount.redeemed_discounts.exists():
                 discounts_to_update = discounts_to_update.exclude(pk=discount.pk)
-        elif discount.max_redemptions and discount.redeemed_discounts.count() == discount.max_redemptions:
+        elif (
+            discount.max_redemptions
+            and discount.redeemed_discounts.count() == discount.max_redemptions
+        ):
             discounts_to_update = discounts_to_update.exclude(pk=discount.pk)
 
     discount_attributes_dict = {
-            "discount_type": discount_type,
-            "redemption_type": redemption_type,
-            "payment_type": payment_type,
-            "expiration_date": expiration_date,
-            "activation_date": activation_date,
-            "amount": amount,
-            "integrated_system": integrated_system,
-            "product": product,
-        }
-    discount_values_to_update = {key: value for key, value in discount_attributes_dict.items() if value is not None}
+        "discount_type": discount_type,
+        "redemption_type": redemption_type,
+        "payment_type": payment_type,
+        "expiration_date": expiration_date,
+        "activation_date": activation_date,
+        "amount": amount,
+        "integrated_system": integrated_system,
+        "product": product,
+    }
+    discount_values_to_update = {
+        key: value
+        for key, value in discount_attributes_dict.items()
+        if value is not None
+    }
 
-    number_of_discounts_updated = discounts_to_update.update(**discount_values_to_update)
+    number_of_discounts_updated = discounts_to_update.update(
+        **discount_values_to_update
+    )
 
     if users:
         for discount in discounts_to_update:

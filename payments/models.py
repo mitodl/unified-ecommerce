@@ -8,6 +8,7 @@ from datetime import datetime
 from decimal import Decimal
 
 import pytz
+import reversion
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -15,7 +16,6 @@ from django.db import models, transaction
 from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
 from reversion.models import Version
-import reversion
 
 from payments.utils import product_price_with_discount
 from system_meta.models import IntegratedSystem, Product
@@ -33,6 +33,7 @@ from unified_ecommerce.plugin_manager import get_plugin_manager
 User = get_user_model()
 log = logging.getLogger(__name__)
 pm = get_plugin_manager()
+
 
 @reversion.register(exclude=("created_on", "updated_on"))
 class Discount(TimestampedModel):
@@ -173,7 +174,7 @@ class Discount(TimestampedModel):
 
     def __str__(self):
         return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
-    
+
     @staticmethod
     def resolve_discount_version(discount, discount_version=None):
         """
@@ -208,13 +209,16 @@ class Discount(TimestampedModel):
                     integrated_system=IntegratedSystem.objects.get(
                         pk=test_version.field_dict["integrated_system_id"]
                     ),
-                    product=Product.objects.get(pk=test_version.field_dict["product_id"]),
+                    product=Product.objects.get(
+                        pk=test_version.field_dict["product_id"]
+                    ),
                     assigned_users=test_version.field_dict["assigned_users"],
                     deleted_on=test_version.field_dict["deleted_on"],
                     deleted_by_cascade=test_version.field_dict["deleted_by_cascade"],
                 )
         exception_message = "Invalid product version specified"
         raise TypeError(exception_message)
+
 
 class Basket(TimestampedModel):
     """Represents a User's basket."""
