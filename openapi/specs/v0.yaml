@@ -599,6 +599,7 @@ components:
           maxLength: 46
         user_taxable_country_code:
           type: string
+          nullable: true
           description: The country code for the user for this basket for tax purposes.
           maxLength: 2
         user_taxable_geolocation_type:
@@ -612,6 +613,7 @@ components:
             * `none` - none
         user_blockable_country_code:
           type: string
+          nullable: true
           description: The country code for the user for this basket for blocked items.
           maxLength: 2
         user_blockable_geolocation_type:

@@ -225,7 +225,7 @@ export interface Nested {
      * @type {string}
      * @memberof Nested
      */
-    'user_taxable_country_code'?: string;
+    'user_taxable_country_code'?: string | null;
     /**
      *
      * @type {UserTaxableGeolocationTypeEnum}
@@ -237,7 +237,7 @@ export interface Nested {
      * @type {string}
      * @memberof Nested
      */
-    'user_blockable_country_code'?: string;
+    'user_blockable_country_code'?: string | null;
     /**
      * How the user\'s location was determined for blocked items.
      * @type {string}
