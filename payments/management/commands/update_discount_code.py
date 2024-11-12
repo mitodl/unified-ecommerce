@@ -1,9 +1,11 @@
-import pytz
 from datetime import datetime
-from payments.api import update_discount_codes
+
+import pytz
 from django.core.management import BaseCommand
 
+from payments.api import update_discount_codes
 from unified_ecommerce import settings
+
 
 class Command(BaseCommand):
     """
@@ -88,8 +90,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         if options.get("expire_now"):
-            #convert date to string
-            options["expires"] = datetime.now(tz=pytz.timezone(settings.TIME_ZONE)).strftime("%Y-%m-%d")
+            # convert date to string
+            options["expires"] = datetime.now(
+                tz=pytz.timezone(settings.TIME_ZONE)
+            ).strftime("%Y-%m-%d")
 
         number_of_updated_codes = 0
         try:
@@ -98,5 +102,7 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR(e))
 
         self.stdout.write(
-            self.style.SUCCESS(f"Successfully updated {number_of_updated_codes} discounts.")
+            self.style.SUCCESS(
+                f"Successfully updated {number_of_updated_codes} discounts."
+            )
         )

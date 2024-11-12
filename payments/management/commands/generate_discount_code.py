@@ -97,7 +97,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **kwargs):  # pylint: disable=unused-argument  # noqa: ARG002
-
         # Don't allow the creation of bulk unlimited discounts.
         if not kwargs.get("one_time") and kwargs.get("bulk"):
             self.stderr.write(

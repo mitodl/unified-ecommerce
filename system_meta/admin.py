@@ -1,7 +1,6 @@
 """Django Admin for system_meta app"""
 
 from django.contrib import admin
-from payments.models import Discount
 from reversion.admin import VersionAdmin
 from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter, highlight_deleted
 
