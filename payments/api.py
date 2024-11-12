@@ -477,9 +477,9 @@ def get_auto_apply_discounts_for_basket(basket_id: int) -> QuerySet[Discount]:
     )
 
 
-def generate_discount_code(**kwargs):  # noqa: C901
+def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
     """
-    Generates a discount code (or a batch of discount codes) as specified by the
+    Generate a discount code (or a batch of discount codes) as specified by the
     arguments passed.
 
     Note that the prefix argument will not add any characters between it and the
@@ -512,26 +512,28 @@ def generate_discount_code(**kwargs):  # noqa: C901
     payment_type = kwargs["payment_type"]
     amount = Decimal(kwargs["amount"])
     if kwargs["discount_type"] not in ALL_DISCOUNT_TYPES:
-        raise Exception(f"Discount type {kwargs['discount_type']} is not valid.")  # noqa: EM102, TRY002
+        raise ValueError(f"Invalid discount type: {kwargs['discount_type']}.")  # noqa: EM102, TRY003
 
     if payment_type not in ALL_PAYMENT_TYPES:
-        raise Exception(f"Payment type {payment_type} is not valid.")  # noqa: EM102, TRY002
+        raise ValueError(f"Payment type {payment_type} is not valid.")  # noqa: EM102, TRY003
 
     if kwargs["discount_type"] == DISCOUNT_TYPE_PERCENT_OFF and amount > 100:  # noqa: PLR2004
-        raise Exception(  # noqa: TRY002
-            f"Discount amount {amount} not valid for discount type {DISCOUNT_TYPE_PERCENT_OFF}."  # noqa: EM102
+        message = (
+            f"Discount amount {amount} not valid for discount type "
+            f"{DISCOUNT_TYPE_PERCENT_OFF}."
         )
+        raise ValueError(message)
 
     if kwargs["count"] > 1 and "prefix" not in kwargs:
-        raise Exception("You must specify a prefix to create a batch of codes.")  # noqa: EM101, TRY002
+        raise ValueError("You must specify a prefix to create a batch of codes.")  # noqa: EM101, TRY003
 
     if kwargs["count"] > 1:
         prefix = kwargs["prefix"]
 
-        # upped the discount code limit to 100 characters - this used to be 13 (50 - 37 for the UUID)
+        # upped the discount code limit to 100 characters - this used to be 13 (50 - 37 for the UUID)  # noqa: E501
         if len(prefix) > 63:  # noqa: PLR2004
-            raise Exception(  # noqa: TRY002
-                f"Prefix {prefix} is {len(prefix)} - prefixes must be 63 characters or less."  # noqa: EM102
+            raise ValueError(  # noqa: TRY003
+                f"Prefix {prefix} is {len(prefix)} - prefixes must be 63 characters or less."  # noqa: E501, EM102
             )
 
         for i in range(kwargs["count"]):  # noqa: B007
@@ -565,7 +567,7 @@ def generate_discount_code(**kwargs):  # noqa: C901
         activation_date = None
 
     if "integrated_system" in kwargs and kwargs["integrated_system"] is not None:
-        # Try to get the integrated system via ID or slug.  Raise an exception if it doesn't exist.
+        # Try to get the integrated system via ID or slug.  Raise an exception if it doesn't exist.  # noqa: E501
         # check if integrated_system is an integer or a slug
         integrated_system_missing_msg = (
             f"Integrated system {kwargs['integrated_system']} does not exist."
@@ -576,14 +578,14 @@ def generate_discount_code(**kwargs):  # noqa: C901
                     pk=kwargs["integrated_system"]
                 )
             except IntegratedSystem.DoesNotExist:
-                raise Exception(integrated_system_missing_msg)  # noqa: B904, TRY002
+                raise ValueError(integrated_system_missing_msg)  # noqa: B904
         else:
             try:
                 integrated_system = IntegratedSystem.objects.get(
                     slug=kwargs["integrated_system"]
                 )
             except IntegratedSystem.DoesNotExist:
-                raise Exception(integrated_system_missing_msg)  # noqa: B904, TRY002
+                raise ValueError(integrated_system_missing_msg)  # noqa: B904
     else:
         integrated_system = None
 
@@ -594,12 +596,12 @@ def generate_discount_code(**kwargs):  # noqa: C901
             try:
                 product = Product.objects.get(pk=kwargs["product"])
             except Product.DoesNotExist:
-                raise Exception(product_missing_msg)  # noqa: B904, TRY002
+                raise ValueError(product_missing_msg)  # noqa: B904
         else:
             try:
                 product = Product.objects.get(sku=kwargs["product"])
             except Product.DoesNotExist:
-                raise Exception(product_missing_msg)  # noqa: B904, TRY002
+                raise ValueError(product_missing_msg)  # noqa: B904
     else:
         product = None
 
@@ -607,18 +609,18 @@ def generate_discount_code(**kwargs):  # noqa: C901
         # Try to get the users via ID or email.  Raise an exception if it doesn't exist.
         users = []
         user_missing_msg = "User %s does not exist."
-        for user in kwargs["users"]:
-            if user.isdigit():
+        for user_identifier in kwargs["users"]:
+            if user_identifier.isdigit():
                 try:
-                    users.append(User.objects.get(pk=user))
+                    users.append(User.objects.get(pk=user_identifier))
                 except User.DoesNotExist:
-                    raise Exception(user_missing_msg % user)
+                    raise ValueError(user_missing_msg % user_identifier)  # noqa: B904
             else:
                 try:
-                    user = User.objects.get(email=user)
+                    user = User.objects.get(email=user_identifier)
                     users.append(user)
                 except User.DoesNotExist:
-                    raise Exception(user_missing_msg % user)
+                    raise ValueError(user_missing_msg % user)  # noqa: B904
     else:
         users = None
 
@@ -646,9 +648,9 @@ def generate_discount_code(**kwargs):  # noqa: C901
     return generated_codes
 
 
-def update_discount_codes(**kwargs):  # noqa: C901
+def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     """
-    Updates a discount code (or a batch of discount codes) as specified by the
+    Update a discount code (or a batch of discount codes) as specified by the
     arguments passed.
 
     Keyword Args:
@@ -672,7 +674,8 @@ def update_discount_codes(**kwargs):  # noqa: C901
     discount_ids_to_update = kwargs["discount_ids"]
     if kwargs.get("discount_type"):
         if kwargs["discount_type"] not in ALL_DISCOUNT_TYPES:
-            raise Exception(f"Discount type {kwargs['discount_type']} is not valid.")
+            error_message = f"Discount type {kwargs['discount_type']} is not valid."
+            raise ValueError(error_message)
         else:
             discount_type = kwargs["discount_type"]
     else:
@@ -680,7 +683,8 @@ def update_discount_codes(**kwargs):  # noqa: C901
 
     if kwargs.get("payment_type"):
         if kwargs["payment_type"] not in ALL_PAYMENT_TYPES:
-            raise Exception(f"Payment type {kwargs['payment_type']} is not valid.")
+            error_message = f"Payment type {kwargs['payment_type']} is not valid."
+            raise ValueError(error_message)
         else:
             payment_type = kwargs["payment_type"]
     else:
@@ -688,18 +692,14 @@ def update_discount_codes(**kwargs):  # noqa: C901
 
     if kwargs.get("redemption_type"):
         if kwargs["redemption_type"] not in ALL_REDEMPTION_TYPES:
-            raise Exception(
-                f"Redemption type {kwargs['redemption_type']} is not valid."
-            )
+            error_message = f"Redemption type {kwargs['redemption_type']} is not valid."
+            raise ValueError(error_message)
         else:
             redemption_type = kwargs["redemption_type"]
     else:
         redemption_type = None
 
-    if kwargs.get("amount"):
-        amount = Decimal(kwargs["amount"])
-    else:
-        amount = None
+    amount = Decimal(kwargs["amount"]) if kwargs.get("amount") else None
 
     if kwargs.get("activates"):
         activation_date = parse_supplied_date(kwargs["activates"])
@@ -712,7 +712,8 @@ def update_discount_codes(**kwargs):  # noqa: C901
         expiration_date = None
 
     if kwargs.get("integrated_system"):
-        # Try to get the integrated system via ID or slug.  Raise an exception if it doesn't exist.
+        # Try to get the integrated system via ID or slug.
+        # Raise an exception if it doesn't exist.
         integrated_system_missing_msg = (
             f"Integrated system {kwargs['integrated_system']} does not exist."
         )
@@ -722,14 +723,14 @@ def update_discount_codes(**kwargs):  # noqa: C901
                     pk=kwargs["integrated_system"]
                 )
             except IntegratedSystem.DoesNotExist:
-                raise Exception(integrated_system_missing_msg)
+                raise ValueError(integrated_system_missing_msg)  # noqa: B904
         else:
             try:
                 integrated_system = IntegratedSystem.objects.get(
                     slug=kwargs["integrated_system"]
                 )
             except IntegratedSystem.DoesNotExist:
-                raise Exception(integrated_system_missing_msg)
+                raise ValueError(integrated_system_missing_msg)  # noqa: B904
     else:
         integrated_system = None
 
@@ -740,12 +741,12 @@ def update_discount_codes(**kwargs):  # noqa: C901
             try:
                 product = Product.objects.get(pk=kwargs["product"])
             except Product.DoesNotExist:
-                raise Exception(product_missing_msg)
+                raise ValueError(product_missing_msg)  # noqa: B904
         else:
             try:
                 product = Product.objects.get(sku=kwargs["product"])
             except Product.DoesNotExist:
-                raise Exception(product_missing_msg)
+                raise ValueError(product_missing_msg)  # noqa: B904
     else:
         product = None
 
@@ -753,25 +754,26 @@ def update_discount_codes(**kwargs):  # noqa: C901
         # Try to get the users via ID or email.  Raise an exception if it doesn't exist.
         users = []
         user_missing_msg = "User %s does not exist."
-        for user in kwargs["users"]:
-            if user.isdigit():
+        for user_identifier in kwargs["users"]:
+            if user_identifier.isdigit():
                 try:
-                    users.append(User.objects.get(pk=user))
+                    users.append(User.objects.get(pk=user_identifier))
                 except User.DoesNotExist:
-                    raise Exception(user_missing_msg % user)
+                    raise ValueError(user_missing_msg % user_identifier)  # noqa: B904
             else:
                 try:
-                    user = User.objects.get(email=user)
+                    user = User.objects.get(email=user_identifier)
                     users.append(user)
                 except User.DoesNotExist:
-                    raise Exception(user_missing_msg % user)
+                    raise ValueError(user_missing_msg % user)  # noqa: B904
     else:
         users = None
 
     discounts_to_update = Discount.objects.filter(pk__in=discount_ids_to_update)
 
     # Don't include any discounts with one time or one time per user redemption types
-    # if there is a matching RedeemedDiscount, or if the max_redemptions has been reached.
+    # if there is a matching RedeemedDiscount, or if the max_redemptions
+    # has been reached.
     for discount in discounts_to_update:
         if discount.redemption_type in [
             REDEMPTION_TYPE_ONE_TIME,

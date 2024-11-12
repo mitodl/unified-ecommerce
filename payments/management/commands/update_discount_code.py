@@ -11,7 +11,8 @@ class Command(BaseCommand):
     """
     Updates one or multiple discount codes using the Discount IDs.
     example usage of this command:
-    python manage.py update_discount_code 1 2 3 --expires 2023-01-01 --amount 10 --discount-type dollars-off --payment-type marketing
+    python manage.py update_discount_code 1 2 3 --expires 2023-01-01 --amount 10 \
+    --discount-type dollars-off --payment-type marketing
     """
 
     help = "Updates one or multiple discount codes using the Discount IDs."
@@ -27,25 +28,37 @@ class Command(BaseCommand):
         parser.add_argument(
             "--expires",
             type=str,
-            help="Optional expiration date for the code, in ISO-8601 (YYYY-MM-DD) format.",
+            help=(
+                "Optional expiration date for the code, "
+                "in ISO-8601 (YYYY-MM-DD) format."
+            ),
         )
 
         parser.add_argument(
             "--activates",
             type=str,
-            help="Optional activation date for the code, in ISO-8601 (YYYY-MM-DD) format.",
+            help=(
+                "Optional activation date for the code, "
+                "in ISO-8601 (YYYY-MM-DD) format."
+            ),
         )
 
         parser.add_argument(
             "--discount-type",
             type=str,
-            help="Sets the discount type (dollars-off, percent-off, fixed-price; default percent-off)",
+            help=(
+                "Sets the discount type (dollars-off, percent-off, fixed-price; "
+                "default percent-off)"
+            ),
         )
 
         parser.add_argument(
             "--payment-type",
             type=str,
-            help="Sets the payment type (marketing, sales, financial-assistance, customer-support, staff)",
+            help=(
+                "Sets the payment type (marketing, sales, financial-assistance, "
+                "customer-support, staff)"
+            ),
         )
 
         parser.add_argument(
@@ -57,13 +70,19 @@ class Command(BaseCommand):
 
         parser.add_argument(
             "--one-time",
-            help="Make the resulting code(s) one-time redemptions (otherwise, default to unlimited)",
+            help=(
+                "Make the resulting code(s) one-time redemptions "
+                "(otherwise, default to unlimited)"
+            ),
             action="store_true",
         )
 
         parser.add_argument(
             "--once-per-user",
-            help="Make the resulting code(s) one-time per user redemptions (otherwise, default to unlimited)",
+            help=(
+                "Make the resulting code(s) one-time per user redemptions "
+                "(otherwise, default to unlimited)"
+            ),
             action="store_true",
         )
 
@@ -88,7 +107,10 @@ class Command(BaseCommand):
             action="store_true",
         )
 
-    def handle(self, *args, **options) -> None:
+    def handle(self, **options) -> None:
+        """
+        Handle the updating of discount codes based on the provided options.
+        """
         if options.get("expire_now"):
             # convert date to string
             options["expires"] = datetime.now(
@@ -98,7 +120,7 @@ class Command(BaseCommand):
         number_of_updated_codes = 0
         try:
             number_of_updated_codes = update_discount_codes(**options)
-        except Exception as e:  # noqa: BLE001
+        except (ValueError, KeyError, TypeError) as e:  # noqa: BLE001
             self.stderr.write(self.style.ERROR(e))
 
         self.stdout.write(
