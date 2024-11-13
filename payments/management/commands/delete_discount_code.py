@@ -1,10 +1,10 @@
-from django.core.management import BaseCommand
 from datetime import datetime
 
 import pytz
-from unified_ecommerce import settings
+from django.core.management import BaseCommand
 
 from payments.models import Discount
+from unified_ecommerce import settings
 
 
 class Command(BaseCommand):

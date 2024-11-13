@@ -770,7 +770,9 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     else:
         users = None
 
-    discounts_to_update = Discount.objects.filter(discount_code__in=discount_codes_to_update)
+    discounts_to_update = Discount.objects.filter(
+        discount_code__in=discount_codes_to_update
+    )
 
     # Don't include any discounts with one time or one time per user redemption types
     # if there is a matching RedeemedDiscount, or if the max_redemptions
