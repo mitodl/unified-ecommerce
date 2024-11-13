@@ -131,3 +131,6 @@ tsconfig.tsbuildinfo
 # Non-default Keycloak certificates
 config/keycloak/tls/tls.crt
 config/keycloak/tls/tls.key
+
+# Docker Compose override
+docker-compose.override.yml
