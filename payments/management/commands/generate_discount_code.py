@@ -79,9 +79,8 @@ class Command(BaseCommand):
             "--count",
             type=int,
             nargs="?",
-            help="Number of codes to produce",
+            help="Number of codes to produce. Not required if codes are provided.",
             default=1,
-            required=True,
         )
 
         parser.add_argument(
@@ -121,6 +120,7 @@ class Command(BaseCommand):
 
         parser.add_argument(
             "--users",
+            nargs="*",
             help="List of user IDs or emails to associate with the discount.",
         )
 
@@ -134,6 +134,16 @@ class Command(BaseCommand):
                 self.style.ERROR(
                     "Bulk discounts must be one-time redemptions. "
                     "Please specify the --one-time flag."
+                )
+            )
+            return
+
+        # count is required if codes are not provided
+        if not kwargs.get("codes") and not kwargs.get("count"):
+            self.stderr.write(
+                self.style.ERROR(
+                    "Number of codes to produce is required. "
+                    "Please specify the --count flag."
                 )
             )
             return

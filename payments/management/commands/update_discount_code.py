@@ -9,20 +9,20 @@ from unified_ecommerce import settings
 
 class Command(BaseCommand):
     """
-    Updates one or multiple discount codes using the Discount IDs.
+    Updates one or multiple discount codes using the Discount codes.
     example usage of this command:
     python manage.py update_discount_code 1 2 3 --expires 2023-01-01 --amount 10 \
     --discount-type dollars-off --payment-type marketing
     """
 
-    help = "Updates one or multiple discount codes using the Discount IDs."
+    help = "Updates one or multiple discount codes using the Discount codes."
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(
-            "discount_ids",
+            "discount_codes",
             type=int,
             nargs="+",
-            help="The IDs of the discounts to update.",
+            help="The codes of the discounts to update.",
         )
 
         parser.add_argument(
@@ -98,6 +98,7 @@ class Command(BaseCommand):
 
         parser.add_argument(
             "--users",
+            nargs="*",
             help="List of user IDs or emails to associate with the discount.",
         )
 

@@ -531,7 +531,7 @@ def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
         prefix = kwargs["prefix"]
 
         # upped the discount code limit to 100 characters - this used to be 13 (50 - 37 for the UUID)  # noqa: E501
-        if len(prefix) > 63:  # noqa: PLR2004
+        if prefix and len(prefix) > 63:  # noqa: PLR2004
             raise ValueError(  # noqa: TRY003
                 f"Prefix {prefix} is {len(prefix)} - prefixes must be 63 characters or less."  # noqa: E501, EM102
             )
@@ -620,7 +620,7 @@ def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
                     user = User.objects.get(email=user_identifier)
                     users.append(user)
                 except User.DoesNotExist:
-                    raise ValueError(user_missing_msg % user)  # noqa: B904
+                    raise ValueError(user_missing_msg % user_identifier)  # noqa: B904
     else:
         users = None
 
@@ -654,7 +654,7 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     arguments passed.
 
     Keyword Args:
-    * discount_ids - list of discount IDs to update
+    * discount_codes - list of discount codes to update
     * discount_type - one of the valid discount types
     * payment_type - one of the valid payment types
     * redemption_type - one of the valid redemption types (overrules use of the flags)
@@ -672,7 +672,7 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     * Number of discounts updated
 
     """
-    discount_ids_to_update = kwargs["discount_ids"]
+    discount_codes_to_update = kwargs["discount_codes"]
     if kwargs.get("discount_type"):
         if kwargs["discount_type"] not in ALL_DISCOUNT_TYPES:
             error_message = f"Discount type {kwargs['discount_type']} is not valid."
@@ -770,7 +770,7 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     else:
         users = None
 
-    discounts_to_update = Discount.objects.filter(pk__in=discount_ids_to_update)
+    discounts_to_update = Discount.objects.filter(discount_code__in=discount_codes_to_update)
 
     # Don't include any discounts with one time or one time per user redemption types
     # if there is a matching RedeemedDiscount, or if the max_redemptions
@@ -803,10 +803,10 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
         for key, value in discount_attributes_dict.items()
         if value is not None
     }
-
-    number_of_discounts_updated = discounts_to_update.update(
-        **discount_values_to_update
-    )
+    with reversion.create_revision():
+        number_of_discounts_updated = discounts_to_update.update(
+            **discount_values_to_update
+        )
 
     if users:
         for discount in discounts_to_update:
