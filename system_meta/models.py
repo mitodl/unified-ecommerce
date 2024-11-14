@@ -5,7 +5,9 @@ import logging
 import reversion
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
+from mitol.payment_gateway.payment_utils import quantize_decimal
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 from slugify import slugify
@@ -128,3 +130,9 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
 
         exception_message = "Invalid product version specified"
         raise TypeError(exception_message)
+
+    @cached_property
+    def price_money(self):
+        """Return the item price as a quantized decimal."""
+
+        return quantize_decimal(self.price)

@@ -593,10 +593,41 @@ components:
           type: string
           format: date-time
           readOnly: true
+        user_ip:
+          type: string
+          description: The IP address of the user.
+          maxLength: 46
+        user_taxable_country_code:
+          type: string
+          nullable: true
+          description: The country code for the user for this basket for tax purposes.
+          maxLength: 2
+        user_taxable_geolocation_type:
+          allOf:
+          - $ref: '#/components/schemas/UserTaxableGeolocationTypeEnum'
+          description: |-
+            How the user's location was determined for tax purposes.
+
+            * `profile` - profile
+            * `geoip` - geoip
+            * `none` - none
+        user_blockable_country_code:
+          type: string
+          nullable: true
+          description: The country code for the user for this basket for blocked items.
+          maxLength: 2
+        user_blockable_geolocation_type:
+          type: string
+          description: How the user's location was determined for blocked items.
+          maxLength: 15
         user:
           type: integer
         integrated_system:
           type: integer
+        tax_rate:
+          type: integer
+          nullable: true
+          description: The tax rate assessed for this basket.
         discounts:
           type: array
           items:
@@ -897,3 +928,17 @@ components:
       - Declined
       - Errored
       - Review
+    UserTaxableGeolocationTypeEnum:
+      enum:
+      - profile
+      - geoip
+      - none
+      type: string
+      description: |-
+        * `profile` - profile
+        * `geoip` - geoip
+        * `none` - none
+      x-enum-descriptions:
+      - profile
+      - geoip
+      - none

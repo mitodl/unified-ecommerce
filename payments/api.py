@@ -12,13 +12,20 @@ from mitol.payment_gateway.api import CartItem as GatewayCartItem
 from mitol.payment_gateway.api import Order as GatewayOrder
 from mitol.payment_gateway.api import PaymentGateway, ProcessorResponse
 
-from payments.exceptions import PaymentGatewayError, PaypalRefundError
+from payments.dataclasses import CustomerLocationMetadata
+from payments.exceptions import (
+    PaymentGatewayError,
+    PaypalRefundError,
+    ProductBlockedError,
+)
 from payments.models import (
     Basket,
+    BlockedCountry,
     Discount,
     FulfilledOrder,
     Order,
     PendingOrder,
+    TaxRate,
 )
 from payments.tasks import send_post_sale_webhook
 from system_meta.models import IntegratedSystem
@@ -26,6 +33,8 @@ from unified_ecommerce.constants import (
     CYBERSOURCE_ACCEPT_CODES,
     CYBERSOURCE_ERROR_CODES,
     CYBERSOURCE_REASON_CODE_SUCCESS,
+    FLAGGED_COUNTRY_BLOCKED,
+    FLAGGED_COUNTRY_TAX,
     POST_SALE_SOURCE_BACKOFFICE,
     POST_SALE_SOURCE_REDIRECT,
     REFUND_SUCCESS_STATES,
@@ -33,6 +42,7 @@ from unified_ecommerce.constants import (
     ZERO_PAYMENT_DATA,
 )
 from unified_ecommerce.utils import redirect_with_user_message
+from users.api import determine_user_location, get_flagged_countries
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +52,7 @@ def generate_checkout_payload(request, system):
     basket = Basket.establish_basket(request, system)
 
     # Notes for future implementation: this used to check for
-    # * Blocked products (by country)
+    # * ~~Blocked products (by country)~~ (now handled in the basket_add hook)
     # * Re-purchases of the same product
     # * Purchasing a product that is expired
     # These are all cleared for now, but will need to go back here later.
@@ -65,17 +75,19 @@ def generate_checkout_payload(request, system):
         field_dict = line_item.product_version.field_dict
         system = IntegratedSystem.objects.get(pk=field_dict["system_id"])
         sku = f"{system.slug}!{field_dict['sku']}"
+        # Using the py-moneyed objects here for quantization.
+        # It will do it correctly and then we get a Decimal out of it.
         gateway_order.items.append(
             GatewayCartItem(
                 code=sku,
                 name=field_dict["description"],
                 quantity=1,
                 sku=sku,
-                unitprice=line_item.discounted_price,
-                taxable=0,
+                unitprice=line_item.unit_price_money,
+                taxable=line_item.tax_money,
             )
         )
-        total_price += line_item.discounted_price
+        total_price += line_item.total_price
 
     if total_price == 0:
         with transaction.atomic():
@@ -462,3 +474,99 @@ def get_auto_apply_discounts_for_basket(basket_id: int) -> QuerySet[Discount]:
         .filter(Q(assigned_users=basket.user) | Q(assigned_users__isnull=True))
         .filter(automatic=True)
     )
+
+
+def locate_customer_for_basket(request, basket, basket_item):
+    """
+    Locate the customer.
+
+    For the basket_add hook, we need to figure out where the customer is and
+    write that data to the basket so it can be used for later checks. This does
+    not enforce the check - but for blocked countries we need to consider
+    blockages that may be product-specific, so we need to know that.
+
+    Args:
+    - request (HttpRequest): the current request
+    - basket (Basket): the current basket
+    - basket_item (Product): the item to add to the basket
+    Returns:
+    - None
+    """
+
+    log.debug(
+        "locate_customer_for_basket: running for %s at %s",
+        request.user,
+        get_client_ip(request),
+    )
+
+    location_meta = CustomerLocationMetadata(
+        determine_user_location(
+            request,
+            get_flagged_countries(FLAGGED_COUNTRY_BLOCKED, product=basket_item),
+        ),
+        determine_user_location(request, get_flagged_countries(FLAGGED_COUNTRY_TAX)),
+    )
+
+    basket.set_customer_location(location_meta)
+    basket.save()
+
+
+def check_blocked_countries(basket, basket_item):
+    """
+    Check to see if the product is blocked for this customer.
+
+    We should have the customer's location stored, so now perform the check
+    to see if the product is blocked or not. If it is, we raise an exception
+    to stop the process.
+
+    Try this one first so we can kick the user out if they're blocked.
+
+    Args:
+    - basket (Basket): the current basket
+    - basket_item (Product): the item to add to the basket
+    Returns:
+    - None
+    Raises:
+    - ProductBlockedError: if the customer is blocked
+    """
+
+    log.debug("check_blocked_countries: checking for blockages for %s", basket.user)
+
+    blocked_qset = BlockedCountry.objects.filter(
+        country_code=basket.user_blockable_country_code
+    ).filter(Q(product__isnull=True) | Q(product=basket_item))
+
+    if blocked_qset.exists():
+        log.debug("check_blocked_countries: user is blocked")
+        errmsg = "Product %s blocked from purchase in country %s"
+        raise ProductBlockedError(
+            errmsg, basket_item, basket.user_blockable_country_code
+        )
+
+
+def check_taxable(basket):
+    """
+    Check to see if the product is taxable for this customer.
+
+    We don't consider particular items taxable or not but we may want to
+    change that in the future. (Maybe one day we'll sell gift cards or
+    something!) So, this really applies to the basket - if there's an
+    applicable rate, then we tack it on to the basket.
+
+    Args:
+    - basket (Basket): the current basket
+    Returns:
+    - None
+    """
+
+    log.debug("check_taxable: checking for tax for %s", basket.user)
+
+    taxable_qset = TaxRate.objects.filter(
+        country_code=basket.user_blockable_country_code
+    )
+
+    if taxable_qset.exists():
+        taxrate = taxable_qset.first()
+        basket.tax_rate = taxrate
+        basket.save()
+        log.debug("check_taxable: charging the tax for %s", taxrate)

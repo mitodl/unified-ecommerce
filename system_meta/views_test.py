@@ -45,7 +45,7 @@ class TestIntegratedSystemViewSet(AuthVariegatedModelViewSetTest):
             (False, False, False),
         ],
     )
-    def test_retrieve(  # noqa: PLR0913
+    def test_retrieve(
         self,
         is_active_system,
         is_logged_in,
@@ -80,7 +80,7 @@ class TestIntegratedSystemViewSet(AuthVariegatedModelViewSetTest):
             (False, False, False),
         ],
     )
-    def test_update(  # noqa: PLR0913
+    def test_update(
         self,
         is_active_system,
         is_logged_in,
@@ -132,8 +132,13 @@ class TestIntegratedSystemViewSet(AuthVariegatedModelViewSetTest):
             ),
         ],
     )
-    def test_delete(  # noqa: PLR0913
-        self, is_logged_in, use_staff_user, client, user_client, staff_client
+    def test_delete(
+        self,
+        is_logged_in,
+        use_staff_user,
+        client,
+        user_client,
+        staff_client,
     ):
         """Test that the viewset can delete an object."""
 
@@ -170,7 +175,7 @@ class TestIntegratedSystemViewSet(AuthVariegatedModelViewSetTest):
         ],
     )
     @pytest.mark.parametrize("with_bad_data", [True, False])
-    def test_create(  # noqa: PLR0913
+    def test_create(
         self,
         with_bad_data,
         is_logged_in,
@@ -226,7 +231,7 @@ class TestProductViewSet(AuthVariegatedModelViewSetTest):
             (False, False, False),
         ],
     )
-    def test_retrieve(  # noqa: PLR0913
+    def test_retrieve(
         self,
         is_active_product,
         is_logged_in,
@@ -259,7 +264,7 @@ class TestProductViewSet(AuthVariegatedModelViewSetTest):
             (False, False, False),
         ],
     )
-    def test_update(  # noqa: PLR0913
+    def test_update(
         self,
         is_active_product,
         is_logged_in,
@@ -309,8 +314,13 @@ class TestProductViewSet(AuthVariegatedModelViewSetTest):
             ),
         ],
     )
-    def test_delete(  # noqa: PLR0913
-        self, is_logged_in, use_staff_user, client, user_client, staff_client
+    def test_delete(
+        self,
+        is_logged_in,
+        use_staff_user,
+        client,
+        user_client,
+        staff_client,
     ):
         """Test that the viewset can delete an object."""
         self.queryset = Product.objects.all()
@@ -346,7 +356,7 @@ class TestProductViewSet(AuthVariegatedModelViewSetTest):
         ],
     )
     @pytest.mark.parametrize("with_bad_data", [True, False])
-    def test_create(  # noqa: PLR0913
+    def test_create(
         self,
         with_bad_data,
         is_logged_in,

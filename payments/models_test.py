@@ -1,10 +1,13 @@
 """Tests for payment models."""
 
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 import pytest
 import pytz
 import reversion
+from mitol.payment_gateway.payment_utils import quantize_decimal
+from reversion.models import Version
 
 from payments import models
 from payments.factories import (
@@ -12,6 +15,7 @@ from payments.factories import (
     BasketItemFactory,
     LineFactory,
     OrderFactory,
+    TaxRateFactory,
 )
 from system_meta.factories import (
     IntegratedSystemFactory,
@@ -362,3 +366,155 @@ def test_discounted_price_for_multiple_discounts_for_integrated_system():
     basket.discounts.add(discount_1, discount_2)
 
     assert basket_item.discounted_price == (basket_item.base_price - discount_1.amount)
+
+
+@pytest.mark.parametrize("user_is_in_taxed_country", [True, False])
+def test_basket_tax_calculation(user, user_is_in_taxed_country):
+    """Test that the tax is calculated correctly."""
+
+    if user_is_in_taxed_country:
+        tax_rate = TaxRateFactory.create(country_code=user.profile.country_code)
+    else:
+        tax_rate = TaxRateFactory.create()
+
+    basket = BasketFactory.create(user=user)
+
+    if user_is_in_taxed_country:
+        basket.tax_rate = tax_rate
+        basket.save()
+
+    with reversion.create_revision():
+        BasketItemFactory.create_batch(2, basket=basket)
+
+    basket.refresh_from_db()
+
+    for item in basket.basket_items.all():
+        assert item.tax == (
+            item.base_price * (tax_rate.tax_rate / 100)
+            if user_is_in_taxed_country
+            else 0
+        )
+
+    if user_is_in_taxed_country:
+        assert basket.tax == sum(
+            [
+                item.base_price * (tax_rate.tax_rate / 100)
+                for item in basket.basket_items.all()
+            ]
+        )
+    else:
+        assert basket.tax == 0
+
+
+def test_basket_tax_calculation_precision_check(user):
+    """
+    Test that the tax is calculated correctly in the Basket.
+
+    This is a sanity check test with a known tax value to check for introduced
+    errors.
+    """
+
+    tax_rate = TaxRateFactory.create(
+        country_code=user.profile.country_code, tax_rate=10.0
+    )
+    basket = BasketFactory.create(user=user)
+    basket.tax_rate = tax_rate
+    basket.save()
+
+    with reversion.create_revision():
+        item = BasketItemFactory.create(basket=basket, quantity=1)
+
+    basket.refresh_from_db()
+
+    # Pass tax rate as Decimal(str) - if we use a float, we get a huge mantissa.
+    tax_assessed = item.product.price * Decimal("0.1")
+    taxed_price = item.product.price + tax_assessed
+
+    assert basket.tax == tax_assessed
+    assert basket.total == taxed_price
+    assert item.tax == tax_assessed
+    assert item.total_price == taxed_price
+
+
+@pytest.mark.parametrize("user_is_in_taxed_country", [True, False])
+def test_order_tax_calculation(user, user_is_in_taxed_country):
+    """Test that the tax is calculated correctly."""
+
+    if user_is_in_taxed_country:
+        tax_rate = TaxRateFactory.create(country_code=user.profile.country_code)
+    else:
+        tax_rate = TaxRateFactory.create()
+
+    order = OrderFactory.create(purchaser=user)
+
+    if user_is_in_taxed_country:
+        order.tax_rate = tax_rate
+        order.save()
+
+    with reversion.create_revision():
+        product = ProductFactory.create()
+
+    product_version = Version.objects.get_for_object(product).first()
+
+    LineFactory.create(
+        order=order,
+        product_version=product_version,
+        discounted_price=product_version.field_dict["price"],
+    )
+
+    order.refresh_from_db()
+
+    for item in order.lines.all():
+        assert item.tax_money == quantize_decimal(
+            item.base_price * (tax_rate.tax_rate / 100)
+            if user_is_in_taxed_country
+            else 0
+        )
+
+    if user_is_in_taxed_country:
+        assert order.tax == quantize_decimal(
+            sum(
+                [
+                    item.base_price * (tax_rate.tax_rate / 100)
+                    for item in order.lines.all()
+                ]
+            )
+        )
+    else:
+        assert order.tax == 0
+
+
+def test_order_tax_calculation_precision_check(user):
+    """
+    Test that the tax is calculated correctly in the Order.
+
+    This is a sanity check test with a known tax value to check for introduced
+    errors.
+    """
+
+    tax_rate = TaxRateFactory.create(
+        country_code=user.profile.country_code, tax_rate=10.0
+    )
+    order = OrderFactory.create(purchaser=user, tax_rate=tax_rate)
+
+    with reversion.create_revision():
+        product = ProductFactory.create()
+
+    product_version = Version.objects.get_for_object(product).first()
+
+    LineFactory.create(
+        order=order,
+        product_version=product_version,
+        discounted_price=product_version.field_dict["price"],
+    )
+
+    order.refresh_from_db()
+
+    # Pass tax rate as Decimal(str) - if we use a float, we get a huge mantissa.
+    tax_assessed = product.price * Decimal("0.1")
+    taxed_price = product.price + tax_assessed
+
+    # Don't check the order, because we just store that during the checkout process.
+    assert order.tax == quantize_decimal(tax_assessed)
+    assert order.lines.first().tax == tax_assessed
+    assert order.lines.first().total_price == taxed_price

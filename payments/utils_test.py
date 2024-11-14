@@ -1,3 +1,5 @@
+"""Tests for utility functions in payments."""
+
 import pytest
 
 from payments import models, utils

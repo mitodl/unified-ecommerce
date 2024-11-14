@@ -1,3 +1,5 @@
+"""Mail functions for payments."""
+
 import logging
 from email.utils import formataddr
 
@@ -11,6 +13,8 @@ User = get_user_model()
 
 
 def send_successful_order_payment_email(order, email_subject, email_body):
+    """Send order payment email on successful transaction"""
+
     try:
         with get_message_sender(SuccessfulOrderPaymentMessage) as sender:
             sender.build_and_send_message(
@@ -28,4 +32,5 @@ def send_successful_order_payment_email(order, email_subject, email_body):
 
 def format_recipient(user: User) -> str:
     """Format the user as a recipient"""
+
     return formataddr((user.name, user.email))

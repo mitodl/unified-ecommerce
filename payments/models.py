@@ -13,9 +13,14 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.functional import cached_property
+from django_countries.fields import CountryField
 from mitol.common.models import TimestampedModel
+from mitol.payment_gateway.payment_utils import quantize_decimal
 from reversion.models import Version
+from safedelete.managers import SafeDeleteManager
+from safedelete.models import SafeDeleteModel
 
+from payments.constants import GEOLOCATION_CHOICES, GEOLOCATION_TYPE_NONE
 from payments.utils import product_price_with_discount
 from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce.constants import (
@@ -28,6 +33,7 @@ from unified_ecommerce.constants import (
     TRANSACTION_TYPES,
 )
 from unified_ecommerce.plugin_manager import get_plugin_manager
+from unified_ecommerce.utils import SoftDeleteActiveModel
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -171,7 +177,80 @@ class Discount(TimestampedModel):
         )
 
     def __str__(self):
+        """Return the discount as a string."""
+
         return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
+
+
+class BlockedCountry(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
+    """
+    Represents a country that is blocked from purchasing.
+
+    This can either be for a particular product, or a system-wide block.
+    """
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="blocked_countries",
+        null=True,
+        blank=True,
+        default=None,
+    )
+    country_code = CountryField()
+
+    objects = SafeDeleteManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        """Meta options for the model"""
+
+        verbose_name_plural = "blocked countries"
+        unique_together = ("product", "country_code")
+
+    def __str__(self):
+        """Return model data as a string"""
+
+        return (
+            f"product='{self.product.sku if self.product else 'global'}';"
+            f" country='{self.country_code.name}'"
+        )
+
+
+class TaxRate(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
+    """
+    Stores tax rates for countries. Generally, this should be a VAT rate, but
+    a text field is supplied to store the name of the tax assessed
+    """
+
+    country_code = CountryField()
+    tax_rate = models.DecimalField(max_digits=6, decimal_places=4, default=0)
+    tax_rate_name = models.CharField(max_length=100, blank=True, default="VAT")
+
+    objects = SafeDeleteManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        """Meta options for the model"""
+
+        constraints = [
+            models.UniqueConstraint(fields=["country_code"], name="unique_country")
+        ]
+
+    def to_dict(self):
+        """Return object data as dict"""
+
+        return {
+            "country_code": self.country_code,
+            "tax_rate": self.tax_rate,
+            "tax_rate_name": self.tax_rate_name,
+            "active": self.active,
+        }
+
+    def __str__(self):
+        """Return model data as a string"""
+
+        return f"{self.tax_rate}% {self.tax_rate_name} for {self.country_code}"
 
 
 class Basket(TimestampedModel):
@@ -182,6 +261,43 @@ class Basket(TimestampedModel):
         IntegratedSystem, on_delete=models.CASCADE, related_name="basket"
     )
     discounts = models.ManyToManyField(Discount, related_name="basket")
+    user_ip = models.CharField(
+        blank=True, max_length=46, help_text="The IP address of the user."
+    )
+    user_taxable_country_code = models.CharField(  # noqa: DJ001
+        max_length=2,
+        help_text="The country code for the user for this basket for tax purposes.",
+        blank=True,
+        null=True,
+        default="",
+    )
+    user_taxable_geolocation_type = models.CharField(
+        default=GEOLOCATION_TYPE_NONE,
+        choices=GEOLOCATION_CHOICES,
+        help_text="How the user's location was determined for tax purposes.",
+        max_length=15,
+    )
+    user_blockable_country_code = models.CharField(  # noqa: DJ001
+        max_length=2,
+        help_text="The country code for the user for this basket for blocked items.",
+        blank=True,
+        null=True,
+        default="",
+    )
+    user_blockable_geolocation_type = models.CharField(
+        default=GEOLOCATION_TYPE_NONE,
+        choices=GEOLOCATION_CHOICES,
+        help_text="How the user's location was determined for blocked items.",
+        max_length=15,
+    )
+    tax_rate = models.ForeignKey(
+        TaxRate,
+        on_delete=models.DO_NOTHING,
+        related_name="+",
+        help_text="The tax rate assessed for this basket.",
+        null=True,
+        blank=True,
+    )
 
     def compare_to_order(self, order):
         """
@@ -205,6 +321,54 @@ class Basket(TimestampedModel):
         """
 
         return [item.product for item in self.basket_items.all()]
+
+    def set_customer_location(self, customer_location):
+        """Ingest a CustomerLocationMetadata object."""
+
+        self.user_ip = customer_location.location_block.ip
+
+        self.user_blockable_country_code = customer_location.location_block.country_code
+        self.user_blockable_geolocation_type = (
+            customer_location.location_block.lookup_type
+        )
+        self.user_taxable_country_code = customer_location.location_tax.country_code
+        self.user_taxable_geolocation_type = customer_location.location_tax.lookup_type
+
+    @property
+    def subtotal(self) -> Decimal:
+        """Return the subtotal amount for the basket."""
+
+        return Decimal(sum([item.discounted_price for item in self.basket_items.all()]))
+
+    @property
+    def tax(self) -> Decimal:
+        """Return the aggregate tax for the basket."""
+
+        return Decimal(sum([item.tax for item in self.basket_items.all()]))
+
+    @property
+    def total(self) -> Decimal:
+        """Return the total for the basket, including discounts and tax."""
+
+        return Decimal(sum([item.total_price for item in self.basket_items.all()]))
+
+    @property
+    def subtotal_money(self) -> Decimal:
+        """Return the subtotal amount for the basket."""
+
+        return quantize_decimal(self.subtotal)
+
+    @property
+    def tax_money(self) -> Decimal:
+        """Return the aggregate tax for the basket."""
+
+        return quantize_decimal(self.tax)
+
+    @property
+    def total_money(self) -> Decimal:
+        """Return the total for the basket, including discounts and tax."""
+
+        return quantize_decimal(self.total_money)
 
     @staticmethod
     def establish_basket(request, integrated_system: IntegratedSystem):
@@ -272,7 +436,7 @@ class BasketItem(TimestampedModel):
             price_with_best_discount = product_price_with_discount(
                 self.best_discount_for_item_from_basket, self.product
             )
-        return round(price_with_best_discount, 2)
+        return price_with_best_discount
 
     @cached_property
     def best_discount_for_item_from_basket(self) -> Discount:
@@ -297,14 +461,64 @@ class BasketItem(TimestampedModel):
         return best_discount
 
     @cached_property
-    def base_price(self):
+    def discounted_price_money(self) -> Decimal:
+        """Return the total with discounts and assessed tax, as a Money object."""
+
+        return quantize_decimal(self.discounted_price)
+
+    @cached_property
+    def tax(self) -> Decimal:
+        """
+        Return the total tax assessed for this basket item.
+
+        This considers the discounted price, not the base price of the item.
+        """
+
+        return (
+            self.discounted_price * (self.basket.tax_rate.tax_rate / 100)
+            if self.basket.tax_rate
+            else Decimal(0)
+        )
+
+    @property
+    def tax_money(self) -> Decimal:
+        """Return the tax amount as a Money object."""
+
+        return quantize_decimal(self.tax)
+
+    @property
+    def base_price(self) -> Decimal:
         """Return the total price of the basket item without discounts."""
         return self.product.price * self.quantity
 
-    @cached_property
+    @property
+    def base_price_money(self) -> Decimal:
+        """Return the total with discounts and assessed tax, as a Money object."""
+
+        return quantize_decimal(self.base_price)
+
+    @property
     def price(self) -> Decimal:
         """Return the total price of the basket item with discounts."""
         return self.discounted_price * self.quantity
+
+    @property
+    def price_money(self) -> Decimal:
+        """Return the total with discounts, as a Money object."""
+
+        return quantize_decimal(self.price)
+
+    @property
+    def total_price(self) -> Decimal:
+        """Return the total with discounts and assessed tax."""
+
+        return self.price + self.tax
+
+    @property
+    def total_price_money(self) -> Decimal:
+        """Return the total with discounts and assessed tax, as a Money object."""
+
+        return quantize_decimal(self.total_price)
 
 
 class Order(TimestampedModel):
@@ -338,6 +552,42 @@ class Order(TimestampedModel):
         on_delete=models.CASCADE,
         related_name="orders",
     )
+    purchaser_ip = models.CharField(
+        blank=True, max_length=46, help_text="The IP address of the user."
+    )
+    purchaser_taxable_country_code = models.CharField(
+        max_length=2,
+        help_text="The country code for the user for this order for tax purposes.",
+        blank=True,
+        default="",
+    )
+    purchaser_taxable_geolocation_type = models.CharField(
+        default=GEOLOCATION_TYPE_NONE,
+        choices=GEOLOCATION_CHOICES,
+        help_text="How the user's location was determined for tax purposes.",
+        max_length=15,
+    )
+    purchaser_blockable_country_code = models.CharField(
+        max_length=2,
+        help_text="The country code for the user for this order for blocked items.",
+        blank=True,
+        default="",
+    )
+    purchaser_blockable_geolocation_type = models.CharField(
+        default=GEOLOCATION_TYPE_NONE,
+        choices=GEOLOCATION_CHOICES,
+        help_text="How the user's location was determined for blocked items.",
+        max_length=15,
+    )
+    tax_rate = models.ForeignKey(
+        TaxRate,
+        on_delete=models.DO_NOTHING,
+        related_name="+",
+        help_text="The tax rate assessed for this order.",
+        null=True,
+        blank=True,
+    )
+
     total_price_paid = models.DecimalField(
         decimal_places=5,
         max_digits=20,
@@ -374,6 +624,26 @@ class Order(TimestampedModel):
     def is_fulfilled(self):
         """Return if the order is fulfilled"""
         return self.state == Order.STATE.FULFILLED
+
+    @property
+    def tax(self):
+        """Return the aggregated tax amount for this order"""
+
+        return quantize_decimal(sum([line.tax for line in self.lines.all()]))
+
+    @property
+    def subtotal(self):
+        """Return the aggregated subtotal for the order"""
+
+        return quantize_decimal(sum([line.base_price for line in self.lines.all()]))
+
+    @property
+    def discounts_applied(self):
+        """Return the aggregated discounts applied to the order"""
+
+        return quantize_decimal(
+            sum([line.base_price - line.discounted_price for line in self.lines.all()])
+        )
 
     def fulfill(self, payment_data, source=POST_SALE_SOURCE_REDIRECT):
         """Fufill the order."""
@@ -540,9 +810,23 @@ class PendingOrder(Order):
 
             # TODO: Apply any discounts to the PendingOrder
 
+            # Manually set these so that we get updated data if it changes
+            # (this re-uses a PendingOrder if it exists, so it might now be wrong)
+            order.tax_rate = basket.tax_rate
+            order.purchaser_ip = basket.user_ip
+            order.purchaser_taxable_country_code = basket.user_taxable_country_code
+            order.purchaser_taxable_geolocation_type = (
+                basket.user_taxable_geolocation_type
+            )
+            order.purchaser_blockable_country_code = basket.user_blockable_country_code
+            order.purchaser_blockable_geolocation_type = (
+                basket.user_blockable_geolocation_type
+            )
+            order.save()
+
             # Create or get Line for each product.
             # Calculate the Order total based on Lines and discount.
-            total = 0
+            total = Decimal(0)
             used_discounts = []
             for product_version in product_versions:
                 basket_item = basket.basket_items.get(
@@ -557,7 +841,7 @@ class PendingOrder(Order):
                     },
                 )
                 used_discounts.append(basket_item.best_discount_for_item_from_basket)
-                total += line.discounted_price
+                total += line.total_price_money
                 log.debug(
                     "%s line %s product %s",
                     ("Created" if created else "Updated"),
@@ -698,6 +982,8 @@ class CanceledOrder(Order):
     """
 
     def __init__(self):
+        """Initialize the cancelled order."""
+
         self.delete_redeemed_discounts()
 
     class Meta:
@@ -727,6 +1013,8 @@ class DeclinedOrder(Order):
     """
 
     def __init__(self):
+        """Initialize the cancelled order."""
+
         self.delete_redeemed_discounts()
 
     class Meta:
@@ -743,6 +1031,8 @@ class ErroredOrder(Order):
     """
 
     def __init__(self):
+        """Initialize the cancelled order."""
+
         self.delete_redeemed_discounts()
 
     class Meta:
@@ -802,15 +1092,49 @@ class Line(TimestampedModel):
         """Return the item description"""
         return self.product_version.field_dict["description"]
 
-    @property
+    @cached_property
     def unit_price(self) -> Decimal:
         """Return the price of the product"""
         return self.product_version.field_dict["price"]
 
     @cached_property
-    def total_price(self) -> Decimal:
+    def base_price(self) -> Decimal:
         """Return the price of the product"""
         return self.unit_price * self.quantity
+
+    @cached_property
+    def tax(self) -> Decimal:
+        """Return the tax assessed for the item"""
+        return (
+            (self.base_price * (self.order.tax_rate.tax_rate) / 100)
+            if self.order.tax_rate
+            else 0
+        )
+
+    @cached_property
+    def total_price(self) -> Decimal:
+        """Return the price of the product"""
+        return self.unit_price * self.quantity + self.tax
+
+    @cached_property
+    def unit_price_money(self) -> Decimal:
+        """Return the price of the product"""
+        return quantize_decimal(self.unit_price)
+
+    @cached_property
+    def tax_money(self) -> Decimal:
+        """Return the tax assessed, as Money"""
+        return quantize_decimal(self.tax)
+
+    @cached_property
+    def base_price_money(self) -> Decimal:
+        """Return the price of the product"""
+        return quantize_decimal(self.base_price)
+
+    @cached_property
+    def total_price_money(self) -> Decimal:
+        """Return the price of the product"""
+        return quantize_decimal(self.total_price)
 
     @cached_property
     def product(self) -> Product:
@@ -864,4 +1188,6 @@ class RedeemedDiscount(TimestampedModel):
     )
 
     def __str__(self):
+        """Return the redeemed discount as a string."""
+
         return f"{self.discount} {self.user}"

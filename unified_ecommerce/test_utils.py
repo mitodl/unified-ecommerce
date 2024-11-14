@@ -538,8 +538,13 @@ class AuthVariegatedModelViewSetTest(BaseViewSetTest):
         assert response.status_code < 500
         return response
 
-    def _determine_client_wrapper(  # noqa: PLR0913
-        self, is_logged_in, use_staff_user, client, user_client, staff_client
+    def _determine_client_wrapper(
+        self,
+        is_logged_in,
+        use_staff_user,
+        client,
+        user_client,
+        staff_client,
     ):
         """
         Determine the client to use for the test.

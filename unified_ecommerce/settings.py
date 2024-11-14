@@ -92,8 +92,11 @@ INSTALLED_APPS = [
     "reversion",
     "oauth2_provider",
     "mitol.mail.apps.MailApp",
+    "django_countries",
+    "mitol.geoip",
     # Application modules
     "unified_ecommerce",
+    "users",
     "system_meta",
     "payments",
     "cart",
@@ -467,6 +470,19 @@ REST_FRAMEWORK_EXTENSIONS = {
     "DEFAULT_PARENT_LOOKUP_KWARG_NAME_PREFIX": DRF_NESTED_PARENT_LOOKUP_PREFIX
 }
 
+# APISIX middleware settings
+APISIX_USERDATA_MAP = {
+    "auth_user": {
+        "email": "email",
+        "preferred_username": "sub",
+        "given_name": "given_name",
+        "family_name": "family_name",
+    },
+    "authentication_userprofile": {
+        "country_code": None,
+    },
+}
+
 # ecommerce settings
 MITOL_UE_REFERENCE_NUMBER_PREFIX = get_string(
     "MITOL_UE_REFERENCE_NUMBER_PREFIX", "mitol-"
@@ -476,6 +492,10 @@ MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG = get_bool(
 )
 MITOL_UE_WEBHOOK_RETRY_COOLDOWN = get_int("MITOL_UE_WEBHOOK_RETRY_COOLDOWN", 60)
 MITOL_UE_WEBHOOK_RETRY_MAX = get_int("MITOL_UE_WEBHOOK_RETRY_MAX", 4)
+
+MITOL_UE_FORCE_PROFILE_COUNTRY = get_bool(
+    name="MITOL_UE_FORCE_PROFILE_COUNTRY", default=False
+)
 
 import_settings_modules("mitol.payment_gateway.settings.cybersource")
 
