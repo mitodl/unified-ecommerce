@@ -240,6 +240,7 @@ class BulkDiscountCollection(TimestampedModel):
 
     prefix = models.CharField(max_length=100, unique=True)
 
+
 class BlockedCountry(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
     """
     Represents a country that is blocked from purchasing.

@@ -24,8 +24,8 @@ from payments.exceptions import (
 )
 from payments.models import (
     Basket,
-    BulkDiscountCollection,
     BlockedCountry,
+    BulkDiscountCollection,
     Discount,
     FulfilledOrder,
     Order,
@@ -777,7 +777,6 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     else:
         product = None
 
-
     if kwargs.get("users"):
         if kwargs.get("clear_users"):
             error_message = "Cannot clear and set users at the same time."
@@ -862,11 +861,12 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
         for discount in discounts_to_update:
             discount.assigned_users.set(users)
 
-    #delete all bulk discount collections
+    # delete all bulk discount collections
     if kwargs.get("prefix"):
         bulk_discount_collection.delete()
 
     return number_of_discounts_updated
+
 
 def locate_customer_for_basket(request, basket, basket_item):
     """

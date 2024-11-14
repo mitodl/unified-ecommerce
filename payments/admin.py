@@ -189,6 +189,7 @@ class RefundedOrderAdmin(BaseOrderAdmin):
         """Filter only to refunded orders"""
         return super().get_queryset(request).filter(state=models.Order.STATE.REFUNDED)
 
+
 class DiscountAdmin(VersionAdmin):
     model = models.Discount
     search_fields = ["discount_type", "redemption_type", "discount_code"]
@@ -217,6 +218,7 @@ class RedeemedDiscountAdmin(admin.ModelAdmin):
     ]
     list_filter = ["discount", "order", "user"]
 
+
 @admin.register(models.BulkDiscountCollection)
 class BulkDiscountCollectionAdmin(VersionAdmin):
     """Admin for BulkDiscountCollection"""
@@ -227,6 +229,7 @@ class BulkDiscountCollectionAdmin(VersionAdmin):
         "prefix",
     ]
     list_filter = ["prefix"]
+
 
 @admin.register(models.BlockedCountry)
 class BlockedCountryAdmin(SafeDeleteAdmin):
