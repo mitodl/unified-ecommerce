@@ -850,4 +850,8 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
         for discount in discounts_to_update:
             discount.assigned_users.set(users)
 
+    #delete all bulk discount collections
+    if kwargs.get("prefix"):
+        bulk_discount_collection.delete()
+
     return number_of_discounts_updated

@@ -10,8 +10,8 @@ from unified_ecommerce import settings
 class Command(BaseCommand):
     """
     Deactivates multiple discounts using the Discount codes.
-    An example usage of this command: 
-    python manage.py deactivate_discount_code --discount_codes 1 2 3
+    An example usage of this command:
+    python manage.py delete_discount_code --discount_codes 1 2 3
     """
 
     help = "Deactivate multiple discounts using the Discount codes."
@@ -56,8 +56,6 @@ class Command(BaseCommand):
                 tz=pytz.timezone(settings.TIME_ZONE)
             ).strftime("%Y-%m-%d")
             discount.save()
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Discount codes {discount_codes} have been successfully deactivated."
-            )
+        self.stderr.write(
+            self.style.SUCCESS("Discounts have been successfully deactivated.")
         )
