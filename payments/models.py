@@ -475,7 +475,7 @@ class BasketItem(TimestampedModel):
         """
 
         return (
-            self.discounted_price * self.basket.tax_rate.tax_rate
+            self.discounted_price * (self.basket.tax_rate.tax_rate / 100)
             if self.basket.tax_rate
             else Decimal(0)
         )
@@ -1106,7 +1106,7 @@ class Line(TimestampedModel):
     def tax(self) -> Decimal:
         """Return the tax assessed for the item"""
         return (
-            (self.base_price * self.order.tax_rate.tax_rate)
+            (self.base_price * (self.order.tax_rate.tax_rate) / 100)
             if self.order.tax_rate
             else 0
         )
