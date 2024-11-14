@@ -4,7 +4,7 @@ Factory for Users
 
 import ulid
 from django.contrib.auth.models import Group, User
-from factory import LazyFunction, Trait
+from factory import LazyFunction, RelatedFactory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
 
@@ -17,16 +17,13 @@ class UserFactory(DjangoModelFactory):
     first_name = FuzzyText()
     last_name = FuzzyText()
 
+    profile = RelatedFactory("users.factories.UserProfileFactory", "user")
+
     class Meta:
         """Meta options for UserFactory"""
 
         model = User
         skip_postgeneration_save = True
-
-    class Params:
-        """Params for UserFactory"""
-
-        no_profile = Trait(profile=None)
 
 
 class GroupFactory(DjangoModelFactory):

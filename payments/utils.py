@@ -1,5 +1,8 @@
+"""Utility functions for payments."""
+
 import dateutil
 import pytz
+from decimal import Decimal
 
 from system_meta.models import Product
 from unified_ecommerce.constants import (
@@ -10,7 +13,7 @@ from unified_ecommerce.constants import (
 from unified_ecommerce.settings import TIME_ZONE
 
 
-def product_price_with_discount(discount, product: Product) -> float:
+def product_price_with_discount(discount, product: Product) -> Decimal:
     """
     Return the price of the product with the discount applied
 
@@ -18,15 +21,15 @@ def product_price_with_discount(discount, product: Product) -> float:
         discount (Discount): The discount to apply to the product
         product (Product): The product to apply the discount to
     Returns:
-        float: The price of the product with the discount applied, or the price of the
+        Decimal: The price of the product with the discount applied, or the price of the
         product if the discount type is not recognized.
     """
     if discount.discount_type == DISCOUNT_TYPE_PERCENT_OFF:
-        return product.price * (1 - discount.amount / 100)
+        return Decimal(product.price * (1 - discount.amount / 100))
     if discount.discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
-        return product.price - discount.amount
+        return Decimal(product.price - discount.amount)
     if discount.discount_type == DISCOUNT_TYPE_FIXED_PRICE:
-        return discount.amount
+        return Decimal(discount.amount)
     return product.price
 
 

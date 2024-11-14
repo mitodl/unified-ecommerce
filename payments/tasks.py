@@ -1,3 +1,5 @@
+"""Tasks for the payments app."""
+
 import logging
 
 import requests
@@ -9,14 +11,13 @@ from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer, WebhookO
 from system_meta.models import IntegratedSystem
 from unified_ecommerce.celery import app
 
-"""Tasks for the payments app."""
-
-
 log = logging.getLogger(__name__)
 
 
 @app.task
 def successful_order_payment_email_task(order_id, email_subject, email_body):
+    """Send order success email."""
+
     from payments.models import Order
 
     order = Order.objects.get(id=order_id)

@@ -47,6 +47,18 @@ export interface BasketItemWithProduct {
      * @memberof BasketItemWithProduct
      */
     'id': number;
+    /**
+     * Return the total price of the basket item with discounts.
+     * @type {number}
+     * @memberof BasketItemWithProduct
+     */
+    'price': number;
+    /**
+     * Get the price of the basket item with applicable discounts.  Returns:     Decimal: The price of the basket item reduced by an applicable discount.
+     * @type {number}
+     * @memberof BasketItemWithProduct
+     */
+    'discounted_price': number;
 }
 /**
  * Basket model serializer with items and products
@@ -203,12 +215,62 @@ export interface Nested {
      */
     'updated_on': string;
     /**
+     * The IP address of the user.
+     * @type {string}
+     * @memberof Nested
+     */
+    'user_ip'?: string;
+    /**
+     * The country code for the user for this basket for tax purposes.
+     * @type {string}
+     * @memberof Nested
+     */
+    'user_taxable_country_code'?: string | null;
+    /**
+     *
+     * @type {UserTaxableGeolocationTypeEnum}
+     * @memberof Nested
+     */
+    'user_taxable_geolocation_type'?: UserTaxableGeolocationTypeEnum;
+    /**
+     * The country code for the user for this basket for blocked items.
+     * @type {string}
+     * @memberof Nested
+     */
+    'user_blockable_country_code'?: string | null;
+    /**
+     * How the user\'s location was determined for blocked items.
+     * @type {string}
+     * @memberof Nested
+     */
+    'user_blockable_geolocation_type'?: string;
+    /**
      *
      * @type {number}
      * @memberof Nested
      */
     'user': number;
+    /**
+     *
+     * @type {number}
+     * @memberof Nested
+     */
+    'integrated_system': number;
+    /**
+     * The tax rate assessed for this basket.
+     * @type {number}
+     * @memberof Nested
+     */
+    'tax_rate'?: number | null;
+    /**
+     *
+     * @type {Array<number>}
+     * @memberof Nested
+     */
+    'discounts': Array<number>;
 }
+
+
 /**
  * Serializer for order history.
  * @export
@@ -622,6 +684,36 @@ export const StateEnum = {
 } as const;
 
 export type StateEnum = typeof StateEnum[keyof typeof StateEnum];
+
+
+/**
+ * * `profile` - profile * `geoip` - geoip * `none` - none
+ * @export
+ * @enum {string}
+ */
+
+export const UserTaxableGeolocationTypeEnumDescriptions = {
+    'profile': "profile",
+    'geoip': "geoip",
+    'none': "none",
+} as const;
+
+export const UserTaxableGeolocationTypeEnum = {
+    /**
+    * profile
+    */
+    Profile: 'profile',
+    /**
+    * geoip
+    */
+    Geoip: 'geoip',
+    /**
+    * none
+    */
+    None: 'none'
+} as const;
+
+export type UserTaxableGeolocationTypeEnum = typeof UserTaxableGeolocationTypeEnum[keyof typeof UserTaxableGeolocationTypeEnum];
 
 
 
@@ -1729,12 +1821,49 @@ export class MetaApi extends BaseAPI {
 export const PaymentsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Clears the basket for the current user.
+         * Creates or updates a basket for the current user, adding the discount if valid.
+         * @param {string} system_slug
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        paymentsBasketsClearDestroy: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v0/payments/baskets/clear/`;
+        paymentsBasketsAddDiscountCreate: async (system_slug: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'system_slug' is not null or undefined
+            assertParamExists('paymentsBasketsAddDiscountCreate', 'system_slug', system_slug)
+            const localVarPath = `/api/v0/payments/baskets/add_discount/{system_slug}/`
+                .replace(`{${"system_slug"}}`, encodeURIComponent(String(system_slug)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Clears the basket for the current user.
+         * @param {string} system_slug
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsBasketsClearDestroy: async (system_slug: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'system_slug' is not null or undefined
+            assertParamExists('paymentsBasketsClearDestroy', 'system_slug', system_slug)
+            const localVarPath = `/api/v0/payments/baskets/clear/{system_slug}/`
+                .replace(`{${"system_slug"}}`, encodeURIComponent(String(system_slug)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1949,12 +2078,25 @@ export const PaymentsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = PaymentsApiAxiosParamCreator(configuration)
     return {
         /**
-         * Clears the basket for the current user.
+         * Creates or updates a basket for the current user, adding the discount if valid.
+         * @param {string} system_slug
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async paymentsBasketsClearDestroy(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsBasketsClearDestroy(options);
+        async paymentsBasketsAddDiscountCreate(system_slug: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BasketWithProduct>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsBasketsAddDiscountCreate(system_slug, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PaymentsApi.paymentsBasketsAddDiscountCreate']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         * Clears the basket for the current user.
+         * @param {string} system_slug
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async paymentsBasketsClearDestroy(system_slug: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsBasketsClearDestroy(system_slug, options);
             const index = configuration?.serverIndex ?? 0;
             const operationBasePath = operationServerMap['PaymentsApi.paymentsBasketsClearDestroy']?.[index]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
@@ -2033,12 +2175,22 @@ export const PaymentsApiFactory = function (configuration?: Configuration, baseP
     const localVarFp = PaymentsApiFp(configuration)
     return {
         /**
-         * Clears the basket for the current user.
+         * Creates or updates a basket for the current user, adding the discount if valid.
+         * @param {PaymentsApiPaymentsBasketsAddDiscountCreateRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        paymentsBasketsClearDestroy(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.paymentsBasketsClearDestroy(options).then((request) => request(axios, basePath));
+        paymentsBasketsAddDiscountCreate(requestParameters: PaymentsApiPaymentsBasketsAddDiscountCreateRequest, options?: RawAxiosRequestConfig): AxiosPromise<BasketWithProduct> {
+            return localVarFp.paymentsBasketsAddDiscountCreate(requestParameters.system_slug, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Clears the basket for the current user.
+         * @param {PaymentsApiPaymentsBasketsClearDestroyRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsBasketsClearDestroy(requestParameters: PaymentsApiPaymentsBasketsClearDestroyRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.paymentsBasketsClearDestroy(requestParameters.system_slug, options).then((request) => request(axios, basePath));
         },
         /**
          * Creates or updates a basket for the current user, adding the selected product.
@@ -2087,6 +2239,34 @@ export const PaymentsApiFactory = function (configuration?: Configuration, baseP
         },
     };
 };
+
+/**
+ * Request parameters for paymentsBasketsAddDiscountCreate operation in PaymentsApi.
+ * @export
+ * @interface PaymentsApiPaymentsBasketsAddDiscountCreateRequest
+ */
+export interface PaymentsApiPaymentsBasketsAddDiscountCreateRequest {
+    /**
+     *
+     * @type {string}
+     * @memberof PaymentsApiPaymentsBasketsAddDiscountCreate
+     */
+    readonly system_slug: string
+}
+
+/**
+ * Request parameters for paymentsBasketsClearDestroy operation in PaymentsApi.
+ * @export
+ * @interface PaymentsApiPaymentsBasketsClearDestroyRequest
+ */
+export interface PaymentsApiPaymentsBasketsClearDestroyRequest {
+    /**
+     *
+     * @type {string}
+     * @memberof PaymentsApiPaymentsBasketsClearDestroy
+     */
+    readonly system_slug: string
+}
 
 /**
  * Request parameters for paymentsBasketsCreateFromProductCreate operation in PaymentsApi.
@@ -2187,13 +2367,25 @@ export interface PaymentsApiPaymentsOrdersHistoryRetrieveRequest {
  */
 export class PaymentsApi extends BaseAPI {
     /**
-     * Clears the basket for the current user.
+     * Creates or updates a basket for the current user, adding the discount if valid.
+     * @param {PaymentsApiPaymentsBasketsAddDiscountCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PaymentsApi
      */
-    public paymentsBasketsClearDestroy(options?: RawAxiosRequestConfig) {
-        return PaymentsApiFp(this.configuration).paymentsBasketsClearDestroy(options).then((request) => request(this.axios, this.basePath));
+    public paymentsBasketsAddDiscountCreate(requestParameters: PaymentsApiPaymentsBasketsAddDiscountCreateRequest, options?: RawAxiosRequestConfig) {
+        return PaymentsApiFp(this.configuration).paymentsBasketsAddDiscountCreate(requestParameters.system_slug, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Clears the basket for the current user.
+     * @param {PaymentsApiPaymentsBasketsClearDestroyRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PaymentsApi
+     */
+    public paymentsBasketsClearDestroy(requestParameters: PaymentsApiPaymentsBasketsClearDestroyRequest, options?: RawAxiosRequestConfig) {
+        return PaymentsApiFp(this.configuration).paymentsBasketsClearDestroy(requestParameters.system_slug, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

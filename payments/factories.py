@@ -8,7 +8,7 @@ from payments import models
 from system_meta.factories import IntegratedSystemFactory, ProductFactory
 from unified_ecommerce.factories import UserFactory
 
-FAKE = faker.Factory.create()
+FAKE = faker.Faker()
 
 
 class BasketFactory(DjangoModelFactory):
@@ -69,3 +69,26 @@ class LineFactory(DjangoModelFactory):
         """Meta options for BasketFactory"""
 
         model = models.Line
+
+
+class BlockedCountryFactory(DjangoModelFactory):
+    """Factory for BlockedCountry"""
+
+    country_code = FAKE.unique.country_code(representation="alpha-2")
+
+    class Meta:
+        """Meta options for BlockedCountryFactory"""
+
+        model = models.BlockedCountry
+
+
+class TaxRateFactory(DjangoModelFactory):
+    """Factory for TaxRate"""
+
+    country_code = FAKE.unique.country_code(representation="alpha-2")
+    tax_rate = fuzzy.FuzzyDecimal(low=0, high=99, precision=4)
+
+    class Meta:
+        """Meta options for BlockedCountryFactory"""
+
+        model = models.TaxRate

@@ -28,6 +28,7 @@ from rest_framework.viewsets import (
 )
 
 from payments import api
+from payments.exceptions import ProductBlockedError
 from payments.models import Basket, BasketItem, Discount, Order
 from payments.serializers.v0 import (
     BasketWithProductSerializer,
@@ -44,9 +45,11 @@ from unified_ecommerce.constants import (
     USER_MSG_TYPE_PAYMENT_ERROR,
     USER_MSG_TYPE_PAYMENT_ERROR_UNKNOWN,
 )
+from unified_ecommerce.plugin_manager import get_plugin_manager
 from unified_ecommerce.utils import redirect_with_user_message
 
 log = logging.getLogger(__name__)
+pm = get_plugin_manager()
 
 # Baskets
 
@@ -115,6 +118,15 @@ def create_basket_from_product(request, system_slug: str, sku: str):
     except Product.DoesNotExist:
         return Response(
             {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    try:
+        log.debug("attempting to run basket_add")
+        pm.hook.basket_add(request=request, basket=basket, basket_item=product)
+    except ProductBlockedError:
+        return Response(
+            {"error": "Product blocked from purchasing."},
+            status=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS,
         )
 
     (_, created) = BasketItem.objects.update_or_create(
