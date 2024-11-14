@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0008_remove_discount_assigned_users_and_more'),
+        ('payments', '0009_add_blocked_country_tax_rate_update_basket_order'),
     ]
 
     operations = [
