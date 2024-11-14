@@ -57,25 +57,6 @@ services:
       - .:/src
       - django_media:/var/media
 
-  # watch:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile-node
-  #   working_dir: /src
-  #   command: ./scripts/run-watch-dev.sh
-  #   ports:
-  #     - "8052:8052"
-  #     - "8062:8062"
-  #   environment:
-  #     DOCKER_HOST: ${DOCKER_HOST:-missing}
-  #     NODE_ENV: ${NODE_ENV:-development}
-  #     CONTAINER_NAME: "watch"
-  #     WEBPACK_PORT_MITOPEN: 8062
-  #   env_file: .env
-  #   volumes:
-  #     - .:/src
-  #     - yarn-cache:/home/mitodl/.cache/yarn
-
   celery:
     build:
       context: .
@@ -127,7 +108,9 @@ services:
       default:
         aliases:
         - ${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local}
-    command: start --verbose --features scripts --import-realm --hostname=${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local} --hostname-strict=false --hostname-debug=true --https-port=7443 --https-certificate-file=/etc/x509/https/tls.crt --https-certificate-key-file=/etc/x509/https/tls.key --http-enabled=true --http-port=7080 --config-keystore=/etc/keycloak-store --config-keystore-password=${KEYCLOAK_SVC_KEYSTORE_PASSWORD} --db=postgres --db-url-database=keycloak --db-url-host=db --db-schema=public --db-password=${POSTGRES_PASSWORD} --db-username=postgres
+    links:
+      - db:uedb
+    command: start --verbose --features scripts --import-realm --hostname=${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local} --hostname-strict=false --hostname-debug=true --https-port=7443 --https-certificate-file=/etc/x509/https/tls.crt --https-certificate-key-file=/etc/x509/https/tls.key --http-enabled=true --http-port=7080 --config-keystore=/etc/keycloak-store --config-keystore-password=${KEYCLOAK_SVC_KEYSTORE_PASSWORD} --db=postgres --db-url-database=keycloak --db-url-host=uedb --db-schema=public --db-password=${POSTGRES_PASSWORD} --db-username=postgres
     volumes:
       - keycloak-store:/etc/keycloak-store
       - ./config/keycloak/tls:/etc/x509/https
