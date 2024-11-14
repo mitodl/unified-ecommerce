@@ -1,8 +1,9 @@
 """Utility functions for payments."""
 
+from decimal import Decimal
+
 import dateutil
 import pytz
-from decimal import Decimal
 
 from system_meta.models import Product
 from unified_ecommerce.constants import (
