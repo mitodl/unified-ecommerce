@@ -80,6 +80,13 @@ class Discount(TimestampedModel):
         blank=True,
         null=True,
     )
+    bulk_discount_collection = models.ForeignKey(
+        "BulkDiscountCollection",
+        on_delete=models.PROTECT,
+        related_name="discounts",
+        blank=True,
+        null=True,
+    )
 
     def is_valid(self, basket) -> bool:
         """
@@ -219,6 +226,11 @@ class Discount(TimestampedModel):
         exception_message = "Invalid product version specified"
         raise TypeError(exception_message)
 
+
+class BulkDiscountCollection(TimestampedModel):
+    """Bulk Discount Collection model"""
+
+    prefix = models.CharField(max_length=100, unique=True)
 
 class Basket(TimestampedModel):
     """Represents a User's basket."""

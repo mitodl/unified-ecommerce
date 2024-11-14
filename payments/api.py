@@ -19,6 +19,7 @@ from mitol.payment_gateway.api import PaymentGateway, ProcessorResponse
 from payments.exceptions import PaymentGatewayError, PaypalRefundError
 from payments.models import (
     Basket,
+    BulkDiscountCollection,
     Discount,
     FulfilledOrder,
     Order,
@@ -511,6 +512,7 @@ def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
     redemption_type = REDEMPTION_TYPE_UNLIMITED
     payment_type = kwargs["payment_type"]
     amount = Decimal(kwargs["amount"])
+    bulk_discount_collection = None
     if kwargs["discount_type"] not in ALL_DISCOUNT_TYPES:
         raise ValueError(f"Invalid discount type: {kwargs['discount_type']}.")  # noqa: EM102, TRY003
 
@@ -529,11 +531,14 @@ def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
 
     if kwargs["count"] > 1:
         prefix = kwargs["prefix"]
-
-        # upped the discount code limit to 100 characters - this used to be 13 (50 - 37 for the UUID)  # noqa: E501
-        if prefix and len(prefix) > 63:  # noqa: PLR2004
-            raise ValueError(  # noqa: TRY003
-                f"Prefix {prefix} is {len(prefix)} - prefixes must be 63 characters or less."  # noqa: E501, EM102
+        if prefix:
+            # upped the discount code limit to 100 characters - this used to be 13 (50 - 37 for the UUID)  # noqa: E501
+            if len(prefix) > 63:  # noqa: PLR2004
+                raise ValueError(  # noqa: TRY003
+                    f"Prefix {prefix} is {len(prefix)} - prefixes must be 63 characters or less."  # noqa: E501, EM102
+                )
+            bulk_discount_collection, _ = BulkDiscountCollection.objects.get_or_create(
+                prefix=prefix
             )
 
         for i in range(kwargs["count"]):  # noqa: B007
@@ -639,6 +644,7 @@ def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
                 is_bulk=True,
                 integrated_system=integrated_system,
                 product=product,
+                bulk_discount_collection=bulk_discount_collection,
             )
         if users:
             discount.assigned_users.set(users)
@@ -667,6 +673,11 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
       with the discount
     * product - ID or SKU of the product to associate with the discount
     * users - list of user IDs or emails to associate with the discount
+    * clear_users - boolean; clear the users associated with the discount
+    * clear_products - boolean; clear the products associated with the discount
+    * clear_integrated_systems - boolean; clear the integrated systems associated with
+      the discount
+    * prefix - prefix of the bulk discount codes to update
 
     Returns:
     * Number of discounts updated
@@ -736,6 +747,9 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
         integrated_system = None
 
     if kwargs.get("product"):
+        if kwargs.get("clear_products"):
+            error_message = "Cannot clear and set products at the same time."
+            raise ValueError(error_message)
         # Try to get the product via ID or SKU.  Raise an exception if it doesn't exist.
         product_missing_msg = f"Product {kwargs['product']} does not exist."
         if kwargs["product"].isdigit():
@@ -751,7 +765,11 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     else:
         product = None
 
+
     if kwargs.get("users"):
+        if kwargs.get("clear_users"):
+            error_message = "Cannot clear and set users at the same time."
+            raise ValueError(error_message)
         # Try to get the users via ID or email.  Raise an exception if it doesn't exist.
         users = []
         user_missing_msg = "User %s does not exist."
@@ -770,9 +788,21 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     else:
         users = None
 
-    discounts_to_update = Discount.objects.filter(
-        discount_code__in=discount_codes_to_update
-    )
+    if kwargs.get("prefix"):
+        prefix = kwargs["prefix"]
+        bulk_discount_collection = BulkDiscountCollection.objects.filter(
+            prefix=prefix
+        ).first()
+        if not bulk_discount_collection:
+            error_message = (
+                f"Bulk discount collection with prefix {prefix} does not exist."
+            )
+            raise ValueError(error_message)
+        discounts_to_update = bulk_discount_collection.discounts.all()
+    else:
+        discounts_to_update = Discount.objects.filter(
+            discount_code__in=discount_codes_to_update
+        )
 
     # Don't include any discounts with one time or one time per user redemption types
     # if there is a matching RedeemedDiscount, or if the max_redemptions
@@ -800,6 +830,10 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
         "integrated_system": integrated_system,
         "product": product,
     }
+    if kwargs.get("clear_products"):
+        discount_attributes_dict["product"] = None
+    if kwargs.get("clear_integrated_systems"):
+        discount_attributes_dict["integrated_system"] = None
     discount_values_to_update = {
         key: value
         for key, value in discount_attributes_dict.items()
@@ -809,8 +843,10 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
         number_of_discounts_updated = discounts_to_update.update(
             **discount_values_to_update
         )
-
-    if users:
+    if kwargs.get("clear_users"):
+        for discount in discounts_to_update:
+            discount.assigned_users.clear()
+    elif users:
         for discount in discounts_to_update:
             discount.assigned_users.set(users)
 

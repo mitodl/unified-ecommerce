@@ -168,3 +168,14 @@ class RedeemedDiscountAdmin(admin.ModelAdmin):
         "user",
     ]
     list_filter = ["discount", "order", "user"]
+
+@admin.register(models.BulkDiscountCollection)
+class BulkDiscountCollectionAdmin(VersionAdmin):
+    """Admin for BulkDiscountCollection"""
+
+    model = models.BulkDiscountCollection
+    search_fields = ["prefix"]
+    list_display = [
+        "prefix",
+    ]
+    list_filter = ["prefix"]

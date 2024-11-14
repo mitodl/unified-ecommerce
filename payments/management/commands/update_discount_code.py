@@ -11,15 +11,15 @@ class Command(BaseCommand):
     """
     Updates one or multiple discount codes using the Discount codes.
     example usage of this command:
-    python manage.py update_discount_code 1 2 3 --expires 2023-01-01 --amount 10 \
-    --discount-type dollars-off --payment-type marketing
+    python manage.py update_discount_code --discount_codes 1 2 3 --expires 2021-12-31
+    --amount 10
     """
 
     help = "Updates one or multiple discount codes using the Discount codes."
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(
-            "discount_codes",
+            "--discount_codes",
             type=int,
             nargs="+",
             help="The codes of the discounts to update.",
@@ -106,6 +106,30 @@ class Command(BaseCommand):
             "--expire-now",
             help="Expire the discount code(s) immediately.",
             action="store_true",
+        )
+
+        parser.add_argument(
+            "--clear-users",
+            help="Clear the users associated with the discount code(s).",
+            action="store_true",
+        )
+
+        parser.add_argument(
+            "--clear-products",
+            help="Clear the products associated with the discount code(s).",
+            action="store_true",
+        )
+
+        parser.add_argument(
+            "--clear-integrated-systems",
+            help="Clear the integrated systems associated with the discount code(s).",
+            action="store_true",
+        )
+
+        parser.add_argument(
+            "--prefix",
+            type=str,
+            help="The prefix of the bulk discount codes to update.",
         )
 
     def handle(self, **options) -> None:
