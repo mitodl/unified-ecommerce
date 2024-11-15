@@ -19,8 +19,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(
-            "--discount_codes",
-            type=int,
+            "--discount-codes",
+            type=str,
             nargs="+",
             help="The codes of the discounts to update.",
         )

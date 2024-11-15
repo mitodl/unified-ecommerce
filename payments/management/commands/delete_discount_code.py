@@ -21,8 +21,8 @@ class Command(BaseCommand):
         Add arguments to the command parser.
         """
         parser.add_argument(
-            "--iscount_codes",
-            type=int,
+            "--discount-codes",
+            type=str,
             nargs="+",
             help="The codes of the discounts to deactivate.",
         )

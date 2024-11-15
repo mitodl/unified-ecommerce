@@ -54,7 +54,7 @@ class Discount(TimestampedModel):
     redemption_type = models.CharField(choices=REDEMPTION_TYPES, max_length=30)
     payment_type = models.CharField(null=True, choices=PAYMENT_TYPES, max_length=30)  # noqa: DJ001
     max_redemptions = models.PositiveIntegerField(null=True, default=0)
-    discount_code = models.CharField(max_length=100)
+    discount_code = models.CharField(max_length=100, unique=True)
     activation_date = models.DateTimeField(
         null=True,
         blank=True,
