@@ -727,8 +727,12 @@ def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_us
     when they exist for the basket's - basket item - product, basket's user, and basket's integrated system.
     """
     basket_item = BasketItemFactory.create()
-    user_discount = DiscountFactory.create(automatic=True, amount=10,
-        discount_type=DISCOUNT_TYPE_DOLLARS_OFF, discount_code=uuid.uuid4(),)
+    user_discount = DiscountFactory.create(
+        automatic=True,
+        amount=10,
+        discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        discount_code=uuid.uuid4(),
+    )
     basket_item.basket.user.discounts.add(user_discount)
     DiscountFactory.create(
         automatic=True,
