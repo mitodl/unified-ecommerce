@@ -675,7 +675,6 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     * discount_codes - list of discount codes to update
     * discount_type - one of the valid discount types
     * payment_type - one of the valid payment types
-    * redemption_type - one of the valid redemption types (overrules use of the flags)
     * amount - the value of the discount
     * one_time - boolean; discount can only be redeemed once
     * one_time_per_user - boolean; discount can only be redeemed once per user
@@ -714,14 +713,12 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     else:
         payment_type = None
 
-    if kwargs.get("redemption_type"):
-        if kwargs["redemption_type"] not in ALL_REDEMPTION_TYPES:
-            error_message = f"Redemption type {kwargs['redemption_type']} is not valid."
-            raise ValueError(error_message)
-        else:
-            redemption_type = kwargs["redemption_type"]
+    if kwargs.get("one_time"):
+        redemption_type = REDEMPTION_TYPE_ONE_TIME
+    elif kwargs.get("one_time_per_user"):
+        redemption_type = REDEMPTION_TYPE_ONE_TIME_PER_USER
     else:
-        redemption_type = None
+        redemption_type = REDEMPTION_TYPE_UNLIMITED
 
     amount = Decimal(kwargs["amount"]) if kwargs.get("amount") else None
 
@@ -841,10 +838,6 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
         "integrated_system": integrated_system,
         "product": product,
     }
-    if kwargs.get("clear_products"):
-        discount_attributes_dict["product"] = None
-    if kwargs.get("clear_integrated_systems"):
-        discount_attributes_dict["integrated_system"] = None
     discount_values_to_update = {
         key: value
         for key, value in discount_attributes_dict.items()
@@ -852,18 +845,22 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     }
     with reversion.create_revision():
         number_of_discounts_updated = discounts_to_update.update(
-            **discount_values_to_update
+            **discount_values_to_update,
         )
+        if kwargs.get("clear_products"):
+            discounts_to_update.update(
+                product = None
+            )
+        if kwargs.get("clear_integrated_systems"):
+            discounts_to_update.update(
+                integrated_system = None
+            )
     if kwargs.get("clear_users"):
         for discount in discounts_to_update:
             discount.assigned_users.clear()
     elif users:
         for discount in discounts_to_update:
             discount.assigned_users.set(users)
-
-    # delete all bulk discount collections
-    if kwargs.get("prefix"):
-        bulk_discount_collection.delete()
 
     return number_of_discounts_updated
 
