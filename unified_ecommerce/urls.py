@@ -23,7 +23,7 @@ from django.urls import include, path, re_path
 
 urlpatterns = [
     path("", include("cart.urls")),
-    path("", include("django.contrib.auth.urls")),
+    path("auth/", include("django.contrib.auth.urls")),
     path("admin/", admin.site.urls),
     path("hijack/", include("hijack.urls")),
     # OAuth2 Paths
@@ -33,6 +33,7 @@ urlpatterns = [
     # Private Paths
     re_path(r"^_/v0/meta/", include("system_meta.private_urls")),
     # API Paths
+    re_path(r"", include("users.urls")),
     re_path(r"", include("payments.urls")),
     re_path(r"", include("system_meta.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

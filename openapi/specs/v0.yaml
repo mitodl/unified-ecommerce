@@ -454,6 +454,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/OrderHistory'
           description: ''
+  /api/v0/users/me/:
+    get:
+      operationId: users_me_retrieve
+      description: User retrieve and update viewsets for the current user
+      tags:
+      - users
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
 components:
   schemas:
     BasketItemWithProduct:
@@ -928,6 +941,33 @@ components:
       - Declined
       - Errored
       - Review
+    User:
+      type: object
+      description: Serializer for User model.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+      required:
+      - id
+      - username
     UserTaxableGeolocationTypeEnum:
       enum:
       - profile
