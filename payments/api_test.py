@@ -25,6 +25,7 @@ from payments.exceptions import PaymentGatewayError, PaypalRefundError
 from payments.factories import (
     BasketFactory,
     BasketItemFactory,
+    DiscountFactory,
     LineFactory,
     OrderFactory,
     TransactionFactory,
@@ -726,23 +727,26 @@ def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_us
     when they exist for the basket's - basket item - product, basket's user, and basket's integrated system.
     """
     basket_item = BasketItemFactory.create()
-    user_discount = Discount.objects.create(
+    user_discount = DiscountFactory.create(
         automatic=True,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        discount_code=uuid.uuid4(),
     )
     basket_item.basket.user.discounts.add(user_discount)
-    Discount.objects.create(
+    DiscountFactory.create(
         automatic=True,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
         integrated_system=basket_item.basket.integrated_system,
+        discount_code=uuid.uuid4(),
     )
-    Discount.objects.create(
+    DiscountFactory.create(
         automatic=True,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
         product=basket_item.product,
+        discount_code=uuid.uuid4(),
     )
 
     discount = get_auto_apply_discounts_for_basket(basket_item.basket.id)
@@ -755,23 +759,26 @@ def test_get_auto_apply_discount_for_basket_no_auto_discount_exists():
     when no auto discount exists for the basket.
     """
     basket_item = BasketItemFactory.create()
-    user_discount = Discount.objects.create(
+    user_discount = DiscountFactory.create(
         automatic=False,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        discount_code=uuid.uuid4(),
     )
     basket_item.basket.user.discounts.add(user_discount)
-    Discount.objects.create(
+    DiscountFactory.create(
         automatic=False,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
         integrated_system=basket_item.basket.integrated_system,
+        discount_code=uuid.uuid4(),
     )
-    Discount.objects.create(
+    DiscountFactory.create(
         automatic=False,
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
         product=basket_item.product,
+        discount_code=uuid.uuid4(),
     )
 
     discount = get_auto_apply_discounts_for_basket(basket_item.basket.id)

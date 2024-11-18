@@ -8,6 +8,7 @@ from datetime import datetime
 from decimal import Decimal
 
 import pytz
+import reversion
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -40,6 +41,7 @@ log = logging.getLogger(__name__)
 pm = get_plugin_manager()
 
 
+@reversion.register(exclude=("created_on", "updated_on"))
 class Discount(TimestampedModel):
     """Discount model"""
 
@@ -52,7 +54,7 @@ class Discount(TimestampedModel):
     redemption_type = models.CharField(choices=REDEMPTION_TYPES, max_length=30)
     payment_type = models.CharField(null=True, choices=PAYMENT_TYPES, max_length=30)  # noqa: DJ001
     max_redemptions = models.PositiveIntegerField(null=True, default=0)
-    discount_code = models.CharField(max_length=100)
+    discount_code = models.CharField(max_length=100, unique=True)
     activation_date = models.DateTimeField(
         null=True,
         blank=True,
@@ -80,6 +82,13 @@ class Discount(TimestampedModel):
     )
     assigned_users = models.ManyToManyField(
         User,
+        related_name="discounts",
+        blank=True,
+        null=True,
+    )
+    bulk_discount_collection = models.ForeignKey(
+        "BulkDiscountCollection",
+        on_delete=models.PROTECT,
         related_name="discounts",
         blank=True,
         null=True,
@@ -180,6 +189,56 @@ class Discount(TimestampedModel):
         """Return the discount as a string."""
 
         return f"{self.amount} {self.discount_type} {self.redemption_type} - {self.discount_code}"  # noqa: E501
+
+    @staticmethod
+    def resolve_discount_version(discount, discount_version=None):
+        """
+        Resolve the specified version of the discount. Specify None to indicate the
+        current version.
+
+        Returns: Discount; either the discount you passed in or the version of the
+        discount you requested.
+        """
+        if discount_version is None:
+            return discount
+
+        versions = reversion.models.Version.objects.get_for_object(discount)
+
+        if versions.count() == 0:
+            return discount
+
+        for test_version in versions.all():
+            if test_version == discount_version:
+                return Discount(
+                    id=test_version.field_dict["id"],
+                    amount=test_version.field_dict["amount"],
+                    automatic=test_version.field_dict["automatic"],
+                    discount_type=test_version.field_dict["discount_type"],
+                    redemption_type=test_version.field_dict["redemption_type"],
+                    payment_type=test_version.field_dict["payment_type"],
+                    max_redemptions=test_version.field_dict["max_redemptions"],
+                    discount_code=test_version.field_dict["discount_code"],
+                    activation_date=test_version.field_dict["activation_date"],
+                    expiration_date=test_version.field_dict["expiration_date"],
+                    is_bulk=test_version.field_dict["is_bulk"],
+                    integrated_system=IntegratedSystem.objects.get(
+                        pk=test_version.field_dict["integrated_system_id"]
+                    ),
+                    product=Product.objects.get(
+                        pk=test_version.field_dict["product_id"]
+                    ),
+                    assigned_users=test_version.field_dict["assigned_users"],
+                    deleted_on=test_version.field_dict["deleted_on"],
+                    deleted_by_cascade=test_version.field_dict["deleted_by_cascade"],
+                )
+        exception_message = "Invalid product version specified"
+        raise TypeError(exception_message)
+
+
+class BulkDiscountCollection(TimestampedModel):
+    """Bulk Discount Collection model"""
+
+    prefix = models.CharField(max_length=100, unique=True)
 
 
 class BlockedCountry(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):

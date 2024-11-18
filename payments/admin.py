@@ -191,9 +191,7 @@ class RefundedOrderAdmin(BaseOrderAdmin):
 
 
 @admin.register(models.Discount)
-class DiscountAdmin(admin.ModelAdmin):
-    """Admin for Discount"""
-
+class DiscountAdmin(VersionAdmin):
     model = models.Discount
     search_fields = ["discount_type", "redemption_type", "discount_code"]
     list_display = [
@@ -220,6 +218,18 @@ class RedeemedDiscountAdmin(admin.ModelAdmin):
         "user",
     ]
     list_filter = ["discount", "order", "user"]
+
+
+@admin.register(models.BulkDiscountCollection)
+class BulkDiscountCollectionAdmin(VersionAdmin):
+    """Admin for BulkDiscountCollection"""
+
+    model = models.BulkDiscountCollection
+    search_fields = ["prefix"]
+    list_display = [
+        "prefix",
+    ]
+    list_filter = ["prefix"]
 
 
 @admin.register(models.BlockedCountry)

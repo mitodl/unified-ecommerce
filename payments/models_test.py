@@ -1,5 +1,6 @@
 """Tests for payment models."""
 
+import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
 
@@ -79,10 +80,12 @@ def test_unused_discounts_do_not_create_redeemed_discounts_when_creating_pending
     discount_used = models.Discount.objects.create(
         amount=10,
         product=basket.basket_items.first().product,
+        discount_code=uuid.uuid4(),
     )
     discount_not_used = models.Discount.objects.create(
         amount=10,
         product=unused_product,
+        discount_code=uuid.uuid4(),
     )
     basket.discounts.add(discount_used, discount_not_used)
     models.PendingOrder.create_from_basket(basket)
@@ -103,11 +106,13 @@ def test_only_best_discounts_create_redeemed_discounts_when_creating_pending_ord
         amount=10,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
         product=basket.basket_items.first().product,
+        discount_code=uuid.uuid4(),
     )
     discount_not_used = models.Discount.objects.create(
         amount=5,
         product=basket.basket_items.first().product,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        discount_code=uuid.uuid4(),
     )
     basket.discounts.add(discount_used, discount_not_used)
     models.PendingOrder.create_from_basket(basket)
@@ -337,11 +342,13 @@ def test_discounted_price_for_multiple_discounts_for_product():
         amount=10,
         product=basket_item.product,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        discount_code=uuid.uuid4(),
     )
     discount_2 = models.Discount.objects.create(
         amount=5,
         product=basket_item.product,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        discount_code=uuid.uuid4(),
     )
     basket.discounts.add(discount_1, discount_2)
 
@@ -357,11 +364,13 @@ def test_discounted_price_for_multiple_discounts_for_integrated_system():
         amount=10,
         integrated_system=basket.integrated_system,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        discount_code=uuid.uuid4(),
     )
     discount_2 = models.Discount.objects.create(
         amount=5,
         integrated_system=basket.integrated_system,
         discount_type=DISCOUNT_TYPE_DOLLARS_OFF,
+        discount_code=uuid.uuid4(),
     )
     basket.discounts.add(discount_1, discount_2)
 
