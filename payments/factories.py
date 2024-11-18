@@ -92,6 +92,8 @@ class TaxRateFactory(DjangoModelFactory):
         """Meta options for BlockedCountryFactory"""
 
         model = models.TaxRate
+
+
 class DiscountFactory(DjangoModelFactory):
     """Factory for Discount"""
 
@@ -105,9 +107,7 @@ class DiscountFactory(DjangoModelFactory):
             "staff",
         ]
     )
-    discount_type = fuzzy.FuzzyChoice(
-        ["dollars-off", "percent-off", "fixed-price"]
-    )
+    discount_type = fuzzy.FuzzyChoice(["dollars-off", "percent-off", "fixed-price"])
     discount_code = FAKE.unique.word()
 
     class Meta:

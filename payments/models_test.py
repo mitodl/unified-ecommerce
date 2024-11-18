@@ -1,8 +1,8 @@
 """Tests for payment models."""
 
+import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
-import uuid
 
 import pytest
 import pytz
