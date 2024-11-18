@@ -848,13 +848,9 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
             **discount_values_to_update,
         )
         if kwargs.get("clear_products"):
-            discounts_to_update.update(
-                product = None
-            )
+            discounts_to_update.update(product=None)
         if kwargs.get("clear_integrated_systems"):
-            discounts_to_update.update(
-                integrated_system = None
-            )
+            discounts_to_update.update(integrated_system=None)
     if kwargs.get("clear_users"):
         for discount in discounts_to_update:
             discount.assigned_users.clear()
