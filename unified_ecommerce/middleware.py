@@ -3,7 +3,7 @@
 import logging
 
 from django.contrib.auth import login, logout
-from django.contrib.auth.middleware import RemoteUserMiddleware
+from django.contrib.auth.middleware import PersistentRemoteUserMiddleware
 from django.core.exceptions import ImproperlyConfigured
 
 from unified_ecommerce.utils import decode_apisix_headers, get_user_from_apisix_headers
@@ -11,7 +11,7 @@ from unified_ecommerce.utils import decode_apisix_headers, get_user_from_apisix_
 log = logging.getLogger(__name__)
 
 
-class ApisixUserMiddleware(RemoteUserMiddleware):
+class ApisixUserMiddleware(PersistentRemoteUserMiddleware):
     """Checks for and processes APISIX-specific headers."""
 
     def process_request(self, request):
@@ -28,6 +28,7 @@ class ApisixUserMiddleware(RemoteUserMiddleware):
             apisix_user = get_user_from_apisix_headers(request)
         except KeyError:
             if self.force_logout_if_no_header and request.user.is_authenticated:
+                log.debug("Forcing user logout due to missing APISIX headers.")
                 logout(request)
             return None
 

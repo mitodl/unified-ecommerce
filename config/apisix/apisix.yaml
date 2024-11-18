@@ -3,24 +3,15 @@ upstreams:
     nodes:
       "nginx:8073": 1
     type: roundrobin
+  - id: 2
+    nodes:
+      "keycloak:9080": 1
+    type: roundrobin
 
 routes:
   - id: 1
-    name: "ue-unauth"
-    desc: "Unauthenticated routes, including assets and checkout callback API"
-    priority: 0
-    upstream_id: 1
-    plugins: {}
-    uris:
-    - "/api/v0/payments/checkout/result/*"
-    - "/static/*"
-    - "/api/v0/schema/*"
-    - "/auth/*"
-    - "/_/v0/meta/apisix_test_request/"
-    - "/logged_out/"
-  - id: 2
     name: "ue-default"
-    desc: "Wildcard route for the rest of the system - authentication required"
+    desc: "System routes that require OIDC authentication."
     priority: 1
     upstream_id: 1
     plugins:
@@ -36,7 +27,7 @@ routes:
         logout_path: "/logout/"
         post_logout_redirect_uri: "http://ue.odl.local:9080/auth/logout/"
       cors:
-        allow_origins: "http://learn.odl.local:8062,http://ue.odl.local:9080"
+        allow_origins: "**"
         allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
         allow_headers: "**"
         allow_credential: true
@@ -44,7 +35,24 @@ routes:
         headers:
           set:
             Referrer-Policy: "origin"
+    host: "ue.odl.local"
     uris:
-    - "/*"
+    - "/establish_session/*"
+    - "/cart/*"
+    - "/admin/*"
+  - id: 2
+    name: "ue-unauth"
+    desc: "Everything else."
+    priority: 0
+    upstream_id: 1
+    plugins:
+      cors:
+        allow_origins: "**"
+        allow_methods: "GET,POST,PUT,DELETE,OPTIONS"
+        allow_headers: "**"
+        allow_credential: true
+    host: "ue.odl.local"
+    uris:
+    - "*"
 
 #END

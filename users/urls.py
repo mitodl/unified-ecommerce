@@ -2,7 +2,12 @@
 
 from django.urls import include, re_path
 
-from users.views import CurrentUserRetrieveViewSet, LoggedOutView
+from users.views import (
+    CurrentUserRetrieveViewSet,
+    LoggedOutView,
+    establish_session,
+    session_check,
+)
 
 v0_urls = [
     re_path(
@@ -16,6 +21,16 @@ urlpatterns = [
         r"^logged_out/$",
         LoggedOutView.as_view(),
         name="logged_out_page",
+    ),
+    re_path(
+        r"^session_check/$",
+        session_check,
+        name="users-session_check",
+    ),
+    re_path(
+        r"^establish_session/$",
+        establish_session,
+        name="users-establish_session",
     ),
     re_path(r"^api/v0/users/", include((v0_urls, "v0"))),
 ]
