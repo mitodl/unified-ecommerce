@@ -78,7 +78,7 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--once-per-user",
+            "--one_time_per_user",
             help=(
                 "Make the resulting code(s) one-time per user redemptions "
                 "(otherwise, default to unlimited)"

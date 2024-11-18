@@ -134,3 +134,6 @@ config/keycloak/tls/tls.key
 
 # Docker Compose override
 docker-compose.override.yml
+
+# Bulk discount csv
+generated-codes.csv
