@@ -37,6 +37,9 @@ class ApisixUserMiddleware(PersistentRemoteUserMiddleware):
                 # The user is authenticated, but doesn't match the user we got
                 # from APISIX. So, log them out so the APISIX user takes
                 # precedence.
+                log.debug(
+                    "Forcing user logout because request user doesn't match APISIX user"
+                )
 
                 logout(request)
 

@@ -3,10 +3,6 @@ upstreams:
     nodes:
       "nginx:8073": 1
     type: roundrobin
-  - id: 2
-    nodes:
-      "keycloak:9080": 1
-    type: roundrobin
 
 routes:
   - id: 1

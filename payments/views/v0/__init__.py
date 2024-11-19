@@ -9,6 +9,7 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
+from django_filters import rest_framework as filters
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
@@ -54,6 +55,16 @@ pm = get_plugin_manager()
 # Baskets
 
 
+class BasketFilter(filters.FilterSet):
+    """Filter class for Basket, just so we can filter by integrated system."""
+
+    class Meta:
+        """Meta class for BasketFilter"""
+
+        model = Basket
+        fields = ["integrated_system"]
+
+
 @extend_schema_view(
     list=extend_schema(
         description=("Retrives the current user's baskets, one per system.")
@@ -69,7 +80,9 @@ class BasketViewSet(ReadOnlyModelViewSet):
     """API view set for Basket"""
 
     serializer_class = BasketWithProductSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = BasketFilter
 
     def get_queryset(self):
         """Return only baskets owned by this user."""
