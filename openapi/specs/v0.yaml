@@ -460,6 +460,8 @@ paths:
       description: User retrieve and update viewsets for the current user
       tags:
       - users
+      security:
+      - {}
       responses:
         '200':
           content:
