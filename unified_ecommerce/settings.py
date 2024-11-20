@@ -501,6 +501,9 @@ MITOL_UE_FORCE_PROFILE_COUNTRY = get_bool(
 MITOL_UE_PAYMENT_BASKET_ROOT = get_string(
     name="MITOL_UE_PAYMENT_BASKET_ROOT", default="/cart/"
 )
+MITOL_UE_PAYMENT_BASKET_CHOOSER = get_string(
+    name="MITOL_UE_PAYMENT_BASKET_CHOOSER", default="/cart/"
+)
 
 import_settings_modules("mitol.payment_gateway.settings.cybersource")
 

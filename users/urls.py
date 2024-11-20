@@ -27,5 +27,5 @@ urlpatterns = [
         establish_session,
         name="users-establish_session",
     ),
-    re_path(r"^api/v0/users/", include((v0_urls, "v0"))),
+    re_path(r"^api/v0/users/", include(v0_urls)),
 ]

@@ -2,7 +2,6 @@
 
 from django.conf import settings
 from django.shortcuts import redirect
-from django.urls import reverse
 from django.views.generic import TemplateView
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import api_view, permission_classes
@@ -43,10 +42,10 @@ def establish_session(request):
 
     if "next" in request.GET:
         try:
-            system = IntegratedSystem.objects.get(system_slug=request.GET["next"])
-            next_url = f"{settings.MITOL_UE_PAYMENT_BASKET_ROOT}{system.system_slug}/"
+            system = IntegratedSystem.objects.get(slug=request.GET["next"])
+            next_url = f"{settings.MITOL_UE_PAYMENT_BASKET_ROOT}{system.slug}/"
         except IntegratedSystem.DoesNotExist:
-            next_url = reverse("users-session_check")
+            next_url = settings.MITOL_UE_PAYMENT_BASKET_CHOOSER
 
     next_url = request.session.get("next", next_url)
 
