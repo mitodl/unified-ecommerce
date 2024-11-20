@@ -1962,12 +1962,13 @@ export const PaymentsApiAxiosParamCreator = function (configuration?: Configurat
         },
         /**
          * Retrives the current user\'s baskets, one per system.
+         * @param {number} [integrated_system]
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        paymentsBasketsList: async (limit?: number, offset?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        paymentsBasketsList: async (integrated_system?: number, limit?: number, offset?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v0/payments/baskets/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1979,6 +1980,10 @@ export const PaymentsApiAxiosParamCreator = function (configuration?: Configurat
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            if (integrated_system !== undefined) {
+                localVarQueryParameter['integrated_system'] = integrated_system;
+            }
 
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
@@ -2153,13 +2158,14 @@ export const PaymentsApiFp = function(configuration?: Configuration) {
         },
         /**
          * Retrives the current user\'s baskets, one per system.
+         * @param {number} [integrated_system]
          * @param {number} [limit] Number of results to return per page.
          * @param {number} [offset] The initial index from which to return the results.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async paymentsBasketsList(limit?: number, offset?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedBasketWithProductList>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsBasketsList(limit, offset, options);
+        async paymentsBasketsList(integrated_system?: number, limit?: number, offset?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedBasketWithProductList>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsBasketsList(integrated_system, limit, offset, options);
             const index = configuration?.serverIndex ?? 0;
             const operationBasePath = operationServerMap['PaymentsApi.paymentsBasketsList']?.[index]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
@@ -2245,7 +2251,7 @@ export const PaymentsApiFactory = function (configuration?: Configuration, baseP
          * @throws {RequiredError}
          */
         paymentsBasketsList(requestParameters: PaymentsApiPaymentsBasketsListRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedBasketWithProductList> {
-            return localVarFp.paymentsBasketsList(requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
+            return localVarFp.paymentsBasketsList(requestParameters.integrated_system, requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve a basket for the current user.
@@ -2332,6 +2338,13 @@ export interface PaymentsApiPaymentsBasketsCreateFromProductCreateRequest {
  * @interface PaymentsApiPaymentsBasketsListRequest
  */
 export interface PaymentsApiPaymentsBasketsListRequest {
+    /**
+     *
+     * @type {number}
+     * @memberof PaymentsApiPaymentsBasketsList
+     */
+    readonly integrated_system?: number
+
     /**
      * Number of results to return per page.
      * @type {number}
@@ -2444,7 +2457,7 @@ export class PaymentsApi extends BaseAPI {
      * @memberof PaymentsApi
      */
     public paymentsBasketsList(requestParameters: PaymentsApiPaymentsBasketsListRequest = {}, options?: RawAxiosRequestConfig) {
-        return PaymentsApiFp(this.configuration).paymentsBasketsList(requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
+        return PaymentsApiFp(this.configuration).paymentsBasketsList(requestParameters.integrated_system, requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

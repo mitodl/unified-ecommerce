@@ -309,6 +309,10 @@ paths:
       operationId: payments_baskets_list
       description: Retrives the current user's baskets, one per system.
       parameters:
+      - in: query
+        name: integrated_system
+        schema:
+          type: integer
       - name: limit
         required: false
         in: query

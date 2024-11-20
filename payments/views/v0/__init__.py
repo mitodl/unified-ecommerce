@@ -67,7 +67,12 @@ class BasketFilter(filters.FilterSet):
 
 @extend_schema_view(
     list=extend_schema(
-        description=("Retrives the current user's baskets, one per system.")
+        description=("Retrives the current user's baskets, one per system."),
+        parameters=[
+            OpenApiParameter(
+                "integrated_system", OpenApiTypes.INT, OpenApiParameter.QUERY
+            ),
+        ],
     ),
     retrieve=extend_schema(
         description="Retrieve a basket for the current user.",
@@ -86,6 +91,9 @@ class BasketViewSet(ReadOnlyModelViewSet):
 
     def get_queryset(self):
         """Return only baskets owned by this user."""
+
+        if getattr(self, "swagger_fake_view", False):
+            return Basket.objects.none()
 
         return Basket.objects.filter(user=self.request.user).all()
 
