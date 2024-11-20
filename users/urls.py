@@ -12,6 +12,7 @@ v0_urls = [
     re_path(
         r"^me/$",
         CurrentUserRetrieveViewSet.as_view({"get": "retrieve"}),
+        name="current_user",
     ),
 ]
 
