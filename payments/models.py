@@ -40,6 +40,15 @@ User = get_user_model()
 log = logging.getLogger(__name__)
 pm = get_plugin_manager()
 
+class Company(TimestampedModel):
+    """Company model"""
+
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        """Return the company as a string."""
+
+        return self.name
 
 @reversion.register(exclude=("created_on", "updated_on"))
 class Discount(TimestampedModel):
@@ -89,6 +98,17 @@ class Discount(TimestampedModel):
     bulk_discount_collection = models.ForeignKey(
         "BulkDiscountCollection",
         on_delete=models.PROTECT,
+        related_name="discounts",
+        blank=True,
+        null=True,
+    )
+    transaction_number = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
         related_name="discounts",
         blank=True,
         null=True,
@@ -233,6 +253,12 @@ class Discount(TimestampedModel):
                 )
         exception_message = "Invalid product version specified"
         raise TypeError(exception_message)
+    class Meta:
+        """Model meta options."""
+
+        indexes = [
+            models.Index(fields=["company"]),
+        ]
 
 
 class BulkDiscountCollection(TimestampedModel):
