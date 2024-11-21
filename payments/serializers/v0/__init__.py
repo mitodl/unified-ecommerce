@@ -13,7 +13,7 @@ from payments.constants import (
 )
 from payments.models import Basket, BasketItem, Line, Order
 from system_meta.models import Product
-from system_meta.serializers import ProductSerializer
+from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
 
 User = get_user_model()
@@ -74,6 +74,7 @@ class BasketSerializer(serializers.ModelSerializer):
     """Basket model serializer"""
 
     basket_items = BasketItemSerializer(many=True)
+    integrated_system = IntegratedSystemSerializer()
 
     class Meta:
         """Meta options for BasketSerializer"""
@@ -81,6 +82,7 @@ class BasketSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user",
+            "integrated_system",
             "basket_items",
         ]
         model = Basket
@@ -104,6 +106,7 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
 
     basket_items = BasketItemWithProductSerializer(many=True)
     total_price = serializers.SerializerMethodField()
+    integrated_system = IntegratedSystemSerializer()
 
     def get_total_price(self, instance) -> Decimal:
         """Get the total price for the basket"""
@@ -117,6 +120,7 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user",
+            "integrated_system",
             "basket_items",
             "total_price",
         ]
