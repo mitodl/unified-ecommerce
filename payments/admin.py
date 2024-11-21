@@ -256,3 +256,23 @@ class TaxRateAdmin(SafeDeleteAdmin):
         "tax_rate_name",
         "country_code",
     ]
+
+
+@admin.register(models.Company)
+class CompanyAdmin(VersionAdmin):
+    """Admin for Company"""
+
+    model = models.Company
+    search_fields = ["name"]
+    list_display = ["name"]
+    list_filter = ["name"]
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": [
+                    "name",
+                ]
+            },
+        ),
+    ]
