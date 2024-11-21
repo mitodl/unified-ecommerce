@@ -257,6 +257,7 @@ class TaxRateAdmin(SafeDeleteAdmin):
         "country_code",
     ]
 
+
 @admin.register(models.Company)
 class CompanyAdmin(VersionAdmin):
     """Admin for Company"""

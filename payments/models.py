@@ -40,6 +40,7 @@ User = get_user_model()
 log = logging.getLogger(__name__)
 pm = get_plugin_manager()
 
+
 class Company(TimestampedModel):
     """Company model"""
 
@@ -49,6 +50,7 @@ class Company(TimestampedModel):
         """Return the company as a string."""
 
         return self.name
+
 
 @reversion.register(exclude=("created_on", "updated_on"))
 class Discount(TimestampedModel):
@@ -253,6 +255,7 @@ class Discount(TimestampedModel):
                 )
         exception_message = "Invalid product version specified"
         raise TypeError(exception_message)
+
     class Meta:
         """Model meta options."""
 
