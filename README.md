@@ -56,6 +56,15 @@ The following settings must be configured before running the app:
 
   The client secret for the OIDC client. No default - you will need to get this from the Keycloak admin, even if you're using the pack-in Keycloak instance.
 
+- `MITOL_UE_PAYMENT_BASKET_ROOT`
+
+  The root URL for the basket page. This defaults to `/cart/` (which is the cart test mule app), but if you're testing the actual frontend, this needs to be set to go there (i.e. `http://learn.odl.local:8062/cart/`). Make sure this has a `/` appended since it is used to _generate_ a URL.
+
+- `MITOL_UE_PAYMENT_BASKET_CHOOSER`
+
+  The URL for an optional "chooser" page. If the `establish_session` call happens without a valid system slug, the user gets sent here so they can choose which cart they want to see.
+
+
 ### Loading and Accessing Data
 
 You'll need an integrated system and product for that system to be able to do much of anything. A management command exists to create the test data: `generate_test_data`. This will create a system and add some products with random (but usable) prices in it.

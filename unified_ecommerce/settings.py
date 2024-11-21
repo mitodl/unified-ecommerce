@@ -94,6 +94,7 @@ INSTALLED_APPS = [
     "mitol.mail.apps.MailApp",
     "django_countries",
     "mitol.geoip",
+    "django_extensions",
     # Application modules
     "unified_ecommerce",
     "users",
@@ -133,7 +134,7 @@ LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = "/login"
 LOGIN_ERROR_URL = "/login"
 LOGOUT_URL = "/logout"
-LOGOUT_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/logged_out"
 
 ROOT_URLCONF = "unified_ecommerce.urls"
 
@@ -495,6 +496,13 @@ MITOL_UE_WEBHOOK_RETRY_MAX = get_int("MITOL_UE_WEBHOOK_RETRY_MAX", 4)
 
 MITOL_UE_FORCE_PROFILE_COUNTRY = get_bool(
     name="MITOL_UE_FORCE_PROFILE_COUNTRY", default=False
+)
+
+MITOL_UE_PAYMENT_BASKET_ROOT = get_string(
+    name="MITOL_UE_PAYMENT_BASKET_ROOT", default="/cart/"
+)
+MITOL_UE_PAYMENT_BASKET_CHOOSER = get_string(
+    name="MITOL_UE_PAYMENT_BASKET_CHOOSER", default="/cart/"
 )
 
 import_settings_modules("mitol.payment_gateway.settings.cybersource")
