@@ -4,15 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('payments', '0013_add_companies'),
+        ("payments", "0013_add_companies"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='discount',
-            name='payment_type',
-            field=models.CharField(choices=[('marketing', 'marketing'), ('sales', 'sales'), ('financial-assistance', 'financial-assistance'), ('customer-support', 'customer-support'), ('staff', 'staff'), ('legacy', 'legacy'), ('credit_card', 'credit_card'), ('purchase_order', 'purchase_order')], max_length=30, null=True),
+            model_name="discount",
+            name="payment_type",
+            field=models.CharField(
+                choices=[
+                    ("marketing", "marketing"),
+                    ("sales", "sales"),
+                    ("financial-assistance", "financial-assistance"),
+                    ("customer-support", "customer-support"),
+                    ("staff", "staff"),
+                    ("legacy", "legacy"),
+                    ("credit_card", "credit_card"),
+                    ("purchase_order", "purchase_order"),
+                ],
+                max_length=30,
+                null=True,
+            ),
         ),
     ]
