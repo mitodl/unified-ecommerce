@@ -479,10 +479,6 @@ components:
       type: object
       description: Basket item model serializer with product information
       properties:
-        basket:
-          allOf:
-          - $ref: '#/components/schemas/Nested'
-          readOnly: true
         product:
           $ref: '#/components/schemas/Product'
         id:
@@ -503,7 +499,6 @@ components:
                 Decimal: The price of the basket item reduced by an applicable discount.
           readOnly: true
       required:
-      - basket
       - discounted_price
       - id
       - price
@@ -523,6 +518,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BasketItemWithProduct'
+        subtotal:
+          type: number
+          format: double
+          description: Get the subtotal for the basket
+          readOnly: true
+        tax:
+          type: number
+          format: double
+          description: Get the tax for the basket
+          readOnly: true
         total_price:
           type: number
           format: double
@@ -532,6 +537,8 @@ components:
       - basket_items
       - id
       - integrated_system
+      - subtotal
+      - tax
       - total_price
       - user
     IntegratedSystem:
@@ -601,66 +608,6 @@ components:
       - quantity
       - total_price
       - unit_price
-    Nested:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        created_on:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_on:
-          type: string
-          format: date-time
-          readOnly: true
-        user_ip:
-          type: string
-          description: The IP address of the user.
-          maxLength: 46
-        user_taxable_country_code:
-          type: string
-          nullable: true
-          description: The country code for the user for this basket for tax purposes.
-          maxLength: 2
-        user_taxable_geolocation_type:
-          allOf:
-          - $ref: '#/components/schemas/UserTaxableGeolocationTypeEnum'
-          description: |-
-            How the user's location was determined for tax purposes.
-
-            * `profile` - profile
-            * `geoip` - geoip
-            * `none` - none
-        user_blockable_country_code:
-          type: string
-          nullable: true
-          description: The country code for the user for this basket for blocked items.
-          maxLength: 2
-        user_blockable_geolocation_type:
-          type: string
-          description: How the user's location was determined for blocked items.
-          maxLength: 15
-        user:
-          type: integer
-        integrated_system:
-          type: integer
-        tax_rate:
-          type: integer
-          nullable: true
-          description: The tax rate assessed for this basket.
-        discounts:
-          type: array
-          items:
-            type: integer
-      required:
-      - created_on
-      - discounts
-      - id
-      - integrated_system
-      - updated_on
-      - user
     OrderHistory:
       type: object
       description: Serializer for order history.
@@ -818,11 +765,6 @@ components:
           minLength: 1
           description: Short name of the product, displayed in carts/etc.
           maxLength: 255
-        price:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
-          description: Price (decimal to two places)
         description:
           type: string
           minLength: 1
@@ -833,28 +775,17 @@ components:
         system:
           type: integer
           description: Owner system of the product.
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          description: Price (decimal to two places)
     Product:
       type: object
       description: Serializer for Product model.
       properties:
         id:
           type: integer
-          readOnly: true
-        deleted_on:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        deleted_by_cascade:
-          type: boolean
-          readOnly: true
-        created_on:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_on:
-          type: string
-          format: date-time
           readOnly: true
         sku:
           type: string
@@ -864,11 +795,6 @@ components:
           type: string
           description: Short name of the product, displayed in carts/etc.
           maxLength: 255
-        price:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
-          description: Price (decimal to two places)
         description:
           type: string
           description: Long description of the product.
@@ -878,17 +804,18 @@ components:
         system:
           type: integer
           description: Owner system of the product.
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          description: Price (decimal to two places)
       required:
-      - created_on
-      - deleted_by_cascade
-      - deleted_on
       - description
       - id
       - name
       - price
       - sku
       - system
-      - updated_on
     ProductRequest:
       type: object
       description: Serializer for Product model.
@@ -903,11 +830,6 @@ components:
           minLength: 1
           description: Short name of the product, displayed in carts/etc.
           maxLength: 255
-        price:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
-          description: Price (decimal to two places)
         description:
           type: string
           minLength: 1
@@ -918,6 +840,11 @@ components:
         system:
           type: integer
           description: Owner system of the product.
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
+          description: Price (decimal to two places)
       required:
       - description
       - name
@@ -977,17 +904,3 @@ components:
       required:
       - id
       - username
-    UserTaxableGeolocationTypeEnum:
-      enum:
-      - profile
-      - geoip
-      - none
-      type: string
-      description: |-
-        * `profile` - profile
-        * `geoip` - geoip
-        * `none` - none
-      x-enum-descriptions:
-      - profile
-      - geoip
-      - none
