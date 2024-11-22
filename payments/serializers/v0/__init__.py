@@ -97,7 +97,7 @@ class BasketItemWithProductSerializer(serializers.ModelSerializer):
         """Meta options for BasketItemWithProductSerializer"""
 
         model = BasketItem
-        fields = ["basket", "product", "id", "price", "discounted_price"]
+        fields = ["product", "id", "price", "discounted_price"]
         depth = 1
 
 
@@ -106,13 +106,21 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
 
     basket_items = BasketItemWithProductSerializer(many=True)
     total_price = serializers.SerializerMethodField()
+    tax = serializers.SerializerMethodField()
+    subtotal = serializers.SerializerMethodField()
     integrated_system = IntegratedSystemSerializer()
 
     def get_total_price(self, instance) -> Decimal:
         """Get the total price for the basket"""
-        return sum(
-            basket_item.base_price for basket_item in instance.basket_items.all()
-        )
+        return instance.total_money
+
+    def get_tax(self, instance) -> Decimal:
+        """Get the tax for the basket"""
+        return instance.tax_money
+
+    def get_subtotal(self, instance) -> Decimal:
+        """Get the subtotal for the basket"""
+        return instance.subtotal_money
 
     class Meta:
         """Meta options for BasketWithProductSerializer"""
@@ -122,6 +130,8 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
             "user",
             "integrated_system",
             "basket_items",
+            "subtotal",
+            "tax",
             "total_price",
         ]
         model = Basket
