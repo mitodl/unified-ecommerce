@@ -111,7 +111,7 @@ services:
         - ${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local}
     links:
       - db:uedb
-    command: start --verbose --features scripts --import-realm --hostname=${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local} --hostname-strict=false --hostname-debug=true --https-port=7443 --https-certificate-file=/etc/x509/https/tls.crt --https-certificate-key-file=/etc/x509/https/tls.key --http-enabled=true --http-port=7080 --config-keystore=/etc/keycloak-store --config-keystore-password=${KEYCLOAK_SVC_KEYSTORE_PASSWORD} --db=postgres --db-url-database=keycloak --db-url-host=uedb --db-schema=public --db-password=${POSTGRES_PASSWORD} --db-username=postgres
+    command: start --verbose --features scripts --import-realm --hostname=${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local} --hostname-strict=false --hostname-debug=true --https-port=7443 --https-certificate-file=/etc/x509/https/tls.crt --https-certificate-key-file=/etc/x509/https/tls.key --http-enabled=true --http-port=7080 --config-keystore=/etc/keycloak-store --config-keystore-password=${KEYCLOAK_SVC_KEYSTORE_PASSWORD} --db=postgres --db-url-database=keycloak --db-url-host=uedb --db-schema=public --db-password=${POSTGRES_PASSWORD:-postgres} --db-username=postgres
     volumes:
       - keycloak-store:/etc/keycloak-store
       - ./config/keycloak/tls:/etc/x509/https

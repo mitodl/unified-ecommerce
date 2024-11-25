@@ -80,9 +80,9 @@ The `add_system` command will generate an API key for the system's use. You can 
 
 ### API Access
 
-You can interact with the API directly through the Swagger interface: `<root url>/api/schema/swagger-ui/`
+You can interact with the API directly through the Swagger interface: `<root url>/api/v0/schema/swagger-ui/`
 
-The system also exposes a Redoc version of the API at `<root url>/api/schema/redoc/`
+The system also exposes a Redoc version of the API at `<root url>/api/v0/schema/redoc/`
 
 Navigating to an API endpoint in the browser should also get you the normal DRF interface as well.
 
