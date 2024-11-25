@@ -40,4 +40,5 @@ class ProductSerializer(serializers.ModelSerializer):
             "system_data",
             "system",
             "price",
+            "deleted_by_cascade",
         ]

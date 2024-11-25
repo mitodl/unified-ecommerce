@@ -809,7 +809,11 @@ components:
           format: decimal
           pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
           description: Price (decimal to two places)
+        deleted_by_cascade:
+          type: boolean
+          readOnly: true
       required:
+      - deleted_by_cascade
       - description
       - id
       - name

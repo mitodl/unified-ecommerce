@@ -499,6 +499,12 @@ export interface Product {
      * @memberof Product
      */
     'price': string;
+    /**
+     *
+     * @type {boolean}
+     * @memberof Product
+     */
+    'deleted_by_cascade': boolean;
 }
 /**
  * Serializer for Product model.
