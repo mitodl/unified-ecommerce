@@ -29,6 +29,7 @@ If you want to use the Keycloak instance, follow these steps:
 1. Start the stack normally. The `db` container needs to be up and running, at least.
 1. In `config/keycloak/tls`, copy `tls.crt.default` and `tls.key.default` to `tls.crt` and `tls.key`. (Or, you can regenerate them - see the README in that folder.)
 2. Create a database called `keycloak`. For example: `docker compose --profile keycloak run --rm -ti db psql -h db -U postgres -c 'create database keycloak;'` (then enter the default password of `postgres` when it asks)
+    - After this initial setup, you can have this container start automatically by setting `COMPOSE_PROFILES=keycloak` in your `.env` file.
 3. Set required keycloak environment values in your `.env` file:
    - Set a keystore password via `KEYCLOAK_SVC_KEYSTORE_PASSWORD`. This is required, but the password need not be anything special.
    - Set `KEYCLOAK_CLIENT_SECRET`; ask another developer for the relevant value.
