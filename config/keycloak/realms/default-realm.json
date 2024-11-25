@@ -696,7 +696,7 @@
         "jsonType.label" : "String"
       }
     } ],
-    "defaultClientScopes" : [ "web-origins", "acr", "roles", "profile", "basic", "email" ],
+    "defaultClientScopes" : [ "web-origins", "acr", "roles", "profile", "basic", "email", "ol-profile" ],
     "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ],
     "authorizationSettings" : {
       "allowRemoteResourceManagement" : true,
@@ -1312,7 +1312,19 @@
         "access.token.claim" : "true"
       }
     } ]
-  }, {
+  },    {
+    "id": "c6dd6cb7-653d-400a-8ead-9bb0f75b4024",
+    "name": "ol-profile",
+    "description": "",
+    "protocol": "openid-connect",
+    "attributes": {
+      "include.in.token.scope": "false",
+      "display.on.consent.screen": "true",
+      "gui.order": "",
+      "consent.screen.text": ""
+    }
+  },
+  {
     "id" : "e3e5a646-2741-4544-9722-c109fed166d4",
     "name" : "acr",
     "description" : "OpenID Connect scope for add acr (authentication context class reference) to the token",
