@@ -456,7 +456,7 @@ class Basket(TimestampedModel):
     def total_money(self) -> Decimal:
         """Return the total for the basket, including discounts and tax."""
 
-        return quantize_decimal(self.total_money)
+        return quantize_decimal(self.total)
 
     @staticmethod
     def establish_basket(request, integrated_system: IntegratedSystem):

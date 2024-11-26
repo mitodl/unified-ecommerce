@@ -31,12 +31,6 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 export interface BasketItemWithProduct {
     /**
      *
-     * @type {Nested}
-     * @memberof BasketItemWithProduct
-     */
-    'basket': Nested;
-    /**
-     *
      * @type {Product}
      * @memberof BasketItemWithProduct
      */
@@ -80,10 +74,28 @@ export interface BasketWithProduct {
     'user': number;
     /**
      *
+     * @type {IntegratedSystem}
+     * @memberof BasketWithProduct
+     */
+    'integrated_system': IntegratedSystem;
+    /**
+     *
      * @type {Array<BasketItemWithProduct>}
      * @memberof BasketWithProduct
      */
     'basket_items': Array<BasketItemWithProduct>;
+    /**
+     * Get the subtotal for the basket
+     * @type {number}
+     * @memberof BasketWithProduct
+     */
+    'subtotal': number;
+    /**
+     * Get the tax for the basket
+     * @type {number}
+     * @memberof BasketWithProduct
+     */
+    'tax': number;
     /**
      * Get the total price for the basket
      * @type {number}
@@ -190,87 +202,6 @@ export interface Line {
      */
     'product': Product;
 }
-/**
- *
- * @export
- * @interface Nested
- */
-export interface Nested {
-    /**
-     *
-     * @type {number}
-     * @memberof Nested
-     */
-    'id': number;
-    /**
-     *
-     * @type {string}
-     * @memberof Nested
-     */
-    'created_on': string;
-    /**
-     *
-     * @type {string}
-     * @memberof Nested
-     */
-    'updated_on': string;
-    /**
-     * The IP address of the user.
-     * @type {string}
-     * @memberof Nested
-     */
-    'user_ip'?: string;
-    /**
-     * The country code for the user for this basket for tax purposes.
-     * @type {string}
-     * @memberof Nested
-     */
-    'user_taxable_country_code'?: string | null;
-    /**
-     *
-     * @type {UserTaxableGeolocationTypeEnum}
-     * @memberof Nested
-     */
-    'user_taxable_geolocation_type'?: UserTaxableGeolocationTypeEnum;
-    /**
-     * The country code for the user for this basket for blocked items.
-     * @type {string}
-     * @memberof Nested
-     */
-    'user_blockable_country_code'?: string | null;
-    /**
-     * How the user\'s location was determined for blocked items.
-     * @type {string}
-     * @memberof Nested
-     */
-    'user_blockable_geolocation_type'?: string;
-    /**
-     *
-     * @type {number}
-     * @memberof Nested
-     */
-    'user': number;
-    /**
-     *
-     * @type {number}
-     * @memberof Nested
-     */
-    'integrated_system': number;
-    /**
-     * The tax rate assessed for this basket.
-     * @type {number}
-     * @memberof Nested
-     */
-    'tax_rate'?: number | null;
-    /**
-     *
-     * @type {Array<number>}
-     * @memberof Nested
-     */
-    'discounts': Array<number>;
-}
-
-
 /**
  * Serializer for order history.
  * @export
@@ -496,12 +427,6 @@ export interface PatchedProductRequest {
      */
     'name'?: string;
     /**
-     * Price (decimal to two places)
-     * @type {string}
-     * @memberof PatchedProductRequest
-     */
-    'price'?: string;
-    /**
      * Long description of the product.
      * @type {string}
      * @memberof PatchedProductRequest
@@ -519,6 +444,12 @@ export interface PatchedProductRequest {
      * @memberof PatchedProductRequest
      */
     'system'?: number;
+    /**
+     * Price (decimal to two places)
+     * @type {string}
+     * @memberof PatchedProductRequest
+     */
+    'price'?: string;
 }
 /**
  * Serializer for Product model.
@@ -533,30 +464,6 @@ export interface Product {
      */
     'id': number;
     /**
-     *
-     * @type {string}
-     * @memberof Product
-     */
-    'deleted_on': string | null;
-    /**
-     *
-     * @type {boolean}
-     * @memberof Product
-     */
-    'deleted_by_cascade': boolean;
-    /**
-     *
-     * @type {string}
-     * @memberof Product
-     */
-    'created_on': string;
-    /**
-     *
-     * @type {string}
-     * @memberof Product
-     */
-    'updated_on': string;
-    /**
      * SKU of the product.
      * @type {string}
      * @memberof Product
@@ -568,12 +475,6 @@ export interface Product {
      * @memberof Product
      */
     'name': string;
-    /**
-     * Price (decimal to two places)
-     * @type {string}
-     * @memberof Product
-     */
-    'price': string;
     /**
      * Long description of the product.
      * @type {string}
@@ -592,6 +493,18 @@ export interface Product {
      * @memberof Product
      */
     'system': number;
+    /**
+     * Price (decimal to two places)
+     * @type {string}
+     * @memberof Product
+     */
+    'price': string;
+    /**
+     *
+     * @type {boolean}
+     * @memberof Product
+     */
+    'deleted_by_cascade': boolean;
 }
 /**
  * Serializer for Product model.
@@ -612,12 +525,6 @@ export interface ProductRequest {
      */
     'name': string;
     /**
-     * Price (decimal to two places)
-     * @type {string}
-     * @memberof ProductRequest
-     */
-    'price': string;
-    /**
      * Long description of the product.
      * @type {string}
      * @memberof ProductRequest
@@ -635,6 +542,12 @@ export interface ProductRequest {
      * @memberof ProductRequest
      */
     'system': number;
+    /**
+     * Price (decimal to two places)
+     * @type {string}
+     * @memberof ProductRequest
+     */
+    'price': string;
 }
 /**
  * * `pending` - Pending * `fulfilled` - Fulfilled * `canceled` - Canceled * `refunded` - Refunded * `declined` - Declined * `errored` - Errored * `review` - Review
@@ -687,35 +600,42 @@ export type StateEnum = typeof StateEnum[keyof typeof StateEnum];
 
 
 /**
- * * `profile` - profile * `geoip` - geoip * `none` - none
+ * Serializer for User model.
  * @export
- * @enum {string}
+ * @interface User
  */
-
-export const UserTaxableGeolocationTypeEnumDescriptions = {
-    'profile': "profile",
-    'geoip': "geoip",
-    'none': "none",
-} as const;
-
-export const UserTaxableGeolocationTypeEnum = {
+export interface User {
     /**
-    * profile
-    */
-    Profile: 'profile',
+     *
+     * @type {number}
+     * @memberof User
+     */
+    'id': number;
     /**
-    * geoip
-    */
-    Geoip: 'geoip',
+     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+     * @type {string}
+     * @memberof User
+     */
+    'username': string;
     /**
-    * none
-    */
-    None: 'none'
-} as const;
-
-export type UserTaxableGeolocationTypeEnum = typeof UserTaxableGeolocationTypeEnum[keyof typeof UserTaxableGeolocationTypeEnum];
-
-
+     *
+     * @type {string}
+     * @memberof User
+     */
+    'email'?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof User
+     */
+    'first_name'?: string;
+    /**
+     *
+     * @type {string}
+     * @memberof User
+     */
+    'last_name'?: string;
+}
 
 /**
  * MetaApi - axios parameter creator
@@ -2454,5 +2374,102 @@ export class PaymentsApi extends BaseAPI {
      */
     public paymentsOrdersHistoryRetrieve(requestParameters: PaymentsApiPaymentsOrdersHistoryRetrieveRequest, options?: RawAxiosRequestConfig) {
         return PaymentsApiFp(this.configuration).paymentsOrdersHistoryRetrieve(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * UsersApi - axios parameter creator
+ * @export
+ */
+export const UsersApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * User retrieve and update viewsets for the current user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersMeRetrieve: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/users/me/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * UsersApi - functional programming interface
+ * @export
+ */
+export const UsersApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = UsersApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * User retrieve and update viewsets for the current user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async usersMeRetrieve(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.usersMeRetrieve(options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['UsersApi.usersMeRetrieve']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * UsersApi - factory interface
+ * @export
+ */
+export const UsersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = UsersApiFp(configuration)
+    return {
+        /**
+         * User retrieve and update viewsets for the current user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        usersMeRetrieve(options?: RawAxiosRequestConfig): AxiosPromise<User> {
+            return localVarFp.usersMeRetrieve(options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * UsersApi - object-oriented interface
+ * @export
+ * @class UsersApi
+ * @extends {BaseAPI}
+ */
+export class UsersApi extends BaseAPI {
+    /**
+     * User retrieve and update viewsets for the current user
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public usersMeRetrieve(options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).usersMeRetrieve(options).then((request) => request(this.axios, this.basePath));
     }
 }

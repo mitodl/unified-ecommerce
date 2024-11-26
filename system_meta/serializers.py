@@ -32,4 +32,13 @@ class ProductSerializer(serializers.ModelSerializer):
         """Meta class for serializer."""
 
         model = Product
-        fields = "__all__"
+        fields = [
+            "id",
+            "sku",
+            "name",
+            "description",
+            "system_data",
+            "system",
+            "price",
+            "deleted_by_cascade",
+        ]
