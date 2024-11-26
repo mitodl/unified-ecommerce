@@ -8,20 +8,24 @@ routes:
   - id: 1
     name: "ue-unauth"
     desc: "Unauthenticated routes, including assets and checkout callback API"
-    priority: 0
+    priority: 1
     upstream_id: 1
-    plugins: {}
+    plugins:
+      cors:
+        allow_origins: "**"
+        allow_methods: "**"
+        allow_headers: "**"
+        allow_credential: true
+      response-rewrite:
+        headers:
+          set:
+            Referrer-Policy: "origin"
     uris:
-    - "/api/v0/payments/checkout/result/*"
-    - "/static/*"
-    - "/api/v0/schema/*"
-    - "/auth/*"
-    - "/_/v0/meta/apisix_test_request/"
-    - "/logged_out/"
+    - "/*"
   - id: 2
     name: "ue-default"
     desc: "Wildcard route for the rest of the system - authentication required"
-    priority: 1
+    priority: 0
     upstream_id: 1
     plugins:
       openid-connect:
@@ -45,6 +49,8 @@ routes:
           set:
             Referrer-Policy: "origin"
     uris:
-    - "/*"
+    - "/cart/*"
+    - "/admin/*"
+    - "/establish_session/*"
 
 #END
