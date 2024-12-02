@@ -18,6 +18,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 from mitol.payment_gateway.api import PaymentGateway
+from payments.permissions import HasIntegratedSystemAPIKey
 from rest_framework import status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -27,7 +28,6 @@ from rest_framework.viewsets import (
     ReadOnlyModelViewSet,
     ViewSet,
 )
-from rest_framework_api_key.permissions import HasAPIKey
 
 from payments import api
 from payments.exceptions import ProductBlockedError
@@ -36,7 +36,7 @@ from payments.serializers.v0 import (
     BasketWithProductSerializer,
     OrderHistorySerializer,
 )
-from system_meta.models import IntegratedSystem, Product
+from system_meta.models import IntegratedSystem, IntegratedSystemAPIKey, Product
 from unified_ecommerce import settings
 from unified_ecommerce.constants import (
     POST_SALE_SOURCE_BACKOFFICE,
@@ -482,7 +482,7 @@ class DiscountAPIViewSet(APIView):
     Responds with a 201 status code if the discount is created successfully.
     """
 
-    permission_classes = [HasAPIKey]
+    permission_classes = [HasIntegratedSystemAPIKey]
     authentication_classes = []  # disables authentication
 
     @extend_schema(
@@ -500,9 +500,11 @@ class DiscountAPIViewSet(APIView):
         Returns:
             Response: The response object.
         """
+        key = request.META["HTTP_AUTHORIZATION"].split()[1]
+        api_key = IntegratedSystemAPIKey.objects.get_from_key(key)
         discount_codes = api.generate_discount_code(
             **request.data,
-            integrated_system=request.auth.system,
+            integrated_system=api_key.integrated_system.id,
         )
 
         return Response(

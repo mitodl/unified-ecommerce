@@ -14,6 +14,7 @@ from slugify import slugify
 from rest_framework_api_key.models import AbstractAPIKey
 
 from unified_ecommerce.utils import SoftDeleteActiveModel
+from django.urls import reverse
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -142,8 +143,8 @@ class IntegratedSystemAPIKey(AbstractAPIKey):
     """API key for an integrated system"""
 
     name = models.CharField(max_length=100, unique=True)
-    integrate_system = models.ForeignKey("IntegratedSystem", on_delete=models.CASCADE, related_name="api_keys")
+    integrated_system = models.ForeignKey("IntegratedSystem", on_delete=models.CASCADE, related_name="api_keys")
 
     class Meta(AbstractAPIKey.Meta):
-        verbose_name = "Integrate System API Key"
-        verbose_name_plural = "Integrate System API Keys"
+        verbose_name = "Integrated System API Key"
+        verbose_name_plural = "Integrated System API Keys"
