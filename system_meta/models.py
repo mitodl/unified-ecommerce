@@ -11,6 +11,7 @@ from mitol.payment_gateway.payment_utils import quantize_decimal
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 from slugify import slugify
+from rest_framework_api_key.models import AbstractAPIKey
 
 from unified_ecommerce.utils import SoftDeleteActiveModel
 
@@ -136,3 +137,13 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
         """Return the item price as a quantized decimal."""
 
         return quantize_decimal(self.price)
+
+class IntegratedSystemAPIKey(AbstractAPIKey):
+    """API key for an integrated system"""
+
+    name = models.CharField(max_length=100, unique=True)
+    integrate_system = models.ForeignKey("IntegratedSystem", on_delete=models.CASCADE, related_name="api_keys")
+
+    class Meta(AbstractAPIKey.Meta):
+        verbose_name = "Integrate System API Key"
+        verbose_name_plural = "Integrate System API Keys"

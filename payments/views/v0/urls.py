@@ -7,6 +7,7 @@ from payments.views.v0 import (
     BasketViewSet,
     CheckoutApiViewSet,
     CheckoutCallbackView,
+    DiscountAPIViewSet,
     OrderHistoryViewSet,
     add_discount_to_basket,
     clear_basket,
@@ -42,6 +43,11 @@ urlpatterns = [
         "checkout/callback/",
         BackofficeCallbackView.as_view(),
         name="checkout-callback",
+    ),
+    path(
+        "discounts/",
+        DiscountAPIViewSet.as_view(),
+        name="discount-api",
     ),
     re_path(
         r"^",

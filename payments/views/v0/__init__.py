@@ -27,6 +27,7 @@ from rest_framework.viewsets import (
     ReadOnlyModelViewSet,
     ViewSet,
 )
+from rest_framework_api_key.permissions import HasAPIKey
 
 from payments import api
 from payments.exceptions import ProductBlockedError
@@ -471,3 +472,40 @@ def add_discount_to_basket(request, system_slug: str):
         BasketWithProductSerializer(basket).data,
         status=status.HTTP_200_OK,
     )
+
+class DiscountAPIViewSet(APIView):
+    """
+    Provides API for creating Discount objects.
+    Discounts created through this API will be associated
+    with the integrated system that is linked to the api key.
+    
+    Responds with a 201 status code if the discount is created successfully.
+    """
+
+    permission_classes = [HasAPIKey]
+    authentication_classes = []  # disables authentication
+
+    @extend_schema(
+        description="Create a discount.",
+        methods=["POST"],
+        request=None,
+    )
+    def post(self, request):
+        """
+        Create discounts.
+
+        Args:
+            request: The request object.
+
+        Returns:
+            Response: The response object.
+        """
+        discount_codes = api.generate_discount_code(
+            **request.data,
+            integrated_system=request.auth.system,
+        )
+
+        return Response(
+            {"discounts_created": discount_codes},
+            status=status.HTTP_201_CREATED,
+        )

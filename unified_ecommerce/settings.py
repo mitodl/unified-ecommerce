@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "server_status",
     "rest_framework",
+    "rest_framework_api_key",
     "corsheaders",
     # "webpack_loader",
     "anymail",
