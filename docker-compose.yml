@@ -76,14 +76,14 @@ services:
       - django_media:/var/media
 
   api:
-    image: apache/apisix
-    platform: linux/amd64
+    image: apache/apisix:latest
     environment:
     - KEYCLOAK_REALM=${KEYCLOAK_REALM:-ol-local}
     - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-apisix}
     - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
     - KEYCLOAK_DISCOVERY_URL=${KEYCLOAK_DISCOVERY_URL:-https://kc.odl.local:7443/realms/ol-local/.well-known/openid-configuration}
     - APISIX_PORT=${APISIX_PORT:-9080}
+    - SECRET_KEY=${SECRET_KEY}
     - UE_LOGOUT_URL=${UE_LOGOUT_URL:-http://ue.odl.local:9080/auth/logout/}
     ports:
       - 9080:9080
