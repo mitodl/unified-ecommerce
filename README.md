@@ -64,6 +64,9 @@ The following settings must be configured before running the app:
 
   The URL for an optional "chooser" page. If the `establish_session` call happens without a valid system slug, the user gets sent here so they can choose which cart they want to see.
 
+- `APISIX_SESSION_SECRET_KEY`
+
+  The secret key that APISIX will use to encode session data. This has a reasonable default, but if you do specify this, make sure the key you specify is _at least_ 16 characters long and is not numeric. (It can contain numbers but if you just put in 12345.. it will complain.)
 
 ### Loading and Accessing Data
 
@@ -108,6 +111,8 @@ The two files most likely to need to change are `apisix.yaml`, which controls ro
 Use the documentation and the APISIX source code to determine what goes in each file.
 
 Note that, since APISIX is run in "decoupled"/"standalone" mode, you _cannot_ use the API to control it. All changes and state introspection is done from the yaml files.
+
+If you're getting 404 errors for all routes, make sure you've set the session key as noted above, and watch the logs for the `api` container. Debug mode is turned on so you should see errors on startup if it's unable to parse the routes file (`apisix.yaml`).
 
 ## Code Generation
 
