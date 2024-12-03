@@ -474,6 +474,7 @@ def add_discount_to_basket(request, system_slug: str):
         status=status.HTTP_200_OK,
     )
 
+
 class DiscountAPIViewSet(APIView):
     """
     Provides API for creating Discount objects.
