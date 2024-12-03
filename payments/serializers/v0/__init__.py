@@ -218,6 +218,7 @@ class OrderHistorySerializer(serializers.ModelSerializer):
         ]
         model = Order
 
+
 class CompanySerializer(serializers.ModelSerializer):
     """Serializer for companies."""
 
