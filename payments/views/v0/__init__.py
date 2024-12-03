@@ -479,7 +479,7 @@ class DiscountAPIViewSet(APIView):
     Provides API for creating Discount objects.
     Discounts created through this API will be associated
     with the integrated system that is linked to the api key.
-    
+
     Responds with a 201 status code if the discount is created successfully.
     """
 

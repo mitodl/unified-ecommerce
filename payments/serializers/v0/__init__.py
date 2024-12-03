@@ -11,7 +11,7 @@ from payments.constants import (
     PAYMENT_HOOK_ACTION_POST_SALE,
     PAYMENT_HOOK_ACTIONS,
 )
-from payments.models import Basket, BasketItem, Discount, Line, Order
+from payments.models import Basket, BasketItem, Company, Discount, Line, Order
 from system_meta.models import Product
 from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
@@ -217,9 +217,23 @@ class OrderHistorySerializer(serializers.ModelSerializer):
             "updated_on",
         ]
         model = Order
+        
+class CompanySerializer(serializers.ModelSerializer):
+    """Serializer for companies."""
+
+    class Meta:
+        """Meta options for CompanySerializer"""
+
+        model = Company
+        fields = ["id", "name"]
 
 class DiscountSerializer(serializers.ModelSerializer):
     """Serializer for discounts."""
+
+    assigned_users = UserSerializer(many=True)
+    integrated_system = IntegratedSystemSerializer()
+    product = ProductSerializer()
+    company = CompanySerializer()
 
     class Meta:
         """Meta options for DiscountSerializer"""
