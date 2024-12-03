@@ -8,13 +8,13 @@ routes:
   - id: 1
     name: "ue-unauth"
     desc: "Unauthenticated routes, including assets and checkout callback API"
-    priority: 0
+    priority: 1
     upstream_id: 1
     plugins: {}
     uris:
     - "/api/v0/payments/checkout/result/*"
     - "/static/*"
-    - "/api/v0/schema/*"
+    - "/api/*"
     - "/auth/*"
     - "/_/v0/meta/apisix_test_request/"
     - "/logged_out/"

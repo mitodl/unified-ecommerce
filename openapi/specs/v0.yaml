@@ -413,6 +413,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/BasketWithProduct'
           description: ''
+  /api/v0/payments/discounts/:
+    post:
+      operationId: payments_discounts_create
+      description: Create a discount.
+      tags:
+      - payments
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discount'
+          description: ''
   /api/v0/payments/orders/history/:
     get:
       operationId: payments_orders_history_list
@@ -541,6 +554,73 @@ components:
       - tax
       - total_price
       - user
+    Company:
+      type: object
+      description: Serializer for companies.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+      required:
+      - id
+      - name
+    Discount:
+      type: object
+      description: Serializer for discounts.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        discount_code:
+          type: string
+          maxLength: 100
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+        payment_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/PaymentTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        max_redemptions:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        activation_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: If set, this discount code will not be redeemable before this
+            date.
+        expiration_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: If set, this discount code will not be redeemable after this
+            date.
+        integrated_system:
+          $ref: '#/components/schemas/IntegratedSystem'
+        product:
+          $ref: '#/components/schemas/Product'
+        assigned_users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        company:
+          $ref: '#/components/schemas/Company'
+      required:
+      - amount
+      - assigned_users
+      - company
+      - discount_code
+      - id
+      - integrated_system
+      - product
     IntegratedSystem:
       type: object
       description: Serializer for IntegratedSystem model.
@@ -608,6 +688,9 @@ components:
       - quantity
       - total_price
       - unit_price
+    NullEnum:
+      enum:
+      - null
     OrderHistory:
       type: object
       description: Serializer for order history.
@@ -780,6 +863,35 @@ components:
           format: decimal
           pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
           description: Price (decimal to two places)
+    PaymentTypeEnum:
+      enum:
+      - marketing
+      - sales
+      - financial-assistance
+      - customer-support
+      - staff
+      - legacy
+      - credit_card
+      - purchase_order
+      type: string
+      description: |-
+        * `marketing` - marketing
+        * `sales` - sales
+        * `financial-assistance` - financial-assistance
+        * `customer-support` - customer-support
+        * `staff` - staff
+        * `legacy` - legacy
+        * `credit_card` - credit_card
+        * `purchase_order` - purchase_order
+      x-enum-descriptions:
+      - marketing
+      - sales
+      - financial-assistance
+      - customer-support
+      - staff
+      - legacy
+      - credit_card
+      - purchase_order
     Product:
       type: object
       description: Serializer for Product model.
