@@ -227,6 +227,7 @@ class CompanySerializer(serializers.ModelSerializer):
         model = Company
         fields = ["id", "name"]
 
+
 class DiscountSerializer(serializers.ModelSerializer):
     """Serializer for discounts."""
 
