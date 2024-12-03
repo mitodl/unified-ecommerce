@@ -217,7 +217,7 @@ class OrderHistorySerializer(serializers.ModelSerializer):
             "updated_on",
         ]
         model = Order
-        
+
 class CompanySerializer(serializers.ModelSerializer):
     """Serializer for companies."""
 
