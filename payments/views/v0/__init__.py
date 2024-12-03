@@ -34,6 +34,7 @@ from payments.exceptions import ProductBlockedError
 from payments.models import Basket, BasketItem, Discount, Order
 from payments.serializers.v0 import (
     BasketWithProductSerializer,
+    DiscountSerializer,
     OrderHistorySerializer,
 )
 from system_meta.models import IntegratedSystem, IntegratedSystemAPIKey, Product
@@ -502,12 +503,13 @@ class DiscountAPIViewSet(APIView):
         """
         key = request.META["HTTP_AUTHORIZATION"].split()[1]
         api_key = IntegratedSystemAPIKey.objects.get_from_key(key)
+        discount_dictionary = request.data
+        discount_dictionary["integrated_system"] = str(api_key.integrated_system.id)
         discount_codes = api.generate_discount_code(
-            **request.data,
-            integrated_system=api_key.integrated_system.id,
+            **discount_dictionary,
         )
 
         return Response(
-            {"discounts_created": discount_codes},
+            {"discounts_created": DiscountSerializer(discount_codes, many=True).data},
             status=status.HTTP_201_CREATED,
         )
