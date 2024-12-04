@@ -40,12 +40,14 @@ def establish_session(request):
     session check API endpoint.
     """
 
+    next_url = settings.MITOL_UE_PAYMENT_BASKET_CHOOSER
+
     if "next" in request.GET:
         try:
             system = IntegratedSystem.objects.get(slug=request.GET["next"])
             next_url = f"{settings.MITOL_UE_PAYMENT_BASKET_ROOT}{system.slug}/"
         except IntegratedSystem.DoesNotExist:
-            next_url = settings.MITOL_UE_PAYMENT_BASKET_CHOOSER
+            pass
 
     next_url = request.session.get("next", next_url)
 
