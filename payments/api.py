@@ -515,6 +515,7 @@ def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
     * count - number of codes to create (requires prefix)
     * prefix - prefix to append to the codes (max 63 characters)
     * company - ID of the company to associate with the discount
+    * transaction_number - transaction number to associate with the discount
 
     Returns:
     * List of generated codes, with the following fields:
@@ -652,6 +653,11 @@ def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
     else:
         company = None
 
+    if "transaction_number" in kwargs and kwargs["transaction_number"] is not None:
+        transaction_number = kwargs["transaction_number"]
+    else:
+        transaction_number = None
+
     generated_codes = []
 
     for code_to_generate in codes_to_generate:
@@ -669,6 +675,7 @@ def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
                 product=product,
                 bulk_discount_collection=bulk_discount_collection,
                 company=company,
+                transaction_number=transaction_number,
             )
         if users:
             discount.assigned_users.set(users)
