@@ -124,6 +124,11 @@ class Command(BaseCommand):
             help="List of user IDs or emails to associate with the discount.",
         )
 
+        parser.add_argument(
+            "--company",
+            help="Company ID to associate with the discount.",
+        )
+
     def handle(self, *args, **kwargs):  # pylint: disable=unused-argument  # noqa: ARG002
         """
         Handle the generation of discount codes based on the provided arguments.

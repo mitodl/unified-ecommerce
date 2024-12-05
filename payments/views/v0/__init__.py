@@ -31,11 +31,13 @@ from rest_framework.viewsets import (
 from payments import api
 from payments.exceptions import ProductBlockedError
 from payments.models import Basket, BasketItem, Discount, Order
+from payments.permissions import HasIntegratedSystemAPIKey
 from payments.serializers.v0 import (
     BasketWithProductSerializer,
+    DiscountSerializer,
     OrderHistorySerializer,
 )
-from system_meta.models import IntegratedSystem, Product
+from system_meta.models import IntegratedSystem, IntegratedSystemAPIKey, Product
 from unified_ecommerce import settings
 from unified_ecommerce.constants import (
     POST_SALE_SOURCE_BACKOFFICE,
@@ -471,3 +473,45 @@ def add_discount_to_basket(request, system_slug: str):
         BasketWithProductSerializer(basket).data,
         status=status.HTTP_200_OK,
     )
+
+
+class DiscountAPIViewSet(APIView):
+    """
+    Provides API for creating Discount objects.
+    Discounts created through this API will be associated
+    with the integrated system that is linked to the api key.
+
+    Responds with a 201 status code if the discount is created successfully.
+    """
+
+    permission_classes = [HasIntegratedSystemAPIKey]
+    authentication_classes = []  # disables authentication
+
+    @extend_schema(
+        description="Create a discount.",
+        methods=["POST"],
+        request=None,
+        responses=DiscountSerializer,
+    )
+    def post(self, request):
+        """
+        Create discounts.
+
+        Args:
+            request: The request object.
+
+        Returns:
+            Response: The response object.
+        """
+        key = request.META["HTTP_AUTHORIZATION"].split()[1]
+        api_key = IntegratedSystemAPIKey.objects.get_from_key(key)
+        discount_dictionary = request.data
+        discount_dictionary["integrated_system"] = str(api_key.integrated_system.id)
+        discount_codes = api.generate_discount_code(
+            **discount_dictionary,
+        )
+
+        return Response(
+            {"discounts_created": DiscountSerializer(discount_codes, many=True).data},
+            status=status.HTTP_201_CREATED,
+        )

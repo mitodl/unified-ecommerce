@@ -1,6 +1,7 @@
 """Routes for the system_meta app."""
 
-from django.urls import include, re_path
+from django.contrib import admin
+from django.urls import include, path, re_path
 from rest_framework import routers
 
 from system_meta.views import (
@@ -18,5 +19,6 @@ v0_router.register(
 v0_router.register(r"^meta/product", ProductViewSet, basename="meta_products_api")
 
 urlpatterns = [
+    path("admin/", admin.site.urls),
     re_path("^api/v0/", include((v0_router.urls, "v0"))),
 ]

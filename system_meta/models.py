@@ -8,6 +8,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
 from mitol.payment_gateway.payment_utils import quantize_decimal
+from rest_framework_api_key.models import AbstractAPIKey
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 from slugify import slugify
@@ -136,3 +137,16 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
         """Return the item price as a quantized decimal."""
 
         return quantize_decimal(self.price)
+
+
+class IntegratedSystemAPIKey(AbstractAPIKey):
+    """API key for an integrated system"""
+
+    name = models.CharField(max_length=100, unique=True)
+    integrated_system = models.ForeignKey(
+        "IntegratedSystem", on_delete=models.CASCADE, related_name="api_keys"
+    )
+
+    class Meta(AbstractAPIKey.Meta):
+        verbose_name = "Integrated System API Key"
+        verbose_name_plural = "Integrated System API Keys"
