@@ -83,3 +83,32 @@ class CheckoutInterstitialView(LoginRequiredMixin, TemplateView):
                 "debug_mode": settings.MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG,
             },
         )
+
+class OrderHistoryView(LoginRequiredMixin, TemplateView):
+    """View for the order history page."""
+
+    template_name = "order_history.html"
+    extra_context = {"title": "Order History", "innertitle": "Order History"}
+
+    def get(self, request: HttpRequest, system_slug: str) -> HttpResponse:
+        """Render the order history page."""
+        system = IntegratedSystem.objects.get(slug=system_slug)
+        basket = Basket.establish_basket(request, system)
+        products = Product.objects.all()
+
+        if not request.user.is_authenticated:
+            msg = "User is not authenticated"
+            raise ValueError(msg)
+
+        return render(
+            request,
+            self.template_name,
+            {
+                **self.extra_context,
+                "user": request.user,
+                "basket": basket,
+                "basket_items": basket.basket_items.all(),
+                "products": products,
+                "debug_mode": settings.MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG,
+            },
+        )

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Order History{% endblock %}
+{% block innertitle %}Order History{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <p>
+            This is the order history for {{ user.email }} ({{ user.first_name }} {{ user.last_name }}).
+        </p>
+    </div>
+</div>
+{% if orders %}
+<div class="row">
+    <div class="col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Order ID</th>
+                    <th scope="col">Order Date</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.order_date }}</td>
+                    <td>{{ order.total_price_money }}</td>
+                    <td>{{ order.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <p>No orders found.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-from cart.views import CartView, CheckoutInterstitialView
+from cart.views import CartView, CheckoutInterstitialView, OrderHistoryView
 
 urlpatterns = [
     path(
@@ -11,4 +11,5 @@ urlpatterns = [
         name="checkout_interstitial_page",
     ),
     path("cart/<str:system_slug>/", CartView.as_view(), name="cart"),
+    path("history/", OrderHistoryView.as_view(), name="history"),
 ]
