@@ -413,6 +413,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/BasketWithProduct'
           description: ''
+  /api/v0/payments/baskets/for_system/{system_slug}/:
+    get:
+      operationId: payments_baskets_for_system_retrieve
+      description: Returns or creates a basket for the current user and system.
+      parameters:
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketWithProduct'
+          description: ''
   /api/v0/payments/discounts/:
     post:
       operationId: payments_discounts_create
