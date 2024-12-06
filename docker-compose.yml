@@ -12,17 +12,21 @@ x-environment: &py-environment
   DOCKER_HOST: ${DOCKER_HOST:-missing}
   POSTGRES_PORT: ${POSTGRES_PORT:-5432}
   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+  NGINX_PORT: ${NGINX_PORT:-8073}
+  APISIX_PORT: ${APISIX_PORT:-9080}
+  KEYCLOAK_PORT: ${KEYCLOAK_PORT:-7080}
+  KEYCLOAK_SSL_PORT: ${KEYCLOAK_SSL_PORT:-7443}
 
 services:
   db:
-    image: postgres:16
+    image: postgres:17
     ports:
       - "$POSTGRES_PORT:5432"
     environment:
       <<: *py-environment
 
   redis:
-    image: redis:5.0.14
+    image: redis:6.2
     ports:
       - "6379"
 
@@ -49,7 +53,7 @@ services:
     stdin_open: true
     tty: true
     ports:
-      - "8071:8071"
+      - "8071"
     links:
       - db
       - redis
@@ -86,8 +90,7 @@ services:
     - APISIX_SESSION_SECRET_KEY=${APISIX_SESSION_SECRET_KEY:-something_at_least_16_characters}
     - UE_LOGOUT_URL=${UE_LOGOUT_URL:-http://ue.odl.local:9080/auth/logout/}
     ports:
-      - 9080:9080
-      - 9180:9180
+      - ${APISIX_PORT}:9080
     volumes:
       - ./config/apisix/config.yaml:/usr/local/apisix/conf/config.yaml
       - ./config/apisix/apisix.yaml:/usr/local/apisix/conf/apisix.yaml
@@ -100,7 +103,7 @@ services:
     depends_on:
       - db
     ports:
-      - 7080:7080
+      - ${KEYCLOAK_PORT}:7080
       - 7443:7443
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_SVC_ADMIN:-admin}
@@ -111,7 +114,7 @@ services:
         - ${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local}
     links:
       - db:uedb
-    command: start --verbose --features scripts --import-realm --hostname=${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local} --hostname-strict=false --hostname-debug=true --https-port=7443 --https-certificate-file=/etc/x509/https/tls.crt --https-certificate-key-file=/etc/x509/https/tls.key --http-enabled=true --http-port=7080 --config-keystore=/etc/keycloak-store --config-keystore-password=${KEYCLOAK_SVC_KEYSTORE_PASSWORD} --db=postgres --db-url-database=keycloak --db-url-host=uedb --db-schema=public --db-password=${POSTGRES_PASSWORD:-postgres} --db-username=postgres
+    command: start --verbose --features scripts --import-realm --hostname=${KEYCLOAK_SVC_HOSTNAME:-kc.odl.local} --hostname-strict=false --hostname-debug=true --https-port=${KEYCLOAK_SSL_PORT} --https-certificate-file=/etc/x509/https/tls.crt --https-certificate-key-file=/etc/x509/https/tls.key --http-enabled=true --http-port=${KEYCLOAK_PORT} --config-keystore=/etc/keycloak-store --config-keystore-password=${KEYCLOAK_SVC_KEYSTORE_PASSWORD} --db=postgres --db-url-database=keycloak --db-url-host=uedb --db-schema=public --db-password=${POSTGRES_PASSWORD:-postgres} --db-username=postgres
     volumes:
       - keycloak-store:/etc/keycloak-store
       - ./config/keycloak/tls:/etc/x509/https
