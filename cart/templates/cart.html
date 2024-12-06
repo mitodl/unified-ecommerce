@@ -96,7 +96,9 @@
                 <select name="product" id="product">
                     <option></option>
                     {% for product in products %}
+                    {% if product.system.id == basket.integrated_system.id %}
                     <option value="{{ product.system.slug }}/{{ product.sku }}">{{ product.system.name }} - {{ product.name }} ${{ product.price }}</option>
+                    {% endif %}
                     {% endfor %}
                 </select>
             </div>
