@@ -101,6 +101,32 @@ class BasketViewSet(ReadOnlyModelViewSet):
 
 
 @extend_schema(
+    description="Returns or creates a basket for the current user and system.",
+    methods=["GET"],
+    request=None,
+    responses=BasketWithProductSerializer,
+)
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def get_user_basket_for_system(request, system_slug: str):
+    """
+    Return the user's basket for the given system.
+
+    Args:
+        request: The request object.
+        system_slug: The system slug.
+
+    Returns:
+        Basket: The basket object.
+    """
+    system = IntegratedSystem.objects.get(slug=system_slug)
+    return Response(
+        BasketWithProductSerializer(Basket.establish_basket(request, system)).data,
+        status=status.HTTP_200_OK,
+    )
+
+
+@extend_schema(
     description=(
         "Creates or updates a basket for the current user, "
         "adding the selected product."

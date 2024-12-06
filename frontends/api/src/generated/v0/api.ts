@@ -104,6 +104,100 @@ export interface BasketWithProduct {
     'total_price': number;
 }
 /**
+ * Serializer for companies.
+ * @export
+ * @interface Company
+ */
+export interface Company {
+    /**
+     *
+     * @type {number}
+     * @memberof Company
+     */
+    'id': number;
+    /**
+     *
+     * @type {string}
+     * @memberof Company
+     */
+    'name': string;
+}
+/**
+ * Serializer for discounts.
+ * @export
+ * @interface Discount
+ */
+export interface Discount {
+    /**
+     *
+     * @type {number}
+     * @memberof Discount
+     */
+    'id': number;
+    /**
+     *
+     * @type {string}
+     * @memberof Discount
+     */
+    'discount_code': string;
+    /**
+     *
+     * @type {string}
+     * @memberof Discount
+     */
+    'amount': string;
+    /**
+     *
+     * @type {PaymentTypeEnum}
+     * @memberof Discount
+     */
+    'payment_type'?: PaymentTypeEnum | null;
+    /**
+     *
+     * @type {number}
+     * @memberof Discount
+     */
+    'max_redemptions'?: number | null;
+    /**
+     * If set, this discount code will not be redeemable before this date.
+     * @type {string}
+     * @memberof Discount
+     */
+    'activation_date'?: string | null;
+    /**
+     * If set, this discount code will not be redeemable after this date.
+     * @type {string}
+     * @memberof Discount
+     */
+    'expiration_date'?: string | null;
+    /**
+     *
+     * @type {IntegratedSystem}
+     * @memberof Discount
+     */
+    'integrated_system': IntegratedSystem;
+    /**
+     *
+     * @type {Product}
+     * @memberof Discount
+     */
+    'product': Product;
+    /**
+     *
+     * @type {Array<User>}
+     * @memberof Discount
+     */
+    'assigned_users': Array<User>;
+    /**
+     *
+     * @type {Company}
+     * @memberof Discount
+     */
+    'company': Company;
+}
+
+
+/**
  * Serializer for IntegratedSystem model.
  * @export
  * @interface IntegratedSystem
@@ -202,6 +296,23 @@ export interface Line {
      */
     'product': Product;
 }
+/**
+ *
+ * @export
+ * @enum {string}
+ */
+
+export const NullEnumDescriptions = {
+    'null': "",
+} as const;
+
+export const NullEnum = {
+    Null: 'null'
+} as const;
+
+export type NullEnum = typeof NullEnum[keyof typeof NullEnum];
+
+
 /**
  * Serializer for order history.
  * @export
@@ -451,6 +562,61 @@ export interface PatchedProductRequest {
      */
     'price'?: string;
 }
+/**
+ * * `marketing` - marketing * `sales` - sales * `financial-assistance` - financial-assistance * `customer-support` - customer-support * `staff` - staff * `legacy` - legacy * `credit_card` - credit_card * `purchase_order` - purchase_order
+ * @export
+ * @enum {string}
+ */
+
+export const PaymentTypeEnumDescriptions = {
+    'marketing': "marketing",
+    'sales': "sales",
+    'financial-assistance': "financial-assistance",
+    'customer-support': "customer-support",
+    'staff': "staff",
+    'legacy': "legacy",
+    'credit_card': "credit_card",
+    'purchase_order': "purchase_order",
+} as const;
+
+export const PaymentTypeEnum = {
+    /**
+    * marketing
+    */
+    Marketing: 'marketing',
+    /**
+    * sales
+    */
+    Sales: 'sales',
+    /**
+    * financial-assistance
+    */
+    FinancialAssistance: 'financial-assistance',
+    /**
+    * customer-support
+    */
+    CustomerSupport: 'customer-support',
+    /**
+    * staff
+    */
+    Staff: 'staff',
+    /**
+    * legacy
+    */
+    Legacy: 'legacy',
+    /**
+    * credit_card
+    */
+    CreditCard: 'credit_card',
+    /**
+    * purchase_order
+    */
+    PurchaseOrder: 'purchase_order'
+} as const;
+
+export type PaymentTypeEnum = typeof PaymentTypeEnum[keyof typeof PaymentTypeEnum];
+
+
 /**
  * Serializer for Product model.
  * @export
@@ -1844,6 +2010,39 @@ export const PaymentsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
+         * Returns or creates a basket for the current user and system.
+         * @param {string} system_slug
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsBasketsForSystemRetrieve: async (system_slug: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'system_slug' is not null or undefined
+            assertParamExists('paymentsBasketsForSystemRetrieve', 'system_slug', system_slug)
+            const localVarPath = `/api/v0/payments/baskets/for_system/{system_slug}/`
+                .replace(`{${"system_slug"}}`, encodeURIComponent(String(system_slug)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrives the current user\'s baskets, one per system.
          * @param {number} [integrated_system]
          * @param {number} [limit] Number of results to return per page.
@@ -1906,6 +2105,35 @@ export const PaymentsApiAxiosParamCreator = function (configuration?: Configurat
             }
 
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create a discount.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsDiscountsCreate: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v0/payments/discounts/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -2040,6 +2268,18 @@ export const PaymentsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
+         * Returns or creates a basket for the current user and system.
+         * @param {string} system_slug
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async paymentsBasketsForSystemRetrieve(system_slug: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BasketWithProduct>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsBasketsForSystemRetrieve(system_slug, options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PaymentsApi.paymentsBasketsForSystemRetrieve']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
          * Retrives the current user\'s baskets, one per system.
          * @param {number} [integrated_system]
          * @param {number} [limit] Number of results to return per page.
@@ -2063,6 +2303,17 @@ export const PaymentsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsBasketsRetrieve(id, options);
             const index = configuration?.serverIndex ?? 0;
             const operationBasePath = operationServerMap['PaymentsApi.paymentsBasketsRetrieve']?.[index]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
+        },
+        /**
+         * Create a discount.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async paymentsDiscountsCreate(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Discount>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsDiscountsCreate(options);
+            const index = configuration?.serverIndex ?? 0;
+            const operationBasePath = operationServerMap['PaymentsApi.paymentsDiscountsCreate']?.[index]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
@@ -2128,6 +2379,15 @@ export const PaymentsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.paymentsBasketsCreateFromProductCreate(requestParameters.sku, requestParameters.system_slug, options).then((request) => request(axios, basePath));
         },
         /**
+         * Returns or creates a basket for the current user and system.
+         * @param {PaymentsApiPaymentsBasketsForSystemRetrieveRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsBasketsForSystemRetrieve(requestParameters: PaymentsApiPaymentsBasketsForSystemRetrieveRequest, options?: RawAxiosRequestConfig): AxiosPromise<BasketWithProduct> {
+            return localVarFp.paymentsBasketsForSystemRetrieve(requestParameters.system_slug, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrives the current user\'s baskets, one per system.
          * @param {PaymentsApiPaymentsBasketsListRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -2144,6 +2404,14 @@ export const PaymentsApiFactory = function (configuration?: Configuration, baseP
          */
         paymentsBasketsRetrieve(requestParameters: PaymentsApiPaymentsBasketsRetrieveRequest, options?: RawAxiosRequestConfig): AxiosPromise<BasketWithProduct> {
             return localVarFp.paymentsBasketsRetrieve(requestParameters.id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create a discount.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        paymentsDiscountsCreate(options?: RawAxiosRequestConfig): AxiosPromise<Discount> {
+            return localVarFp.paymentsDiscountsCreate(options).then((request) => request(axios, basePath));
         },
         /**
          * Retrives the current user\'s completed orders.
@@ -2211,6 +2479,20 @@ export interface PaymentsApiPaymentsBasketsCreateFromProductCreateRequest {
      *
      * @type {string}
      * @memberof PaymentsApiPaymentsBasketsCreateFromProductCreate
+     */
+    readonly system_slug: string
+}
+
+/**
+ * Request parameters for paymentsBasketsForSystemRetrieve operation in PaymentsApi.
+ * @export
+ * @interface PaymentsApiPaymentsBasketsForSystemRetrieveRequest
+ */
+export interface PaymentsApiPaymentsBasketsForSystemRetrieveRequest {
+    /**
+     *
+     * @type {string}
+     * @memberof PaymentsApiPaymentsBasketsForSystemRetrieve
      */
     readonly system_slug: string
 }
@@ -2333,6 +2615,17 @@ export class PaymentsApi extends BaseAPI {
     }
 
     /**
+     * Returns or creates a basket for the current user and system.
+     * @param {PaymentsApiPaymentsBasketsForSystemRetrieveRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PaymentsApi
+     */
+    public paymentsBasketsForSystemRetrieve(requestParameters: PaymentsApiPaymentsBasketsForSystemRetrieveRequest, options?: RawAxiosRequestConfig) {
+        return PaymentsApiFp(this.configuration).paymentsBasketsForSystemRetrieve(requestParameters.system_slug, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Retrives the current user\'s baskets, one per system.
      * @param {PaymentsApiPaymentsBasketsListRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -2352,6 +2645,16 @@ export class PaymentsApi extends BaseAPI {
      */
     public paymentsBasketsRetrieve(requestParameters: PaymentsApiPaymentsBasketsRetrieveRequest, options?: RawAxiosRequestConfig) {
         return PaymentsApiFp(this.configuration).paymentsBasketsRetrieve(requestParameters.id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create a discount.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PaymentsApi
+     */
+    public paymentsDiscountsCreate(options?: RawAxiosRequestConfig) {
+        return PaymentsApiFp(this.configuration).paymentsDiscountsCreate(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
