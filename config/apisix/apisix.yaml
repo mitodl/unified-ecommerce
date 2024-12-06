@@ -60,6 +60,7 @@ routes:
     - "/admin/*"
     - "/establish_session/*"
     - "/logout"
+    - "/history/"
   - id: 3
     name: "ue-logout-redirect"
     desc: "Strip trailing slash from logout redirect."
