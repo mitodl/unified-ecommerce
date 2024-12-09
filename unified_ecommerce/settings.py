@@ -104,6 +104,7 @@ INSTALLED_APPS = [
     "cart",
     "mitol.payment_gateway.apps.PaymentGatewayApp",
     "openapi",
+    "django_tables2",
 ]
 
 MIDDLEWARE = [
@@ -152,6 +153,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
+                "django.template.context_processors.request",
             ],
         },
     },

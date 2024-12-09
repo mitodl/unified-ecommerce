@@ -10,10 +10,14 @@ from django.http.request import HttpRequest
 from django.shortcuts import render
 from django.views.generic import TemplateView
 
+from cart.tables import OrderTable
 from payments import api
-from payments.models import Basket
-from payments.serializers.v0 import OrderHistorySerializer
+from payments.models import Basket, Order
 from system_meta.models import IntegratedSystem, Product
+from django_filters.views import FilterView
+from django_tables2.views import SingleTableMixin
+from django_filters import FilterSet
+import django_filters
 
 log = logging.getLogger(__name__)
 
@@ -85,29 +89,24 @@ class CheckoutInterstitialView(LoginRequiredMixin, TemplateView):
             },
         )
 
-class OrderHistoryView(LoginRequiredMixin, TemplateView):
-    """View for the order history page."""
-
+class OrderFilter(FilterSet):
+    state = django_filters.ChoiceFilter(
+        choices=[
+            (Order.STATE.REFUNDED, 'Refunded'),
+            (Order.STATE.FULFILLED, 'Fulfilled')
+        ]
+    )
+    created_on = django_filters.DateFromToRangeFilter(widget=django_filters.widgets.RangeWidget(attrs={'type': 'date'}))
+    class Meta:
+        model = Order
+        fields = {"reference_number": ["contains"], "state": ["exact"], "created_on": ["range"]}
+class OrderHistoryView(SingleTableMixin, FilterView):
+    table_class = OrderTable
+    model = Order
     template_name = "order_history.html"
-    extra_context = {"title": "Order History", "innertitle": "Order History"}
 
-    def get(self, request: HttpRequest) -> HttpResponse:
-        """
-        Render the order history page.  This only returns completed or
-        refunded orders for the current user.
-        """
+    def get_queryset(self):
+        return Order.objects.filter(state__in=[Order.STATE.REFUNDED,
+                                               Order.STATE.FULFILLED])
 
-        if not request.user.is_authenticated:
-            msg = "User is not authenticated"
-            raise ValueError(msg)
-
-        return render(
-            request,
-            self.template_name,
-            {
-                **self.extra_context,
-                "user": request.user,
-                "orders": OrderHistorySerializer(request.user.orders.all(), many=True).data,
-                "debug_mode": settings.MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG,
-            },
-        )
+    filterset_class = OrderFilter

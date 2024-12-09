@@ -2,6 +2,7 @@
 
 {% block title %}Order History{% endblock %}
 {% block innertitle %}Order History{% endblock %}
+{% load render_table from django_tables2 %}
 
 {% block body %}
 <div class="row">
@@ -11,40 +12,10 @@
         </p>
     </div>
 </div>
-{% if orders %}
-<div class="row">
-    <div class="col-12">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Order Number</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Number of items</th>
-                    <th scope="col">Purchase date</th>
-                    <th scope="col">System</th>
-                    <th scope="col">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>{{ order.reference_number }}</td>
-                    <td>{{ order.state }}</td>
-                    <td>{{ order.lines|length }}</td>
-                    <td>{{ order.created_on }}</td>
-                    <td>{{ order.system }}</td>
-                    <td>{{ order.total_price_paid }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% else %}
-<div class="row">
-    <div class="col-12">
-        <p>No orders found.</p>
-    </div>
-</div>
-{% endif %}
+<form method="get">
+    {{ filter.form.as_p }}
+    <input type="submit" />
+</form>
+
+{% render_table table %}
 {% endblock %}
