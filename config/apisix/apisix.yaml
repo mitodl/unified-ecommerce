@@ -27,6 +27,7 @@ routes:
     - "/auth/*"
     - "/static/*"
     - "/favicon.ico"
+    - "/checkout/*"
   - id: 2
     name: "ue-default"
     desc: "Wildcard route for the rest of the system - authentication required"

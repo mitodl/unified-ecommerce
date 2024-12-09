@@ -12,6 +12,7 @@ from payments.views.v0 import (
     add_discount_to_basket,
     clear_basket,
     create_basket_from_product,
+    get_user_basket_for_system,
 )
 from unified_ecommerce.routers import SimpleRouterWithNesting
 
@@ -24,6 +25,11 @@ router.register(r"orders/history", OrderHistoryViewSet, basename="orderhistory_a
 router.register(r"checkout", CheckoutApiViewSet, basename="checkout")
 
 urlpatterns = [
+    path(
+        "baskets/for_system/<str:system_slug>/",
+        get_user_basket_for_system,
+        name="get_user_basket_for_system",
+    ),
     path(
         "baskets/create_from_product/<str:system_slug>/<str:sku>/",
         create_basket_from_product,

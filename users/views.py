@@ -1,5 +1,7 @@
 """Views for the users app."""
 
+from urllib.parse import urljoin
+
 from django.conf import settings
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
@@ -45,7 +47,9 @@ def establish_session(request):
     if "next" in request.GET:
         try:
             system = IntegratedSystem.objects.get(slug=request.GET["next"])
-            next_url = f"{settings.MITOL_UE_PAYMENT_BASKET_ROOT}{system.slug}/"
+            next_url = urljoin(
+                settings.MITOL_UE_PAYMENT_BASKET_ROOT, f"?system={system.slug}"
+            )
         except IntegratedSystem.DoesNotExist:
             pass
 
