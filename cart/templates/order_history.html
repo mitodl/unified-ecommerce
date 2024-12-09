@@ -17,19 +17,23 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th scope="col">Order ID</th>
-                    <th scope="col">Order Date</th>
-                    <th scope="col">Total</th>
+                    <th scope="col">Order Number</th>
                     <th scope="col">Status</th>
+                    <th scope="col">Number of items</th>
+                    <th scope="col">Purchase date</th>
+                    <th scope="col">System</th>
+                    <th scope="col">Total</th>
                 </tr>
             </thead>
             <tbody>
                 {% for order in orders %}
                 <tr>
-                    <td>{{ order.id }}</td>
-                    <td>{{ order.order_date }}</td>
-                    <td>{{ order.total_price_money }}</td>
-                    <td>{{ order.status }}</td>
+                    <td>{{ order.reference_number }}</td>
+                    <td>{{ order.state }}</td>
+                    <td>{{ order.lines|length }}</td>
+                    <td>{{ order.created_on }}</td>
+                    <td>{{ order.system }}</td>
+                    <td>{{ order.total_price_paid }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

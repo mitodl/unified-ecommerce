@@ -202,6 +202,12 @@ class OrderHistorySerializer(serializers.ModelSerializer):
     """Serializer for order history."""
 
     lines = LineSerializer(many=True)
+    system = serializers.SerializerMethodField()
+    created_on = serializers.DateTimeField(format="%m-%d-%Y %H:%M:%S")
+
+    def get_system(self, instance):
+        """Get the system for the order."""
+        return instance.lines.first().product.system.name
 
     class Meta:
         """Meta options for OrderHistorySerializer"""
@@ -215,6 +221,7 @@ class OrderHistorySerializer(serializers.ModelSerializer):
             "lines",
             "created_on",
             "updated_on",
+            "system",
         ]
         model = Order
 

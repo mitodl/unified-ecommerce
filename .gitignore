@@ -137,3 +137,13 @@ docker-compose.override.yml
 
 # Bulk discount csv
 generated-codes.csv
+GeoLite2-Country-Blocks-IPv4.csv
+GeoLite2-Country-Blocks-IPv6.csv
+GeoLite2-Country-Locations-de.csv
+GeoLite2-Country-Locations-en.csv
+GeoLite2-Country-Locations-es.csv
+GeoLite2-Country-Locations-fr.csv
+GeoLite2-Country-Locations-ja.csv
+GeoLite2-Country-Locations-pt-BR.csv
+GeoLite2-Country-Locations-ru.csv
+GeoLite2-Country-Locations-zh-CN.csv

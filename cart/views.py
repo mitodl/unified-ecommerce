@@ -12,6 +12,7 @@ from django.views.generic import TemplateView
 
 from payments import api
 from payments.models import Basket
+from payments.serializers.v0 import OrderHistorySerializer
 from system_meta.models import IntegratedSystem, Product
 
 log = logging.getLogger(__name__)
@@ -91,7 +92,10 @@ class OrderHistoryView(LoginRequiredMixin, TemplateView):
     extra_context = {"title": "Order History", "innertitle": "Order History"}
 
     def get(self, request: HttpRequest) -> HttpResponse:
-        """Render the order history page."""
+        """
+        Render the order history page.  This only returns completed or
+        refunded orders for the current user.
+        """
 
         if not request.user.is_authenticated:
             msg = "User is not authenticated"
@@ -103,7 +107,7 @@ class OrderHistoryView(LoginRequiredMixin, TemplateView):
             {
                 **self.extra_context,
                 "user": request.user,
-                "orders": request.user.orders.all(),
+                "orders": OrderHistorySerializer(request.user.orders.all(), many=True).data,
                 "debug_mode": settings.MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG,
             },
         )

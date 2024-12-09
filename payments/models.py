@@ -1261,6 +1261,7 @@ class Transaction(TimestampedModel):
 
 
 class RedeemedDiscount(TimestampedModel):
+
     """Redeemed Discount model"""
 
     discount = models.ForeignKey(
