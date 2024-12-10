@@ -77,6 +77,11 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
         null=True,
         help_text="System-specific data for the product (in JSON).",
     )
+    image_metadata = models.JSONField(
+        blank=True,
+        null=True,
+        help_text="Image metadata including URL, alt text, and description (in JSON).",
+    )
 
     objects = SafeDeleteManager()
     all_objects = models.Manager()
