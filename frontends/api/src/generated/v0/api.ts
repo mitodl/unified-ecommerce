@@ -3537,10 +3537,10 @@ export const PaymentsApiAxiosParamCreator = function (configuration?: Configurat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        paymentsCheckoutStartCheckoutCreate: async (system_slug: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        paymentsCheckoutCreate: async (system_slug: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'system_slug' is not null or undefined
-            assertParamExists('paymentsCheckoutStartCheckoutCreate', 'system_slug', system_slug)
-            const localVarPath = `/api/v0/payments/checkout/start_checkout/`
+            assertParamExists('paymentsCheckoutCreate', 'system_slug', system_slug)
+            const localVarPath = `/api/v0/payments/checkout/{system_slug}/`
                 .replace(`{${"system_slug"}}`, encodeURIComponent(String(system_slug)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -3757,10 +3757,10 @@ export const PaymentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async paymentsCheckoutStartCheckoutCreate(system_slug: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CyberSourceCheckout>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsCheckoutStartCheckoutCreate(system_slug, options);
+        async paymentsCheckoutCreate(system_slug: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CyberSourceCheckout>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.paymentsCheckoutCreate(system_slug, options);
             const index = configuration?.serverIndex ?? 0;
-            const operationBasePath = operationServerMap['PaymentsApi.paymentsCheckoutStartCheckoutCreate']?.[index]?.url;
+            const operationBasePath = operationServerMap['PaymentsApi.paymentsCheckoutCreate']?.[index]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, operationBasePath || basePath);
         },
         /**
@@ -3865,12 +3865,12 @@ export const PaymentsApiFactory = function (configuration?: Configuration, baseP
         },
         /**
          * Generates and returns the form payload for the current basket for the specified system, which can be used to start the checkout process.
-         * @param {PaymentsApiPaymentsCheckoutStartCheckoutCreateRequest} requestParameters Request parameters.
+         * @param {PaymentsApiPaymentsCheckoutCreateRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        paymentsCheckoutStartCheckoutCreate(requestParameters: PaymentsApiPaymentsCheckoutStartCheckoutCreateRequest, options?: RawAxiosRequestConfig): AxiosPromise<CyberSourceCheckout> {
-            return localVarFp.paymentsCheckoutStartCheckoutCreate(requestParameters.system_slug, options).then((request) => request(axios, basePath));
+        paymentsCheckoutCreate(requestParameters: PaymentsApiPaymentsCheckoutCreateRequest, options?: RawAxiosRequestConfig): AxiosPromise<CyberSourceCheckout> {
+            return localVarFp.paymentsCheckoutCreate(requestParameters.system_slug, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a discount.
@@ -4014,15 +4014,15 @@ export interface PaymentsApiPaymentsBasketsRetrieveRequest {
 }
 
 /**
- * Request parameters for paymentsCheckoutStartCheckoutCreate operation in PaymentsApi.
+ * Request parameters for paymentsCheckoutCreate operation in PaymentsApi.
  * @export
- * @interface PaymentsApiPaymentsCheckoutStartCheckoutCreateRequest
+ * @interface PaymentsApiPaymentsCheckoutCreateRequest
  */
-export interface PaymentsApiPaymentsCheckoutStartCheckoutCreateRequest {
+export interface PaymentsApiPaymentsCheckoutCreateRequest {
     /**
      *
      * @type {string}
-     * @memberof PaymentsApiPaymentsCheckoutStartCheckoutCreate
+     * @memberof PaymentsApiPaymentsCheckoutCreate
      */
     readonly system_slug: string
 }
@@ -4137,13 +4137,13 @@ export class PaymentsApi extends BaseAPI {
 
     /**
      * Generates and returns the form payload for the current basket for the specified system, which can be used to start the checkout process.
-     * @param {PaymentsApiPaymentsCheckoutStartCheckoutCreateRequest} requestParameters Request parameters.
+     * @param {PaymentsApiPaymentsCheckoutCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof PaymentsApi
      */
-    public paymentsCheckoutStartCheckoutCreate(requestParameters: PaymentsApiPaymentsCheckoutStartCheckoutCreateRequest, options?: RawAxiosRequestConfig) {
-        return PaymentsApiFp(this.configuration).paymentsCheckoutStartCheckoutCreate(requestParameters.system_slug, options).then((request) => request(this.axios, this.basePath));
+    public paymentsCheckoutCreate(requestParameters: PaymentsApiPaymentsCheckoutCreateRequest, options?: RawAxiosRequestConfig) {
+        return PaymentsApiFp(this.configuration).paymentsCheckoutCreate(requestParameters.system_slug, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

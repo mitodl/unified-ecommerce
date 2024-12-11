@@ -19,14 +19,11 @@ from drf_spectacular.utils import (
 )
 from mitol.payment_gateway.api import PaymentGateway
 from rest_framework import status
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import (
-    ReadOnlyModelViewSet,
-    ViewSet,
-)
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from payments import api
 from payments.exceptions import ProductBlockedError
@@ -225,9 +222,24 @@ def clear_basket(request, system_slug: str):
 # Checkout
 
 
-class CheckoutApiViewSet(ViewSet):
+@extend_schema(
+    description=(
+        "Generates and returns the form payload for the current basket for"
+        " the specified system, which can be used to start the checkout process."
+    ),
+    methods=["POST"],
+    versions=["v0"],
+    request=None,
+    parameters=[
+        OpenApiParameter("system_slug", OpenApiTypes.STR, OpenApiParameter.PATH),
+    ],
+    responses=CyberSourceCheckoutSerializer,
+)
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def start_checkout(request, system_slug: str):
     """
-    Handles checkout.
+    Handle checkout.
 
     Because of the way the payload works for CyberSource, we don't really have
     a dataclass for this. (It involves fields that have variable names - the
@@ -241,54 +253,22 @@ class CheckoutApiViewSet(ViewSet):
     The payload def can be found in the ol-django payment gateway app or in the
     CyberSource documentation.
     """
+    try:
+        system = IntegratedSystem.objects.get(slug=system_slug)
+        payload = api.generate_checkout_payload(request, system)
+    except ObjectDoesNotExist:
+        return Response("No basket", status=status.HTTP_406_NOT_ACCEPTABLE)
 
-    permission_classes = (IsAuthenticated,)
+    if (
+        "country_blocked" in payload
+        or "no_checkout" in payload
+        or "purchased_same_courserun" in payload
+        or "purchased_non_upgradeable_courserun" in payload
+        or "invalid_discounts" in payload
+    ):
+        return Response(payload["response"], status=status.HTTP_406_NOT_ACCEPTABLE)
 
-    @extend_schema(
-        description=(
-            "Generates and returns the form payload for the current basket for"
-            " the specified system, which can be used to start the checkout process."
-        ),
-        methods=["POST"],
-        request=None,
-        parameters=[
-            OpenApiParameter("system_slug", OpenApiTypes.STR, OpenApiParameter.PATH),
-        ],
-        responses=CyberSourceCheckoutSerializer,
-    )
-    @action(
-        detail=False, methods=["post"], name="Start Checkout", url_name="start_checkout"
-    )
-    def start_checkout(self, request):
-        """
-        Start the checkout process. This assembles the basket items
-        into an Order with Lines for each item, applies the attached basket
-        discounts, and then calls the payment gateway to prepare for payment.
-
-        This is expected to be called from within the Ecommerce cart app, not
-        from an integrated system.
-
-        Returns:
-            - JSON payload from the ol-django payment gateway app. The payment
-              gateway returns data necessary to construct a form that will
-              ultimately POST to the actual payment processor.
-        """
-        try:
-            system = IntegratedSystem.objects.get(slug=self.kwargs["system_slug"])
-            payload = api.generate_checkout_payload(request, system)
-        except ObjectDoesNotExist:
-            return Response("No basket", status=status.HTTP_406_NOT_ACCEPTABLE)
-
-        if (
-            "country_blocked" in payload
-            or "no_checkout" in payload
-            or "purchased_same_courserun" in payload
-            or "purchased_non_upgradeable_courserun" in payload
-            or "invalid_discounts" in payload
-        ):
-            return Response(payload["response"], status=status.HTTP_406_NOT_ACCEPTABLE)
-
-        return Response(CyberSourceCheckoutSerializer(payload).data)
+    return Response(CyberSourceCheckoutSerializer(payload).data)
 
 
 @method_decorator(csrf_exempt, name="dispatch")

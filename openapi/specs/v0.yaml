@@ -437,9 +437,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/BasketWithProduct'
           description: ''
-  /api/v0/payments/checkout/start_checkout/:
+  /api/v0/payments/checkout/{system_slug}/:
     post:
-      operationId: payments_checkout_start_checkout_create
+      operationId: payments_checkout_create
       description: Generates and returns the form payload for the current basket for
         the specified system, which can be used to start the checkout process.
       parameters:
