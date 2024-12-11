@@ -34,6 +34,7 @@ from payments.models import Basket, BasketItem, Discount, Order
 from payments.permissions import HasIntegratedSystemAPIKey
 from payments.serializers.v0 import (
     BasketWithProductSerializer,
+    CyberSourceCheckoutSerializer,
     DiscountSerializer,
     OrderHistorySerializer,
 )
@@ -228,13 +229,33 @@ class CheckoutApiViewSet(ViewSet):
     """
     Handles checkout.
 
-    This is excluded from the APIs, but we may want to have this return a proper
-    API response at some point.
+    Because of the way the payload works for CyberSource, we don't really have
+    a dataclass for this. (It involves fields that have variable names - the
+    line items are an array, but not.)
+
+    The data that is returned is:
+    - payload: the data that needs to be in the form (verbatim, basically)
+    - url: the URL to send the form to
+    - method: how to send the form (POST)
+
+    The payload def can be found in the ol-django payment gateway app or in the
+    CyberSource documentation.
     """
 
     permission_classes = (IsAuthenticated,)
 
-    @extend_schema(exclude=True)
+    @extend_schema(
+        description=(
+            "Generates and returns the form payload for the current basket for"
+            " the specified system, which can be used to start the checkout process."
+        ),
+        methods=["POST"],
+        request=None,
+        parameters=[
+            OpenApiParameter("system_slug", OpenApiTypes.STR, OpenApiParameter.PATH),
+        ],
+        responses=CyberSourceCheckoutSerializer,
+    )
     @action(
         detail=False, methods=["post"], name="Start Checkout", url_name="start_checkout"
     )
@@ -265,9 +286,9 @@ class CheckoutApiViewSet(ViewSet):
             or "purchased_non_upgradeable_courserun" in payload
             or "invalid_discounts" in payload
         ):
-            return payload["response"]
+            return Response(payload["response"], status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        return Response(payload)
+        return Response(CyberSourceCheckoutSerializer(payload).data)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -459,6 +480,12 @@ class OrderHistoryViewSet(ReadOnlyModelViewSet):
     methods=["POST"],
     request=None,
     responses=BasketWithProductSerializer,
+    parameters=[
+        OpenApiParameter("system_slug", OpenApiTypes.STR, OpenApiParameter.PATH),
+        OpenApiParameter(
+            "discount_code", OpenApiTypes.STR, OpenApiParameter.QUERY, required=True
+        ),
+    ],
 )
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
@@ -477,13 +504,13 @@ def add_discount_to_basket(request, system_slug: str):
     """
     system = IntegratedSystem.objects.get(slug=system_slug)
     basket = Basket.establish_basket(request, system)
-    discount_code = request.data.get("discount_code")
+    discount_code = request.query_params.get("discount_code")
 
     try:
         discount = Discount.objects.get(discount_code=discount_code)
     except Discount.DoesNotExist:
         return Response(
-            {"error": "Discount not found"},
+            {"error": f"Discount '{discount_code}' not found"},
             status=status.HTTP_404_NOT_FOUND,
         )
 

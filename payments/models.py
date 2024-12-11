@@ -25,6 +25,8 @@ from payments.constants import GEOLOCATION_CHOICES, GEOLOCATION_TYPE_NONE
 from payments.utils import product_price_with_discount
 from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce.constants import (
+    DISCOUNT_TYPE_DOLLARS_OFF,
+    DISCOUNT_TYPE_PERCENT_OFF,
     DISCOUNT_TYPES,
     PAYMENT_TYPES,
     POST_SALE_SOURCE_REDIRECT,
@@ -255,6 +257,21 @@ class Discount(TimestampedModel):
                 )
         exception_message = "Invalid product version specified"
         raise TypeError(exception_message)
+
+    @cached_property
+    def formatted_discount_amount(self) -> str:
+        """
+        Return the formatted discount amount.
+
+        This quantizes percent discounts to whole numbers. This is probably fine.
+        """
+
+        if self.discount_type == DISCOUNT_TYPE_PERCENT_OFF:
+            return f"{Decimal(self.amount).quantize(Decimal('0'))}%"
+        elif self.discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
+            return f"${Decimal(self.amount).quantize(Decimal('0.01'))}"
+
+        return f"${Decimal(self.amount).quantize(Decimal('0.01'))}"
 
     class Meta:
         """Model meta options."""

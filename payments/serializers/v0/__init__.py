@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework_dataclasses.serializers import DataclassSerializer
 
@@ -11,7 +12,7 @@ from payments.constants import (
     PAYMENT_HOOK_ACTION_POST_SALE,
     PAYMENT_HOOK_ACTIONS,
 )
-from payments.models import Basket, BasketItem, Company, Discount, Line, Order
+from payments.models import Basket, BasketItem, Company, Discount, Line, Order, TaxRate
 from system_meta.models import Product
 from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
@@ -56,6 +57,69 @@ class WebhookBase:
     data: WebhookOrder | WebhookCart
 
 
+class TaxRateSerializer(serializers.ModelSerializer):
+    """TaxRate model serializer"""
+
+    class Meta:
+        """Meta options for TaxRateSerializer"""
+
+        model = TaxRate
+        fields = ["id", "country_code", "tax_rate", "tax_rate_name"]
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    """Serializer for companies."""
+
+    class Meta:
+        """Meta options for CompanySerializer"""
+
+        model = Company
+        fields = ["id", "name"]
+
+
+class SimpleDiscountSerializer(serializers.ModelSerializer):
+    """Simpler serializer for discounts."""
+
+    class Meta:
+        """Meta options for SimpleDiscountSerializer"""
+
+        model = Discount
+        fields = [
+            "id",
+            "discount_code",
+            "amount",
+            "discount_type",
+            "formatted_discount_amount",
+        ]
+
+
+class DiscountSerializer(SimpleDiscountSerializer):
+    """Serializer for discounts."""
+
+    assigned_users = UserSerializer(many=True)
+    integrated_system = IntegratedSystemSerializer()
+    product = ProductSerializer()
+    company = CompanySerializer()
+
+    class Meta:
+        """Meta options for DiscountSerializer"""
+
+        fields = [
+            "id",
+            "discount_code",
+            "amount",
+            "payment_type",
+            "max_redemptions",
+            "activation_date",
+            "expiration_date",
+            "integrated_system",
+            "product",
+            "assigned_users",
+            "company",
+        ]
+        model = Discount
+
+
 class BasketItemSerializer(serializers.ModelSerializer):
     """BasketItem model serializer"""
 
@@ -92,12 +156,28 @@ class BasketItemWithProductSerializer(serializers.ModelSerializer):
     """Basket item model serializer with product information"""
 
     product = ProductSerializer()
+    discount_applied = serializers.SerializerMethodField()
+
+    @extend_schema_field(SimpleDiscountSerializer)
+    def get_discount_applied(self, instance):
+        """Return "best_discount_for_item_from_basket"."""
+
+        return SimpleDiscountSerializer(
+            instance.best_discount_for_item_from_basket
+        ).data
 
     class Meta:
         """Meta options for BasketItemWithProductSerializer"""
 
         model = BasketItem
-        fields = ["product", "id", "price", "discounted_price"]
+        fields = [
+            "product",
+            "id",
+            "price",
+            "discounted_price",
+            "quantity",
+            "discount_applied",
+        ]
         depth = 1
 
 
@@ -109,6 +189,7 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
     tax = serializers.SerializerMethodField()
     subtotal = serializers.SerializerMethodField()
     integrated_system = IntegratedSystemSerializer()
+    tax_rate = TaxRateSerializer()
 
     def get_total_price(self, instance) -> Decimal:
         """Get the total price for the basket"""
@@ -132,6 +213,7 @@ class BasketWithProductSerializer(serializers.ModelSerializer):
             "basket_items",
             "subtotal",
             "tax",
+            "tax_rate",
             "total_price",
         ]
         model = Basket
@@ -219,38 +301,9 @@ class OrderHistorySerializer(serializers.ModelSerializer):
         model = Order
 
 
-class CompanySerializer(serializers.ModelSerializer):
-    """Serializer for companies."""
+class CyberSourceCheckoutSerializer(serializers.Serializer):
+    """Really basic serializer for the payload that we need to send to CyberSource."""
 
-    class Meta:
-        """Meta options for CompanySerializer"""
-
-        model = Company
-        fields = ["id", "name"]
-
-
-class DiscountSerializer(serializers.ModelSerializer):
-    """Serializer for discounts."""
-
-    assigned_users = UserSerializer(many=True)
-    integrated_system = IntegratedSystemSerializer()
-    product = ProductSerializer()
-    company = CompanySerializer()
-
-    class Meta:
-        """Meta options for DiscountSerializer"""
-
-        fields = [
-            "id",
-            "discount_code",
-            "amount",
-            "payment_type",
-            "max_redemptions",
-            "activation_date",
-            "expiration_date",
-            "integrated_system",
-            "product",
-            "assigned_users",
-            "company",
-        ]
-        model = Discount
+    payload = serializers.DictField()
+    url = serializers.CharField()
+    method = serializers.CharField()
