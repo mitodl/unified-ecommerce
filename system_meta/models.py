@@ -12,8 +12,10 @@ from rest_framework_api_key.models import AbstractAPIKey
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 from slugify import slugify
-
+import requests
 from unified_ecommerce.utils import SoftDeleteActiveModel
+from django.core.exceptions import ValidationError
+from django.conf import settings
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -85,6 +87,24 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
 
     objects = SafeDeleteManager()
     all_objects = models.Manager()
+
+    def save(self, *args, **kwargs):
+        # Retrieve image data from the API
+        try:
+            response = requests.get(f"{settings.MITOL_LEARN_API_URL}learning_resources/", params={"platform": self.system.slug, "readable_id": self.sku})
+            response.raise_for_status()
+            results_data = response.json()
+            course_data = results_data.get("results")[0]
+            image_data = course_data.get("image")
+            self.image_metadata = {
+                "imageURL": image_data.get("url"),
+                "alt_text": image_data.get("alt"),
+                "description": image_data.get("description")
+            }
+        except requests.RequestException as e:
+            log.error(f"Error retrieving image data for product {self.sku}: {e}")
+
+        super().save(*args, **kwargs)
 
     class Meta:
         """Meta class for Product"""
