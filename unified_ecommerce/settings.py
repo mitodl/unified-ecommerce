@@ -506,6 +506,10 @@ MITOL_UE_PAYMENT_BASKET_CHOOSER = get_string(
     name="MITOL_UE_PAYMENT_BASKET_CHOOSER", default="/cart/"
 )
 
+MITOL_LEARN_API_URL = get_string(
+    name="MITOL_LEARN_API_URL", default=""
+)
+
 import_settings_modules("mitol.payment_gateway.settings.cybersource")
 
 # Keycloak API settings
