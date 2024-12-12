@@ -2,7 +2,9 @@
 
 import logging
 
+import requests
 import reversion
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.functional import cached_property
@@ -12,10 +14,8 @@ from rest_framework_api_key.models import AbstractAPIKey
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 from slugify import slugify
-import requests
+
 from unified_ecommerce.utils import SoftDeleteActiveModel
-from django.core.exceptions import ValidationError
-from django.conf import settings
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -91,7 +91,10 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
     def save(self, *args, **kwargs):
         # Retrieve image data from the API
         try:
-            response = requests.get(f"{settings.MITOL_LEARN_API_URL}learning_resources/", params={"platform": self.system.slug, "readable_id": self.sku})
+            response = requests.get(
+                f"{settings.MITOL_LEARN_API_URL}learning_resources/",
+                params={"platform": self.system.slug, "readable_id": self.sku},
+            )
             response.raise_for_status()
             results_data = response.json()
             course_data = results_data.get("results")[0]
@@ -99,7 +102,7 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
             self.image_metadata = {
                 "imageURL": image_data.get("url"),
                 "alt_text": image_data.get("alt"),
-                "description": image_data.get("description")
+                "description": image_data.get("description"),
             }
         except requests.RequestException as e:
             log.error(f"Error retrieving image data for product {self.sku}: {e}")

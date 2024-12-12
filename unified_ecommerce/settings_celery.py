@@ -2,8 +2,9 @@
 Django settings for celery.
 """
 
-from unified_ecommerce.envs import get_bool, get_int, get_string
 from celery.schedules import crontab
+
+from unified_ecommerce.envs import get_bool, get_int, get_string
 
 USE_CELERY = True
 CELERY_BROKER_URL = get_string("CELERY_BROKER_URL", get_string("REDISCLOUD_URL", None))
@@ -20,9 +21,9 @@ CELERY_WORKER_MAX_MEMORY_PER_CHILD = get_int(
 )
 
 CELERY_BEAT_SCHEDULE = {
-   "update-products-daily": {
-        'task': "system_meta.tasks.update_products",
-        'schedule': crontab(hour=0, minute=0),  # Runs every day at midnight
+    "update-products-daily": {
+        "task": "system_meta.tasks.update_products",
+        "schedule": crontab(hour=0, minute=0),  # Runs every day at midnight
     },
 }
 
