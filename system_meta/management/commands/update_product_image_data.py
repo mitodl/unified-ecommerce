@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand
+
 from system_meta.models import Product
+
 
 class Command(BaseCommand):
     """
@@ -8,7 +10,7 @@ class Command(BaseCommand):
     """
 
     help = "Update image_metadata for all Product objects"
-    
+
     def add_arguments(self, parser):
         parser.add_argument(
             "--id",
@@ -42,4 +44,6 @@ class Command(BaseCommand):
 
         for product in products:
             product.save()
-            self.stdout.write(self.style.SUCCESS(f"Updated image_metadata for product {product}"))
+            self.stdout.write(
+                self.style.SUCCESS(f"Updated image_metadata for product {product}")
+            )
