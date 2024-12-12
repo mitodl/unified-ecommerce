@@ -16,7 +16,6 @@ from safedelete.models import SafeDeleteModel
 from slugify import slugify
 
 from unified_ecommerce.utils import SoftDeleteActiveModel
-from django.conf import settings
 
 User = get_user_model()
 log = logging.getLogger(__name__)
@@ -89,13 +88,13 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
     objects = SafeDeleteManager()
     all_objects = models.Manager()
 
-    def save(self, *args, **kwargs):  # noqa: D102
+    def save(self, *args, **kwargs):
         # Retrieve image data from the API
         try:
             response = requests.get(
                 f"{settings.MITOL_LEARN_API_URL}learning_resources/",
                 params={"platform": self.system.slug, "readable_id": self.sku},
-                timeout=10
+                timeout=10,
             )
             response.raise_for_status()
             results_data = response.json()
