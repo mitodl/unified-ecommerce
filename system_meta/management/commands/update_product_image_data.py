@@ -6,14 +6,14 @@ from system_meta.models import Product
 class Command(BaseCommand):
     """
     A management command to update image_metadata for all Product objects
-    Example usage: python manage.py update_product_image_data --id 1
+    Example usage: python manage.py update_product_image_data --product_id 1
     """
 
     help = "Update image_metadata for all Product objects"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--id",
+            "--product-id",
             type=int,
             help="The ID of the product to update",
         )
@@ -29,12 +29,12 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **kwargs):  # noqa: ARG002, D102
-        id = kwargs.get("id")
+        product_id = kwargs.get("product_id")
         sku = kwargs.get("sku")
         name = kwargs.get("name")
 
-        if id:
-            products = Product.objects.filter(id=id)
+        if product_id:
+            products = Product.objects.filter(id=product_id)
         elif sku:
             products = Product.objects.filter(sku=sku)
         elif name:
