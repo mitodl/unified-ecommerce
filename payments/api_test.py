@@ -594,7 +594,7 @@ def test_check_and_process_pending_orders_for_resolution(mocker, test_type):
 def test_integrated_system_webhook(mocker, fulfilled_complete_order, source):
     """Test fire the webhook."""
 
-    mocked_request = mocker.patch("requests.post")
+    mocked_task = mocker.patch("payments.tasks.dispatch_webhook.delay")
     system_id = fulfilled_complete_order.lines.first().product_version.field_dict[
         "system_id"
     ]
@@ -607,6 +607,7 @@ def test_integrated_system_webhook(mocker, fulfilled_complete_order, source):
 
     webhook_data = WebhookBase(
         type=PAYMENT_HOOK_ACTION_POST_SALE,
+        system_slug=system.slug,
         system_key=system.api_key,
         user=fulfilled_complete_order.purchaser,
         data=order_info,
@@ -616,9 +617,7 @@ def test_integrated_system_webhook(mocker, fulfilled_complete_order, source):
 
     process_post_sale_webhooks(fulfilled_complete_order.id, source)
 
-    mocked_request.assert_called_with(
-        system.webhook_url, json=serialized_webhook_data.data, timeout=30
-    )
+    mocked_task.assert_called_with(system.webhook_url, serialized_webhook_data.data)
 
 
 @pytest.mark.parametrize(
@@ -639,7 +638,7 @@ def test_integrated_system_webhook_multisystem(
         discounted_price=product_version.field_dict["price"],
     )
 
-    mocked_request = mocker.patch("requests.post")
+    mocked_task = mocker.patch("payments.tasks.dispatch_webhook.delay")
 
     serialized_calls = []
 
@@ -655,20 +654,19 @@ def test_integrated_system_webhook_multisystem(
 
         webhook_data = WebhookBase(
             type=PAYMENT_HOOK_ACTION_POST_SALE,
+            system_slug=system.slug,
             system_key=system.api_key,
             user=fulfilled_complete_order.purchaser,
             data=order_info,
         )
 
         serialized_order = WebhookBaseSerializer(webhook_data).data
-        serialized_calls.append(
-            mocker.call(system.webhook_url, json=serialized_order, timeout=30)
-        )
+        serialized_calls.append(mocker.call(system.webhook_url, serialized_order))
 
     process_post_sale_webhooks(fulfilled_complete_order.id, source)
 
-    assert mocked_request.call_count == 2
-    mocked_request.assert_has_calls(serialized_calls, any_order=True)
+    assert mocked_task.call_count == 2
+    mocked_task.assert_has_calls(serialized_calls, any_order=True)
 
 
 def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_system():

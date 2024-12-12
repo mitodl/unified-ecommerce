@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from decimal import Decimal
+from enum import Enum
 
 from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema_field
@@ -10,6 +11,7 @@ from rest_framework_dataclasses.serializers import DataclassSerializer
 
 from payments.constants import (
     PAYMENT_HOOK_ACTION_POST_SALE,
+    PAYMENT_HOOK_ACTION_PRE_SALE,
     PAYMENT_HOOK_ACTIONS,
 )
 from payments.models import Basket, BasketItem, Company, Discount, Line, Order, TaxRate
@@ -18,6 +20,13 @@ from system_meta.serializers import IntegratedSystemSerializer, ProductSerialize
 from unified_ecommerce.serializers import UserSerializer
 
 User = get_user_model()
+
+
+class WebhookBasketAction(Enum):
+    """Enum for basket actions."""
+
+    ADD = "add"
+    REMOVE = "remove"
 
 
 @dataclass
@@ -31,11 +40,15 @@ class WebhookOrder:
     order: Order
     lines: list[Line]
 
+    def __str__(self):
+        """Return a resonable string representation of the object."""
+        return f"order {self.order.reference_number}"
+
 
 @dataclass
-class WebhookCart:
+class WebhookBasket:
     """
-    Webhook event data for cart-based events.
+    Webhook event data for basket-based events.
 
     This includes item added to cart and item removed from cart. (These are so
     the integrated system can fire off enrollments when people add things to
@@ -45,16 +58,26 @@ class WebhookCart:
     """
 
     product: Product
+    action: WebhookBasketAction
+
+    def __str__(self):
+        """Return a resonable string representation of the object."""
+        return f"cart {self.action.value} event for {self.product}"
 
 
 @dataclass
 class WebhookBase:
     """Class representing the base data that we need to post a webhook."""
 
+    system_slug: str
     system_key: str
     type: str
     user: object
-    data: WebhookOrder | WebhookCart
+    data: WebhookOrder | WebhookBasket
+
+    def __str__(self):
+        """Return a resonable string representation of the object."""
+        return f"{self.type} for {self.user} in {self.system_slug}: {self.data}"
 
 
 class TaxRateSerializer(serializers.ModelSerializer):
@@ -256,6 +279,22 @@ class WebhookOrderDataSerializer(DataclassSerializer):
         dataclass = WebhookOrder
 
 
+class WebhookBasketDataSerializer(DataclassSerializer):
+    """Serializes order data for submission to the webhook."""
+
+    product = ProductSerializer()
+    action = serializers.SerializerMethodField()
+
+    def get_action(self, instance):
+        """Return the action as a string."""
+        return instance.action.value
+
+    class Meta:
+        """Meta options for WebhookBasketDataSerializer"""
+
+        dataclass = WebhookBasket
+
+
 class WebhookBaseSerializer(DataclassSerializer):
     """Base serializer for webhooks."""
 
@@ -269,6 +308,8 @@ class WebhookBaseSerializer(DataclassSerializer):
 
         if instance.type == PAYMENT_HOOK_ACTION_POST_SALE:
             return WebhookOrderDataSerializer(instance.data).data
+        elif instance.type == PAYMENT_HOOK_ACTION_PRE_SALE:
+            return WebhookBasketDataSerializer(instance.data).data
 
         error_msg = "Invalid webhook type %s"
         raise ValueError(error_msg, instance.type)

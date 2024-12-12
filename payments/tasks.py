@@ -5,10 +5,8 @@ import logging
 import requests
 from django.conf import settings
 
-from payments.constants import PAYMENT_HOOK_ACTION_POST_SALE
 from payments.mail_api import send_successful_order_payment_email
-from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer, WebhookOrder
-from system_meta.models import IntegratedSystem
+from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer
 from unified_ecommerce.celery import app
 
 log = logging.getLogger(__name__)
@@ -25,48 +23,24 @@ def successful_order_payment_email_task(order_id, email_subject, email_body):
 
 
 @app.task()
-def send_post_sale_webhook(system_id, order_id, source, attempt_count=0):
-    """
-    Actually send the webhook some data for a post-sale event.
+def dispatch_webhook(system_webhook_url, webhook_data, attempt_count=0):
+    """Dispatch a webhook."""
 
-    This is split out so we can queue the webhook requests individually.
-    """
-    from payments.models import Order
-
-    order = Order.objects.get(pk=order_id)
-    system = IntegratedSystem.objects.get(pk=system_id)
-
-    system_webhook_url = system.webhook_url
-    if system_webhook_url:
-        log.info(
-            ("Calling webhook endpoint %s for order %s with source %s"),
-            system_webhook_url,
-            order.reference_number,
-            source,
+    unserialized = WebhookBaseSerializer(data=webhook_data)
+    if not unserialized.is_valid():
+        log.error(
+            "Could not serialize webhook data %s for event: %s",
+            webhook_data,
+            unserialized.errors,
         )
+        return
 
-    order_info = WebhookOrder(
-        order=order,
-        lines=[
-            line
-            for line in order.lines.all()
-            if line.product.system.slug == system.slug
-        ],
-    )
-
-    webhook_data = WebhookBase(
-        type=PAYMENT_HOOK_ACTION_POST_SALE,
-        system_key=system.api_key,
-        user=order.purchaser,
-        data=order_info,
-    )
-
-    serializer = WebhookBaseSerializer(webhook_data)
+    webhook_dataclass = WebhookBase(**unserialized.validated_data)
 
     try:
         requests.post(
             system_webhook_url,
-            json=serializer.data,
+            json=webhook_data,
             timeout=30,
         )
     except (requests.Timeout, requests.HTTPError, requests.ConnectionError) as e:
@@ -76,12 +50,11 @@ def send_post_sale_webhook(system_id, order_id, source, attempt_count=0):
         log.warning(
             (
                 "Had problems getting to the webhook URL %s on attempt %s for "
-                "order %s for system %s: %s"
+                "event %s: %s"
             ),
             system_webhook_url,
             attempt_count,
-            order.reference_number,
-            system.slug,
+            webhook_dataclass,
             e,
         )
 
@@ -90,23 +63,21 @@ def send_post_sale_webhook(system_id, order_id, source, attempt_count=0):
         if attempt_count == settings.MITOL_UE_WEBHOOK_RETRY_MAX:
             log.exception(
                 (
-                    "Hit the retry max (%s) for webhook URL %s for order %s for "
-                    "system %s, giving up"
+                    "Hit the retry max (%s) for webhook URL %s for event %s, "
+                    "giving up"
                 ),
                 attempt_count,
-                order.reference_number,
-                system.slug,
+                webhook_dataclass,
                 exc_info=e,
             )
             return
 
         log.info(
-            "Requeueing post-sale webhook %s for order %s for system %s",
+            "Requeueing post-sale webhook %s for event %s",
             system_webhook_url,
-            order.reference_number,
-            system.slug,
+            webhook_dataclass,
         )
-        send_post_sale_webhook.s(system, order, source, attempt_count).apply_async(
+        dispatch_webhook.s(system_webhook_url, webhook_data, attempt_count).apply_async(
             countdown=settings.MITOL_UE_WEBHOOK_RETRY_COOLDOWN
         )
     except (
@@ -118,13 +89,9 @@ def send_post_sale_webhook(system_id, order_id, source, attempt_count=0):
         # or set to something that is returning gibberish, so don't retry.
 
         log.exception(
-            (
-                "Webhook URL %s for system %s in order %s returned something "
-                "unexpected: %s"
-            ),
+            ("Webhook URL %s for event %s returned something unexpected: %s"),
             system_webhook_url,
-            system.slug,
-            order.reference_number,
+            webhook_dataclass,
             exc_info=e,
         )
     except requests.RequestException as e:
@@ -133,10 +100,9 @@ def send_post_sale_webhook(system_id, order_id, source, attempt_count=0):
         log.exception(
             (
                 "Unexpected error trying to dispatch to webhook URL %s for "
-                "system %s in order %s returned something unexpected: %s"
+                "event %s returned something unexpected: %s"
             ),
             system_webhook_url,
-            system.slug,
-            order.reference_number,
+            webhook_dataclass,
             exc_info=e,
         )
