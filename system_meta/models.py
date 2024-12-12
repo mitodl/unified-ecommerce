@@ -14,7 +14,6 @@ from safedelete.models import SafeDeleteModel
 from slugify import slugify
 import requests
 from unified_ecommerce.utils import SoftDeleteActiveModel
-from django.core.exceptions import ValidationError
 from django.conf import settings
 
 User = get_user_model()
@@ -88,10 +87,14 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
     objects = SafeDeleteManager()
     all_objects = models.Manager()
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs):  # noqa: D102
         # Retrieve image data from the API
         try:
-            response = requests.get(f"{settings.MITOL_LEARN_API_URL}learning_resources/", params={"platform": self.system.slug, "readable_id": self.sku})
+            response = requests.get(
+                f"{settings.MITOL_LEARN_API_URL}learning_resources/",
+                params={"platform": self.system.slug, "readable_id": self.sku},
+                timeout=10
+            )
             response.raise_for_status()
             results_data = response.json()
             course_data = results_data.get("results")[0]
@@ -101,8 +104,8 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
                 "alt_text": image_data.get("alt"),
                 "description": image_data.get("description")
             }
-        except requests.RequestException as e:
-            log.error(f"Error retrieving image data for product {self.sku}: {e}")
+        except requests.RequestException:
+            log.exception("Error retrieving image data for product %s", self.sku)
 
         super().save(*args, **kwargs)
 

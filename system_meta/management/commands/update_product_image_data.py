@@ -26,7 +26,7 @@ class Command(BaseCommand):
             help="The name of the product to update",
         )
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs):  # noqa: ARG002, D102
         id = kwargs.get("id")
         sku = kwargs.get("sku")
         name = kwargs.get("name")
