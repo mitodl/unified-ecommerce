@@ -13,6 +13,7 @@ from unified_ecommerce.exceptions import DoNotUseRequestException
 def mock_api_request():
     """
     Mock the API request to prevent actual API calls during tests.
+    Product save method will call this API to get image metadata.
     """
     # Mock the requests.get method to prevent actual API calls during tests
     with patch("requests.get") as mock_get:
