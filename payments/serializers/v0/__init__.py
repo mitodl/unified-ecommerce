@@ -12,6 +12,7 @@ from rest_framework_dataclasses.serializers import DataclassSerializer
 from payments.constants import (
     PAYMENT_HOOK_ACTION_POST_SALE,
     PAYMENT_HOOK_ACTION_PRE_SALE,
+    PAYMENT_HOOK_ACTION_TEST,
     PAYMENT_HOOK_ACTIONS,
 )
 from payments.models import Basket, BasketItem, Company, Discount, Line, Order, TaxRate
@@ -66,6 +67,17 @@ class WebhookBasket:
 
 
 @dataclass
+class WebhookTest:
+    """Test dataclass for WebhookBase."""
+
+    some_data: str
+
+    def __str__(self):
+        """Return a resonable string representation of the object."""
+        return f"test data: {self.some_data}"
+
+
+@dataclass
 class WebhookBase:
     """Class representing the base data that we need to post a webhook."""
 
@@ -73,7 +85,7 @@ class WebhookBase:
     system_key: str
     type: str
     user: object
-    data: WebhookOrder | WebhookBasket
+    data: WebhookOrder | WebhookBasket | WebhookTest
 
     def __str__(self):
         """Return a resonable string representation of the object."""
@@ -295,6 +307,17 @@ class WebhookBasketDataSerializer(DataclassSerializer):
         dataclass = WebhookBasket
 
 
+class WebhookTestDataSerializer(DataclassSerializer):
+    """Serializes test data for submission to the webhook."""
+
+    some_data = serializers.CharField()
+
+    class Meta:
+        """Meta options for WebhookTestDataSerializer"""
+
+        dataclass = WebhookTest
+
+
 class WebhookBaseSerializer(DataclassSerializer):
     """Base serializer for webhooks."""
 
@@ -310,6 +333,8 @@ class WebhookBaseSerializer(DataclassSerializer):
             return WebhookOrderDataSerializer(instance.data).data
         elif instance.type == PAYMENT_HOOK_ACTION_PRE_SALE:
             return WebhookBasketDataSerializer(instance.data).data
+        elif instance.type == PAYMENT_HOOK_ACTION_TEST:
+            return WebhookTestDataSerializer(instance.data).data
 
         error_msg = "Invalid webhook type %s"
         raise ValueError(error_msg, instance.type)

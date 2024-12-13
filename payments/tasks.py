@@ -6,7 +6,7 @@ import requests
 from django.conf import settings
 
 from payments.mail_api import send_successful_order_payment_email
-from payments.serializers.v0 import WebhookBase, WebhookBaseSerializer
+from payments.serializers.v0 import WebhookBase
 from unified_ecommerce.celery import app
 
 log = logging.getLogger(__name__)
@@ -26,16 +26,7 @@ def successful_order_payment_email_task(order_id, email_subject, email_body):
 def dispatch_webhook(system_webhook_url, webhook_data, attempt_count=0):
     """Dispatch a webhook."""
 
-    unserialized = WebhookBaseSerializer(data=webhook_data)
-    if not unserialized.is_valid():
-        log.error(
-            "Could not serialize webhook data %s for event: %s",
-            webhook_data,
-            unserialized.errors,
-        )
-        return
-
-    webhook_dataclass = WebhookBase(**unserialized.validated_data)
+    webhook_dataclass = WebhookBase(**webhook_data)
 
     try:
         requests.post(

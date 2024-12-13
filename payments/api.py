@@ -529,20 +529,18 @@ def process_post_sale_webhooks(order_id, source):
         send_post_sale_webhook(system.id, order.id, source)
 
 
-def send_pre_sale_webhook(basket_id, product_id, action):
+def send_pre_sale_webhook(basket, product, action):
     """
     Send the webhook some data for a pre-sale event.
 
     This happens when a user adds an product to the cart.
 
     Args:
-    - basket_id (int): ID of the basket
-    - product_id (int): ID of the product being added
+    - basket (Basket): the basket to work with
+    - product (Product): the product being added/removed
     - action (WebhookBasketAction): The action being taken
     """
 
-    basket = Basket.objects.get(pk=basket_id)
-    product = Product.objects.get(pk=product_id)
     system = basket.integrated_system
 
     basket_info = WebhookBasket(
