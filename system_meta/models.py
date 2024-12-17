@@ -15,6 +15,7 @@ from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 from slugify import slugify
 
+from system_meta.tasks import update_products
 from unified_ecommerce.utils import SoftDeleteActiveModel
 
 User = get_user_model()
@@ -90,25 +91,10 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
 
     def save(self, *args, **kwargs):
         # Retrieve image data from the API
-        try:
-            response = requests.get(
-                f"{settings.MITOL_LEARN_API_URL}learning_resources/",
-                params={"platform": self.system.slug, "readable_id": self.sku},
-                timeout=10,
-            )
-            response.raise_for_status()
-            results_data = response.json()
-            course_data = results_data.get("results")[0]
-            image_data = course_data.get("image")
-            self.image_metadata = {
-                "imageURL": image_data.get("url"),
-                "alt_text": image_data.get("alt"),
-                "description": image_data.get("description"),
-            }
-        except requests.RequestException:
-            log.exception("Error retrieving image data for product %s", self.sku)
-
+        created = not self.pk
         super().save(*args, **kwargs)
+        if created:
+            update_products.delay(self.id)
 
     class Meta:
         """Meta class for Product"""

@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from system_meta.models import Product
+from system_meta.tasks import update_products
 
 
 class Command(BaseCommand):
@@ -49,7 +50,9 @@ class Command(BaseCommand):
             products = Product.objects.all()
 
         for product in products:
-            product.save()
+            update_products.delay(product.id)
             self.stdout.write(
-                self.style.SUCCESS(f"Updated image_metadata for product {product}")
+                self.style.SUCCESS(
+                    f"Successfully updated image metadata for product {product.id}"
+                )
             )
