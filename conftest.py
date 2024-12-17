@@ -1,11 +1,11 @@
 # pylint: disable=wildcard-import, unused-wildcard-import
-from unittest.mock import patch
 
 import pytest
 
 from fixtures.common import *  # noqa: F403
 from fixtures.users import *  # noqa: F403
 from unified_ecommerce.exceptions import DoNotUseRequestException
+
 
 @pytest.fixture(autouse=True)
 def prevent_requests(mocker, request):  # noqa: PT004
