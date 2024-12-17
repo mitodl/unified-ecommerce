@@ -31,16 +31,6 @@ def mock_api_request():
         }
         yield mock_get  # Yield the mock for use in the test
 
-
-@pytest.fixture()
-def product():
-    """
-    Create a Product instance for testing purposes
-    """
-    # Create and return an instance of MyModel
-    return Product()
-
-
 @pytest.fixture(autouse=True)
 def prevent_requests(mocker, request):  # noqa: PT004
     """Patch requests to error on request by default"""

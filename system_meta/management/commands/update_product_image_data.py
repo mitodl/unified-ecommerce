@@ -27,16 +27,22 @@ class Command(BaseCommand):
             type=str,
             help="The name of the product to update",
         )
+        parser.add_argument(
+            "--system-name",
+            type=str,
+            help="The system name of the product to update",
+        )
 
     def handle(self, *args, **kwargs):  # noqa: ARG002
         product_id = kwargs.get("product_id")
         sku = kwargs.get("sku")
         name = kwargs.get("name")
+        system_name = kwargs.get("system_name")
 
         if product_id:
             products = Product.objects.filter(id=product_id)
         elif sku:
-            products = Product.objects.filter(sku=sku)
+            products = Product.objects.filter(sku=sku, system__name=system_name)
         elif name:
             products = Product.objects.filter(name=name)
         else:
