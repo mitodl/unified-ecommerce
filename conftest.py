@@ -5,7 +5,6 @@ import pytest
 
 from fixtures.common import *  # noqa: F403
 from fixtures.users import *  # noqa: F403
-from system_meta.models import Product
 from unified_ecommerce.exceptions import DoNotUseRequestException
 
 
@@ -30,6 +29,7 @@ def mock_api_request():
             ]
         }
         yield mock_get  # Yield the mock for use in the test
+
 
 @pytest.fixture(autouse=True)
 def prevent_requests(mocker, request):  # noqa: PT004
