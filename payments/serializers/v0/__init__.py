@@ -155,69 +155,6 @@ class DiscountSerializer(SimpleDiscountSerializer):
         model = Discount
 
 
-class TaxRateSerializer(serializers.ModelSerializer):
-    """TaxRate model serializer"""
-
-    class Meta:
-        """Meta options for TaxRateSerializer"""
-
-        model = TaxRate
-        fields = ["id", "country_code", "tax_rate", "tax_rate_name"]
-
-
-class CompanySerializer(serializers.ModelSerializer):
-    """Serializer for companies."""
-
-    class Meta:
-        """Meta options for CompanySerializer"""
-
-        model = Company
-        fields = ["id", "name"]
-
-
-class SimpleDiscountSerializer(serializers.ModelSerializer):
-    """Simpler serializer for discounts."""
-
-    class Meta:
-        """Meta options for SimpleDiscountSerializer"""
-
-        model = Discount
-        fields = [
-            "id",
-            "discount_code",
-            "amount",
-            "discount_type",
-            "formatted_discount_amount",
-        ]
-
-
-class DiscountSerializer(SimpleDiscountSerializer):
-    """Serializer for discounts."""
-
-    assigned_users = UserSerializer(many=True)
-    integrated_system = IntegratedSystemSerializer()
-    product = ProductSerializer()
-    company = CompanySerializer()
-
-    class Meta:
-        """Meta options for DiscountSerializer"""
-
-        fields = [
-            "id",
-            "discount_code",
-            "amount",
-            "payment_type",
-            "max_redemptions",
-            "activation_date",
-            "expiration_date",
-            "integrated_system",
-            "product",
-            "assigned_users",
-            "company",
-        ]
-        model = Discount
-
-
 class BasketItemSerializer(serializers.ModelSerializer):
     """BasketItem model serializer"""
 
