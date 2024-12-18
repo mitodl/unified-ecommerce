@@ -76,3 +76,24 @@ class CustomerVerificationHooks:
         )
 
         check_taxable(basket)
+
+    @hookimpl(specname="basket_add", trylast=True)
+    def notify_integrated_system(self, request, basket, basket_item):  # noqa: ARG002
+        """
+        Notify the integrated system of the basket update.
+
+        Some integrated systems take action when the user adds items to the
+        basket (to add things like audit enrollments, etc.). This hook will send
+        the same data that would get sent from the post_sale hook so the
+        integrated system can do what it needs to.
+
+        Args:
+        - request (HttpRequest): the current request
+        - basket (Basket): the current basket
+        - basket_item (Product): the item to add to the basket; ignored
+        """
+
+        from payments.api import send_pre_sale_webhook
+        from payments.serializers.v0 import WebhookBasketAction
+
+        send_pre_sale_webhook(basket, basket_item, WebhookBasketAction.ADD)

@@ -55,7 +55,7 @@ def test_post_sale_webhook_not_called_when_no_url(mocker, pending_complete_order
     """
 
     mocked_webhook = mocker.patch("payments.api.process_post_sale_webhooks")
-    mocked_webhook_dispatcher = mocker.patch("payments.tasks.send_post_sale_webhook")
+    mocked_webhook_dispatcher = mocker.patch("payments.api.send_post_sale_webhook")
 
     mocked_transaction_data = {
         "transaction_id": "12345",

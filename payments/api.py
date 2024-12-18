@@ -16,6 +16,10 @@ from mitol.payment_gateway.api import CartItem as GatewayCartItem
 from mitol.payment_gateway.api import Order as GatewayOrder
 from mitol.payment_gateway.api import PaymentGateway, ProcessorResponse
 
+from payments.constants import (
+    PAYMENT_HOOK_ACTION_POST_SALE,
+    PAYMENT_HOOK_ACTION_PRE_SALE,
+)
 from payments.dataclasses import CustomerLocationMetadata
 from payments.exceptions import (
     PaymentGatewayError,
@@ -33,7 +37,13 @@ from payments.models import (
     PendingOrder,
     TaxRate,
 )
-from payments.tasks import send_post_sale_webhook
+from payments.serializers.v0 import (
+    WebhookBase,
+    WebhookBaseSerializer,
+    WebhookBasket,
+    WebhookOrder,
+)
+from payments.tasks import dispatch_webhook
 from payments.utils import parse_supplied_date
 from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce.constants import (
@@ -438,6 +448,58 @@ def check_and_process_pending_orders_for_resolution(refnos=None):
     return (fulfilled_count, cancel_count, error_count)
 
 
+def send_post_sale_webhook(system_id, order_id, source):
+    """
+    Actually send the webhook some data for a post-sale event.
+
+    This is split out so we can queue the webhook requests individually.
+    """
+
+    order = Order.objects.get(pk=order_id)
+    system = IntegratedSystem.objects.get(pk=system_id)
+
+    system_webhook_url = system.webhook_url
+    if system_webhook_url:
+        log.info(
+            (
+                "send_post_sale_webhook: Calling webhook endpoint %s for order %s "
+                "with source %s"
+            ),
+            system_webhook_url,
+            order.reference_number,
+            source,
+        )
+    else:
+        log.warning(
+            (
+                "send_post_sale_webhook: No webhook URL set for system %s, skipping"
+                "for order %s"
+            ),
+            system.slug,
+            order.reference_number,
+        )
+        return
+
+    order_info = WebhookOrder(
+        order=order,
+        lines=[
+            line
+            for line in order.lines.all()
+            if line.product.system.slug == system.slug
+        ],
+    )
+
+    webhook_data = WebhookBase(
+        type=PAYMENT_HOOK_ACTION_POST_SALE,
+        system_slug=system.slug,
+        system_key=system.api_key,
+        user=order.purchaser,
+        data=order_info,
+    )
+
+    dispatch_webhook.delay(system_webhook_url, WebhookBaseSerializer(webhook_data).data)
+
+
 def process_post_sale_webhooks(order_id, source):
     """
     Send data to the webhooks for post-sale events.
@@ -464,7 +526,55 @@ def process_post_sale_webhooks(order_id, source):
             log.warning("No webhook URL specified for system %s", system.slug)
             continue
 
-        send_post_sale_webhook.delay(system.id, order.id, source)
+        send_post_sale_webhook(system.id, order.id, source)
+
+
+def send_pre_sale_webhook(basket, product, action):
+    """
+    Send the webhook some data for a pre-sale event.
+
+    This happens when a user adds an product to the cart.
+
+    Args:
+    - basket (Basket): the basket to work with
+    - product (Product): the product being added/removed
+    - action (WebhookBasketAction): The action being taken
+    """
+
+    system = basket.integrated_system
+
+    basket_info = WebhookBasket(
+        product=product,
+        action=action,
+    )
+
+    system_webhook_url = system.webhook_url
+    if system_webhook_url:
+        log.info(
+            "send_pre_sale_webhook: Calling webhook endpoint %s for %s",
+            system_webhook_url,
+            basket_info,
+        )
+    else:
+        log.warning(
+            (
+                "send_pre_sale_webhook: No webhook URL set for system %s, skipping"
+                "for event %s"
+            ),
+            system.slug,
+            basket_info,
+        )
+        return
+
+    webhook_data = WebhookBase(
+        type=PAYMENT_HOOK_ACTION_PRE_SALE,
+        system_slug=system.slug,
+        system_key=system.api_key,
+        user=basket.user,
+        data=basket_info,
+    )
+
+    dispatch_webhook.delay(system_webhook_url, WebhookBaseSerializer(webhook_data).data)
 
 
 def get_auto_apply_discounts_for_basket(basket_id: int) -> QuerySet[Discount]:
