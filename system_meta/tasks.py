@@ -1,5 +1,5 @@
-from typing import Optional
 import logging
+from typing import Optional
 
 import requests
 from celery import shared_task
@@ -13,7 +13,7 @@ def update_products(product_id: Optional[int] = None):
     product with that ID.  Otherwise, update all products.
     """
     from .models import Product
-    
+
     log = logging.getLogger(__name__)
     if product_id:
         products = Product.objects.filter(id=product_id)

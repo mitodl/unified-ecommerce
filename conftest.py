@@ -7,6 +7,7 @@ from fixtures.common import *  # noqa: F403
 from fixtures.users import *  # noqa: F403
 from unified_ecommerce.exceptions import DoNotUseRequestException
 
+
 @pytest.fixture(autouse=True)
 def mock_requests_get():
     # Mock the response of requests.get
