@@ -47,6 +47,11 @@ class ProductFactory(DjangoModelFactory):
     description = Faker("text")
     system = SubFactory(IntegratedSystemFactory)
     system_data = Faker("json")
+    image_metadata = {
+                    "image_url": "http://example.com/image.jpg",
+                    "alt_text": "Image alt text",
+                    "description": "Image description"
+                }
 
 
 class ActiveProductFactory(ProductFactory):

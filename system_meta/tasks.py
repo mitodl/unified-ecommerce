@@ -31,7 +31,7 @@ def update_products(product_id: Optional[int] = None):
             course_data = results_data.get("results")[0]
             image_data = course_data.get("image")
             product.image_metadata = {
-                "imageURL": image_data.get("url"),
+                "image_url": image_data.get("url"),
                 "alt_text": image_data.get("alt"),
                 "description": image_data.get("description"),
             }
