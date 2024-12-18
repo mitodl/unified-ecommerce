@@ -1701,6 +1701,10 @@ components:
           format: decimal
           pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
           description: Price (decimal to two places)
+        image_metadata:
+          nullable: true
+          description: Image metadata including URL, alt text, and description (in
+            JSON).
     PaymentTypeEnum:
       enum:
       - marketing
@@ -1762,6 +1766,10 @@ components:
         deleted_by_cascade:
           type: boolean
           readOnly: true
+        image_metadata:
+          nullable: true
+          description: Image metadata including URL, alt text, and description (in
+            JSON).
       required:
       - deleted_by_cascade
       - description
@@ -1799,6 +1807,10 @@ components:
           format: decimal
           pattern: ^-?\d{0,5}(?:\.\d{0,2})?$
           description: Price (decimal to two places)
+        image_metadata:
+          nullable: true
+          description: Image metadata including URL, alt text, and description (in
+            JSON).
       required:
       - description
       - name

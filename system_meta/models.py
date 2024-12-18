@@ -13,6 +13,7 @@ from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
 from slugify import slugify
 
+from system_meta.tasks import update_products
 from unified_ecommerce.utils import SoftDeleteActiveModel
 
 User = get_user_model()
@@ -77,9 +78,21 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
         null=True,
         help_text="System-specific data for the product (in JSON).",
     )
+    image_metadata = models.JSONField(
+        blank=True,
+        null=True,
+        help_text="Image metadata including URL, alt text, and description (in JSON).",
+    )
 
     objects = SafeDeleteManager()
     all_objects = models.Manager()
+
+    def save(self, *args, **kwargs):
+        # Retrieve image data from the API
+        created = not self.pk
+        super().save(*args, **kwargs)
+        if created:
+            update_products.delay(self.id)
 
     class Meta:
         """Meta class for Product"""
