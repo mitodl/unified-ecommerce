@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API Gateway Integration &#8212; Unified Ecommerce  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/nature.css?v=279e0f84" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Events" href="events.html" />
+    <link rel="prev" title="Unified Ecommerce: Technical Information" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="events.html" title="Events"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Unified Ecommerce: Technical Information"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Unified Ecommerce  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Unified Ecommerce: Technical Information</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">API Gateway Integration</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="api-gateway-integration">
+<h1>API Gateway Integration<a class="headerlink" href="#api-gateway-integration" title="Link to this heading">§</a></h1>
+<p>The Unified Ecommerce application expects to be run behind an API gateway of some sort to provide authentication support. The application supports two protocols for this:</p>
+<ul class="simple">
+<li><p>Forward Authentication: the API gateway provides only username of the authenticated user to the application</p></li>
+<li><p>X-UserInfo: the API gateway provides a more complete user record to the application</p></li>
+</ul>
+<p>Of these, the latter is the preferred method as it doesn’t entail a further API call to another service to retrieve the user data.</p>
+<section id="forward-authentication">
+<h2>Forward Authentication<a class="headerlink" href="#forward-authentication" title="Link to this heading">§</a></h2>
+<p>Forward auth is provided by a number of API gateway (and gateway-like) services, including Traefik. To support this, the app extends the built-in Django <code class="docutils literal notranslate"><span class="pre">RemoteUserMiddleware</span></code> to use the  <code class="docutils literal notranslate"><span class="pre">X-Forwarded-User</span></code> header. In addition to this, the app then attempts to load the user data from Keycloak to fill out the user account, as the only data that will be passed along will be the username.</p>
+<p>The app requires a service account in the relevant Keycloak realm so that it can pull user data.</p>
+</section>
+<section id="x-userinfo">
+<h2>X-UserInfo<a class="headerlink" href="#x-userinfo" title="Link to this heading">§</a></h2>
+<p>This method is useful when a more fully-fledged API gateway system is placed in front of the app. (APISIX is the canonical example and was the service that was used to write the initial integration, so this info is geared towards using APISIX.)</p>
+<p>When configured to use authentication via OIDC Connect, APISIX returns the user data back to the application by injecting it into the HTTP headers sent to the app. A custom middleware in the application decodes this data, and takes action based on it.</p>
+<p>For <em>local</em> deployments, APISIX sends user data retrieved via OIDC in the <code class="docutils literal notranslate"><span class="pre">X-UserInfo</span></code> header. The data is sent as a base64-encoded JSON object, and its contents may vary but include:</p>
+<ul class="simple">
+<li><p>The user’s email address (<code class="docutils literal notranslate"><span class="pre">email</span></code>)</p></li>
+<li><p>The UUID associated with the user in the SSO system (<code class="docutils literal notranslate"><span class="pre">preferred_username</span></code>)</p></li>
+<li><p>The user’s first and last name (<code class="docutils literal notranslate"><span class="pre">given_name</span></code>, <code class="docutils literal notranslate"><span class="pre">family_name</span></code>)</p></li>
+</ul>
+<p>The middleware creates or updates the user account based on this data and sets the session user appropriately. Note that, unlike forward authentication, APISIX includes enough user data to construct and update the user record so the app does not need to make a separate call to Keycloak directly for this data.</p>
+<p>For Heroku deployments, we do something different because we need to be able to trust the data in the <code class="docutils literal notranslate"><span class="pre">X-UserInfo</span></code> header.</p>
+<blockquote>
+<div><p><em>TODO:</em> Fill this out - we don’t have the info here yet. The challenge here is preventing injection: the app won’t be DMZed in production so we need to be able to verify the source of the data.</p>
+</div></blockquote>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="../index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">API Gateway Integration</a><ul>
+<li><a class="reference internal" href="#forward-authentication">Forward Authentication</a></li>
+<li><a class="reference internal" href="#x-userinfo">X-UserInfo</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">Unified Ecommerce: Technical Information</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="events.html"
+                          title="next chapter">Events</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/technical/apigateway.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="events.html" title="Events"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Unified Ecommerce: Technical Information"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Unified Ecommerce  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Unified Ecommerce: Technical Information</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">API Gateway Integration</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, OL Engineering.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>
