@@ -5,12 +5,14 @@ from django.urls import include, path, re_path
 from payments.views.v0 import (
     BackofficeCallbackView,
     BasketViewSet,
-    CheckoutApiViewSet,
     CheckoutCallbackView,
+    DiscountAPIViewSet,
     OrderHistoryViewSet,
     add_discount_to_basket,
     clear_basket,
     create_basket_from_product,
+    get_user_basket_for_system,
+    start_checkout,
 )
 from unified_ecommerce.routers import SimpleRouterWithNesting
 
@@ -20,9 +22,12 @@ basket_router = router.register(r"baskets", BasketViewSet, basename="basket")
 
 router.register(r"orders/history", OrderHistoryViewSet, basename="orderhistory_api")
 
-router.register(r"checkout", CheckoutApiViewSet, basename="checkout")
-
 urlpatterns = [
+    path(
+        "baskets/for_system/<str:system_slug>/",
+        get_user_basket_for_system,
+        name="get_user_basket_for_system",
+    ),
     path(
         "baskets/create_from_product/<str:system_slug>/<str:sku>/",
         create_basket_from_product,
@@ -42,6 +47,16 @@ urlpatterns = [
         "checkout/callback/",
         BackofficeCallbackView.as_view(),
         name="checkout-callback",
+    ),
+    path(
+        "checkout/<str:system_slug>/",
+        start_checkout,
+        name="start_checkout",
+    ),
+    path(
+        "discounts/",
+        DiscountAPIViewSet.as_view(),
+        name="discount-api",
     ),
     re_path(
         r"^",

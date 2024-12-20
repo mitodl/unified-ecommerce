@@ -55,7 +55,40 @@ def user_client_and_basket():
     return user_client, basket
 
 
-def test_basket_add_wrapper(mocker, user_client_and_basket, maxmimd_resolvable_ip):
+def mock_basket_add_hook_steps(mocker, exceptfor: str | None = None):
+    """
+    Mock the steps in the basket_add hook, except for the one specified.
+
+    Args:
+    - mocker: The mocker fixture
+    - exceptfor: The name of the step to skip
+    Returns:
+    - A dictionary of the mocked steps
+    """
+
+    return {
+        "check_blocked_countries": mocker.patch("payments.api.check_blocked_countries")
+        if exceptfor != "check_blocked_countries"
+        else None,
+        "check_taxable": mocker.patch("payments.api.check_taxable")
+        if exceptfor != "check_taxable"
+        else None,
+        "send_pre_sale_webhook": mocker.patch("payments.api.send_pre_sale_webhook")
+        if exceptfor != "send_pre_sale_webhook"
+        else None,
+    }
+
+
+@pytest.fixture()
+def basket_add_hook_steps(mocker):
+    """Mock the steps in the basket_add hook."""
+
+    return mock_basket_add_hook_steps(mocker)
+
+
+def test_basket_add_wrapper(
+    basket_add_hook_steps, user_client_and_basket, maxmimd_resolvable_ip
+):
     """
     Test that the wrapper for the basket_add hook adds the data as we expect.
 
@@ -64,8 +97,10 @@ def test_basket_add_wrapper(mocker, user_client_and_basket, maxmimd_resolvable_i
 
     user_client, basket = user_client_and_basket
 
-    mocked_bcc = mocker.patch("payments.api.check_blocked_countries")
-    mocked_tcc = mocker.patch("payments.api.check_taxable")
+    mocked_bcc, mocked_tcc = [
+        basket_add_hook_steps["check_blocked_countries"],
+        basket_add_hook_steps["check_taxable"],
+    ]
 
     with reversion.create_revision():
         product = ProductFactory.create(system=basket.integrated_system)
@@ -98,7 +133,7 @@ def test_basket_blocked_country(
 
     user_client, basket = user_client_and_basket
 
-    mocker.patch("payments.api.check_taxable")
+    mock_basket_add_hook_steps(mocker, exceptfor="check_blocked_countries")
 
     with reversion.create_revision():
         product = ProductFactory.create(system=basket.integrated_system)
@@ -124,7 +159,7 @@ def test_basket_blocked_country_product(
 
     user_client, basket = user_client_and_basket
 
-    mocker.patch("payments.api.check_taxable")
+    mock_basket_add_hook_steps(mocker, exceptfor="check_blocked_countries")
 
     with reversion.create_revision():
         product = ProductFactory.create(system=basket.integrated_system)
@@ -159,7 +194,7 @@ def test_basket_add_tax_collection(
 
     user_client, basket = user_client_and_basket
 
-    mocker.patch("payments.api.check_blocked_countries")
+    mock_basket_add_hook_steps(mocker, exceptfor="check_taxable")
 
     with reversion.create_revision():
         product = ProductFactory.create(system=basket.integrated_system)
@@ -181,3 +216,22 @@ def test_basket_add_tax_collection(
 
     if user_in_country:
         assert basket.tax > 0
+
+
+def test_basket_add_webhook(mocker, user_client_and_basket):
+    """Test that the pre-sale webhook gets triggered."""
+
+    user_client, basket = user_client_and_basket
+
+    mocked_notify = mocker.patch("payments.api.send_pre_sale_webhook")
+
+    with reversion.create_revision():
+        product = ProductFactory.create(system=basket.integrated_system)
+
+    url = reverse(
+        "v0:create_from_product", args=[basket.integrated_system.slug, product.sku]
+    )
+    resp = user_client.post(url)
+
+    assert resp.status_code == 201
+    mocked_notify.assert_called_once()

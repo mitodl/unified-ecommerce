@@ -16,6 +16,8 @@ This application provides a central system to handle ecommerce activities across
     - [Interstitial Debug Mode](#interstitial-debug-mode)
     - [Webhook Retry](#webhook-retry)
     - [Running the app in a notebook](#running-the-app-in-a-notebook)
+    - [Change ports](#change-ports)
+    - [Import MaxMind GeoIP data](#import-maxmind-geoip-data)
 
 ## Initial Setup
 
@@ -184,3 +186,31 @@ This repo includes a config for running a [Jupyter notebook](https://jupyter.org
 - Execute the first block to confirm it's working properly (click inside the block and press Shift+Enter)
 
 From there, you should be able to run code snippets with a live Django app just like you would in a Django shell.
+
+### Change ports
+
+If you need, you can change the exposed ports for all services:
+
+```
+POSTGRES_PORT=5420
+APISIX_PORT=9080
+KEYCLOAK_SSL_PORT=7443
+KEYCLOAK_PORT=7080
+NGINX_PORT=8073
+```
+
+If you change these, you may need to update settings elsewhere. (Note that the APISIX config references `nginx:8073` but since it's _within_ the Docker network for the app, you don't need to update its port if you change it in your `.env` file.)
+
+### Import MaxMind GeoIP data
+
+The blocked country and tax assessment checks need the MaxMind GeoLite2 dataset to be imported into the app.
+
+You'll need to retrieve a copy of the data. You can get this for free from MaxMind: https://dev.maxmind.com/ Use the blue "Sign up for a GeoLite2 account" at the bottom to sign up for an account, and then you can download the data. There are several versions of the data to download - generally the "Country: CSV Format" is the best option. (You _have_ to use a CSV option, however.)
+
+Once you've downloaded it, place the CSV files in the root directory and then you can run this one-liner:
+
+```
+docker compose exec web ./manage.py import_maxmind_data GeoLite2-Country-Locations-en.csv geolite2-country-locations ; docker compose exec web ./manage.py import_maxmind_data GeoLite2-Country-Blocks-IPv4.csv geolite2-country-ipv4 ; docker compose exec web ./manage.py import_maxmind_data GeoLite2-Country-Blocks-IPv6.csv geolite2-country-ipv6
+```
+
+You can also (and probably should) add mappings for private IPs too. Private IPs aren't represented by default in the GeoIP databases. Run `docker compose exec web ./manage.py create_private_maxmind_data <ISO code>` to do this. The ISO code can be anything that's a valid ISO 3166 code (so, US works, but you can set it to something else if you'd prefer).

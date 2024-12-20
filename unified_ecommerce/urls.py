@@ -19,6 +19,7 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import include, path, re_path
 
 urlpatterns = [
@@ -31,6 +32,10 @@ urlpatterns = [
     # App Paths
     re_path(r"", include("openapi.urls")),
     # Private Paths
+    re_path(
+        r"^_/v0/booted/",
+        lambda request: HttpResponse("ok", content_type="text/plain"),  # noqa: ARG005
+    ),
     re_path(r"^_/v0/meta/", include("system_meta.private_urls")),
     # API Paths
     re_path(r"", include("payments.urls")),

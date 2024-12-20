@@ -85,6 +85,7 @@ django-countries = "^7.6.1"
 mitol-django-geoip = ">=2024.11.05"
 py-moneyed = "^3.0"
 django-extensions = "^3.2.3"
+djangorestframework-api-key = "^3.0.0"
 
 [tool.poetry.group.dev.dependencies]
 bpython = "^0.24"

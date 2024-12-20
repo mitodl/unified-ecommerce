@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "server_status",
     "rest_framework",
+    "rest_framework_api_key",
     "corsheaders",
     # "webpack_loader",
     "anymail",
@@ -122,6 +123,8 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = get_list_of_str("CORS_ALLOWED_ORIGINS", [])
 CORS_ALLOWED_ORIGIN_REGEXES = get_list_of_str("CORS_ALLOWED_ORIGIN_REGEXES", [])
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = get_list_of_str("CSRF_TRUSTED_ORIGINS", [])
 
 # enable the nplusone profiler only in debug mode
 if DEBUG:
@@ -504,6 +507,8 @@ MITOL_UE_PAYMENT_BASKET_ROOT = get_string(
 MITOL_UE_PAYMENT_BASKET_CHOOSER = get_string(
     name="MITOL_UE_PAYMENT_BASKET_CHOOSER", default="/cart/"
 )
+
+MITOL_LEARN_API_URL = get_string(name="MITOL_LEARN_API_URL", default="")
 
 import_settings_modules("mitol.payment_gateway.settings.cybersource")
 
