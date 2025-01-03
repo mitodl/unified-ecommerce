@@ -54,11 +54,9 @@ flowchart LR
 
 Since APISIX sits before the Django app, it will first check to see if the user has a session established in APISIX. If it does, then the user is passed along to the Django app. If not, the user is redirected into Keycloak to log in. Assuming that succeeds, APISIX receives the user back, sets up its own session, and then sends the user to the Django app with the APISIX payload attached. (If the user can't get past Keycloak, the process stops.)
 
-APISIX attaches user information in a special `X-UserInfo` header. There's a middleware within the Django app to process this header, either update or create a user account, and establish a Django session for the account with the data contained within.
+APISIX attaches user information in a special `X-UserInfo` header. A middleware within the Django app to process this header, either update or create a user account, and establish a Django session for the account with the data contained within.
 
-Since this is basically a login API, this workflow is used by the `/establish_session` endpoint. The frontend calls an endpoint to retrieve the current user data, and redirects the user to `/establish_session` if the user's not logged in. This endpoint then sends the user back to the frontend, and they can then interact with Unified Ecommerce.
-
-We don't funnel all authenticated API requests through Keycloak - APISIX's redirect generally results in a CORS error (plus, an Axios request won't really handle the redirect properly), and POST data will be lost for POST requests. So, instead, we just make sure the user has a session and then work from there. (There may be a better way to do this. APISIX doesn't _have_ to redirect the user through Keycloak.)
+This workflow is used by the `/establish_session` endpoint. The frontend calls an endpoint to retrieve the current user data, and redirects the user to `/establish_session` if the user's not logged in. This endpoint then logs the user in with the processed APISIX data, starts a Django session, and sends the user back to the frontend. The user can then use the rest of the API as an authenticated user.
 
 ## X-UserInfo
 
@@ -79,5 +77,3 @@ Regular forward authentication doesn't include the user data. If we used that, t
 ### Trust
 
 Having the app configured in this way means that it **must** sit behind APISIX. At time of writing, the APISIX middleware also blindly trusts the payload that APISIX sends along. So, the Django app must not be exposed directly to the Internet when it is deployed.
-
-It may be a good idea to add a shared secret that can be used between APISIX and the Django app so UE can determine if it _should_ trust the user payload.

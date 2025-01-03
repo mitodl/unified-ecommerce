@@ -1,6 +1,6 @@
 # Events
 
-Certain operations within Unified Ecommerce trigger events, and those events are sent to the integrated systems.
+Certain operations within Unified Ecommerce trigger events, and those events can send data to the relevant configured integrated systems.
 
 The integrated system model has a field for a webhook URL. Data for all events are sent to this URL. The integrated system itself decides whether or not to take action on the data.
 
@@ -15,7 +15,7 @@ These are the events that are triggered:
 | `post_refund` | `postrefund` | Triggered when an item has been refunded from a completed order. |
 
 ```{note}
-The Event tracks the plugin hook that is called to generate the event.
+The Event tracks the plugin hook spec that is called to generate the event.
 ```
 
 ## Data Sent
@@ -72,6 +72,4 @@ For `postsale`:
 
 ## Architecture
 
-Internally, the system uses Pluggy to dispatch events. New events can be added by defining a new hook implementation for the event types listed above.
-
-Events in UE don't necessarily trigger webhook notifications - `basket_add`, for instance, is mostly used to ensure the user can purchase the item and to assess tax if necessary.
+The event system is built using Pluggy, REST framework serializers, and Celery tasks. The hookspecs listed in the table in Events have a hook implementation that queues a task to send the data to the target URL(s) without blocking the user.
