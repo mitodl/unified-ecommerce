@@ -919,11 +919,19 @@ class PendingOrder(Order):
             # (this re-uses a PendingOrder if it exists, so it might now be wrong)
             order.tax_rate = basket.tax_rate
             order.purchaser_ip = basket.user_ip
-            order.purchaser_taxable_country_code = basket.user_taxable_country_code
+            order.purchaser_taxable_country_code = (
+                basket.user_taxable_country_code
+                if basket.user_taxable_country_code
+                else ""
+            )
             order.purchaser_taxable_geolocation_type = (
                 basket.user_taxable_geolocation_type
             )
-            order.purchaser_blockable_country_code = basket.user_blockable_country_code
+            order.purchaser_blockable_country_code = (
+                basket.user_blockable_country_code
+                if basket.user_blockable_country_code
+                else ""
+            )
             order.purchaser_blockable_geolocation_type = (
                 basket.user_blockable_geolocation_type
             )

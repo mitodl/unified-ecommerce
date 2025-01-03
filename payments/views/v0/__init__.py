@@ -8,7 +8,6 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import (
     OpenApiParameter,
@@ -20,7 +19,7 @@ from drf_spectacular.utils import (
 from mitol.payment_gateway.api import PaymentGateway
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -272,13 +271,16 @@ def start_checkout(request, system_slug: str):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class CheckoutCallbackView(View):
+class CheckoutCallbackView(APIView):
     """
     Handles the redirect from the payment gateway after the user has completed
     checkout. This may not always happen as the redirect back to the app
     occasionally fails. If it does, then the payment gateway should trigger
     things via the backoffice webhook.
     """
+
+    authentication_classes = []  # disables authentication
+    permission_classes = (AllowAny,)  # disables permission
 
     def _get_payment_process_redirect_url_from_line_items(self, request):
         """
