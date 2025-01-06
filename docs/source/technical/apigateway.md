@@ -54,7 +54,7 @@ flowchart LR
 
 Since APISIX sits before the Django app, it will first check to see if the user has a session established in APISIX. If it does, then the user is passed along to the Django app. If not, the user is redirected into Keycloak to log in. Assuming that succeeds, APISIX receives the user back, sets up its own session, and then sends the user to the Django app with the APISIX payload attached. (If the user can't get past Keycloak, the process stops.)
 
-APISIX attaches user information in a special `X-UserInfo` header. A middleware within the Django app to process this header, either update or create a user account, and establish a Django session for the account with the data contained within.
+APISIX attaches user information in a special `X-UserInfo` header. A middleware within the Django app processes this header, either updates or creates a user account, and establishes a Django session for the account with the data contained within.
 
 This workflow is used by the `/establish_session` endpoint. The frontend calls an endpoint to retrieve the current user data, and redirects the user to `/establish_session` if the user's not logged in. This endpoint then logs the user in with the processed APISIX data, starts a Django session, and sends the user back to the frontend. The user can then use the rest of the API as an authenticated user.
 
