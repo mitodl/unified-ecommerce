@@ -49,6 +49,11 @@ urlpatterns = [
         name="checkout-callback",
     ),
     path(
+        "checkout/result/",
+        CheckoutCallbackView.as_view(),
+        name="checkout-result-callback",
+    ),
+    path(
         "checkout/<str:system_slug>/",
         start_checkout,
         name="start_checkout",
@@ -63,10 +68,5 @@ urlpatterns = [
         include(
             router.urls,
         ),
-    ),
-    path(
-        "checkout/result/",
-        CheckoutCallbackView.as_view(),
-        name="checkout-result-callback",
     ),
 ]

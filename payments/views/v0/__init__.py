@@ -280,7 +280,7 @@ class CheckoutCallbackView(APIView):
     """
 
     authentication_classes = []  # disables authentication
-    permission_classes = (AllowAny,)  # disables permission
+    permission_classes = [AllowAny]  # disables permission
 
     def _get_payment_process_redirect_url_from_line_items(self, request):
         """

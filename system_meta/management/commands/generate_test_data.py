@@ -16,6 +16,7 @@ import reversion
 from django.core.management import BaseCommand
 from django.core.management.base import CommandParser
 from django.db import transaction
+from django.urls import reverse
 
 from system_meta.models import IntegratedSystem, Product
 
@@ -111,6 +112,11 @@ class Command(BaseCommand):
                 description=f"Test System {i} description.",
                 api_key=uuid.uuid4(),
             )
+            system.payment_process_redirect_url = reverse(
+                "cart", kwargs={"system_slug": system.slug}
+            )
+            system.save()
+
             self.stdout.write(f"Created system {system.name} - {system.slug}")
 
     def add_test_products(self, system_slug: str) -> None:
