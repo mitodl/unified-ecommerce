@@ -356,6 +356,7 @@ class CheckoutCallbackView(APIView):
                 {"type": USER_MSG_TYPE_PAYMENT_ERROR_UNKNOWN},
             )
 
+    @extend_schema(exclude=True)
     def post(self, request):
         """
         Handle successfully completed transactions.
@@ -366,6 +367,9 @@ class CheckoutCallbackView(APIView):
         2. Finds and fulfills the order in the system (which should also then
         clear out the stored basket)
         3. Perform any enrollments, account status changes, etc.
+
+        Excluded from the OpenAPI schema because it's not a public API - only
+        CyberSource should be generating the payload for this request.
         """
 
         with transaction.atomic():
