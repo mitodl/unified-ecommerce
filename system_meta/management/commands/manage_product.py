@@ -195,7 +195,7 @@ class Command(BaseCommand):
             exception_message = "Product {sku} already exists in system {system_name}."
             raise CommandError(exception_message, returncode=2)
 
-        system = IntegratedSystem.objects.get(name=system_name)
+        system = IntegratedSystem.objects.get(slug=system_name)
         product = Product.objects.create(
             sku=sku,
             name=name,
