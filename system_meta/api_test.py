@@ -29,9 +29,8 @@ def test_retrieve_product_metadata(mocker, valid_run):
                 "readable_id": "course-v1:MITx+12.345x",
                 "runs": [
                     {
-                        "run_id": "123",
+                        "run_id": "course-v1:MITx+12.345x+2T2099",
                         "prices": [150, 250],
-                        "readable_id": "course-v1:MITx+12.345x+2T2099",
                     }
                 ]
                 if valid_run

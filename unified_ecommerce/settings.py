@@ -451,6 +451,7 @@ REST_FRAMEWORK = {
     "ALLOWED_VERSIONS": [
         "v0",
     ],
+    "DEFAULT_THROTTLE_RATES": {"anon": "100/hour", "user": "1000/day"},
 }
 
 USE_X_FORWARDED_PORT = get_bool("USE_X_FORWARDED_PORT", False)  # noqa: FBT003

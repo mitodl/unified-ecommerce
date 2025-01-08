@@ -11,6 +11,40 @@ from unified_ecommerce.utils import parse_readable_id
 log = logging.getLogger(__name__)
 
 
+def get_product_metadata(platform: str, readable_id: str) -> None:
+    """Get product metadata from the Learn API."""
+
+    try:
+        split_readable_id, split_run = parse_readable_id(readable_id)
+        response = requests.get(
+            f"{settings.MITOL_LEARN_API_URL}learning_resources/",
+            params={"platform": platform, "readable_id": split_readable_id},
+            timeout=10,
+        )
+        response.raise_for_status()
+
+        if response.json().get("count", 0) > 0:
+            course_data = response.json().get("results")[0]
+            if split_run and course_data.get("runs"):
+                test_run = next(
+                    (
+                        r
+                        for r in course_data.get("runs")
+                        if r.get("run_id") == readable_id
+                    ),
+                    None,
+                )
+                if test_run:
+                    return response.json()
+
+                return {"count": 0}
+
+        return response.json()
+    except requests.RequestException:
+        log.exception("Failed to get product metadata for %s", readable_id)
+        return {"count": 0}
+
+
 def update_product_metadata(product_id: int) -> None:
     """Get product metadata from the Learn API."""
 
@@ -52,7 +86,7 @@ def update_product_metadata(product_id: int) -> None:
 
         runs = course_data.get("runs")
         if runs:
-            run = next((r for r in runs if r.get("readable_id") == product.sku), None)
+            run = next((r for r in runs if r.get("run_id") == product.sku), None)
             if run:
                 product_prices = run.get("prices", [])
                 product_prices.sort()
