@@ -48,16 +48,16 @@ def update_product_metadata(product_id: int) -> None:
         # If there are runs, we'll overwrite this with the run's price later.
         product_prices = course_data.get("prices", [])
         product_prices.sort()
-        product.price = product_prices.pop() if len(product_prices) else product.price
+        product.price = product_prices[-1] if len(product_prices) else product.price
 
         runs = course_data.get("runs")
         if runs:
-            run = next((r for r in runs if r.get("run_id") == product.sku), None)
+            run = next((r for r in runs if r.get("readable_id") == product.sku), None)
             if run:
                 product_prices = run.get("prices", [])
                 product_prices.sort()
                 product.price = (
-                    product_prices.pop() if len(product_prices) else product.price
+                    product_prices[-1] if len(product_prices) else product.price
                 )
 
         product.save()

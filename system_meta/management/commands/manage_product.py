@@ -42,7 +42,7 @@ class Command(BaseCommand):
             "-s",
             type=str,
             required=True,
-            help="The system to add the product to.",
+            help="The system slug to add the product to.",
             metavar="system",
         )
 

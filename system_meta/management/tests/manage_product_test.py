@@ -26,7 +26,7 @@ def test_add_product():
         "--sku",
         "test_sku",
         "--system",
-        system.name,
+        system.slug,
         "--price",
         "1.00",
         "--description",
