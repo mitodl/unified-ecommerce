@@ -10,7 +10,7 @@ class Command(BaseCommand):
     Example usage: python manage.py update_product_image_data --product_id 1
     """
 
-    help = "Update image_metadata for all Product objects"
+    help = "Update product data for all Product objects from Learn."
 
     def add_arguments(self, parser):
         parser.add_argument(

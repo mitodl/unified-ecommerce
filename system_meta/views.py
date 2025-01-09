@@ -18,7 +18,7 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
-from system_meta.api import get_product_metadata, update_product_metadata
+from system_meta.api import get_product_metadata
 from system_meta.models import IntegratedSystem, Product
 from system_meta.serializers import (
     AdminIntegratedSystemSerializer,
@@ -111,22 +111,20 @@ def preload_sku(request, system_slug, sku):  # noqa: ARG001
         return Response(ProductSerializer(existing_product.first()).data)
 
     product_metadata = get_product_metadata(system_slug, sku)
-    if product_metadata.get("count", 0) == 0:
+    if not product_metadata:
         return Response(
             {"error": "Resource not found"},
             status=status.HTTP_404_NOT_FOUND,
         )
 
     product = Product.objects.create(
-        name=sku,
-        sku=sku,
-        description=sku,
-        price=0,
+        name=product_metadata.get("title"),
+        sku=product_metadata.get("sku"),
+        description=product_metadata.get("description"),
+        price=product_metadata.get("price"),
         system=IntegratedSystem.objects.get(slug=system_slug),
     )
     product.save()
-
-    update_product_metadata(product.id)
     product.refresh_from_db()
 
     return Response(ProductSerializer(product).data)
