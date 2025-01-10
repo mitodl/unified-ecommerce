@@ -251,7 +251,7 @@ def create_basket_with_products(request):
     try:
         for product, quantity in products:
             pm.hook.basket_add(request=request, basket=basket, basket_item=product)
-            (_, created) = BasketItem.objects.update_or_create(
+            BasketItem.objects.update_or_create(
                 basket=basket, product=product, defaults={"quantity": quantity}
             )
     except ProductBlockedError:
@@ -278,7 +278,7 @@ def create_basket_with_products(request):
 
     return Response(
         BasketWithProductSerializer(basket).data,
-        status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        status=status.HTTP_200_OK,
     )
 
 
