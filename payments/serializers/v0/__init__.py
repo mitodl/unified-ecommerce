@@ -373,3 +373,19 @@ class CyberSourceCheckoutSerializer(serializers.Serializer):
     payload = serializers.DictField()
     url = serializers.CharField()
     method = serializers.CharField()
+
+
+class CreateBasketWithProductsSkuSerializer(serializers.Serializer):
+    """Defines the schema for a SKU in the CreateBasketWithProductsSerializer."""
+
+    sku = serializers.CharField()
+    quantity = serializers.IntegerField(min_value=1)
+
+
+class CreateBasketWithProductsSerializer(serializers.Serializer):
+    """Serializer for creating a basket with products. (For OpenAPI spec.)"""
+
+    system_slug = serializers.CharField()
+    skus = CreateBasketWithProductsSkuSerializer(many=True)
+    checkout = serializers.BooleanField()
+    discount_code = serializers.CharField()

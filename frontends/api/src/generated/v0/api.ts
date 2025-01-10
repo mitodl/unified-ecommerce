@@ -1417,6 +1417,56 @@ export type CountryCodeEnum =
   (typeof CountryCodeEnum)[keyof typeof CountryCodeEnum]
 
 /**
+ * Serializer for creating a basket with products. (For OpenAPI spec.)
+ * @export
+ * @interface CreateBasketWithProductsRequest
+ */
+export interface CreateBasketWithProductsRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof CreateBasketWithProductsRequest
+   */
+  system_slug: string
+  /**
+   *
+   * @type {Array<CreateBasketWithProductsSkuRequest>}
+   * @memberof CreateBasketWithProductsRequest
+   */
+  skus: Array<CreateBasketWithProductsSkuRequest>
+  /**
+   *
+   * @type {boolean}
+   * @memberof CreateBasketWithProductsRequest
+   */
+  checkout: boolean
+  /**
+   *
+   * @type {string}
+   * @memberof CreateBasketWithProductsRequest
+   */
+  discount_code: string
+}
+/**
+ * Defines the schema for a SKU in the CreateBasketWithProductsSerializer.
+ * @export
+ * @interface CreateBasketWithProductsSkuRequest
+ */
+export interface CreateBasketWithProductsSkuRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof CreateBasketWithProductsSkuRequest
+   */
+  sku: string
+  /**
+   *
+   * @type {number}
+   * @memberof CreateBasketWithProductsSkuRequest
+   */
+  quantity: number
+}
+/**
  * Really basic serializer for the payload that we need to send to CyberSource.
  * @export
  * @interface CyberSourceCheckout
@@ -4085,6 +4135,59 @@ export const PaymentsApiAxiosParamCreator = function (
       }
     },
     /**
+     * Creates or updates a basket for the current user, adding the selected product.
+     * @param {CreateBasketWithProductsRequest} CreateBasketWithProductsRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    paymentsBasketsCreateWithProductsCreate: async (
+      CreateBasketWithProductsRequest: CreateBasketWithProductsRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'CreateBasketWithProductsRequest' is not null or undefined
+      assertParamExists(
+        "paymentsBasketsCreateWithProductsCreate",
+        "CreateBasketWithProductsRequest",
+        CreateBasketWithProductsRequest,
+      )
+      const localVarPath = `/api/v0/payments/baskets/create_with_products/`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "POST",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter["Content-Type"] = "application/json"
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        CreateBasketWithProductsRequest,
+        localVarRequestOptions,
+        configuration,
+      )
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Returns or creates a basket for the current user and system.
      * @param {string} system_slug
      * @param {*} [options] Override http request option.
@@ -4525,6 +4628,39 @@ export const PaymentsApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath)
     },
     /**
+     * Creates or updates a basket for the current user, adding the selected product.
+     * @param {CreateBasketWithProductsRequest} CreateBasketWithProductsRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async paymentsBasketsCreateWithProductsCreate(
+      CreateBasketWithProductsRequest: CreateBasketWithProductsRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string,
+      ) => AxiosPromise<BasketWithProduct>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.paymentsBasketsCreateWithProductsCreate(
+          CreateBasketWithProductsRequest,
+          options,
+        )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap[
+          "PaymentsApi.paymentsBasketsCreateWithProductsCreate"
+        ]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
      * Returns or creates a basket for the current user and system.
      * @param {string} system_slug
      * @param {*} [options] Override http request option.
@@ -4805,6 +4941,23 @@ export const PaymentsApiFactory = function (
         .then((request) => request(axios, basePath))
     },
     /**
+     * Creates or updates a basket for the current user, adding the selected product.
+     * @param {PaymentsApiPaymentsBasketsCreateWithProductsCreateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    paymentsBasketsCreateWithProductsCreate(
+      requestParameters: PaymentsApiPaymentsBasketsCreateWithProductsCreateRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<BasketWithProduct> {
+      return localVarFp
+        .paymentsBasketsCreateWithProductsCreate(
+          requestParameters.CreateBasketWithProductsRequest,
+          options,
+        )
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * Returns or creates a basket for the current user and system.
      * @param {PaymentsApiPaymentsBasketsForSystemRetrieveRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -4972,6 +5125,20 @@ export interface PaymentsApiPaymentsBasketsCreateFromProductCreateRequest {
 }
 
 /**
+ * Request parameters for paymentsBasketsCreateWithProductsCreate operation in PaymentsApi.
+ * @export
+ * @interface PaymentsApiPaymentsBasketsCreateWithProductsCreateRequest
+ */
+export interface PaymentsApiPaymentsBasketsCreateWithProductsCreateRequest {
+  /**
+   *
+   * @type {CreateBasketWithProductsRequest}
+   * @memberof PaymentsApiPaymentsBasketsCreateWithProductsCreate
+   */
+  readonly CreateBasketWithProductsRequest: CreateBasketWithProductsRequest
+}
+
+/**
  * Request parameters for paymentsBasketsForSystemRetrieve operation in PaymentsApi.
  * @export
  * @interface PaymentsApiPaymentsBasketsForSystemRetrieveRequest
@@ -5134,6 +5301,25 @@ export class PaymentsApi extends BaseAPI {
       .paymentsBasketsCreateFromProductCreate(
         requestParameters.sku,
         requestParameters.system_slug,
+        options,
+      )
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Creates or updates a basket for the current user, adding the selected product.
+   * @param {PaymentsApiPaymentsBasketsCreateWithProductsCreateRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof PaymentsApi
+   */
+  public paymentsBasketsCreateWithProductsCreate(
+    requestParameters: PaymentsApiPaymentsBasketsCreateWithProductsCreateRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return PaymentsApiFp(this.configuration)
+      .paymentsBasketsCreateWithProductsCreate(
+        requestParameters.CreateBasketWithProductsRequest,
         options,
       )
       .then((request) => request(this.axios, this.basePath))
