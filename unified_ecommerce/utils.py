@@ -445,3 +445,26 @@ def get_user_from_apisix_headers(request):
         user.refresh_from_db()
 
     return user
+
+
+def parse_readable_id(readable_id: str) -> tuple[str, str]:
+    """
+    Parse a readable ID into a resource ID and a run ID.
+
+    Readable IDs look like "course-v1:MITxT+12.345x" but they may also have a run
+    tacked onto the end ("+1T2024" for instance). If the readable ID isn't for a
+    run of the resource, you'll get a None in the run position.
+
+    Args:
+        readable_id (str): The readable ID to parse
+
+    Returns:
+        tuple[str, str]: The resource ID and the run ID (or None)
+    """
+    if readable_id.count("+") > 1:
+        resource, run = readable_id.rsplit("+", 1)
+    else:
+        resource = readable_id
+        run = None
+
+    return resource, run

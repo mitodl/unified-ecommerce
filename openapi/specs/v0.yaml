@@ -304,6 +304,33 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v0/meta/product/preload/{system_slug}/{sku}/:
+    get:
+      operationId: meta_product_preload_retrieve
+      description: Pre-loads the product metadata for a given SKU, even if the SKU
+        doesn't exist yet.
+      parameters:
+      - in: path
+        name: sku
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      tags:
+      - meta
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: ''
   /api/v0/payments/baskets/:
     get:
       operationId: payments_baskets_list

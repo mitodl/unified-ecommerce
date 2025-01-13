@@ -2762,6 +2762,58 @@ export const MetaApiAxiosParamCreator = function (
       }
     },
     /**
+     * Pre-loads the product metadata for a given SKU, even if the SKU doesn\'t exist yet.
+     * @param {string} sku
+     * @param {string} system_slug
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    metaProductPreloadRetrieve: async (
+      sku: string,
+      system_slug: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sku' is not null or undefined
+      assertParamExists("metaProductPreloadRetrieve", "sku", sku)
+      // verify required parameter 'system_slug' is not null or undefined
+      assertParamExists(
+        "metaProductPreloadRetrieve",
+        "system_slug",
+        system_slug,
+      )
+      const localVarPath = `/api/v0/meta/product/preload/{system_slug}/{sku}/`
+        .replace(`{${"sku"}}`, encodeURIComponent(String(sku)))
+        .replace(`{${"system_slug"}}`, encodeURIComponent(String(system_slug)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "GET",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Viewset for Product model.
      * @param {number} id A unique integer value identifying this product.
      * @param {*} [options] Override http request option.
@@ -3186,6 +3238,37 @@ export const MetaApiFp = function (configuration?: Configuration) {
         )(axios, operationBasePath || basePath)
     },
     /**
+     * Pre-loads the product metadata for a given SKU, even if the SKU doesn\'t exist yet.
+     * @param {string} sku
+     * @param {string} system_slug
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async metaProductPreloadRetrieve(
+      sku: string,
+      system_slug: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Product>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.metaProductPreloadRetrieve(
+          sku,
+          system_slug,
+          options,
+        )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["MetaApi.metaProductPreloadRetrieve"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
      * Viewset for Product model.
      * @param {number} id A unique integer value identifying this product.
      * @param {*} [options] Override http request option.
@@ -3421,6 +3504,24 @@ export const MetaApiFactory = function (
         .then((request) => request(axios, basePath))
     },
     /**
+     * Pre-loads the product metadata for a given SKU, even if the SKU doesn\'t exist yet.
+     * @param {MetaApiMetaProductPreloadRetrieveRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    metaProductPreloadRetrieve(
+      requestParameters: MetaApiMetaProductPreloadRetrieveRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Product> {
+      return localVarFp
+        .metaProductPreloadRetrieve(
+          requestParameters.sku,
+          requestParameters.system_slug,
+          options,
+        )
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * Viewset for Product model.
      * @param {MetaApiMetaProductRetrieveRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -3645,6 +3746,27 @@ export interface MetaApiMetaProductPartialUpdateRequest {
 }
 
 /**
+ * Request parameters for metaProductPreloadRetrieve operation in MetaApi.
+ * @export
+ * @interface MetaApiMetaProductPreloadRetrieveRequest
+ */
+export interface MetaApiMetaProductPreloadRetrieveRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof MetaApiMetaProductPreloadRetrieve
+   */
+  readonly sku: string
+
+  /**
+   *
+   * @type {string}
+   * @memberof MetaApiMetaProductPreloadRetrieve
+   */
+  readonly system_slug: string
+}
+
+/**
  * Request parameters for metaProductRetrieve operation in MetaApi.
  * @export
  * @interface MetaApiMetaProductRetrieveRequest
@@ -3866,6 +3988,26 @@ export class MetaApi extends BaseAPI {
       .metaProductPartialUpdate(
         requestParameters.id,
         requestParameters.PatchedProductRequest,
+        options,
+      )
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Pre-loads the product metadata for a given SKU, even if the SKU doesn\'t exist yet.
+   * @param {MetaApiMetaProductPreloadRetrieveRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof MetaApi
+   */
+  public metaProductPreloadRetrieve(
+    requestParameters: MetaApiMetaProductPreloadRetrieveRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return MetaApiFp(this.configuration)
+      .metaProductPreloadRetrieve(
+        requestParameters.sku,
+        requestParameters.system_slug,
         options,
       )
       .then((request) => request(this.axios, this.basePath))
