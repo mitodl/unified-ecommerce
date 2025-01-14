@@ -202,6 +202,58 @@ def _create_basket_from_product(
         "adding the selected product."
     ),
     methods=["POST"],
+    request=None,
+    responses=BasketWithProductSerializer,
+    parameters=[
+        OpenApiParameter(
+            "system_slug", OpenApiTypes.STR, OpenApiParameter.PATH, required=True
+        ),
+        OpenApiParameter("sku", OpenApiTypes.STR, OpenApiParameter.PATH, required=True),
+    ],
+)
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def create_basket_from_product(request, system_slug: str, sku: str):
+    """Run _create_basket_from_product."""
+
+    return _create_basket_from_product(request, system_slug, sku)
+
+
+@extend_schema(
+    operation_id="create_basket_from_product_with_discount",
+    description=(
+        "Creates or updates a basket for the current user, "
+        "adding the selected product and discount."
+    ),
+    methods=["POST"],
+    request=None,
+    responses=BasketWithProductSerializer,
+    parameters=[
+        OpenApiParameter(
+            "system_slug", OpenApiTypes.STR, OpenApiParameter.PATH, required=True
+        ),
+        OpenApiParameter("sku", OpenApiTypes.STR, OpenApiParameter.PATH, required=True),
+        OpenApiParameter(
+            "discount_code", OpenApiTypes.STR, OpenApiParameter.PATH, required=True
+        ),
+    ],
+)
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def create_basket_from_product_with_discount(
+    request, system_slug: str, sku: str, discount_code: Optional[str] = None
+):
+    """Run _create_basket_from_product with the discount code."""
+
+    return _create_basket_from_product(request, system_slug, sku, discount_code)
+
+
+@extend_schema(
+    description=(
+        "Creates or updates a basket for the current user, "
+        "adding the selected product."
+    ),
+    methods=["POST"],
     responses=BasketWithProductSerializer,
     request=CreateBasketWithProductsSerializer,
 )
