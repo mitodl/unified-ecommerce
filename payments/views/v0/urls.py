@@ -11,6 +11,7 @@ from payments.views.v0 import (
     add_discount_to_basket,
     clear_basket,
     create_basket_from_product,
+    create_basket_with_products,
     get_user_basket_for_system,
     start_checkout,
 )
@@ -32,6 +33,11 @@ urlpatterns = [
         "baskets/create_from_product/<str:system_slug>/<str:sku>/",
         create_basket_from_product,
         name="create_from_product",
+    ),
+    path(
+        "baskets/create_with_products/",
+        create_basket_with_products,
+        name="create_with_products",
     ),
     path(
         "baskets/clear/<str:system_slug>/",

@@ -445,6 +445,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/BasketWithProduct'
           description: ''
+  /api/v0/payments/baskets/create_with_products/:
+    post:
+      operationId: payments_baskets_create_with_products_create
+      description: Creates or updates a basket for the current user, adding the selected
+        product.
+      tags:
+      - payments
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBasketWithProductsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateBasketWithProductsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateBasketWithProductsRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketWithProduct'
+          description: ''
   /api/v0/payments/baskets/for_system/{system_slug}/:
     get:
       operationId: payments_baskets_for_system_retrieve
@@ -1402,6 +1428,40 @@ components:
       - Yemen
       - Zambia
       - Zimbabwe
+    CreateBasketWithProductsRequest:
+      type: object
+      description: Serializer for creating a basket with products. (For OpenAPI spec.)
+      properties:
+        system_slug:
+          type: string
+          minLength: 1
+        skus:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateBasketWithProductsSkuRequest'
+        checkout:
+          type: boolean
+        discount_code:
+          type: string
+          minLength: 1
+      required:
+      - checkout
+      - discount_code
+      - skus
+      - system_slug
+    CreateBasketWithProductsSkuRequest:
+      type: object
+      description: Defines the schema for a SKU in the CreateBasketWithProductsSerializer.
+      properties:
+        sku:
+          type: string
+          minLength: 1
+        quantity:
+          type: integer
+          minimum: 1
+      required:
+      - quantity
+      - sku
     CyberSourceCheckout:
       type: object
       description: Really basic serializer for the payload that we need to send to

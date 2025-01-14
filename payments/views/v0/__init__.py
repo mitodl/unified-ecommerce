@@ -30,6 +30,7 @@ from payments.models import Basket, BasketItem, Discount, Order
 from payments.permissions import HasIntegratedSystemAPIKey
 from payments.serializers.v0 import (
     BasketWithProductSerializer,
+    CreateBasketWithProductsSerializer,
     CyberSourceCheckoutSerializer,
     DiscountSerializer,
     OrderHistorySerializer,
@@ -167,7 +168,6 @@ def create_basket_from_product(request, system_slug: str, sku: str):
         )
 
     try:
-        log.debug("attempting to run basket_add")
         pm.hook.basket_add(request=request, basket=basket, basket_item=product)
     except ProductBlockedError:
         return Response(
@@ -189,6 +189,96 @@ def create_basket_from_product(request, system_slug: str, sku: str):
     return Response(
         BasketWithProductSerializer(basket).data,
         status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+    )
+
+
+@extend_schema(
+    description=(
+        "Creates or updates a basket for the current user, "
+        "adding the selected product."
+    ),
+    methods=["POST"],
+    responses=BasketWithProductSerializer,
+    request=CreateBasketWithProductsSerializer,
+)
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def create_basket_with_products(request):
+    """
+    Create new basket items for the currently logged in user. Reuse the existing
+    basket object if it exists. Optionally apply the specified discount.
+
+    If the checkout flag is set in the POST data, then this will create the
+    basket, then immediately flip the user to the checkout interstitial (which
+    then redirects to the payment gateway).
+
+    If any of the products aren't found, this will return a 404 error. If
+    the discount code is invalid, the discount won't be applied and an error
+    will be logged, but the basket will still be updated.
+
+    POST Args:
+        system_slug (str): system slug
+        quantity (int): quantity of the product to add to the basket (defaults to 1)
+        checkout (bool): redirect to checkout interstitial (defaults to False)
+        skus (list[str]): list of product SKUs to add to the basket
+        discount_code (str): discount code to apply to the basket
+
+    Returns:
+        Response: HTTP response
+    """
+    system_slug = request.data.get("system_slug")
+    checkout = request.data.get("checkout", False)
+    discount_code = request.data.get("discount_code", None)
+    skus = request.data.get("skus", [])
+
+    system = IntegratedSystem.objects.get(slug=system_slug)
+    basket = Basket.establish_basket(request, system)
+    products = []
+
+    try:
+        products = [
+            (
+                Product.objects.get(system=system, sku=sku["sku"]),
+                sku["quantity"],
+            )
+            for sku in skus
+        ]
+    except Product.DoesNotExist:
+        return Response(
+            {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    try:
+        for product, quantity in products:
+            pm.hook.basket_add(request=request, basket=basket, basket_item=product)
+            BasketItem.objects.update_or_create(
+                basket=basket, product=product, defaults={"quantity": quantity}
+            )
+    except ProductBlockedError:
+        return Response(
+            {"error": "Product blocked from purchasing.", "product": product},
+            status=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS,
+        )
+
+    auto_apply_discount_discounts = api.get_auto_apply_discounts_for_basket(basket.id)
+    for discount in auto_apply_discount_discounts:
+        basket.apply_discount_to_basket(discount)
+
+    if discount_code:
+        try:
+            discount = Discount.objects.get(discount_code=discount_code)
+            basket.apply_discount_to_basket(discount)
+        except Discount.DoesNotExist:
+            pass
+
+    basket.refresh_from_db()
+
+    if checkout:
+        return redirect("checkout_interstitial_page", system_slug=system.slug)
+
+    return Response(
+        BasketWithProductSerializer(basket).data,
+        status=status.HTTP_200_OK,
     )
 
 
