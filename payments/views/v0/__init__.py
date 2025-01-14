@@ -1,6 +1,7 @@
 """Views for the REST API for payments."""
 
 import logging
+from typing import Optional
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -136,7 +137,7 @@ def get_user_basket_for_system(request, system_slug: str):
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def create_basket_from_product(
-    request, system_slug: str, sku: str, discount_code: str = None
+    request, system_slug: str, sku: str, discount_code: Optional[str] = None
 ):
     """
     Create a new basket item from a product for the currently logged in user. Reuse
