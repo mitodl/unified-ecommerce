@@ -30,7 +30,7 @@ urlpatterns = [
         name="get_user_basket_for_system",
     ),
     path(
-        "baskets/create_from_product/<str:system_slug>/<str:sku>/<str:discount_code>/",
+        "baskets/create_from_product/<str:system_slug>/<str:sku>/",
         create_basket_from_product,
         name="create_from_product",
     ),
