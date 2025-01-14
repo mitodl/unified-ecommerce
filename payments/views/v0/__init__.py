@@ -125,18 +125,7 @@ def get_user_basket_for_system(request, system_slug: str):
     )
 
 
-@extend_schema(
-    description=(
-        "Creates or updates a basket for the current user, "
-        "adding the selected product."
-    ),
-    methods=["POST"],
-    request=None,
-    responses=BasketWithProductSerializer,
-)
-@api_view(["POST"])
-@permission_classes((IsAuthenticated,))
-def create_basket_from_product(
+def _create_basket_from_product(
     request, system_slug: str, sku: str, discount_code: Optional[str] = None
 ):
     """
@@ -147,10 +136,14 @@ def create_basket_from_product(
     basket, then immediately flip the user to the checkout interstitial (which
     then redirects to the payment gateway).
 
+    If the discount code is provided, then it will be applied to the basket. If
+    the discount isn't found or doesn't apply, then it will be ignored.
+
     Args:
+        request (Request): The request object.
         system_slug (str): system slug
         sku (str): product slug
-
+        discount_code (str): discount code
     POST Args:
         quantity (int): quantity of the product to add to the basket (defaults to 1)
         checkout (bool): redirect to checkout interstitial (defaults to False)

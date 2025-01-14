@@ -12,6 +12,7 @@ from payments.views.v0 import (
     clear_basket,
     create_basket_from_product,
     create_basket_with_products,
+    create_basket_from_product_with_discount,
     get_user_basket_for_system,
     start_checkout,
 )
