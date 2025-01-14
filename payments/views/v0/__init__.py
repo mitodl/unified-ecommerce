@@ -135,7 +135,9 @@ def get_user_basket_for_system(request, system_slug: str):
 )
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
-def create_basket_from_product(request, system_slug: str, sku: str):
+def create_basket_from_product(
+    request, system_slug: str, sku: str, discount_code: str = None
+):
     """
     Create a new basket item from a product for the currently logged in user. Reuse
     the existing basket object if it exists.
@@ -181,6 +183,14 @@ def create_basket_from_product(request, system_slug: str, sku: str):
     auto_apply_discount_discounts = api.get_auto_apply_discounts_for_basket(basket.id)
     for discount in auto_apply_discount_discounts:
         basket.apply_discount_to_basket(discount)
+
+    if discount_code:
+        try:
+            discount = Discount.objects.get(discount_code=discount_code)
+            basket.apply_discount_to_basket(discount)
+        except Discount.DoesNotExist:
+            pass
+
     basket.refresh_from_db()
 
     if checkout:

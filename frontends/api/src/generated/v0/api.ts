@@ -4222,16 +4222,24 @@ export const PaymentsApiAxiosParamCreator = function (
     },
     /**
      * Creates or updates a basket for the current user, adding the selected product.
+     * @param {string} discount_code
      * @param {string} sku
      * @param {string} system_slug
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     paymentsBasketsCreateFromProductCreate: async (
+      discount_code: string,
       sku: string,
       system_slug: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
+      // verify required parameter 'discount_code' is not null or undefined
+      assertParamExists(
+        "paymentsBasketsCreateFromProductCreate",
+        "discount_code",
+        discount_code,
+      )
       // verify required parameter 'sku' is not null or undefined
       assertParamExists("paymentsBasketsCreateFromProductCreate", "sku", sku)
       // verify required parameter 'system_slug' is not null or undefined
@@ -4241,7 +4249,11 @@ export const PaymentsApiAxiosParamCreator = function (
         system_slug,
       )
       const localVarPath =
-        `/api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/`
+        `/api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/{discount_code}/`
+          .replace(
+            `{${"discount_code"}}`,
+            encodeURIComponent(String(discount_code)),
+          )
           .replace(`{${"sku"}}`, encodeURIComponent(String(sku)))
           .replace(
             `{${"system_slug"}}`,
@@ -4735,12 +4747,14 @@ export const PaymentsApiFp = function (configuration?: Configuration) {
     },
     /**
      * Creates or updates a basket for the current user, adding the selected product.
+     * @param {string} discount_code
      * @param {string} sku
      * @param {string} system_slug
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async paymentsBasketsCreateFromProductCreate(
+      discount_code: string,
       sku: string,
       system_slug: string,
       options?: RawAxiosRequestConfig,
@@ -4752,6 +4766,7 @@ export const PaymentsApiFp = function (configuration?: Configuration) {
     > {
       const localVarAxiosArgs =
         await localVarAxiosParamCreator.paymentsBasketsCreateFromProductCreate(
+          discount_code,
           sku,
           system_slug,
           options,
@@ -5076,6 +5091,7 @@ export const PaymentsApiFactory = function (
     ): AxiosPromise<BasketWithProduct> {
       return localVarFp
         .paymentsBasketsCreateFromProductCreate(
+          requestParameters.discount_code,
           requestParameters.sku,
           requestParameters.system_slug,
           options,
@@ -5251,6 +5267,13 @@ export interface PaymentsApiPaymentsBasketsClearDestroyRequest {
  * @interface PaymentsApiPaymentsBasketsCreateFromProductCreateRequest
  */
 export interface PaymentsApiPaymentsBasketsCreateFromProductCreateRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof PaymentsApiPaymentsBasketsCreateFromProductCreate
+   */
+  readonly discount_code: string
+
   /**
    *
    * @type {string}
@@ -5441,6 +5464,7 @@ export class PaymentsApi extends BaseAPI {
   ) {
     return PaymentsApiFp(this.configuration)
       .paymentsBasketsCreateFromProductCreate(
+        requestParameters.discount_code,
         requestParameters.sku,
         requestParameters.system_slug,
         options,
