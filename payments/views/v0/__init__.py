@@ -126,8 +126,7 @@ def get_user_basket_for_system(request, system_slug: str):
 
 @extend_schema(
     description=(
-        "Creates or updates a basket for the current user, "
-        "adding the selected product."
+        "Creates or updates a basket for the current user, adding the selected product."
     ),
     methods=["POST"],
     request=None,
