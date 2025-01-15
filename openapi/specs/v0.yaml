@@ -445,6 +445,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/BasketWithProduct'
           description: ''
+  /api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/{discount_code}/:
+    post:
+      operationId: create_basket_from_product_with_discount
+      description: Creates or updates a basket for the current user, adding the selected
+        product and discount.
+      parameters:
+      - in: path
+        name: discount_code
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: sku
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasketWithProduct'
+          description: ''
   /api/v0/payments/baskets/create_with_products/:
     post:
       operationId: payments_baskets_create_with_products_create

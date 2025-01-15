@@ -1,6 +1,7 @@
 """Views for the REST API for payments."""
 
 import logging
+from typing import Optional
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -124,18 +125,9 @@ def get_user_basket_for_system(request, system_slug: str):
     )
 
 
-@extend_schema(
-    description=(
-        "Creates or updates a basket for the current user, "
-        "adding the selected product."
-    ),
-    methods=["POST"],
-    request=None,
-    responses=BasketWithProductSerializer,
-)
-@api_view(["POST"])
-@permission_classes((IsAuthenticated,))
-def create_basket_from_product(request, system_slug: str, sku: str):
+def _create_basket_from_product(
+    request, system_slug: str, sku: str, discount_code: Optional[str] = None
+):
     """
     Create a new basket item from a product for the currently logged in user. Reuse
     the existing basket object if it exists.
@@ -144,10 +136,14 @@ def create_basket_from_product(request, system_slug: str, sku: str):
     basket, then immediately flip the user to the checkout interstitial (which
     then redirects to the payment gateway).
 
+    If the discount code is provided, then it will be applied to the basket. If
+    the discount isn't found or doesn't apply, then it will be ignored.
+
     Args:
+        request (Request): The request object.
         system_slug (str): system slug
         sku (str): product slug
-
+        discount_code (str): discount code
     POST Args:
         quantity (int): quantity of the product to add to the basket (defaults to 1)
         checkout (bool): redirect to checkout interstitial (defaults to False)
@@ -181,6 +177,14 @@ def create_basket_from_product(request, system_slug: str, sku: str):
     auto_apply_discount_discounts = api.get_auto_apply_discounts_for_basket(basket.id)
     for discount in auto_apply_discount_discounts:
         basket.apply_discount_to_basket(discount)
+
+    if discount_code:
+        try:
+            discount = Discount.objects.get(discount_code=discount_code)
+            basket.apply_discount_to_basket(discount)
+        except Discount.DoesNotExist:
+            pass
+
     basket.refresh_from_db()
 
     if checkout:
@@ -190,6 +194,58 @@ def create_basket_from_product(request, system_slug: str, sku: str):
         BasketWithProductSerializer(basket).data,
         status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
     )
+
+
+@extend_schema(
+    description=(
+        "Creates or updates a basket for the current user, "
+        "adding the selected product."
+    ),
+    methods=["POST"],
+    request=None,
+    responses=BasketWithProductSerializer,
+    parameters=[
+        OpenApiParameter(
+            "system_slug", OpenApiTypes.STR, OpenApiParameter.PATH, required=True
+        ),
+        OpenApiParameter("sku", OpenApiTypes.STR, OpenApiParameter.PATH, required=True),
+    ],
+)
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def create_basket_from_product(request, system_slug: str, sku: str):
+    """Run _create_basket_from_product."""
+
+    return _create_basket_from_product(request, system_slug, sku)
+
+
+@extend_schema(
+    operation_id="create_basket_from_product_with_discount",
+    description=(
+        "Creates or updates a basket for the current user, "
+        "adding the selected product and discount."
+    ),
+    methods=["POST"],
+    request=None,
+    responses=BasketWithProductSerializer,
+    parameters=[
+        OpenApiParameter(
+            "system_slug", OpenApiTypes.STR, OpenApiParameter.PATH, required=True
+        ),
+        OpenApiParameter("sku", OpenApiTypes.STR, OpenApiParameter.PATH, required=True),
+        OpenApiParameter(
+            "discount_code", OpenApiTypes.STR, OpenApiParameter.PATH, required=True
+        ),
+    ],
+)
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def create_basket_from_product_with_discount(
+    request, system_slug: str, sku: str, discount_code: Optional[str] = None
+):
+    """Run _create_basket_from_product with the discount code."""
+
+    return _create_basket_from_product(request, system_slug, sku, discount_code)
 
 
 @extend_schema(

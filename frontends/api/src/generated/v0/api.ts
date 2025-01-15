@@ -4109,6 +4109,74 @@ export const PaymentsApiAxiosParamCreator = function (
 ) {
   return {
     /**
+     * Creates or updates a basket for the current user, adding the selected product and discount.
+     * @param {string} discount_code
+     * @param {string} sku
+     * @param {string} system_slug
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createBasketFromProductWithDiscount: async (
+      discount_code: string,
+      sku: string,
+      system_slug: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'discount_code' is not null or undefined
+      assertParamExists(
+        "createBasketFromProductWithDiscount",
+        "discount_code",
+        discount_code,
+      )
+      // verify required parameter 'sku' is not null or undefined
+      assertParamExists("createBasketFromProductWithDiscount", "sku", sku)
+      // verify required parameter 'system_slug' is not null or undefined
+      assertParamExists(
+        "createBasketFromProductWithDiscount",
+        "system_slug",
+        system_slug,
+      )
+      const localVarPath =
+        `/api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/{discount_code}/`
+          .replace(
+            `{${"discount_code"}}`,
+            encodeURIComponent(String(discount_code)),
+          )
+          .replace(`{${"sku"}}`, encodeURIComponent(String(sku)))
+          .replace(
+            `{${"system_slug"}}`,
+            encodeURIComponent(String(system_slug)),
+          )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "POST",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Creates or updates a basket for the current user, adding the discount if valid.
      * @param {string} discount_code
      * @param {string} system_slug
@@ -4669,6 +4737,45 @@ export const PaymentsApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = PaymentsApiAxiosParamCreator(configuration)
   return {
     /**
+     * Creates or updates a basket for the current user, adding the selected product and discount.
+     * @param {string} discount_code
+     * @param {string} sku
+     * @param {string} system_slug
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async createBasketFromProductWithDiscount(
+      discount_code: string,
+      sku: string,
+      system_slug: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string,
+      ) => AxiosPromise<BasketWithProduct>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.createBasketFromProductWithDiscount(
+          discount_code,
+          sku,
+          system_slug,
+          options,
+        )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["PaymentsApi.createBasketFromProductWithDiscount"]?.[
+          index
+        ]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
      * Creates or updates a basket for the current user, adding the discount if valid.
      * @param {string} discount_code
      * @param {string} system_slug
@@ -5033,6 +5140,25 @@ export const PaymentsApiFactory = function (
   const localVarFp = PaymentsApiFp(configuration)
   return {
     /**
+     * Creates or updates a basket for the current user, adding the selected product and discount.
+     * @param {PaymentsApiCreateBasketFromProductWithDiscountRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createBasketFromProductWithDiscount(
+      requestParameters: PaymentsApiCreateBasketFromProductWithDiscountRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<BasketWithProduct> {
+      return localVarFp
+        .createBasketFromProductWithDiscount(
+          requestParameters.discount_code,
+          requestParameters.sku,
+          requestParameters.system_slug,
+          options,
+        )
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * Creates or updates a basket for the current user, adding the discount if valid.
      * @param {PaymentsApiPaymentsBasketsAddDiscountCreateRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -5208,6 +5334,34 @@ export const PaymentsApiFactory = function (
         .then((request) => request(axios, basePath))
     },
   }
+}
+
+/**
+ * Request parameters for createBasketFromProductWithDiscount operation in PaymentsApi.
+ * @export
+ * @interface PaymentsApiCreateBasketFromProductWithDiscountRequest
+ */
+export interface PaymentsApiCreateBasketFromProductWithDiscountRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof PaymentsApiCreateBasketFromProductWithDiscount
+   */
+  readonly discount_code: string
+
+  /**
+   *
+   * @type {string}
+   * @memberof PaymentsApiCreateBasketFromProductWithDiscount
+   */
+  readonly sku: string
+
+  /**
+   *
+   * @type {string}
+   * @memberof PaymentsApiCreateBasketFromProductWithDiscount
+   */
+  readonly system_slug: string
 }
 
 /**
@@ -5392,6 +5546,27 @@ export interface PaymentsApiPaymentsOrdersHistoryRetrieveRequest {
  * @extends {BaseAPI}
  */
 export class PaymentsApi extends BaseAPI {
+  /**
+   * Creates or updates a basket for the current user, adding the selected product and discount.
+   * @param {PaymentsApiCreateBasketFromProductWithDiscountRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof PaymentsApi
+   */
+  public createBasketFromProductWithDiscount(
+    requestParameters: PaymentsApiCreateBasketFromProductWithDiscountRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return PaymentsApiFp(this.configuration)
+      .createBasketFromProductWithDiscount(
+        requestParameters.discount_code,
+        requestParameters.sku,
+        requestParameters.system_slug,
+        options,
+      )
+      .then((request) => request(this.axios, this.basePath))
+  }
+
   /**
    * Creates or updates a basket for the current user, adding the discount if valid.
    * @param {PaymentsApiPaymentsBasketsAddDiscountCreateRequest} requestParameters Request parameters.
