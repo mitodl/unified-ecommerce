@@ -33,6 +33,7 @@ class IntegratedSystem(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel)
             " authenticity of the data sent by UE."
         ),
     )
+    homepage_url = models.URLField(blank=True, default="")
 
     # Webhook URLs
     webhook_url = models.URLField(blank=True, default="")
