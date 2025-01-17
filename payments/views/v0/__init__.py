@@ -18,7 +18,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 from mitol.payment_gateway.api import PaymentGateway
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -30,6 +30,7 @@ from payments.exceptions import ProductBlockedError
 from payments.models import Basket, BasketItem, Discount, Order
 from payments.permissions import HasIntegratedSystemAPIKey
 from payments.serializers.v0 import (
+    BasketItemSerializer,
     BasketWithProductSerializer,
     CreateBasketWithProductsSerializer,
     CyberSourceCheckoutSerializer,
@@ -700,3 +701,8 @@ class DiscountAPIViewSet(APIView):
             {"discounts_created": DiscountSerializer(discount_codes, many=True).data},
             status=status.HTTP_201_CREATED,
         )
+
+
+class BasketItemViewSet(viewsets.ModelViewSet):
+    queryset = BasketItem.objects.all()
+    serializer_class = BasketItemSerializer

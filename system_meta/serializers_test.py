@@ -30,7 +30,7 @@ class TestIntegratedSystemSerializer(BaseSerializerTest):
     factory_class = IntegratedSystemFactory
     model_class = IntegratedSystem
     queryset = IntegratedSystem.all_objects
-    only_fields = ["id", "name", "slug", "description"]
+    only_fields = ["id", "name", "slug", "description", "homepage_url"]
 
 
 class TestProductSerializer(BaseSerializerTest):

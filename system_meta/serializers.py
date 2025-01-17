@@ -12,7 +12,7 @@ class IntegratedSystemSerializer(serializers.ModelSerializer):
         """Meta class for serializer."""
 
         model = IntegratedSystem
-        fields = ["id", "name", "slug", "description"]
+        fields = ["id", "name", "slug", "description", "homepage_url"]
 
 
 class AdminIntegratedSystemSerializer(serializers.ModelSerializer):
@@ -42,4 +42,5 @@ class ProductSerializer(serializers.ModelSerializer):
             "price",
             "deleted_by_cascade",
             "image_metadata",
+            "details_url",
         ]
