@@ -17,7 +17,7 @@ from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
 )
-from rest_framework import serializers, viewsets
+from rest_framework import viewsets
 from mitol.payment_gateway.api import PaymentGateway
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
