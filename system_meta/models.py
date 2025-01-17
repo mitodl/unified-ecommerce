@@ -84,6 +84,11 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
         null=True,
         help_text="Image metadata including URL, alt text, and description (in JSON).",
     )
+    details_url = models.URLField(
+        blank=True,
+        default="",
+        help_text="URL to the product details page.",
+    )
 
     objects = SafeDeleteManager()
     all_objects = models.Manager()

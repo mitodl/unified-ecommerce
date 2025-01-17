@@ -42,4 +42,5 @@ class ProductSerializer(serializers.ModelSerializer):
             "price",
             "deleted_by_cascade",
             "image_metadata",
+            "details_url",
         ]
