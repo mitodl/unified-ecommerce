@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('system_meta', '0007_product_image_metadata'),
+        ("system_meta", "0007_product_image_metadata"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='integratedsystem',
-            name='homepage_url',
-            field=models.URLField(blank=True, default=''),
+            model_name="integratedsystem",
+            name="homepage_url",
+            field=models.URLField(blank=True, default=""),
         ),
     ]

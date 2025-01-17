@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('system_meta', '0008_integratedsystem_homepage_url'),
+        ("system_meta", "0008_integratedsystem_homepage_url"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='product',
-            name='details_url',
-            field=models.URLField(blank=True, default='', help_text='URL to the product details page.'),
+            model_name="product",
+            name="details_url",
+            field=models.URLField(
+                blank=True, default="", help_text="URL to the product details page."
+            ),
         ),
     ]
