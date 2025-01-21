@@ -7,7 +7,7 @@ SPECS_DIR=./openapi/specs/
 ./manage.py generate_openapi_spec \
 	--directory=$TMPDIR --fail-on-warn
 
-npx run prettier --write $TMPDIR
+npx prettier --write $TMPDIR
 
 diff $TMPDIR $SPECS_DIR
 
