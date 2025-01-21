@@ -1,9 +1,9 @@
+# ruff: noqa: ERA001
 """Views for the sandbox app."""
 
 from drf_spectacular.openapi import OpenApiParameter, OpenApiTypes
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.serializers import CharField, IntegerField
 from rest_framework.viewsets import ViewSet
@@ -73,15 +73,17 @@ class SandboxViewSet(ViewSet):
         return Response(item)
 
 
-@extend_schema(
-    description=("Retrieves the list of sandbox values."),
-    methods=["GET"],
-    request=None,
-    responses=SANDBOX_SERIALIZER,
-    operation_id="sandbox_zen_api_list",
-)
-@api_view(["GET"])
-def return_nothing(request):  # noqa: ARG001
-    """Return nothing."""
+# Uncomment this stuff to test!
 
-    return Response()
+# @extend_schema(
+#     description=("Retrieves the list of sandbox values."),
+#     methods=["GET"],
+#     request=None,
+#     responses=SANDBOX_SERIALIZER,
+#     operation_id="sandbox_zen_api_list",
+# )
+# @api_view(["GET"])
+# def return_nothing(request):
+#     """Return nothing."""
+
+#     return Response()
