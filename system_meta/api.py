@@ -35,6 +35,7 @@ def get_product_metadata(
 
         course_data = data.get("results")[0]
         image_data = course_data.get("image", {})
+        url = course_data.get("url", "")
         prices = course_data.get("prices", [])
         prices.sort()
         price = prices[-1] if len(prices) else 0
@@ -58,6 +59,7 @@ def get_product_metadata(
             if image_data
             else None,
             "price": run_price if run and run_price > price else price,
+            "url": url if url else "",
         }
 
     try:
@@ -112,6 +114,7 @@ def update_product_metadata(product_id: int) -> None:
         product.name = fetched_metadata.get("title", product.name)
         product.description = fetched_metadata.get("description", product.description)
         product.price = fetched_metadata.get("price", product.price)
+        product.details_url = fetched_metadata.get("url", product.details_url)
 
         product.save()
     except requests.RequestException:
