@@ -4,7 +4,7 @@ set -eo pipefail
 TMPDIR="$(mktemp -p . -d)"
 SPECS_DIR=./openapi/specs/
 
-./manage.py generate_openapi_spec \
+docker compose run --rm web ./manage.py generate_openapi_spec \
 	--directory=$TMPDIR --fail-on-warn
 
 npx run prettier --write $TMPDIR

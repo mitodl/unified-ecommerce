@@ -48,11 +48,18 @@ jobs:
           python-version: "3.12.1"
           cache: "poetry"
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Validate lockfile
         run: poetry lock --check
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: poetry install --no-interaction
+
+      - name: Install Node dependencies
+        run: npm install
 
       - name: Lint
         run: poetry run ruff check --extend-ignore=D1 $(git ls-files '*.py')
