@@ -17,6 +17,7 @@ from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
 )
+from rest_framework import viewsets
 from mitol.payment_gateway.api import PaymentGateway
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
@@ -704,5 +705,11 @@ class DiscountAPIViewSet(APIView):
 
 
 class BasketItemViewSet(viewsets.ModelViewSet):
-    queryset = BasketItem.objects.all()
+    """ViewSet for handling BasketItem operations."""
+
+    permission_classes = (IsAuthenticated,)
     serializer_class = BasketItemSerializer
+
+    def get_queryset(self):
+        """Return only basket items owned by this user."""
+        return BasketItem.objects.filter(basket__user=self.request.user)
