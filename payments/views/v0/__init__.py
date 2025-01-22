@@ -703,6 +703,15 @@ class DiscountAPIViewSet(APIView):
         )
 
 
+@extend_schema_view(
+    list=extend_schema(description=("Retrives the current user's basket items.")),
+    retrieve=extend_schema(
+        description="Retrieve a basket item for the current user.",
+        parameters=[
+            OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH),
+        ],
+    ),
+)
 class BasketItemViewSet(viewsets.ModelViewSet):
     """ViewSet for handling BasketItem operations."""
 
