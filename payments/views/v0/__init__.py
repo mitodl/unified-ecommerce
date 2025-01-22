@@ -716,6 +716,6 @@ class BasketItemViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return only basket items owned by this user."""
         if getattr(self, "swagger_fake_view", False):
-            return Basket.objects.none()
+            return BasketItem.objects.none()
 
         return BasketItem.objects.filter(basket__user=self.request.user)
