@@ -37,22 +37,35 @@ def establish_session(request):
     """
     Establish a session, then redirect to the basket page.
 
-    Set `next` to the integrated system you're working in, and the user will be
+    This has two modes.
+
+    * Set `next` to the integrated system you're working in, and the user will be
     sent to the cart for that system afterwards. Otherwise, this will go to the
     session check API endpoint.
+
+    * Set `system` to the integrated system you're in, and `next` to the next
+    URL (within the system's URL-space) to send the user back to. This will set
+    up the user, then send them back into the integrated system.
     """
 
     next_url = settings.MITOL_UE_PAYMENT_BASKET_CHOOSER
 
     if "next" in request.GET:
-        try:
-            system = IntegratedSystem.objects.get(slug=request.GET["next"])
-            next_url = urljoin(
-                settings.MITOL_UE_PAYMENT_BASKET_ROOT, f"?system={system.slug}"
-            )
-        except IntegratedSystem.DoesNotExist:
-            pass
-
-    next_url = request.session.get("next", next_url)
+        if "system" in request.GET:
+            try:
+                system = IntegratedSystem.objects.get(slug=request.GET["system"])
+                next_url = request.GET["next"]
+                # TODO: waiting on a PR to merge to add in homepage_url
+                next_url = urljoin(system.webhook_url, next_url)
+            except IntegratedSystem.DoesNotExist:
+                return redirect(settings.MITOL_UE_PAYMENT_BASKET_CHOOSER)
+        else:
+            try:
+                system = IntegratedSystem.objects.get(slug=request.GET["next"])
+                next_url = urljoin(
+                    settings.MITOL_UE_PAYMENT_BASKET_ROOT, f"?system={system.slug}"
+                )
+            except IntegratedSystem.DoesNotExist:
+                return redirect(settings.MITOL_UE_PAYMENT_BASKET_CHOOSER)
 
     return redirect(next_url)
