@@ -701,16 +701,11 @@ class DiscountAPIViewSet(APIView):
             {"discounts_created": DiscountSerializer(discount_codes, many=True).data},
             status=status.HTTP_201_CREATED,
         )
-
-
-@extend_schema_view(
-    list=extend_schema(description=("Retrives the current user's basket items.")),
-    retrieve=extend_schema(
-        description="Retrieve a basket item for the current user.",
-        parameters=[
-            OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH),
-        ],
-    ),
+@extend_schema(
+    description="Returns the basket items for the current user.",
+    methods=["GET"],
+    request=None,
+    responses=BasketItemSerializer,
 )
 class BasketItemViewSet(viewsets.ModelViewSet):
     """ViewSet for handling BasketItem operations."""
@@ -720,4 +715,7 @@ class BasketItemViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return only basket items owned by this user."""
+        if getattr(self, "swagger_fake_view", False):
+            return Basket.objects.none()
+
         return BasketItem.objects.filter(basket__user=self.request.user)
