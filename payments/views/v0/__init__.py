@@ -701,6 +701,8 @@ class DiscountAPIViewSet(APIView):
             {"discounts_created": DiscountSerializer(discount_codes, many=True).data},
             status=status.HTTP_201_CREATED,
         )
+
+
 @extend_schema(
     description="Returns the basket items for the current user.",
     methods=["GET"],
