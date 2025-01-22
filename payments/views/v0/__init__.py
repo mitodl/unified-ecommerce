@@ -18,7 +18,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 from mitol.payment_gateway.api import PaymentGateway
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -30,6 +30,7 @@ from payments.exceptions import ProductBlockedError
 from payments.models import Basket, BasketItem, Discount, Order
 from payments.permissions import HasIntegratedSystemAPIKey
 from payments.serializers.v0 import (
+    BasketItemSerializer,
     BasketWithProductSerializer,
     CreateBasketWithProductsSerializer,
     CyberSourceCheckoutSerializer,
@@ -700,3 +701,23 @@ class DiscountAPIViewSet(APIView):
             {"discounts_created": DiscountSerializer(discount_codes, many=True).data},
             status=status.HTTP_201_CREATED,
         )
+
+
+@extend_schema(
+    description="Returns the basket items for the current user.",
+    methods=["GET"],
+    request=None,
+    responses=BasketItemSerializer,
+)
+class BasketItemViewSet(viewsets.ModelViewSet):
+    """ViewSet for handling BasketItem operations."""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = BasketItemSerializer
+
+    def get_queryset(self):
+        """Return only basket items owned by this user."""
+        if getattr(self, "swagger_fake_view", False):
+            return BasketItem.objects.none()
+
+        return BasketItem.objects.filter(basket__user=self.request.user)

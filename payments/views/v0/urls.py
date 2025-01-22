@@ -4,6 +4,7 @@ from django.urls import include, path, re_path
 
 from payments.views.v0 import (
     BackofficeCallbackView,
+    BasketItemViewSet,
     BasketViewSet,
     CheckoutCallbackView,
     DiscountAPIViewSet,
@@ -21,6 +22,9 @@ from unified_ecommerce.routers import SimpleRouterWithNesting
 router = SimpleRouterWithNesting()
 
 basket_router = router.register(r"baskets", BasketViewSet, basename="basket")
+backet_item_router = router.register(
+    r"basketitems", BasketItemViewSet, basename="basketitem"
+)
 
 router.register(r"orders/history", OrderHistoryViewSet, basename="orderhistory_api")
 
