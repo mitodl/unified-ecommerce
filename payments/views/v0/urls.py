@@ -22,7 +22,9 @@ from unified_ecommerce.routers import SimpleRouterWithNesting
 router = SimpleRouterWithNesting()
 
 basket_router = router.register(r"baskets", BasketViewSet, basename="basket")
-backet_item_router = router.register(r"basketitems", BasketItemViewSet)
+backet_item_router = router.register(
+    r"basketitems", BasketItemViewSet, basename="basketitem"
+)
 
 router.register(r"orders/history", OrderHistoryViewSet, basename="orderhistory_api")
 
