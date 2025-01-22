@@ -334,6 +334,7 @@ paths:
   /api/v0/payments/basketitems/:
     get:
       operationId: payments_basketitems_list
+      description: Returns the basket items for the current user.
       parameters:
       - name: limit
         required: false
@@ -358,6 +359,7 @@ paths:
           description: ''
     post:
       operationId: payments_basketitems_create
+      description: ViewSet for handling BasketItem operations.
       tags:
       - payments
       requestBody:
@@ -382,6 +384,7 @@ paths:
   /api/v0/payments/basketitems/{id}/:
     get:
       operationId: payments_basketitems_retrieve
+      description: Returns the basket items for the current user.
       parameters:
       - in: path
         name: id
@@ -400,6 +403,7 @@ paths:
           description: ''
     put:
       operationId: payments_basketitems_update
+      description: ViewSet for handling BasketItem operations.
       parameters:
       - in: path
         name: id
@@ -430,6 +434,7 @@ paths:
           description: ''
     patch:
       operationId: payments_basketitems_partial_update
+      description: ViewSet for handling BasketItem operations.
       parameters:
       - in: path
         name: id
@@ -459,6 +464,7 @@ paths:
           description: ''
     delete:
       operationId: payments_basketitems_destroy
+      description: ViewSet for handling BasketItem operations.
       parameters:
       - in: path
         name: id
