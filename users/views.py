@@ -55,8 +55,7 @@ def establish_session(request):
             try:
                 system = IntegratedSystem.objects.get(slug=request.GET["system"])
                 next_url = request.GET["next"]
-                # TODO: waiting on a PR to merge to add in homepage_url
-                next_url = urljoin(system.webhook_url, next_url)
+                next_url = urljoin(system.homepage_url, next_url)
             except IntegratedSystem.DoesNotExist:
                 return redirect(settings.MITOL_UE_PAYMENT_BASKET_CHOOSER)
         else:
