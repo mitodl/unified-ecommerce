@@ -750,40 +750,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/OrderHistory"
           description: ""
-  /api/v0/sandbox/zen/:
-    get:
-      operationId: sandbox_zen_api_list
-      description: Retrieves the list of sandbox values.
-      tags:
-        - sandbox
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/sandbox_values"
-          description: ""
-  /api/v0/sandbox/zen/{id}/:
-    get:
-      operationId: sandbox_zen_api_retrieve
-      description: Retrieves a single sandbox value.
-      parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
-      tags:
-        - sandbox
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/sandbox_values"
-          description: ""
   /api/v0/users/me/:
     get:
       operationId: users_me_retrieve
@@ -2312,19 +2278,3 @@ components:
       required:
         - id
         - username
-    sandbox_values:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        age:
-          type: integer
-        email:
-          type: string
-      required:
-        - age
-        - email
-        - id
-        - name

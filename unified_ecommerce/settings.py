@@ -104,7 +104,6 @@ INSTALLED_APPS = [
     "cart",
     "mitol.payment_gateway.apps.PaymentGatewayApp",
     "openapi",
-    "sandbox",
 ]
 
 MIDDLEWARE = [
