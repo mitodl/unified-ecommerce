@@ -41,7 +41,6 @@ urlpatterns = [
     re_path(r"", include("payments.urls")),
     re_path(r"", include("system_meta.urls")),
     re_path(r"", include("users.urls")),
-    re_path(r"", include("sandbox.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
