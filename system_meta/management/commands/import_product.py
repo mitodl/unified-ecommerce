@@ -41,6 +41,7 @@ class Command(BaseCommand):
             image_metadata=metadata["image"],
             price=metadata["price"],
             system=system,
+            details_url=metadata["url"],
         )
 
         self.stdout.write(

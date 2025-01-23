@@ -123,6 +123,7 @@ def preload_sku(request, system_slug, sku):  # noqa: ARG001
         description=product_metadata.get("description"),
         price=product_metadata.get("price"),
         system=IntegratedSystem.objects.get(slug=system_slug),
+        details_url=product_metadata.get("url"),
     )
     product.save()
     product.refresh_from_db()

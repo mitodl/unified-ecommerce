@@ -4,6 +4,7 @@ from django.urls import include, path, re_path
 
 from payments.views.v0 import (
     BackofficeCallbackView,
+    BasketItemViewSet,
     BasketViewSet,
     CheckoutCallbackView,
     DiscountAPIViewSet,
@@ -11,6 +12,8 @@ from payments.views.v0 import (
     add_discount_to_basket,
     clear_basket,
     create_basket_from_product,
+    create_basket_from_product_with_discount,
+    create_basket_with_products,
     get_user_basket_for_system,
     start_checkout,
 )
@@ -19,6 +22,9 @@ from unified_ecommerce.routers import SimpleRouterWithNesting
 router = SimpleRouterWithNesting()
 
 basket_router = router.register(r"baskets", BasketViewSet, basename="basket")
+backet_item_router = router.register(
+    r"basketitems", BasketItemViewSet, basename="basketitem"
+)
 
 router.register(r"orders/history", OrderHistoryViewSet, basename="orderhistory_api")
 
@@ -32,6 +38,16 @@ urlpatterns = [
         "baskets/create_from_product/<str:system_slug>/<str:sku>/",
         create_basket_from_product,
         name="create_from_product",
+    ),
+    path(
+        "baskets/create_from_product/<str:system_slug>/<str:sku>/<str:discount_code>/",
+        create_basket_from_product_with_discount,
+        name="create_from_product_with_discount",
+    ),
+    path(
+        "baskets/create_with_products/",
+        create_basket_with_products,
+        name="create_with_products",
     ),
     path(
         "baskets/clear/<str:system_slug>/",

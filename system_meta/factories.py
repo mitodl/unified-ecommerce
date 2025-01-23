@@ -52,6 +52,7 @@ class ProductFactory(DjangoModelFactory):
         "alt_text": "Image alt text",
         "description": "Image description",
     }
+    details_url = Faker("url")
 
 
 class ActiveProductFactory(ProductFactory):

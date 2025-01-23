@@ -33,6 +33,7 @@ class IntegratedSystem(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel)
             " authenticity of the data sent by UE."
         ),
     )
+    homepage_url = models.URLField(blank=True, default="")
 
     # Webhook URLs
     webhook_url = models.URLField(blank=True, default="")
@@ -82,6 +83,11 @@ class Product(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
         blank=True,
         null=True,
         help_text="Image metadata including URL, alt text, and description (in JSON).",
+    )
+    details_url = models.URLField(
+        blank=True,
+        default="",
+        help_text="URL to the product details page.",
     )
 
     objects = SafeDeleteManager()

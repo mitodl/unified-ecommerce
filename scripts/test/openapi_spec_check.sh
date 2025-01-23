@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-TMPDIR="$(mktemp -d)"
+TMPDIR="$(mktemp -p . -d)"
 SPECS_DIR=./openapi/specs/
 
 ./manage.py generate_openapi_spec \
 	--directory=$TMPDIR --fail-on-warn
+
+npx prettier --write $TMPDIR
 
 diff $TMPDIR $SPECS_DIR
 
