@@ -94,7 +94,7 @@ class Discount(TimestampedModel):
         null=True,
     )
     assigned_users = models.ManyToManyField(
-        User,
+        settings.AUTH_USER_MODEL,
         related_name="discounts",
         blank=True,
         null=True,
@@ -361,7 +361,9 @@ class TaxRate(SafeDeleteModel, SoftDeleteActiveModel, TimestampedModel):
 class Basket(TimestampedModel):
     """Represents a User's basket."""
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="basket")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="basket"
+    )
     integrated_system = models.ForeignKey(
         IntegratedSystem, on_delete=models.CASCADE, related_name="basket"
     )
@@ -653,7 +655,7 @@ class Order(TimestampedModel):
 
     state = models.CharField(default=STATE.PENDING, choices=STATE.choices)
     purchaser = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="orders",
     )
