@@ -719,6 +719,12 @@ class Order(TimestampedModel):
             self.reference_number = self._generate_reference_number()
             super().save(*args, **kwargs)
 
+    @cached_property
+    def system(self):
+        """Return the system associated with the order."""
+
+        return self.lines.first().product_version.system
+
     # Flag to determine if the order is in review status - if it is, then
     # we need to not step on the basket that may or may not exist when it is
     # accepted
