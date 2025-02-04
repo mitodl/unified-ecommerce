@@ -2391,7 +2391,7 @@ export interface User {
    */
   id: number
   /**
-   * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+   *
    * @type {string}
    * @memberof User
    */
@@ -2401,7 +2401,7 @@ export interface User {
    * @type {string}
    * @memberof User
    */
-  email?: string
+  email: string
   /**
    *
    * @type {string}
