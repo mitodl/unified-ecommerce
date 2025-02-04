@@ -2267,6 +2267,7 @@ components:
         email:
           type: string
 <<<<<<< HEAD
+<<<<<<< HEAD
           nullable: true
           description: Return the email.
           readOnly: true
@@ -2274,6 +2275,11 @@ components:
           format: email
           maxLength: 254
 >>>>>>> 7021bb0 (Update OpenAPI spec)
+=======
+          nullable: true
+          description: Return the email.
+          readOnly: true
+>>>>>>> 100cd15 (Typehint email in serializer, regen OpenAPI schema)
         first_name:
           type: string
           maxLength: 255
@@ -2281,11 +2287,17 @@ components:
           type: string
           maxLength: 255
 <<<<<<< HEAD
+<<<<<<< HEAD
         name:
           type: string
           maxLength: 255
 =======
 >>>>>>> 7021bb0 (Update OpenAPI spec)
+=======
+        name:
+          type: string
+          maxLength: 255
+>>>>>>> 100cd15 (Typehint email in serializer, regen OpenAPI schema)
       required:
         - email
         - id
