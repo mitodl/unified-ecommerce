@@ -2391,7 +2391,11 @@ export interface User {
    */
   id: number
   /**
+<<<<<<< HEAD
    * The SSO ID (usually a Keycloak UUID) for the user.
+=======
+   *
+>>>>>>> 7021bb0 (Update OpenAPI spec)
    * @type {string}
    * @memberof User
    */
@@ -2401,6 +2405,7 @@ export interface User {
    * @type {string}
    * @memberof User
    */
+<<<<<<< HEAD
   username: string
   /**
    * Return the email.
@@ -2408,6 +2413,9 @@ export interface User {
    * @memberof User
    */
   email: string | null
+=======
+  email: string
+>>>>>>> 7021bb0 (Update OpenAPI spec)
   /**
    *
    * @type {string}

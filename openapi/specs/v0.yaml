@@ -2266,18 +2266,26 @@ components:
           maxLength: 150
         email:
           type: string
+<<<<<<< HEAD
           nullable: true
           description: Return the email.
           readOnly: true
+=======
+          format: email
+          maxLength: 254
+>>>>>>> 7021bb0 (Update OpenAPI spec)
         first_name:
           type: string
           maxLength: 255
         last_name:
           type: string
           maxLength: 255
+<<<<<<< HEAD
         name:
           type: string
           maxLength: 255
+=======
+>>>>>>> 7021bb0 (Update OpenAPI spec)
       required:
         - email
         - id
