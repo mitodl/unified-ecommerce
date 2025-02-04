@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     email = serializers.SerializerMethodField()
 
-    def get_email(self, instance):
+    def get_email(self, instance) -> str | None:
         """Return the email."""
         return instance.email if not instance.is_anonymous else None
 

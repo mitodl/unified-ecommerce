@@ -2257,17 +2257,25 @@ components:
         id:
           type: integer
           readOnly: true
+        global_id:
+          type: string
+          description: The SSO ID (usually a Keycloak UUID) for the user.
+          maxLength: 255
         username:
           type: string
           maxLength: 150
         email:
           type: string
-          format: email
-          maxLength: 254
+          nullable: true
+          description: Return the email.
+          readOnly: true
         first_name:
           type: string
           maxLength: 255
         last_name:
+          type: string
+          maxLength: 255
+        name:
           type: string
           maxLength: 255
       required:
