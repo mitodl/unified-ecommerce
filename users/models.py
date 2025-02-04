@@ -2,6 +2,7 @@
 # ruff: noqa: TD002,TD003,FIX002
 
 import logging
+from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
@@ -15,7 +16,7 @@ log = logging.getLogger(__name__)
 
 def _post_create_user(user):
     """
-    Create records related to the user
+    Create records related to the user.
 
     Args:
         user (users.models.User): the user that was just created
@@ -78,7 +79,7 @@ class User(AbstractBaseUser, TimestampedModel, PermissionsMixin):
         unique=True,
         max_length=255,
         blank=True,
-        default="",
+        default=uuid4,
         help_text="The SSO ID (usually a Keycloak UUID) for the user.",
     )
     username = models.CharField(unique=True, max_length=150)

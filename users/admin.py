@@ -3,7 +3,6 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as ContribUserAdmin
-from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
 
 from users.models import UserProfile
@@ -32,13 +31,14 @@ class UserAdmin(ContribUserAdmin):
             None,
             {
                 "fields": (
+                    "global_id",
                     "username",
                     "password",
                     "last_login",
                 )
             },
         ),
-        (_("Personal Info"), {"fields": ("first_name", "last_name", "email")}),
+        (_("Personal Info"), {"fields": ("name", "first_name", "last_name", "email")}),
         (
             _("Permissions"),
             {
@@ -54,18 +54,17 @@ class UserAdmin(ContribUserAdmin):
         ),
     )
     list_display = (
+        "global_id",
         "email",
         "username",
         "is_staff",
         "last_login",
     )
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")
-    search_fields = ("username", "email")
+    search_fields = ("global_id", "username", "email")
     ordering = ("email",)
     readonly_fields = ("last_login", "password")
     inlines = [UserProfileInline]
 
 
-admin.site.unregister(Group)
-admin.site.unregister(User)
 admin.site.register(User, UserAdmin)

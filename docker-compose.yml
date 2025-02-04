@@ -24,6 +24,9 @@ services:
       - "${POSTGRES_PORT}:5432"
     environment:
       <<: *py-environment
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./config/keycloak/db:/docker-entrypoint-initdb.d
 
   redis:
     image: redis:6.2
@@ -122,3 +125,4 @@ volumes:
   django_media:
   yarn-cache:
   keycloak-store:
+  postgres_data:
