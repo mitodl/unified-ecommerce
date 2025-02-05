@@ -2,14 +2,12 @@
 
 from rest_framework import serializers
 
-from payments.serializers.v0 import OrderSerializer, TransactionSerializer
+from payments.serializers.v0 import OrderSerializer
 from refunds import models
 
 
 class RequestLineSerializer(serializers.ModelSerializer):
     """Serializer for refund request lines."""
-
-    transactions = TransactionSerializer(many=True)
 
     class Meta:
         """Metadata for the serializer."""

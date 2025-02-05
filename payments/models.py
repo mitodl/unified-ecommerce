@@ -654,6 +654,9 @@ class Order(TimestampedModel):
         ]
 
     state = models.CharField(default=STATE.PENDING, choices=STATE.choices)
+    integrated_system = models.ForeignKey(
+        IntegratedSystem, on_delete=models.PROTECT, related_name="+"
+    )
     purchaser = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -718,12 +721,6 @@ class Order(TimestampedModel):
             log.info("Generating reference number for order %s", self.id)
             self.reference_number = self._generate_reference_number()
             super().save(*args, **kwargs)
-
-    @cached_property
-    def system(self):
-        """Return the system associated with the order."""
-
-        return self.lines.first().product_version.system
 
     # Flag to determine if the order is in review status - if it is, then
     # we need to not step on the basket that may or may not exist when it is
@@ -936,6 +933,7 @@ class PendingOrder(Order):
                 lines__product_version__in=product_versions,
                 state=Order.STATE.PENDING,
                 purchaser=basket.user,
+                integrated_system=basket.integrated_system,
             )
             # Previously, multiple PendingOrders could be created for a single user
             # for the same product, if multiple exist, grab the first.
@@ -948,6 +946,7 @@ class PendingOrder(Order):
                 order = Order.objects.create(
                     state=Order.STATE.PENDING,
                     purchaser=basket.user,
+                    integrated_system=basket.integrated_system,
                     total_price_paid=0,
                 )
 

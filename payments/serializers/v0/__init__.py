@@ -15,9 +15,20 @@ from payments.constants import (
     PAYMENT_HOOK_ACTION_TEST,
     PAYMENT_HOOK_ACTIONS,
 )
-from payments.models import Basket, BasketItem, Company, Discount, Line, Order, TaxRate
+from payments.models import (
+    Basket,
+    BasketItem,
+    Company,
+    Discount,
+    Line,
+    Order,
+    RedeemedDiscount,
+    TaxRate,
+    Transaction,
+)
 from system_meta.models import Product
 from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
+from unified_ecommerce.constants import TRANSACTION_TYPE_PAYMENT
 from unified_ecommerce.serializers import UserSerializer
 
 User = get_user_model()
@@ -273,6 +284,141 @@ class LineSerializer(serializers.ModelSerializer):
             "product",
         ]
         model = Line
+
+
+class TransactionOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ["id", "created_on", "reference_number"]
+        read_only_fields = fields
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    """Serializer for transactions."""
+
+    order = TransactionOrderSerializer()
+
+    class Meta:
+        """Meta options for TransactionSerializer"""
+
+        model = Transaction
+        fields = [
+            "transaction_id",
+            "order",
+            "amount",
+            "data",
+            "transaction_type",
+            "reason",
+        ]
+        read_only_fields = fields
+
+
+class TransactionDataPurchaserSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        """
+        Get the purchaser information.
+
+        Historically, this has come from the CyberSource payload: see
+        https://github.com/mitodl/mitxonline/issues/532
+
+        UE doesn't store (very much) user data so this gets all of it from the
+        CyberSource payload in question.
+        """
+        transaction = instance.data
+
+        fields = {
+            "first_name": transaction.get("req_bill_to_forename", None),
+            "last_name": transaction.get("req_bill_to_surname", None),
+            "country": transaction.get("req_bill_to_address_country", None),
+            "email": transaction.get("req_bill_to_email", None),
+            "street_address": [],
+            "street_address_1": transaction.get("req_bill_to_address_line1", None),
+            "street_address_2": transaction.get("req_bill_to_address_line2", None),
+            "street_address_3": transaction.get("req_bill_to_address_line3", None),
+            "street_address_4": transaction.get("req_bill_to_address_line4", None),
+            "street_address_5": transaction.get("req_bill_to_address_line5", None),
+            "city": transaction.get("req_bill_to_address_city", None),
+            "state_or_territory": transaction.get("req_bill_to_address_state", None),
+            "postal_code": transaction.get("req_bill_to_address_postal_code", None),
+            "company": None,
+        }
+
+        fields["street_address"] = self.get_street_address(fields)
+
+        return fields
+
+    def get_street_address(self, instance):
+        return [
+            line
+            for line in [
+                instance["street_address_1"],
+                instance["street_address_2"],
+                instance["street_address_3"],
+                instance["street_address_4"],
+                instance["street_address_5"],
+            ]
+            if line
+        ]
+
+
+class RedeemedDiscountSerializer(serializers.ModelSerializer):
+    """DiscountRedemption model serializer"""
+
+    class Meta:
+        model = RedeemedDiscount
+        fields = ["discount"]
+        depth = 1
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    lines = LineSerializer(many=True)
+    redeemed_discounts = RedeemedDiscountSerializer(many=True)
+    refunds = serializers.SerializerMethodField()
+    purchaser = UserSerializer()
+    transactions = TransactionSerializer(many=True)
+    street_address = serializers.SerializerMethodField()
+
+    def get_refunds(self, instance):  # noqa: ARG002
+        """Return refunds for the order.
+
+        Returns an empty set for now, don't have that set up yet really. In
+        MITx Online this returned _transactions_ that were refunds, so we want
+        to return the requests that we're now collecting.
+        """
+        return []
+
+    def get_street_address(self, instance):
+        """Get the address information from the transaction"""
+
+        # Pull the address from the most recent payment transaction.
+        # Other types probably won't have address info.
+        transaction = (
+            instance.transactions.filter(transaction_type=TRANSACTION_TYPE_PAYMENT)
+            .order_by("-created_on")
+            .first()
+        )
+
+        return (
+            TransactionDataPurchaserSerializer(transaction).data
+            if transaction
+            else None
+        )
+
+    class Meta:
+        fields = [
+            "id",
+            "reference_number",
+            "state",
+            "purchaser",
+            "total_price_paid",
+            "lines",
+            "redeemed_discounts",
+            "refunds",
+            "created_on",
+            "transactions",
+            "street_address",
+        ]
+        model = Order
 
 
 class WebhookOrderDataSerializer(DataclassSerializer):

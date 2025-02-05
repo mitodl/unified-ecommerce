@@ -1751,6 +1751,263 @@ export interface Line {
   product: Product
 }
 /**
+ * Serializes a line item for an order.
+ * @export
+ * @interface LineRequest
+ */
+export interface LineRequest {
+  /**
+   *
+   * @type {number}
+   * @memberof LineRequest
+   */
+  quantity: number
+  /**
+   *
+   * @type {string}
+   * @memberof LineRequest
+   */
+  unit_price: string
+  /**
+   *
+   * @type {string}
+   * @memberof LineRequest
+   */
+  total_price: string
+  /**
+   *
+   * @type {ProductRequest}
+   * @memberof LineRequest
+   */
+  product: ProductRequest
+}
+/**
+ *
+ * @export
+ * @interface Nested
+ */
+export interface Nested {
+  /**
+   *
+   * @type {number}
+   * @memberof Nested
+   */
+  id: number
+  /**
+   *
+   * @type {string}
+   * @memberof Nested
+   */
+  created_on: string
+  /**
+   *
+   * @type {string}
+   * @memberof Nested
+   */
+  updated_on: string
+  /**
+   *
+   * @type {string}
+   * @memberof Nested
+   */
+  amount: string
+  /**
+   *
+   * @type {boolean}
+   * @memberof Nested
+   */
+  automatic?: boolean
+  /**
+   *
+   * @type {DiscountTypeEnum}
+   * @memberof Nested
+   */
+  discount_type: DiscountTypeEnum
+  /**
+   *
+   * @type {RedemptionTypeEnum}
+   * @memberof Nested
+   */
+  redemption_type: RedemptionTypeEnum
+  /**
+   *
+   * @type {PaymentTypeEnum}
+   * @memberof Nested
+   */
+  payment_type?: PaymentTypeEnum | null
+  /**
+   *
+   * @type {number}
+   * @memberof Nested
+   */
+  max_redemptions?: number | null
+  /**
+   *
+   * @type {string}
+   * @memberof Nested
+   */
+  discount_code: string
+  /**
+   * If set, this discount code will not be redeemable before this date.
+   * @type {string}
+   * @memberof Nested
+   */
+  activation_date?: string | null
+  /**
+   * If set, this discount code will not be redeemable after this date.
+   * @type {string}
+   * @memberof Nested
+   */
+  expiration_date?: string | null
+  /**
+   *
+   * @type {boolean}
+   * @memberof Nested
+   */
+  is_bulk?: boolean
+  /**
+   *
+   * @type {string}
+   * @memberof Nested
+   */
+  transaction_number?: string
+  /**
+   *
+   * @type {number}
+   * @memberof Nested
+   */
+  integrated_system?: number | null
+  /**
+   *
+   * @type {number}
+   * @memberof Nested
+   */
+  product?: number | null
+  /**
+   *
+   * @type {number}
+   * @memberof Nested
+   */
+  bulk_discount_collection?: number | null
+  /**
+   *
+   * @type {number}
+   * @memberof Nested
+   */
+  company?: number | null
+  /**
+   *
+   * @type {Array<number>}
+   * @memberof Nested
+   */
+  assigned_users?: Array<number>
+}
+
+/**
+ *
+ * @export
+ * @interface NestedRequest
+ */
+export interface NestedRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof NestedRequest
+   */
+  amount: string
+  /**
+   *
+   * @type {boolean}
+   * @memberof NestedRequest
+   */
+  automatic?: boolean
+  /**
+   *
+   * @type {DiscountTypeEnum}
+   * @memberof NestedRequest
+   */
+  discount_type: DiscountTypeEnum
+  /**
+   *
+   * @type {RedemptionTypeEnum}
+   * @memberof NestedRequest
+   */
+  redemption_type: RedemptionTypeEnum
+  /**
+   *
+   * @type {PaymentTypeEnum}
+   * @memberof NestedRequest
+   */
+  payment_type?: PaymentTypeEnum | null
+  /**
+   *
+   * @type {number}
+   * @memberof NestedRequest
+   */
+  max_redemptions?: number | null
+  /**
+   *
+   * @type {string}
+   * @memberof NestedRequest
+   */
+  discount_code: string
+  /**
+   * If set, this discount code will not be redeemable before this date.
+   * @type {string}
+   * @memberof NestedRequest
+   */
+  activation_date?: string | null
+  /**
+   * If set, this discount code will not be redeemable after this date.
+   * @type {string}
+   * @memberof NestedRequest
+   */
+  expiration_date?: string | null
+  /**
+   *
+   * @type {boolean}
+   * @memberof NestedRequest
+   */
+  is_bulk?: boolean
+  /**
+   *
+   * @type {string}
+   * @memberof NestedRequest
+   */
+  transaction_number?: string
+  /**
+   *
+   * @type {number}
+   * @memberof NestedRequest
+   */
+  integrated_system?: number | null
+  /**
+   *
+   * @type {number}
+   * @memberof NestedRequest
+   */
+  product?: number | null
+  /**
+   *
+   * @type {number}
+   * @memberof NestedRequest
+   */
+  bulk_discount_collection?: number | null
+  /**
+   *
+   * @type {number}
+   * @memberof NestedRequest
+   */
+  company?: number | null
+  /**
+   *
+   * @type {Array<number>}
+   * @memberof NestedRequest
+   */
+  assigned_users?: Array<number>
+}
+
+/**
  *
  * @export
  * @enum {string}
@@ -1765,6 +2022,80 @@ export const NullEnum = {
 } as const
 
 export type NullEnum = (typeof NullEnum)[keyof typeof NullEnum]
+
+/**
+ *
+ * @export
+ * @interface Order
+ */
+export interface Order {
+  /**
+   *
+   * @type {number}
+   * @memberof Order
+   */
+  id: number
+  /**
+   *
+   * @type {string}
+   * @memberof Order
+   */
+  reference_number?: string
+  /**
+   *
+   * @type {StateEnum}
+   * @memberof Order
+   */
+  state?: StateEnum
+  /**
+   *
+   * @type {User}
+   * @memberof Order
+   */
+  purchaser: User
+  /**
+   *
+   * @type {string}
+   * @memberof Order
+   */
+  total_price_paid: string
+  /**
+   *
+   * @type {Array<Line>}
+   * @memberof Order
+   */
+  lines: Array<Line>
+  /**
+   *
+   * @type {Array<RedeemedDiscount>}
+   * @memberof Order
+   */
+  redeemed_discounts: Array<RedeemedDiscount>
+  /**
+   *
+   * @type {string}
+   * @memberof Order
+   */
+  refunds: string
+  /**
+   *
+   * @type {string}
+   * @memberof Order
+   */
+  created_on: string
+  /**
+   *
+   * @type {Array<Transaction>}
+   * @memberof Order
+   */
+  transactions: Array<Transaction>
+  /**
+   *
+   * @type {string}
+   * @memberof Order
+   */
+  street_address: string
+}
 
 /**
  * Serializer for order history.
@@ -1820,6 +2151,44 @@ export interface OrderHistory {
    * @memberof OrderHistory
    */
   updated_on: string
+}
+
+/**
+ *
+ * @export
+ * @interface OrderRequest
+ */
+export interface OrderRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof OrderRequest
+   */
+  reference_number?: string
+  /**
+   *
+   * @type {StateEnum}
+   * @memberof OrderRequest
+   */
+  state?: StateEnum
+  /**
+   *
+   * @type {UserRequest}
+   * @memberof OrderRequest
+   */
+  purchaser: UserRequest
+  /**
+   *
+   * @type {string}
+   * @memberof OrderRequest
+   */
+  total_price_paid: string
+  /**
+   *
+   * @type {Array<LineRequest>}
+   * @memberof OrderRequest
+   */
+  lines: Array<LineRequest>
 }
 
 /**
@@ -1978,6 +2347,68 @@ export interface PaginatedProductList {
   results: Array<Product>
 }
 /**
+ *
+ * @export
+ * @interface PaginatedRequestLineList
+ */
+export interface PaginatedRequestLineList {
+  /**
+   *
+   * @type {number}
+   * @memberof PaginatedRequestLineList
+   */
+  count: number
+  /**
+   *
+   * @type {string}
+   * @memberof PaginatedRequestLineList
+   */
+  next?: string | null
+  /**
+   *
+   * @type {string}
+   * @memberof PaginatedRequestLineList
+   */
+  previous?: string | null
+  /**
+   *
+   * @type {Array<RequestLine>}
+   * @memberof PaginatedRequestLineList
+   */
+  results: Array<RequestLine>
+}
+/**
+ *
+ * @export
+ * @interface PaginatedRequestList
+ */
+export interface PaginatedRequestList {
+  /**
+   *
+   * @type {number}
+   * @memberof PaginatedRequestList
+   */
+  count: number
+  /**
+   *
+   * @type {string}
+   * @memberof PaginatedRequestList
+   */
+  next?: string | null
+  /**
+   *
+   * @type {string}
+   * @memberof PaginatedRequestList
+   */
+  previous?: string | null
+  /**
+   *
+   * @type {Array<Request>}
+   * @memberof PaginatedRequestList
+   */
+  results: Array<Request>
+}
+/**
  * BasketItem model serializer
  * @export
  * @interface PatchedBasketItemRequest
@@ -2081,6 +2512,68 @@ export interface PatchedProductRequest {
    * @memberof PatchedProductRequest
    */
   details_url?: string
+}
+/**
+ * Serializer for refund request lines.
+ * @export
+ * @interface PatchedRequestLineRequest
+ */
+export interface PatchedRequestLineRequest {
+  /**
+   * The amount refunded for this line item (may not be the full amount charged).
+   * @type {string}
+   * @memberof PatchedRequestLineRequest
+   */
+  refunded_amount?: string | null
+  /**
+   *
+   * @type {number}
+   * @memberof PatchedRequestLineRequest
+   */
+  refund_request?: number
+  /**
+   * The individual line item to refund.
+   * @type {number}
+   * @memberof PatchedRequestLineRequest
+   */
+  line?: number
+  /**
+   *
+   * @type {Array<number>}
+   * @memberof PatchedRequestLineRequest
+   */
+  transactions?: Array<number>
+}
+/**
+ * Serializer for refund requests.
+ * @export
+ * @interface PatchedRequestRequest
+ */
+export interface PatchedRequestRequest {
+  /**
+   *
+   * @type {Array<RequestLineRequest>}
+   * @memberof PatchedRequestRequest
+   */
+  lines?: Array<RequestLineRequest>
+  /**
+   *
+   * @type {OrderRequest}
+   * @memberof PatchedRequestRequest
+   */
+  order?: OrderRequest
+  /**
+   *
+   * @type {string}
+   * @memberof PatchedRequestRequest
+   */
+  zendesk_ticket?: string
+  /**
+   *
+   * @type {number}
+   * @memberof PatchedRequestRequest
+   */
+  requester?: number
 }
 /**
  * * `marketing` - marketing * `sales` - sales * `financial-assistance` - financial-assistance * `customer-support` - customer-support * `staff` - staff * `legacy` - legacy * `credit_card` - credit_card * `purchase_order` - purchase_order
@@ -2260,6 +2753,241 @@ export interface ProductRequest {
   details_url?: string
 }
 /**
+ * DiscountRedemption model serializer
+ * @export
+ * @interface RedeemedDiscount
+ */
+export interface RedeemedDiscount {
+  /**
+   *
+   * @type {Nested}
+   * @memberof RedeemedDiscount
+   */
+  discount: Nested
+}
+/**
+ * * `one-time` - one-time * `one-time-per-user` - one-time-per-user * `unlimited` - unlimited
+ * @export
+ * @enum {string}
+ */
+
+export const RedemptionTypeEnumDescriptions = {
+  "one-time": "one-time",
+  "one-time-per-user": "one-time-per-user",
+  unlimited: "unlimited",
+} as const
+
+export const RedemptionTypeEnum = {
+  /**
+   * one-time
+   */
+  OneTime: "one-time",
+  /**
+   * one-time-per-user
+   */
+  OneTimePerUser: "one-time-per-user",
+  /**
+   * unlimited
+   */
+  Unlimited: "unlimited",
+} as const
+
+export type RedemptionTypeEnum =
+  (typeof RedemptionTypeEnum)[keyof typeof RedemptionTypeEnum]
+
+/**
+ * Serializer for refund requests.
+ * @export
+ * @interface Request
+ */
+export interface Request {
+  /**
+   *
+   * @type {number}
+   * @memberof Request
+   */
+  id: number
+  /**
+   *
+   * @type {Array<RequestLine>}
+   * @memberof Request
+   */
+  lines: Array<RequestLine>
+  /**
+   *
+   * @type {Order}
+   * @memberof Request
+   */
+  order: Order
+  /**
+   *
+   * @type {string}
+   * @memberof Request
+   */
+  created_on: string
+  /**
+   *
+   * @type {string}
+   * @memberof Request
+   */
+  updated_on: string
+  /**
+   *
+   * @type {string}
+   * @memberof Request
+   */
+  processed_date: string | null
+  /**
+   *
+   * @type {string}
+   * @memberof Request
+   */
+  total_refunded: string | null
+  /**
+   *
+   * @type {StatusEnum}
+   * @memberof Request
+   */
+  status: StatusEnum
+  /**
+   *
+   * @type {string}
+   * @memberof Request
+   */
+  zendesk_ticket?: string
+  /**
+   *
+   * @type {number}
+   * @memberof Request
+   */
+  requester: number
+  /**
+   *
+   * @type {number}
+   * @memberof Request
+   */
+  processed_by: number | null
+}
+
+/**
+ * Serializer for refund request lines.
+ * @export
+ * @interface RequestLine
+ */
+export interface RequestLine {
+  /**
+   *
+   * @type {number}
+   * @memberof RequestLine
+   */
+  id: number
+  /**
+   *
+   * @type {string}
+   * @memberof RequestLine
+   */
+  created_on: string
+  /**
+   *
+   * @type {string}
+   * @memberof RequestLine
+   */
+  updated_on: string
+  /**
+   *
+   * @type {StatusEnum}
+   * @memberof RequestLine
+   */
+  status: StatusEnum
+  /**
+   * The amount refunded for this line item (may not be the full amount charged).
+   * @type {string}
+   * @memberof RequestLine
+   */
+  refunded_amount?: string | null
+  /**
+   *
+   * @type {number}
+   * @memberof RequestLine
+   */
+  refund_request: number
+  /**
+   * The individual line item to refund.
+   * @type {number}
+   * @memberof RequestLine
+   */
+  line: number
+  /**
+   *
+   * @type {Array<number>}
+   * @memberof RequestLine
+   */
+  transactions?: Array<number>
+}
+
+/**
+ * Serializer for refund request lines.
+ * @export
+ * @interface RequestLineRequest
+ */
+export interface RequestLineRequest {
+  /**
+   * The amount refunded for this line item (may not be the full amount charged).
+   * @type {string}
+   * @memberof RequestLineRequest
+   */
+  refunded_amount?: string | null
+  /**
+   *
+   * @type {number}
+   * @memberof RequestLineRequest
+   */
+  refund_request: number
+  /**
+   * The individual line item to refund.
+   * @type {number}
+   * @memberof RequestLineRequest
+   */
+  line: number
+  /**
+   *
+   * @type {Array<number>}
+   * @memberof RequestLineRequest
+   */
+  transactions?: Array<number>
+}
+/**
+ * Serializer for refund requests.
+ * @export
+ * @interface RequestRequest
+ */
+export interface RequestRequest {
+  /**
+   *
+   * @type {Array<RequestLineRequest>}
+   * @memberof RequestRequest
+   */
+  lines: Array<RequestLineRequest>
+  /**
+   *
+   * @type {OrderRequest}
+   * @memberof RequestRequest
+   */
+  order: OrderRequest
+  /**
+   *
+   * @type {string}
+   * @memberof RequestRequest
+   */
+  zendesk_ticket?: string
+  /**
+   *
+   * @type {number}
+   * @memberof RequestRequest
+   */
+  requester: number
+}
+/**
  * Simpler serializer for discounts.
  * @export
  * @interface SimpleDiscount
@@ -2347,6 +3075,45 @@ export const StateEnum = {
 export type StateEnum = (typeof StateEnum)[keyof typeof StateEnum]
 
 /**
+ * * `pending` - pending * `created` - created * `denied` - denied * `approved` - approved * `failed` - failed
+ * @export
+ * @enum {string}
+ */
+
+export const StatusEnumDescriptions = {
+  pending: "pending",
+  created: "created",
+  denied: "denied",
+  approved: "approved",
+  failed: "failed",
+} as const
+
+export const StatusEnum = {
+  /**
+   * pending
+   */
+  Pending: "pending",
+  /**
+   * created
+   */
+  Created: "created",
+  /**
+   * denied
+   */
+  Denied: "denied",
+  /**
+   * approved
+   */
+  Approved: "approved",
+  /**
+   * failed
+   */
+  Failed: "failed",
+} as const
+
+export type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum]
+
+/**
  * TaxRate model serializer
  * @export
  * @interface TaxRate
@@ -2377,6 +3144,100 @@ export interface TaxRate {
    */
   tax_rate_name?: string
 }
+
+/**
+ * Serializer for transactions.
+ * @export
+ * @interface Transaction
+ */
+export interface Transaction {
+  /**
+   *
+   * @type {string}
+   * @memberof Transaction
+   */
+  transaction_id: string
+  /**
+   *
+   * @type {TransactionOrder}
+   * @memberof Transaction
+   */
+  order: TransactionOrder
+  /**
+   *
+   * @type {string}
+   * @memberof Transaction
+   */
+  amount: string
+  /**
+   *
+   * @type {any}
+   * @memberof Transaction
+   */
+  data: any
+  /**
+   *
+   * @type {TransactionTypeEnum}
+   * @memberof Transaction
+   */
+  transaction_type: TransactionTypeEnum
+  /**
+   *
+   * @type {string}
+   * @memberof Transaction
+   */
+  reason: string
+}
+
+/**
+ *
+ * @export
+ * @interface TransactionOrder
+ */
+export interface TransactionOrder {
+  /**
+   *
+   * @type {number}
+   * @memberof TransactionOrder
+   */
+  id: number
+  /**
+   *
+   * @type {string}
+   * @memberof TransactionOrder
+   */
+  created_on: string
+  /**
+   *
+   * @type {string}
+   * @memberof TransactionOrder
+   */
+  reference_number: string
+}
+/**
+ * * `payment` - payment * `refund` - refund
+ * @export
+ * @enum {string}
+ */
+
+export const TransactionTypeEnumDescriptions = {
+  payment: "payment",
+  refund: "refund",
+} as const
+
+export const TransactionTypeEnum = {
+  /**
+   * payment
+   */
+  Payment: "payment",
+  /**
+   * refund
+   */
+  Refund: "refund",
+} as const
+
+export type TransactionTypeEnum =
+  (typeof TransactionTypeEnum)[keyof typeof TransactionTypeEnum]
 
 /**
  * Serializer for User model.
@@ -2445,6 +3306,43 @@ export interface User {
    *
    * @type {string}
    * @memberof User
+   */
+  name?: string
+}
+/**
+ * Serializer for User model.
+ * @export
+ * @interface UserRequest
+ */
+export interface UserRequest {
+  /**
+   * The SSO ID (usually a Keycloak UUID) for the user.
+   * @type {string}
+   * @memberof UserRequest
+   */
+  global_id?: string
+  /**
+   *
+   * @type {string}
+   * @memberof UserRequest
+   */
+  username: string
+  /**
+   *
+   * @type {string}
+   * @memberof UserRequest
+   */
+  first_name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof UserRequest
+   */
+  last_name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof UserRequest
    */
   name?: string
 }
@@ -6841,6 +7739,1658 @@ export class UsersApi extends BaseAPI {
   public usersMeRetrieve(options?: RawAxiosRequestConfig) {
     return UsersApiFp(this.configuration)
       .usersMeRetrieve(options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+}
+
+/**
+ * V0linesApi - axios parameter creator
+ * @export
+ */
+export const V0linesApiAxiosParamCreator = function (
+  configuration?: Configuration,
+) {
+  return {
+    /**
+     * API endpoint for line items.
+     * @param {RequestLineRequest} RequestLineRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesCreate: async (
+      RequestLineRequest: RequestLineRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'RequestLineRequest' is not null or undefined
+      assertParamExists(
+        "v0linesCreate",
+        "RequestLineRequest",
+        RequestLineRequest,
+      )
+      const localVarPath = `/v0lines/`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "POST",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter["Content-Type"] = "application/json"
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        RequestLineRequest,
+        localVarRequestOptions,
+        configuration,
+      )
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * API endpoint for line items.
+     * @param {number} id A unique integer value identifying this request line.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesDestroy: async (
+      id: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists("v0linesDestroy", "id", id)
+      const localVarPath = `/v0lines/{id}/`.replace(
+        `{${"id"}}`,
+        encodeURIComponent(String(id)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "DELETE",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * API endpoint for line items.
+     * @param {number} [limit] Number of results to return per page.
+     * @param {number} [offset] The initial index from which to return the results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesList: async (
+      limit?: number,
+      offset?: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/v0lines/`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "GET",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      if (limit !== undefined) {
+        localVarQueryParameter["limit"] = limit
+      }
+
+      if (offset !== undefined) {
+        localVarQueryParameter["offset"] = offset
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * API endpoint for line items.
+     * @param {number} id A unique integer value identifying this request line.
+     * @param {PatchedRequestLineRequest} [PatchedRequestLineRequest]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesPartialUpdate: async (
+      id: number,
+      PatchedRequestLineRequest?: PatchedRequestLineRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists("v0linesPartialUpdate", "id", id)
+      const localVarPath = `/v0lines/{id}/`.replace(
+        `{${"id"}}`,
+        encodeURIComponent(String(id)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "PATCH",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter["Content-Type"] = "application/json"
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        PatchedRequestLineRequest,
+        localVarRequestOptions,
+        configuration,
+      )
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * API endpoint for line items.
+     * @param {number} id A unique integer value identifying this request line.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesRetrieve: async (
+      id: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists("v0linesRetrieve", "id", id)
+      const localVarPath = `/v0lines/{id}/`.replace(
+        `{${"id"}}`,
+        encodeURIComponent(String(id)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "GET",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * API endpoint for line items.
+     * @param {number} id A unique integer value identifying this request line.
+     * @param {RequestLineRequest} RequestLineRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesUpdate: async (
+      id: number,
+      RequestLineRequest: RequestLineRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists("v0linesUpdate", "id", id)
+      // verify required parameter 'RequestLineRequest' is not null or undefined
+      assertParamExists(
+        "v0linesUpdate",
+        "RequestLineRequest",
+        RequestLineRequest,
+      )
+      const localVarPath = `/v0lines/{id}/`.replace(
+        `{${"id"}}`,
+        encodeURIComponent(String(id)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "PUT",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter["Content-Type"] = "application/json"
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        RequestLineRequest,
+        localVarRequestOptions,
+        configuration,
+      )
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+  }
+}
+
+/**
+ * V0linesApi - functional programming interface
+ * @export
+ */
+export const V0linesApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator = V0linesApiAxiosParamCreator(configuration)
+  return {
+    /**
+     * API endpoint for line items.
+     * @param {RequestLineRequest} RequestLineRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0linesCreate(
+      RequestLineRequest: RequestLineRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<RequestLine>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.v0linesCreate(
+        RequestLineRequest,
+        options,
+      )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0linesApi.v0linesCreate"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
+     * API endpoint for line items.
+     * @param {number} id A unique integer value identifying this request line.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0linesDestroy(
+      id: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.v0linesDestroy(
+        id,
+        options,
+      )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0linesApi.v0linesDestroy"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
+     * API endpoint for line items.
+     * @param {number} [limit] Number of results to return per page.
+     * @param {number} [offset] The initial index from which to return the results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0linesList(
+      limit?: number,
+      offset?: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string,
+      ) => AxiosPromise<PaginatedRequestLineList>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.v0linesList(
+        limit,
+        offset,
+        options,
+      )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0linesApi.v0linesList"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
+     * API endpoint for line items.
+     * @param {number} id A unique integer value identifying this request line.
+     * @param {PatchedRequestLineRequest} [PatchedRequestLineRequest]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0linesPartialUpdate(
+      id: number,
+      PatchedRequestLineRequest?: PatchedRequestLineRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<RequestLine>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.v0linesPartialUpdate(
+          id,
+          PatchedRequestLineRequest,
+          options,
+        )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0linesApi.v0linesPartialUpdate"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
+     * API endpoint for line items.
+     * @param {number} id A unique integer value identifying this request line.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0linesRetrieve(
+      id: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<RequestLine>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.v0linesRetrieve(
+        id,
+        options,
+      )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0linesApi.v0linesRetrieve"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
+     * API endpoint for line items.
+     * @param {number} id A unique integer value identifying this request line.
+     * @param {RequestLineRequest} RequestLineRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0linesUpdate(
+      id: number,
+      RequestLineRequest: RequestLineRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<RequestLine>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.v0linesUpdate(
+        id,
+        RequestLineRequest,
+        options,
+      )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0linesApi.v0linesUpdate"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+  }
+}
+
+/**
+ * V0linesApi - factory interface
+ * @export
+ */
+export const V0linesApiFactory = function (
+  configuration?: Configuration,
+  basePath?: string,
+  axios?: AxiosInstance,
+) {
+  const localVarFp = V0linesApiFp(configuration)
+  return {
+    /**
+     * API endpoint for line items.
+     * @param {V0linesApiV0linesCreateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesCreate(
+      requestParameters: V0linesApiV0linesCreateRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<RequestLine> {
+      return localVarFp
+        .v0linesCreate(requestParameters.RequestLineRequest, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * API endpoint for line items.
+     * @param {V0linesApiV0linesDestroyRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesDestroy(
+      requestParameters: V0linesApiV0linesDestroyRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .v0linesDestroy(requestParameters.id, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * API endpoint for line items.
+     * @param {V0linesApiV0linesListRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesList(
+      requestParameters: V0linesApiV0linesListRequest = {},
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<PaginatedRequestLineList> {
+      return localVarFp
+        .v0linesList(requestParameters.limit, requestParameters.offset, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * API endpoint for line items.
+     * @param {V0linesApiV0linesPartialUpdateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesPartialUpdate(
+      requestParameters: V0linesApiV0linesPartialUpdateRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<RequestLine> {
+      return localVarFp
+        .v0linesPartialUpdate(
+          requestParameters.id,
+          requestParameters.PatchedRequestLineRequest,
+          options,
+        )
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * API endpoint for line items.
+     * @param {V0linesApiV0linesRetrieveRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesRetrieve(
+      requestParameters: V0linesApiV0linesRetrieveRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<RequestLine> {
+      return localVarFp
+        .v0linesRetrieve(requestParameters.id, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * API endpoint for line items.
+     * @param {V0linesApiV0linesUpdateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0linesUpdate(
+      requestParameters: V0linesApiV0linesUpdateRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<RequestLine> {
+      return localVarFp
+        .v0linesUpdate(
+          requestParameters.id,
+          requestParameters.RequestLineRequest,
+          options,
+        )
+        .then((request) => request(axios, basePath))
+    },
+  }
+}
+
+/**
+ * Request parameters for v0linesCreate operation in V0linesApi.
+ * @export
+ * @interface V0linesApiV0linesCreateRequest
+ */
+export interface V0linesApiV0linesCreateRequest {
+  /**
+   *
+   * @type {RequestLineRequest}
+   * @memberof V0linesApiV0linesCreate
+   */
+  readonly RequestLineRequest: RequestLineRequest
+}
+
+/**
+ * Request parameters for v0linesDestroy operation in V0linesApi.
+ * @export
+ * @interface V0linesApiV0linesDestroyRequest
+ */
+export interface V0linesApiV0linesDestroyRequest {
+  /**
+   * A unique integer value identifying this request line.
+   * @type {number}
+   * @memberof V0linesApiV0linesDestroy
+   */
+  readonly id: number
+}
+
+/**
+ * Request parameters for v0linesList operation in V0linesApi.
+ * @export
+ * @interface V0linesApiV0linesListRequest
+ */
+export interface V0linesApiV0linesListRequest {
+  /**
+   * Number of results to return per page.
+   * @type {number}
+   * @memberof V0linesApiV0linesList
+   */
+  readonly limit?: number
+
+  /**
+   * The initial index from which to return the results.
+   * @type {number}
+   * @memberof V0linesApiV0linesList
+   */
+  readonly offset?: number
+}
+
+/**
+ * Request parameters for v0linesPartialUpdate operation in V0linesApi.
+ * @export
+ * @interface V0linesApiV0linesPartialUpdateRequest
+ */
+export interface V0linesApiV0linesPartialUpdateRequest {
+  /**
+   * A unique integer value identifying this request line.
+   * @type {number}
+   * @memberof V0linesApiV0linesPartialUpdate
+   */
+  readonly id: number
+
+  /**
+   *
+   * @type {PatchedRequestLineRequest}
+   * @memberof V0linesApiV0linesPartialUpdate
+   */
+  readonly PatchedRequestLineRequest?: PatchedRequestLineRequest
+}
+
+/**
+ * Request parameters for v0linesRetrieve operation in V0linesApi.
+ * @export
+ * @interface V0linesApiV0linesRetrieveRequest
+ */
+export interface V0linesApiV0linesRetrieveRequest {
+  /**
+   * A unique integer value identifying this request line.
+   * @type {number}
+   * @memberof V0linesApiV0linesRetrieve
+   */
+  readonly id: number
+}
+
+/**
+ * Request parameters for v0linesUpdate operation in V0linesApi.
+ * @export
+ * @interface V0linesApiV0linesUpdateRequest
+ */
+export interface V0linesApiV0linesUpdateRequest {
+  /**
+   * A unique integer value identifying this request line.
+   * @type {number}
+   * @memberof V0linesApiV0linesUpdate
+   */
+  readonly id: number
+
+  /**
+   *
+   * @type {RequestLineRequest}
+   * @memberof V0linesApiV0linesUpdate
+   */
+  readonly RequestLineRequest: RequestLineRequest
+}
+
+/**
+ * V0linesApi - object-oriented interface
+ * @export
+ * @class V0linesApi
+ * @extends {BaseAPI}
+ */
+export class V0linesApi extends BaseAPI {
+  /**
+   * API endpoint for line items.
+   * @param {V0linesApiV0linesCreateRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0linesApi
+   */
+  public v0linesCreate(
+    requestParameters: V0linesApiV0linesCreateRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0linesApiFp(this.configuration)
+      .v0linesCreate(requestParameters.RequestLineRequest, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * API endpoint for line items.
+   * @param {V0linesApiV0linesDestroyRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0linesApi
+   */
+  public v0linesDestroy(
+    requestParameters: V0linesApiV0linesDestroyRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0linesApiFp(this.configuration)
+      .v0linesDestroy(requestParameters.id, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * API endpoint for line items.
+   * @param {V0linesApiV0linesListRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0linesApi
+   */
+  public v0linesList(
+    requestParameters: V0linesApiV0linesListRequest = {},
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0linesApiFp(this.configuration)
+      .v0linesList(requestParameters.limit, requestParameters.offset, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * API endpoint for line items.
+   * @param {V0linesApiV0linesPartialUpdateRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0linesApi
+   */
+  public v0linesPartialUpdate(
+    requestParameters: V0linesApiV0linesPartialUpdateRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0linesApiFp(this.configuration)
+      .v0linesPartialUpdate(
+        requestParameters.id,
+        requestParameters.PatchedRequestLineRequest,
+        options,
+      )
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * API endpoint for line items.
+   * @param {V0linesApiV0linesRetrieveRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0linesApi
+   */
+  public v0linesRetrieve(
+    requestParameters: V0linesApiV0linesRetrieveRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0linesApiFp(this.configuration)
+      .v0linesRetrieve(requestParameters.id, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * API endpoint for line items.
+   * @param {V0linesApiV0linesUpdateRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0linesApi
+   */
+  public v0linesUpdate(
+    requestParameters: V0linesApiV0linesUpdateRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0linesApiFp(this.configuration)
+      .v0linesUpdate(
+        requestParameters.id,
+        requestParameters.RequestLineRequest,
+        options,
+      )
+      .then((request) => request(this.axios, this.basePath))
+  }
+}
+
+/**
+ * V0requestsApi - axios parameter creator
+ * @export
+ */
+export const V0requestsApiAxiosParamCreator = function (
+  configuration?: Configuration,
+) {
+  return {
+    /**
+     * API endpoint for refund requests.
+     * @param {RequestRequest} RequestRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsCreate: async (
+      RequestRequest: RequestRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'RequestRequest' is not null or undefined
+      assertParamExists("v0requestsCreate", "RequestRequest", RequestRequest)
+      const localVarPath = `/v0requests/`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "POST",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter["Content-Type"] = "application/json"
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        RequestRequest,
+        localVarRequestOptions,
+        configuration,
+      )
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {string} id
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsDestroy: async (
+      id: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists("v0requestsDestroy", "id", id)
+      const localVarPath = `/v0requests/{id}/`.replace(
+        `{${"id"}}`,
+        encodeURIComponent(String(id)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "DELETE",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {number} [limit] Number of results to return per page.
+     * @param {number} [offset] The initial index from which to return the results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsList: async (
+      limit?: number,
+      offset?: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/v0requests/`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "GET",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      if (limit !== undefined) {
+        localVarQueryParameter["limit"] = limit
+      }
+
+      if (offset !== undefined) {
+        localVarQueryParameter["offset"] = offset
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {string} id
+     * @param {PatchedRequestRequest} [PatchedRequestRequest]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsPartialUpdate: async (
+      id: string,
+      PatchedRequestRequest?: PatchedRequestRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists("v0requestsPartialUpdate", "id", id)
+      const localVarPath = `/v0requests/{id}/`.replace(
+        `{${"id"}}`,
+        encodeURIComponent(String(id)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "PATCH",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter["Content-Type"] = "application/json"
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        PatchedRequestRequest,
+        localVarRequestOptions,
+        configuration,
+      )
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {string} id
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsRetrieve: async (
+      id: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists("v0requestsRetrieve", "id", id)
+      const localVarPath = `/v0requests/{id}/`.replace(
+        `{${"id"}}`,
+        encodeURIComponent(String(id)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "GET",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {string} id
+     * @param {RequestRequest} RequestRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsUpdate: async (
+      id: string,
+      RequestRequest: RequestRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists("v0requestsUpdate", "id", id)
+      // verify required parameter 'RequestRequest' is not null or undefined
+      assertParamExists("v0requestsUpdate", "RequestRequest", RequestRequest)
+      const localVarPath = `/v0requests/{id}/`.replace(
+        `{${"id"}}`,
+        encodeURIComponent(String(id)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = {
+        method: "PUT",
+        ...baseOptions,
+        ...options,
+      }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter["Content-Type"] = "application/json"
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions =
+        baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      }
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        RequestRequest,
+        localVarRequestOptions,
+        configuration,
+      )
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+  }
+}
+
+/**
+ * V0requestsApi - functional programming interface
+ * @export
+ */
+export const V0requestsApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator =
+    V0requestsApiAxiosParamCreator(configuration)
+  return {
+    /**
+     * API endpoint for refund requests.
+     * @param {RequestRequest} RequestRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0requestsCreate(
+      RequestRequest: RequestRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Request>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.v0requestsCreate(
+          RequestRequest,
+          options,
+        )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0requestsApi.v0requestsCreate"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {string} id
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0requestsDestroy(
+      id: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.v0requestsDestroy(id, options)
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0requestsApi.v0requestsDestroy"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {number} [limit] Number of results to return per page.
+     * @param {number} [offset] The initial index from which to return the results.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0requestsList(
+      limit?: number,
+      offset?: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string,
+      ) => AxiosPromise<PaginatedRequestList>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.v0requestsList(
+        limit,
+        offset,
+        options,
+      )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0requestsApi.v0requestsList"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {string} id
+     * @param {PatchedRequestRequest} [PatchedRequestRequest]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0requestsPartialUpdate(
+      id: string,
+      PatchedRequestRequest?: PatchedRequestRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Request>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.v0requestsPartialUpdate(
+          id,
+          PatchedRequestRequest,
+          options,
+        )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0requestsApi.v0requestsPartialUpdate"]?.[index]
+          ?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {string} id
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0requestsRetrieve(
+      id: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Request>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.v0requestsRetrieve(id, options)
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0requestsApi.v0requestsRetrieve"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {string} id
+     * @param {RequestRequest} RequestRequest
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async v0requestsUpdate(
+      id: string,
+      RequestRequest: RequestRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Request>
+    > {
+      const localVarAxiosArgs =
+        await localVarAxiosParamCreator.v0requestsUpdate(
+          id,
+          RequestRequest,
+          options,
+        )
+      const index = configuration?.serverIndex ?? 0
+      const operationBasePath =
+        operationServerMap["V0requestsApi.v0requestsUpdate"]?.[index]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, operationBasePath || basePath)
+    },
+  }
+}
+
+/**
+ * V0requestsApi - factory interface
+ * @export
+ */
+export const V0requestsApiFactory = function (
+  configuration?: Configuration,
+  basePath?: string,
+  axios?: AxiosInstance,
+) {
+  const localVarFp = V0requestsApiFp(configuration)
+  return {
+    /**
+     * API endpoint for refund requests.
+     * @param {V0requestsApiV0requestsCreateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsCreate(
+      requestParameters: V0requestsApiV0requestsCreateRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Request> {
+      return localVarFp
+        .v0requestsCreate(requestParameters.RequestRequest, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {V0requestsApiV0requestsDestroyRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsDestroy(
+      requestParameters: V0requestsApiV0requestsDestroyRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .v0requestsDestroy(requestParameters.id, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {V0requestsApiV0requestsListRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsList(
+      requestParameters: V0requestsApiV0requestsListRequest = {},
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<PaginatedRequestList> {
+      return localVarFp
+        .v0requestsList(
+          requestParameters.limit,
+          requestParameters.offset,
+          options,
+        )
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {V0requestsApiV0requestsPartialUpdateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsPartialUpdate(
+      requestParameters: V0requestsApiV0requestsPartialUpdateRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Request> {
+      return localVarFp
+        .v0requestsPartialUpdate(
+          requestParameters.id,
+          requestParameters.PatchedRequestRequest,
+          options,
+        )
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {V0requestsApiV0requestsRetrieveRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsRetrieve(
+      requestParameters: V0requestsApiV0requestsRetrieveRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Request> {
+      return localVarFp
+        .v0requestsRetrieve(requestParameters.id, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * API endpoint for refund requests.
+     * @param {V0requestsApiV0requestsUpdateRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    v0requestsUpdate(
+      requestParameters: V0requestsApiV0requestsUpdateRequest,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Request> {
+      return localVarFp
+        .v0requestsUpdate(
+          requestParameters.id,
+          requestParameters.RequestRequest,
+          options,
+        )
+        .then((request) => request(axios, basePath))
+    },
+  }
+}
+
+/**
+ * Request parameters for v0requestsCreate operation in V0requestsApi.
+ * @export
+ * @interface V0requestsApiV0requestsCreateRequest
+ */
+export interface V0requestsApiV0requestsCreateRequest {
+  /**
+   *
+   * @type {RequestRequest}
+   * @memberof V0requestsApiV0requestsCreate
+   */
+  readonly RequestRequest: RequestRequest
+}
+
+/**
+ * Request parameters for v0requestsDestroy operation in V0requestsApi.
+ * @export
+ * @interface V0requestsApiV0requestsDestroyRequest
+ */
+export interface V0requestsApiV0requestsDestroyRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof V0requestsApiV0requestsDestroy
+   */
+  readonly id: string
+}
+
+/**
+ * Request parameters for v0requestsList operation in V0requestsApi.
+ * @export
+ * @interface V0requestsApiV0requestsListRequest
+ */
+export interface V0requestsApiV0requestsListRequest {
+  /**
+   * Number of results to return per page.
+   * @type {number}
+   * @memberof V0requestsApiV0requestsList
+   */
+  readonly limit?: number
+
+  /**
+   * The initial index from which to return the results.
+   * @type {number}
+   * @memberof V0requestsApiV0requestsList
+   */
+  readonly offset?: number
+}
+
+/**
+ * Request parameters for v0requestsPartialUpdate operation in V0requestsApi.
+ * @export
+ * @interface V0requestsApiV0requestsPartialUpdateRequest
+ */
+export interface V0requestsApiV0requestsPartialUpdateRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof V0requestsApiV0requestsPartialUpdate
+   */
+  readonly id: string
+
+  /**
+   *
+   * @type {PatchedRequestRequest}
+   * @memberof V0requestsApiV0requestsPartialUpdate
+   */
+  readonly PatchedRequestRequest?: PatchedRequestRequest
+}
+
+/**
+ * Request parameters for v0requestsRetrieve operation in V0requestsApi.
+ * @export
+ * @interface V0requestsApiV0requestsRetrieveRequest
+ */
+export interface V0requestsApiV0requestsRetrieveRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof V0requestsApiV0requestsRetrieve
+   */
+  readonly id: string
+}
+
+/**
+ * Request parameters for v0requestsUpdate operation in V0requestsApi.
+ * @export
+ * @interface V0requestsApiV0requestsUpdateRequest
+ */
+export interface V0requestsApiV0requestsUpdateRequest {
+  /**
+   *
+   * @type {string}
+   * @memberof V0requestsApiV0requestsUpdate
+   */
+  readonly id: string
+
+  /**
+   *
+   * @type {RequestRequest}
+   * @memberof V0requestsApiV0requestsUpdate
+   */
+  readonly RequestRequest: RequestRequest
+}
+
+/**
+ * V0requestsApi - object-oriented interface
+ * @export
+ * @class V0requestsApi
+ * @extends {BaseAPI}
+ */
+export class V0requestsApi extends BaseAPI {
+  /**
+   * API endpoint for refund requests.
+   * @param {V0requestsApiV0requestsCreateRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0requestsApi
+   */
+  public v0requestsCreate(
+    requestParameters: V0requestsApiV0requestsCreateRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0requestsApiFp(this.configuration)
+      .v0requestsCreate(requestParameters.RequestRequest, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * API endpoint for refund requests.
+   * @param {V0requestsApiV0requestsDestroyRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0requestsApi
+   */
+  public v0requestsDestroy(
+    requestParameters: V0requestsApiV0requestsDestroyRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0requestsApiFp(this.configuration)
+      .v0requestsDestroy(requestParameters.id, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * API endpoint for refund requests.
+   * @param {V0requestsApiV0requestsListRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0requestsApi
+   */
+  public v0requestsList(
+    requestParameters: V0requestsApiV0requestsListRequest = {},
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0requestsApiFp(this.configuration)
+      .v0requestsList(
+        requestParameters.limit,
+        requestParameters.offset,
+        options,
+      )
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * API endpoint for refund requests.
+   * @param {V0requestsApiV0requestsPartialUpdateRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0requestsApi
+   */
+  public v0requestsPartialUpdate(
+    requestParameters: V0requestsApiV0requestsPartialUpdateRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0requestsApiFp(this.configuration)
+      .v0requestsPartialUpdate(
+        requestParameters.id,
+        requestParameters.PatchedRequestRequest,
+        options,
+      )
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * API endpoint for refund requests.
+   * @param {V0requestsApiV0requestsRetrieveRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0requestsApi
+   */
+  public v0requestsRetrieve(
+    requestParameters: V0requestsApiV0requestsRetrieveRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0requestsApiFp(this.configuration)
+      .v0requestsRetrieve(requestParameters.id, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * API endpoint for refund requests.
+   * @param {V0requestsApiV0requestsUpdateRequest} requestParameters Request parameters.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof V0requestsApi
+   */
+  public v0requestsUpdate(
+    requestParameters: V0requestsApiV0requestsUpdateRequest,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return V0requestsApiFp(this.configuration)
+      .v0requestsUpdate(
+        requestParameters.id,
+        requestParameters.RequestRequest,
+        options,
+      )
       .then((request) => request(this.axios, this.basePath))
   }
 }
