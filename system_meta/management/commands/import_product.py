@@ -3,6 +3,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
+from reversion import create_revision
 
 from system_meta.api import get_product_metadata
 from system_meta.models import IntegratedSystem, Product
@@ -34,15 +35,16 @@ class Command(BaseCommand):
         metadata = get_product_metadata(kwargs["system_slug"], kwargs["readable_id"])
 
         system = IntegratedSystem.objects.get(slug=kwargs["system_slug"])
-        product = Product.objects.create(
-            sku=metadata["sku"],
-            name=metadata["title"],
-            description=metadata["description"],
-            image_metadata=metadata["image"],
-            price=metadata["price"],
-            system=system,
-            details_url=metadata["url"],
-        )
+        with create_revision():
+            product = Product.objects.create(
+                sku=metadata["sku"],
+                name=metadata["title"],
+                description=metadata["description"],
+                image_metadata=metadata["image"],
+                price=metadata["price"],
+                system=system,
+                details_url=metadata["url"],
+            )
 
         self.stdout.write(
             self.style.SUCCESS(f"Successfully imported product {product}")
