@@ -871,6 +871,40 @@ class Order(TimestampedModel):
 class PendingOrder(Order):
     """An order that is pending payment"""
 
+    def _process_basket_products(self, basket):
+        """Process the basket products."""
+
+        products = basket.get_products()
+        # Get the details from each Product.
+        product_versions = [
+            Version.objects.get_for_object(product).first() for product in products
+        ]
+
+        if len(product_versions) == 0:
+            log.error(
+                (
+                    "PendingOrder._get_or_create: %s products are there "
+                    "but no versions?"
+                ),
+                len(products),
+            )
+            msg = "No product versions found"
+            raise ValidationError(msg)
+
+        if len(product_versions) != len(products):
+            log.error(
+                (
+                    "PendingOrder._get_or_create: %s products are there "
+                    "but only %s versions?"
+                ),
+                len(products),
+                len(product_versions),
+            )
+            msg = "Product versions don't match lines added"
+            raise ValidationError(msg)
+
+        return product_versions
+
     @transaction.atomic
     def _get_or_create(self, basket: Basket):
         """
@@ -888,11 +922,7 @@ class PendingOrder(Order):
             PendingOrder: the retrieved or created PendingOrder.
         """
         try:
-            products = basket.get_products()
-            # Get the details from each Product.
-            product_versions = [
-                Version.objects.get_for_object(product).first() for product in products
-            ]
+            product_versions = self._process_basket_products(basket)
 
             # Get or create a PendingOrder
             # TODO: we prefetched the discounts here
