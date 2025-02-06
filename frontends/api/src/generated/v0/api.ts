@@ -3252,31 +3252,16 @@ export interface User {
    */
   id: number
   /**
-<<<<<<< HEAD
-<<<<<<< HEAD
-   * The SSO ID (usually a Keycloak UUID) for the user.
-=======
-=======
    * The SSO ID (usually a Keycloak UUID) for the user.
    * @type {string}
    * @memberof User
    */
   global_id?: string
   /**
->>>>>>> 100cd15 (Typehint email in serializer, regen OpenAPI schema)
    *
->>>>>>> 7021bb0 (Update OpenAPI spec)
    * @type {string}
    * @memberof User
    */
-  global_id?: string
-  /**
-   * Return the email.
-   * @type {string}
-   * @memberof User
-   */
-<<<<<<< HEAD
-<<<<<<< HEAD
   username: string
   /**
    * Return the email.
@@ -3284,12 +3269,6 @@ export interface User {
    * @memberof User
    */
   email: string | null
-=======
-  email: string
->>>>>>> 7021bb0 (Update OpenAPI spec)
-=======
-  email: string | null
->>>>>>> 100cd15 (Typehint email in serializer, regen OpenAPI schema)
   /**
    *
    * @type {string}
@@ -8628,12 +8607,12 @@ export const V0requestsApiAxiosParamCreator = function (
     },
     /**
      * API endpoint for refund requests.
-     * @param {string} id
+     * @param {number} id A unique integer value identifying this request line.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     v0requestsDestroy: async (
-      id: string,
+      id: number,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
@@ -8723,13 +8702,13 @@ export const V0requestsApiAxiosParamCreator = function (
     },
     /**
      * API endpoint for refund requests.
-     * @param {string} id
+     * @param {number} id A unique integer value identifying this request line.
      * @param {PatchedRequestRequest} [PatchedRequestRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     v0requestsPartialUpdate: async (
-      id: string,
+      id: number,
       PatchedRequestRequest?: PatchedRequestRequest,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
@@ -8777,12 +8756,12 @@ export const V0requestsApiAxiosParamCreator = function (
     },
     /**
      * API endpoint for refund requests.
-     * @param {string} id
+     * @param {number} id A unique integer value identifying this request line.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     v0requestsRetrieve: async (
-      id: string,
+      id: number,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
@@ -8822,13 +8801,13 @@ export const V0requestsApiAxiosParamCreator = function (
     },
     /**
      * API endpoint for refund requests.
-     * @param {string} id
+     * @param {number} id A unique integer value identifying this request line.
      * @param {RequestRequest} RequestRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     v0requestsUpdate: async (
-      id: string,
+      id: number,
       RequestRequest: RequestRequest,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
@@ -8917,12 +8896,12 @@ export const V0requestsApiFp = function (configuration?: Configuration) {
     },
     /**
      * API endpoint for refund requests.
-     * @param {string} id
+     * @param {number} id A unique integer value identifying this request line.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async v0requestsDestroy(
-      id: string,
+      id: number,
       options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>
@@ -8975,13 +8954,13 @@ export const V0requestsApiFp = function (configuration?: Configuration) {
     },
     /**
      * API endpoint for refund requests.
-     * @param {string} id
+     * @param {number} id A unique integer value identifying this request line.
      * @param {PatchedRequestRequest} [PatchedRequestRequest]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async v0requestsPartialUpdate(
-      id: string,
+      id: number,
       PatchedRequestRequest?: PatchedRequestRequest,
       options?: RawAxiosRequestConfig,
     ): Promise<
@@ -9007,12 +8986,12 @@ export const V0requestsApiFp = function (configuration?: Configuration) {
     },
     /**
      * API endpoint for refund requests.
-     * @param {string} id
+     * @param {number} id A unique integer value identifying this request line.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async v0requestsRetrieve(
-      id: string,
+      id: number,
       options?: RawAxiosRequestConfig,
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Request>
@@ -9032,13 +9011,13 @@ export const V0requestsApiFp = function (configuration?: Configuration) {
     },
     /**
      * API endpoint for refund requests.
-     * @param {string} id
+     * @param {number} id A unique integer value identifying this request line.
      * @param {RequestRequest} RequestRequest
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async v0requestsUpdate(
-      id: string,
+      id: number,
       RequestRequest: RequestRequest,
       options?: RawAxiosRequestConfig,
     ): Promise<
@@ -9195,11 +9174,11 @@ export interface V0requestsApiV0requestsCreateRequest {
  */
 export interface V0requestsApiV0requestsDestroyRequest {
   /**
-   *
-   * @type {string}
+   * A unique integer value identifying this request line.
+   * @type {number}
    * @memberof V0requestsApiV0requestsDestroy
    */
-  readonly id: string
+  readonly id: number
 }
 
 /**
@@ -9230,11 +9209,11 @@ export interface V0requestsApiV0requestsListRequest {
  */
 export interface V0requestsApiV0requestsPartialUpdateRequest {
   /**
-   *
-   * @type {string}
+   * A unique integer value identifying this request line.
+   * @type {number}
    * @memberof V0requestsApiV0requestsPartialUpdate
    */
-  readonly id: string
+  readonly id: number
 
   /**
    *
@@ -9251,11 +9230,11 @@ export interface V0requestsApiV0requestsPartialUpdateRequest {
  */
 export interface V0requestsApiV0requestsRetrieveRequest {
   /**
-   *
-   * @type {string}
+   * A unique integer value identifying this request line.
+   * @type {number}
    * @memberof V0requestsApiV0requestsRetrieve
    */
-  readonly id: string
+  readonly id: number
 }
 
 /**
@@ -9265,11 +9244,11 @@ export interface V0requestsApiV0requestsRetrieveRequest {
  */
 export interface V0requestsApiV0requestsUpdateRequest {
   /**
-   *
-   * @type {string}
+   * A unique integer value identifying this request line.
+   * @type {number}
    * @memberof V0requestsApiV0requestsUpdate
    */
-  readonly id: string
+  readonly id: number
 
   /**
    *
