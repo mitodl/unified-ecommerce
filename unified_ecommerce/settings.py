@@ -119,6 +119,8 @@ MIDDLEWARE = [
     "hijack.middleware.HijackUserMiddleware",
 ]
 
+AUTH_USER_MODEL = "users.User"
+
 # CORS
 CORS_ALLOWED_ORIGINS = get_list_of_str("CORS_ALLOWED_ORIGINS", [])
 CORS_ALLOWED_ORIGIN_REGEXES = get_list_of_str("CORS_ALLOWED_ORIGIN_REGEXES", [])
@@ -479,9 +481,11 @@ REST_FRAMEWORK_EXTENSIONS = {
 APISIX_USERDATA_MAP = {
     "auth_user": {
         "email": "email",
-        "preferred_username": "sub",
+        "global_id": "sub",
         "given_name": "given_name",
         "family_name": "family_name",
+        "username": "preferred_username",
+        "name": "name",
     },
     "authentication_userprofile": {
         "country_code": None,

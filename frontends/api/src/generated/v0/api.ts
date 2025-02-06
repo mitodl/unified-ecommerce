@@ -2391,17 +2391,23 @@ export interface User {
    */
   id: number
   /**
-   * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+   * The SSO ID (usually a Keycloak UUID) for the user.
    * @type {string}
    * @memberof User
    */
-  username: string
+  global_id?: string
   /**
    *
    * @type {string}
    * @memberof User
    */
-  email?: string
+  username: string
+  /**
+   * Return the email.
+   * @type {string}
+   * @memberof User
+   */
+  email: string | null
   /**
    *
    * @type {string}
@@ -2414,6 +2420,12 @@ export interface User {
    * @memberof User
    */
   last_name?: string
+  /**
+   *
+   * @type {string}
+   * @memberof User
+   */
+  name?: string
 }
 
 /**

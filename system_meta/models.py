@@ -3,7 +3,6 @@
 import logging
 
 import reversion
-from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.functional import cached_property
 from mitol.common.models import TimestampedModel
@@ -16,7 +15,6 @@ from slugify import slugify
 from system_meta.tasks import update_products
 from unified_ecommerce.utils import SoftDeleteActiveModel
 
-User = get_user_model()
 log = logging.getLogger(__name__)
 
 

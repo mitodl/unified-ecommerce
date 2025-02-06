@@ -21,6 +21,7 @@ def test_current_user(user, client, user_client):
     assert resp.json() == {
         "id": None,
         "username": "",
+        "email": None,
     }
 
     resp = user_client.get(me_api)

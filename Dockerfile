@@ -1,4 +1,4 @@
-FROM python:3.12.6
+FROM python:3.12
 LABEL maintainer "ODL DevOps <mitx-devops@mit.edu>"
 
 # Add package files, install updated node and pip
@@ -32,6 +32,7 @@ RUN pip install "poetry==$POETRY_VERSION"
 # Install project packages
 COPY pyproject.toml /src
 COPY poetry.lock /src
+COPY mitol_django_*.gz /src
 WORKDIR /src
 RUN poetry install
 
