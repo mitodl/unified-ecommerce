@@ -45,15 +45,18 @@ def create_request_access_codes(request: Request) -> None:
 
 
 def create_request_from_order(
-    requester: AbstractBaseUser, order: Order, *, lines: list[Line]
+    requester: AbstractBaseUser, order: Order, *, lines: list[Line] = []
 ) -> Request:
     """Create a refund request from an order."""
+
+    if order.state != Order.STATE.FULFILLED:
+        raise ValueError("Order must be fulfilled to create a refund request.")
 
     request = Request.objects.create(order=order, requester=requester)
 
     process_lines = lines if lines else order.lines.all()
 
     for line in process_lines:
-        RequestLine.objects.create(request=request, line=line)
+        RequestLine.objects.create(request=request, line=line) if line.order == order else None
 
     return request

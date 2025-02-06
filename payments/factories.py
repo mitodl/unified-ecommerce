@@ -1,7 +1,7 @@
 """Test factories for payments"""
 
 import faker
-from factory import SubFactory, fuzzy
+from factory import SubFactory, fuzzy, lazy_attribute
 from factory.django import DjangoModelFactory
 
 from payments import models
@@ -40,6 +40,7 @@ class OrderFactory(DjangoModelFactory):
 
     total_price_paid = fuzzy.FuzzyDecimal(10.00, 10.00)
     purchaser = SubFactory(UserFactory)
+    integrated_system = SubFactory(IntegratedSystemFactory)
 
     class Meta:
         """Meta options for BasketFactory"""
