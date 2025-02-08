@@ -197,13 +197,13 @@ crt = ["awscrt (==0.22.0)"]
 
 [[package]]
 name = "bpython"
-version = "0.24"
+version = "0.25"
 description = ""
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.9"
 files = [
-    {file = "bpython-0.24-py3-none-any.whl", hash = "sha256:0d196ae3d1ce3dcd559a3fb89ed2c468dfbd1504af0d680b906dd65a9c7a32eb"},
-    {file = "bpython-0.24.tar.gz", hash = "sha256:98736ffd7a8c48fd2bfb53d898a475f4241bde0b672125706af04d9d08fd3dbd"},
+    {file = "bpython-0.25-py3-none-any.whl", hash = "sha256:28fd86008ca5ef6100ead407c9743aa60c51293a18ba5b18fcacea7f5b7f2257"},
+    {file = "bpython-0.25.tar.gz", hash = "sha256:c246fc909ef6dcc26e9d8cb4615b0e6b1613f3543d12269b19ffd0782166c65b"},
 ]
 
 [package.dependencies]
@@ -4343,4 +4343,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.1"
-content-hash = "3dfee1cc4e9a0599c8946e26705507d60bb1060d2f2412205b628ef6f4f1f740"
+content-hash = "156398417c6086bdc297a3a05bde2a293fb6caa64aa6e401e4bb088149f17902"
