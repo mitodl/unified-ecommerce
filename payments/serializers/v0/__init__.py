@@ -15,7 +15,7 @@ from payments.constants import (
     PAYMENT_HOOK_ACTION_TEST,
     PAYMENT_HOOK_ACTIONS,
 )
-from payments.models import Basket, BasketItem, Company, Discount, Line, Order, TaxRate
+from payments.models import Basket, BasketItem, Company, Discount, Line, Order, TaxRate, Transaction
 from system_meta.models import Product
 from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
@@ -346,10 +346,29 @@ class WebhookBaseSerializer(DataclassSerializer):
         model = Line
 
 
+class TransactionSerializer(serializers.Serializer):
+    """Serializer for transactions."""
+
+    class Meta:
+        """Meta options for TransactionSerializer"""
+
+        fields = [
+            "transaction_id",
+            "transaction_type",
+            "amount",
+            "created_on",
+            "updated_on",
+            "reason",
+            "data",
+        ]
+        model = Transaction
+
+
 class OrderHistorySerializer(serializers.ModelSerializer):
     """Serializer for order history."""
 
     lines = LineSerializer(many=True)
+    transactions = TransactionSerializer(many=True)
 
     class Meta:
         """Meta options for OrderHistorySerializer"""
@@ -363,6 +382,8 @@ class OrderHistorySerializer(serializers.ModelSerializer):
             "lines",
             "created_on",
             "updated_on",
+            "discounts_applied",
+            "transactions",
         ]
         model = Order
 
