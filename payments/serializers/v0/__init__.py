@@ -15,7 +15,16 @@ from payments.constants import (
     PAYMENT_HOOK_ACTION_TEST,
     PAYMENT_HOOK_ACTIONS,
 )
-from payments.models import Basket, BasketItem, Company, Discount, Line, Order, TaxRate, Transaction
+from payments.models import (
+    Basket,
+    BasketItem,
+    Company,
+    Discount,
+    Line,
+    Order,
+    TaxRate,
+    Transaction,
+)
 from system_meta.models import Product
 from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
@@ -382,12 +391,20 @@ class OrderHistorySerializer(serializers.ModelSerializer):
     @extend_schema_field(TransactionSerializer)
     def get_transactions(self, instance) -> list[TransactionSerializer]:
         """Return a list of transactions for the order."""
-        return TransactionSerializer(instance.transactions, many=True).data if instance.transactions else []
+        return (
+            TransactionSerializer(instance.transactions, many=True).data
+            if instance.transactions
+            else []
+        )
 
     @extend_schema_field(SimpleDiscountSerializer)
     def get_discounts_applied(self, instance) -> list[SimpleDiscountSerializer]:
         """Return a list of discounts applied to the order."""
-        return SimpleDiscountSerializer(instance.discounts_applied, many=True).data if instance.discounts_applied else []
+        return (
+            SimpleDiscountSerializer(instance.discounts_applied, many=True).data
+            if instance.discounts_applied
+            else []
+        )
 
     class Meta:
         """Meta options for OrderHistorySerializer"""
