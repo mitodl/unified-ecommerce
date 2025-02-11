@@ -106,6 +106,7 @@ class BaseOrderAdmin(TimestampedModelAdmin):
                 "fields": [
                     "state",
                     "reference_number",
+                    "integrated_system",
                     "created_on",
                     "updated_on",
                 ]
