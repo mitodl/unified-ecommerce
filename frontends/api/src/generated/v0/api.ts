@@ -2220,6 +2220,12 @@ export interface OrderRequest {
    * @memberof OrderRequest
    */
   lines: Array<LineRequest>
+  /**
+   *
+   * @type {Array<TransactionRequest>}
+   * @memberof OrderRequest
+   */
+  transactions: Array<TransactionRequest>
 }
 
 /**
@@ -3190,17 +3196,10 @@ export interface Transaction {
   transaction_id: string
   /**
    *
-<<<<<<< HEAD
    * @type {string}
    * @memberof Transaction
    */
   transaction_type: string
-=======
-   * @type {TransactionOrder}
-   * @memberof Transaction
-   */
-  order: TransactionOrder
->>>>>>> 9f2945b (Add refunds app, dependencies)
   /**
    *
    * @type {string}
@@ -3209,7 +3208,6 @@ export interface Transaction {
   amount: string
   /**
    *
-<<<<<<< HEAD
    * @type {string}
    * @memberof Transaction
    */
@@ -3220,25 +3218,12 @@ export interface Transaction {
    * @memberof Transaction
    */
   updated_on: string
-=======
-   * @type {any}
-   * @memberof Transaction
-   */
-  data: any
-  /**
-   *
-   * @type {TransactionTypeEnum}
-   * @memberof Transaction
-   */
-  transaction_type: TransactionTypeEnum
->>>>>>> 9f2945b (Add refunds app, dependencies)
   /**
    *
    * @type {string}
    * @memberof Transaction
    */
   reason: string
-<<<<<<< HEAD
   /**
    *
    * @type {any}
@@ -3246,10 +3231,6 @@ export interface Transaction {
    */
   data: any
 }
-/**
-=======
-}
-
 /**
  * Serializes a transaction\'s purchaser data.
  * @export
@@ -3312,57 +3293,55 @@ export interface TransactionDataPurchaser {
   company: string
 }
 /**
- *
+ * Serializer for transactions.
  * @export
- * @interface TransactionOrder
+ * @interface TransactionRequest
  */
-export interface TransactionOrder {
-  /**
-   *
-   * @type {number}
-   * @memberof TransactionOrder
-   */
-  id: number
+export interface TransactionRequest {
   /**
    *
    * @type {string}
-   * @memberof TransactionOrder
+   * @memberof TransactionRequest
+   */
+  transaction_id: string
+  /**
+   *
+   * @type {string}
+   * @memberof TransactionRequest
+   */
+  transaction_type: string
+  /**
+   *
+   * @type {string}
+   * @memberof TransactionRequest
+   */
+  amount: string
+  /**
+   *
+   * @type {string}
+   * @memberof TransactionRequest
    */
   created_on: string
   /**
    *
    * @type {string}
-   * @memberof TransactionOrder
+   * @memberof TransactionRequest
    */
-  reference_number: string
+  updated_on: string
+  /**
+   *
+   * @type {string}
+   * @memberof TransactionRequest
+   */
+  reason: string
+  /**
+   *
+   * @type {any}
+   * @memberof TransactionRequest
+   */
+  data: any
 }
 /**
- * * `payment` - payment * `refund` - refund
- * @export
- * @enum {string}
- */
-
-export const TransactionTypeEnumDescriptions = {
-  payment: "payment",
-  refund: "refund",
-} as const
-
-export const TransactionTypeEnum = {
-  /**
-   * payment
-   */
-  Payment: "payment",
-  /**
-   * refund
-   */
-  Refund: "refund",
-} as const
-
-export type TransactionTypeEnum =
-  (typeof TransactionTypeEnum)[keyof typeof TransactionTypeEnum]
-
-/**
->>>>>>> 9f2945b (Add refunds app, dependencies)
  * Serializer for User model.
  * @export
  * @interface User

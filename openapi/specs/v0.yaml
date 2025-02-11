@@ -2463,10 +2463,15 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LineRequest"
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionRequest"
       required:
         - lines
         - purchaser
         - total_price_paid
+        - transactions
     PaginatedBasketItemList:
       type: object
       required:
@@ -3127,7 +3132,6 @@ components:
       properties:
         transaction_id:
           type: string
-<<<<<<< HEAD
         transaction_type:
           type: string
         amount:
@@ -3151,31 +3155,6 @@ components:
         - transaction_id
         - transaction_type
         - updated_on
-=======
-          readOnly: true
-        order:
-          $ref: "#/components/schemas/TransactionOrder"
-        amount:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,15}(?:\.\d{0,5})?$
-          readOnly: true
-        data:
-          readOnly: true
-        transaction_type:
-          allOf:
-            - $ref: "#/components/schemas/TransactionTypeEnum"
-          readOnly: true
-        reason:
-          type: string
-          readOnly: true
-      required:
-        - amount
-        - data
-        - order
-        - reason
-        - transaction_id
-        - transaction_type
     TransactionDataPurchaser:
       type: object
       description: Serializes a transaction's purchaser data.
@@ -3211,35 +3190,38 @@ components:
         - postal_code
         - state_or_territory
         - street_address
-    TransactionOrder:
+    TransactionRequest:
       type: object
+      description: Serializer for transactions.
       properties:
-        id:
-          type: integer
-          readOnly: true
+        transaction_id:
+          type: string
+          minLength: 1
+        transaction_type:
+          type: string
+          minLength: 1
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,2})?$
         created_on:
           type: string
           format: date-time
-          readOnly: true
-        reference_number:
+        updated_on:
           type: string
-          readOnly: true
+          format: date-time
+        reason:
+          type: string
+          minLength: 1
+        data: {}
       required:
+        - amount
         - created_on
-        - id
-        - reference_number
-    TransactionTypeEnum:
-      enum:
-        - payment
-        - refund
-      type: string
-      description: |-
-        * `payment` - payment
-        * `refund` - refund
-      x-enum-descriptions:
-        - payment
-        - refund
->>>>>>> 9f2945b (Add refunds app, dependencies)
+        - data
+        - reason
+        - transaction_id
+        - transaction_type
+        - updated_on
     User:
       type: object
       description: Serializer for User model.
