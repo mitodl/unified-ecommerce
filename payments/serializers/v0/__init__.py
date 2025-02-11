@@ -15,7 +15,16 @@ from payments.constants import (
     PAYMENT_HOOK_ACTION_TEST,
     PAYMENT_HOOK_ACTIONS,
 )
-from payments.models import Basket, BasketItem, Company, Discount, Line, Order, TaxRate
+from payments.models import (
+    Basket,
+    BasketItem,
+    Company,
+    Discount,
+    Line,
+    Order,
+    TaxRate,
+    Transaction,
+)
 from system_meta.models import Product
 from system_meta.serializers import IntegratedSystemSerializer, ProductSerializer
 from unified_ecommerce.serializers import UserSerializer
@@ -346,10 +355,56 @@ class WebhookBaseSerializer(DataclassSerializer):
         model = Line
 
 
+class TransactionSerializer(serializers.Serializer):
+    """Serializer for transactions."""
+
+    transaction_id = serializers.CharField()
+    transaction_type = serializers.CharField()
+    amount = serializers.DecimalField(max_digits=9, decimal_places=2)
+    created_on = serializers.DateTimeField()
+    updated_on = serializers.DateTimeField()
+    reason = serializers.CharField()
+    data = serializers.JSONField()
+
+    class Meta:
+        """Meta options for TransactionSerializer"""
+
+        fields = [
+            "transaction_id",
+            "transaction_type",
+            "amount",
+            "created_on",
+            "updated_on",
+            "reason",
+            "data",
+        ]
+        model = Transaction
+
+
 class OrderHistorySerializer(serializers.ModelSerializer):
     """Serializer for order history."""
 
     lines = LineSerializer(many=True)
+    transactions = serializers.SerializerMethodField()
+    discounts_applied = serializers.SerializerMethodField()
+
+    @extend_schema_field(TransactionSerializer)
+    def get_transactions(self, instance) -> list[TransactionSerializer]:
+        """Return a list of transactions for the order."""
+        return (
+            TransactionSerializer(instance.transactions, many=True).data
+            if instance.transactions
+            else []
+        )
+
+    @extend_schema_field(SimpleDiscountSerializer)
+    def get_discounts_applied(self, instance) -> list[SimpleDiscountSerializer]:
+        """Return a list of discounts applied to the order."""
+        return (
+            SimpleDiscountSerializer(instance.discounts_applied, many=True).data
+            if instance.discounts_applied
+            else []
+        )
 
     class Meta:
         """Meta options for OrderHistorySerializer"""
@@ -363,6 +418,8 @@ class OrderHistorySerializer(serializers.ModelSerializer):
             "lines",
             "created_on",
             "updated_on",
+            "discounts_applied",
+            "transactions",
         ]
         model = Order
 

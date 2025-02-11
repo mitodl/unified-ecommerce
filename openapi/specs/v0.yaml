@@ -1865,12 +1865,22 @@ components:
           type: string
           format: date-time
           readOnly: true
+        discounts_applied:
+          allOf:
+            - $ref: "#/components/schemas/SimpleDiscount"
+          readOnly: true
+        transactions:
+          allOf:
+            - $ref: "#/components/schemas/Transaction"
+          readOnly: true
       required:
         - created_on
+        - discounts_applied
         - id
         - lines
         - purchaser
         - total_price_paid
+        - transactions
         - updated_on
     PaginatedBasketItemList:
       type: object
@@ -2250,6 +2260,35 @@ components:
       required:
         - country_code
         - id
+    Transaction:
+      type: object
+      description: Serializer for transactions.
+      properties:
+        transaction_id:
+          type: string
+        transaction_type:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,2})?$
+        created_on:
+          type: string
+          format: date-time
+        updated_on:
+          type: string
+          format: date-time
+        reason:
+          type: string
+        data: {}
+      required:
+        - amount
+        - created_on
+        - data
+        - reason
+        - transaction_id
+        - transaction_type
+        - updated_on
     User:
       type: object
       description: Serializer for User model.
