@@ -9,1081 +9,1074 @@ paths:
       operationId: meta_integrated_system_list
       description: Viewset for IntegratedSystem model.
       parameters:
-        - name: limit
-          required: false
-          in: query
-          description: Number of results to return per page.
-          schema:
-            type: integer
-        - name: offset
-          required: false
-          in: query
-          description: The initial index from which to return the results.
-          schema:
-            type: integer
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
-        - meta
+      - meta
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedIntegratedSystemList"
-          description: ""
+                $ref: '#/components/schemas/PaginatedIntegratedSystemList'
+          description: ''
     post:
       operationId: meta_integrated_system_create
       description: Viewset for IntegratedSystem model.
       tags:
-        - meta
+      - meta
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/IntegratedSystemRequest"
+              $ref: '#/components/schemas/IntegratedSystemRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/IntegratedSystemRequest"
+              $ref: '#/components/schemas/IntegratedSystemRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/IntegratedSystemRequest"
+              $ref: '#/components/schemas/IntegratedSystemRequest'
         required: true
       responses:
-        "201":
+        '201':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IntegratedSystem"
-          description: ""
+                $ref: '#/components/schemas/IntegratedSystem'
+          description: ''
   /api/v0/meta/integrated_system/{id}/:
     get:
       operationId: meta_integrated_system_retrieve
       description: Viewset for IntegratedSystem model.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this integrated system.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this integrated system.
+        required: true
       tags:
-        - meta
+      - meta
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IntegratedSystem"
-          description: ""
+                $ref: '#/components/schemas/IntegratedSystem'
+          description: ''
     put:
       operationId: meta_integrated_system_update
       description: Viewset for IntegratedSystem model.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this integrated system.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this integrated system.
+        required: true
       tags:
-        - meta
+      - meta
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/IntegratedSystemRequest"
+              $ref: '#/components/schemas/IntegratedSystemRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/IntegratedSystemRequest"
+              $ref: '#/components/schemas/IntegratedSystemRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/IntegratedSystemRequest"
+              $ref: '#/components/schemas/IntegratedSystemRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IntegratedSystem"
-          description: ""
+                $ref: '#/components/schemas/IntegratedSystem'
+          description: ''
     patch:
       operationId: meta_integrated_system_partial_update
       description: Viewset for IntegratedSystem model.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this integrated system.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this integrated system.
+        required: true
       tags:
-        - meta
+      - meta
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchedIntegratedSystemRequest"
+              $ref: '#/components/schemas/PatchedIntegratedSystemRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/PatchedIntegratedSystemRequest"
+              $ref: '#/components/schemas/PatchedIntegratedSystemRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/PatchedIntegratedSystemRequest"
+              $ref: '#/components/schemas/PatchedIntegratedSystemRequest'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IntegratedSystem"
-          description: ""
+                $ref: '#/components/schemas/IntegratedSystem'
+          description: ''
     delete:
       operationId: meta_integrated_system_destroy
       description: Viewset for IntegratedSystem model.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this integrated system.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this integrated system.
+        required: true
       tags:
-        - meta
+      - meta
       responses:
-        "204":
+        '204':
           description: No response body
   /api/v0/meta/product/:
     get:
       operationId: meta_product_list
       description: Viewset for Product model.
       parameters:
-        - name: limit
-          required: false
-          in: query
-          description: Number of results to return per page.
-          schema:
-            type: integer
-        - in: query
-          name: name
-          schema:
-            type: string
-        - name: offset
-          required: false
-          in: query
-          description: The initial index from which to return the results.
-          schema:
-            type: integer
-        - in: query
-          name: system__slug
-          schema:
-            type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: name
+        schema:
+          type: string
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: system__slug
+        schema:
+          type: string
       tags:
-        - meta
+      - meta
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedProductList"
-          description: ""
+                $ref: '#/components/schemas/PaginatedProductList'
+          description: ''
     post:
       operationId: meta_product_create
       description: Viewset for Product model.
       tags:
-        - meta
+      - meta
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductRequest"
+              $ref: '#/components/schemas/ProductRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/ProductRequest"
+              $ref: '#/components/schemas/ProductRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/ProductRequest"
+              $ref: '#/components/schemas/ProductRequest'
         required: true
       responses:
-        "201":
+        '201':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Product"
-          description: ""
+                $ref: '#/components/schemas/Product'
+          description: ''
   /api/v0/meta/product/{id}/:
     get:
       operationId: meta_product_retrieve
       description: Viewset for Product model.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this product.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product.
+        required: true
       tags:
-        - meta
+      - meta
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Product"
-          description: ""
+                $ref: '#/components/schemas/Product'
+          description: ''
     put:
       operationId: meta_product_update
       description: Viewset for Product model.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this product.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product.
+        required: true
       tags:
-        - meta
+      - meta
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ProductRequest"
+              $ref: '#/components/schemas/ProductRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/ProductRequest"
+              $ref: '#/components/schemas/ProductRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/ProductRequest"
+              $ref: '#/components/schemas/ProductRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Product"
-          description: ""
+                $ref: '#/components/schemas/Product'
+          description: ''
     patch:
       operationId: meta_product_partial_update
       description: Viewset for Product model.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this product.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product.
+        required: true
       tags:
-        - meta
+      - meta
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchedProductRequest"
+              $ref: '#/components/schemas/PatchedProductRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/PatchedProductRequest"
+              $ref: '#/components/schemas/PatchedProductRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/PatchedProductRequest"
+              $ref: '#/components/schemas/PatchedProductRequest'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Product"
-          description: ""
+                $ref: '#/components/schemas/Product'
+          description: ''
     delete:
       operationId: meta_product_destroy
       description: Viewset for Product model.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this product.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this product.
+        required: true
       tags:
-        - meta
+      - meta
       responses:
-        "204":
+        '204':
           description: No response body
   /api/v0/meta/product/preload/{system_slug}/{sku}/:
     get:
       operationId: meta_product_preload_retrieve
-      description:
-        Pre-loads the product metadata for a given SKU, even if the SKU
+      description: Pre-loads the product metadata for a given SKU, even if the SKU
         doesn't exist yet.
       parameters:
-        - in: path
-          name: sku
-          schema:
-            type: string
-            pattern: ^[^/]+$
-          required: true
-        - in: path
-          name: system_slug
-          schema:
-            type: string
-            pattern: ^[^/]+$
-          required: true
+      - in: path
+        name: sku
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
       tags:
-        - meta
+      - meta
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Product"
-          description: ""
+                $ref: '#/components/schemas/Product'
+          description: ''
   /api/v0/payments/basketitems/:
     get:
       operationId: payments_basketitems_list
       description: Returns the basket items for the current user.
       parameters:
-        - name: limit
-          required: false
-          in: query
-          description: Number of results to return per page.
-          schema:
-            type: integer
-        - name: offset
-          required: false
-          in: query
-          description: The initial index from which to return the results.
-          schema:
-            type: integer
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedBasketItemList"
-          description: ""
+                $ref: '#/components/schemas/PaginatedBasketItemList'
+          description: ''
     post:
       operationId: payments_basketitems_create
       description: ViewSet for handling BasketItem operations.
       tags:
-        - payments
+      - payments
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/BasketItemRequest"
+              $ref: '#/components/schemas/BasketItemRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/BasketItemRequest"
+              $ref: '#/components/schemas/BasketItemRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/BasketItemRequest"
+              $ref: '#/components/schemas/BasketItemRequest'
         required: true
       responses:
-        "201":
+        '201':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasketItem"
-          description: ""
+                $ref: '#/components/schemas/BasketItem'
+          description: ''
   /api/v0/payments/basketitems/{id}/:
     get:
       operationId: payments_basketitems_retrieve
       description: Returns the basket items for the current user.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this basket item.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this basket item.
+        required: true
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasketItem"
-          description: ""
+                $ref: '#/components/schemas/BasketItem'
+          description: ''
     put:
       operationId: payments_basketitems_update
       description: ViewSet for handling BasketItem operations.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this basket item.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this basket item.
+        required: true
       tags:
-        - payments
+      - payments
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/BasketItemRequest"
+              $ref: '#/components/schemas/BasketItemRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/BasketItemRequest"
+              $ref: '#/components/schemas/BasketItemRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/BasketItemRequest"
+              $ref: '#/components/schemas/BasketItemRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasketItem"
-          description: ""
+                $ref: '#/components/schemas/BasketItem'
+          description: ''
     patch:
       operationId: payments_basketitems_partial_update
       description: ViewSet for handling BasketItem operations.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this basket item.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this basket item.
+        required: true
       tags:
-        - payments
+      - payments
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchedBasketItemRequest"
+              $ref: '#/components/schemas/PatchedBasketItemRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/PatchedBasketItemRequest"
+              $ref: '#/components/schemas/PatchedBasketItemRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/PatchedBasketItemRequest"
+              $ref: '#/components/schemas/PatchedBasketItemRequest'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasketItem"
-          description: ""
+                $ref: '#/components/schemas/BasketItem'
+          description: ''
     delete:
       operationId: payments_basketitems_destroy
       description: ViewSet for handling BasketItem operations.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this basket item.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this basket item.
+        required: true
       tags:
-        - payments
+      - payments
       responses:
-        "204":
+        '204':
           description: No response body
   /api/v0/payments/baskets/:
     get:
       operationId: payments_baskets_list
       description: Retrives the current user's baskets, one per system.
       parameters:
-        - in: query
-          name: integrated_system
-          schema:
-            type: integer
-        - name: limit
-          required: false
-          in: query
-          description: Number of results to return per page.
-          schema:
-            type: integer
-        - name: offset
-          required: false
-          in: query
-          description: The initial index from which to return the results.
-          schema:
-            type: integer
+      - in: query
+        name: integrated_system
+        schema:
+          type: integer
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedBasketWithProductList"
-          description: ""
+                $ref: '#/components/schemas/PaginatedBasketWithProductList'
+          description: ''
   /api/v0/payments/baskets/{id}/:
     get:
       operationId: payments_baskets_retrieve
       description: Retrieve a basket for the current user.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasketWithProduct"
-          description: ""
+                $ref: '#/components/schemas/BasketWithProduct'
+          description: ''
   /api/v0/payments/baskets/add_discount/{system_slug}/:
     post:
       operationId: payments_baskets_add_discount_create
-      description:
-        Creates or updates a basket for the current user, adding the discount
+      description: Creates or updates a basket for the current user, adding the discount
         if valid.
       parameters:
-        - in: query
-          name: discount_code
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: system_slug
-          schema:
-            type: string
-          required: true
+      - in: query
+        name: discount_code
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasketWithProduct"
-          description: ""
+                $ref: '#/components/schemas/BasketWithProduct'
+          description: ''
   /api/v0/payments/baskets/clear/{system_slug}/:
     delete:
       operationId: payments_baskets_clear_destroy
       description: Clears the basket for the current user.
       parameters:
-        - in: path
-          name: system_slug
-          schema:
-            type: string
-          required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
       tags:
-        - payments
+      - payments
       responses:
-        "204":
+        '204':
           description: No response body
   /api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/:
     post:
       operationId: payments_baskets_create_from_product_create
-      description:
-        Creates or updates a basket for the current user, adding the selected
+      description: Creates or updates a basket for the current user, adding the selected
         product.
       parameters:
-        - in: path
-          name: sku
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: system_slug
-          schema:
-            type: string
-          required: true
+      - in: path
+        name: sku
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasketWithProduct"
-          description: ""
+                $ref: '#/components/schemas/BasketWithProduct'
+          description: ''
   /api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/{discount_code}/:
     post:
       operationId: create_basket_from_product_with_discount
-      description:
-        Creates or updates a basket for the current user, adding the selected
+      description: Creates or updates a basket for the current user, adding the selected
         product and discount.
       parameters:
-        - in: path
-          name: discount_code
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: sku
-          schema:
-            type: string
-          required: true
-        - in: path
-          name: system_slug
-          schema:
-            type: string
-          required: true
+      - in: path
+        name: discount_code
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: sku
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasketWithProduct"
-          description: ""
+                $ref: '#/components/schemas/BasketWithProduct'
+          description: ''
   /api/v0/payments/baskets/create_with_products/:
     post:
       operationId: payments_baskets_create_with_products_create
-      description:
-        Creates or updates a basket for the current user, adding the selected
+      description: Creates or updates a basket for the current user, adding the selected
         product.
       tags:
-        - payments
+      - payments
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateBasketWithProductsRequest"
+              $ref: '#/components/schemas/CreateBasketWithProductsRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/CreateBasketWithProductsRequest"
+              $ref: '#/components/schemas/CreateBasketWithProductsRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreateBasketWithProductsRequest"
+              $ref: '#/components/schemas/CreateBasketWithProductsRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasketWithProduct"
-          description: ""
+                $ref: '#/components/schemas/BasketWithProduct'
+          description: ''
   /api/v0/payments/baskets/for_system/{system_slug}/:
     get:
       operationId: payments_baskets_for_system_retrieve
       description: Returns or creates a basket for the current user and system.
       parameters:
-        - in: path
-          name: system_slug
-          schema:
-            type: string
-          required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasketWithProduct"
-          description: ""
+                $ref: '#/components/schemas/BasketWithProduct'
+          description: ''
   /api/v0/payments/checkout/{system_slug}/:
     post:
       operationId: payments_checkout_create
-      description:
-        Generates and returns the form payload for the current basket for
+      description: Generates and returns the form payload for the current basket for
         the specified system, which can be used to start the checkout process.
       parameters:
-        - in: path
-          name: system_slug
-          schema:
-            type: string
-          required: true
+      - in: path
+        name: system_slug
+        schema:
+          type: string
+        required: true
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CyberSourceCheckout"
-          description: ""
+                $ref: '#/components/schemas/CyberSourceCheckout'
+          description: ''
   /api/v0/payments/discounts/:
     post:
       operationId: payments_discounts_create
       description: Create a discount.
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Discount"
-          description: ""
+                $ref: '#/components/schemas/Discount'
+          description: ''
   /api/v0/payments/orders/history/:
     get:
       operationId: payments_orders_history_list
       description: Retrives the current user's completed orders.
       parameters:
-        - name: limit
-          required: false
-          in: query
-          description: Number of results to return per page.
-          schema:
-            type: integer
-        - name: offset
-          required: false
-          in: query
-          description: The initial index from which to return the results.
-          schema:
-            type: integer
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedOrderHistoryList"
-          description: ""
+                $ref: '#/components/schemas/PaginatedOrderHistoryList'
+          description: ''
   /api/v0/payments/orders/history/{id}/:
     get:
       operationId: payments_orders_history_retrieve
       description: Retrieve a completed order for the current user.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
-        - payments
+      - payments
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OrderHistory"
-          description: ""
+                $ref: '#/components/schemas/OrderHistory'
+          description: ''
   /api/v0/refunds/create_from_order:
     post:
       operationId: refunds_create_from_order_create
-      description:
-        Create a refund from an existing order, optionally specifying which
+      description: Create a refund from an existing order, optionally specifying which
         lines to refund.
       tags:
-        - refunds
+      - refunds
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateFromOrderApiRequest"
+              $ref: '#/components/schemas/CreateFromOrderApiRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/CreateFromOrderApiRequest"
+              $ref: '#/components/schemas/CreateFromOrderApiRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreateFromOrderApiRequest"
+              $ref: '#/components/schemas/CreateFromOrderApiRequest'
         required: true
       responses:
-        "201":
+        '201':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Request"
-          description: ""
+                $ref: '#/components/schemas/Request'
+          description: ''
   /api/v0/refunds/lines/:
     get:
       operationId: refunds_lines_list
       description: API endpoint for line items.
       parameters:
-        - name: limit
-          required: false
-          in: query
-          description: Number of results to return per page.
-          schema:
-            type: integer
-        - name: offset
-          required: false
-          in: query
-          description: The initial index from which to return the results.
-          schema:
-            type: integer
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
-        - refunds
+      - refunds
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedRequestLineList"
-          description: ""
+                $ref: '#/components/schemas/PaginatedRequestLineList'
+          description: ''
     post:
       operationId: refunds_lines_create
       description: API endpoint for line items.
       tags:
-        - refunds
+      - refunds
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RequestLineRequest"
+              $ref: '#/components/schemas/RequestLineRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/RequestLineRequest"
+              $ref: '#/components/schemas/RequestLineRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/RequestLineRequest"
+              $ref: '#/components/schemas/RequestLineRequest'
         required: true
       responses:
-        "201":
+        '201':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RequestLine"
-          description: ""
+                $ref: '#/components/schemas/RequestLine'
+          description: ''
   /api/v0/refunds/lines/{id}/:
     get:
       operationId: refunds_lines_retrieve
       description: API endpoint for line items.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this request line.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this request line.
+        required: true
       tags:
-        - refunds
+      - refunds
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RequestLine"
-          description: ""
+                $ref: '#/components/schemas/RequestLine'
+          description: ''
     put:
       operationId: refunds_lines_update
       description: API endpoint for line items.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this request line.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this request line.
+        required: true
       tags:
-        - refunds
+      - refunds
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RequestLineRequest"
+              $ref: '#/components/schemas/RequestLineRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/RequestLineRequest"
+              $ref: '#/components/schemas/RequestLineRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/RequestLineRequest"
+              $ref: '#/components/schemas/RequestLineRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RequestLine"
-          description: ""
+                $ref: '#/components/schemas/RequestLine'
+          description: ''
     patch:
       operationId: refunds_lines_partial_update
       description: API endpoint for line items.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this request line.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this request line.
+        required: true
       tags:
-        - refunds
+      - refunds
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchedRequestLineRequest"
+              $ref: '#/components/schemas/PatchedRequestLineRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/PatchedRequestLineRequest"
+              $ref: '#/components/schemas/PatchedRequestLineRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/PatchedRequestLineRequest"
+              $ref: '#/components/schemas/PatchedRequestLineRequest'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RequestLine"
-          description: ""
+                $ref: '#/components/schemas/RequestLine'
+          description: ''
     delete:
       operationId: refunds_lines_destroy
       description: API endpoint for line items.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this request line.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this request line.
+        required: true
       tags:
-        - refunds
+      - refunds
       responses:
-        "204":
+        '204':
           description: No response body
   /api/v0/refunds/requests/:
     get:
       operationId: refunds_requests_list
       description: API endpoint for refund requests.
       parameters:
-        - name: limit
-          required: false
-          in: query
-          description: Number of results to return per page.
-          schema:
-            type: integer
-        - name: offset
-          required: false
-          in: query
-          description: The initial index from which to return the results.
-          schema:
-            type: integer
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
       tags:
-        - refunds
+      - refunds
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginatedRequestList"
-          description: ""
+                $ref: '#/components/schemas/PaginatedRequestList'
+          description: ''
     post:
       operationId: refunds_requests_create
       description: API endpoint for refund requests.
       tags:
-        - refunds
+      - refunds
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RequestRequest"
+              $ref: '#/components/schemas/RequestRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/RequestRequest"
+              $ref: '#/components/schemas/RequestRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/RequestRequest"
+              $ref: '#/components/schemas/RequestRequest'
         required: true
       responses:
-        "201":
+        '201':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Request"
-          description: ""
+                $ref: '#/components/schemas/Request'
+          description: ''
   /api/v0/refunds/requests/{id}/:
     get:
       operationId: refunds_requests_retrieve
       description: API endpoint for refund requests.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this request line.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this request line.
+        required: true
       tags:
-        - refunds
+      - refunds
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Request"
-          description: ""
+                $ref: '#/components/schemas/Request'
+          description: ''
     put:
       operationId: refunds_requests_update
       description: API endpoint for refund requests.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this request line.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this request line.
+        required: true
       tags:
-        - refunds
+      - refunds
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RequestRequest"
+              $ref: '#/components/schemas/RequestRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/RequestRequest"
+              $ref: '#/components/schemas/RequestRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/RequestRequest"
+              $ref: '#/components/schemas/RequestRequest'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Request"
-          description: ""
+                $ref: '#/components/schemas/Request'
+          description: ''
     patch:
       operationId: refunds_requests_partial_update
       description: API endpoint for refund requests.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this request line.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this request line.
+        required: true
       tags:
-        - refunds
+      - refunds
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchedRequestRequest"
+              $ref: '#/components/schemas/PatchedRequestRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/PatchedRequestRequest"
+              $ref: '#/components/schemas/PatchedRequestRequest'
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/PatchedRequestRequest"
+              $ref: '#/components/schemas/PatchedRequestRequest'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Request"
-          description: ""
+                $ref: '#/components/schemas/Request'
+          description: ''
     delete:
       operationId: refunds_requests_destroy
       description: API endpoint for refund requests.
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
-          description: A unique integer value identifying this request line.
-          required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this request line.
+        required: true
       tags:
-        - refunds
+      - refunds
       responses:
-        "204":
+        '204':
           description: No response body
   /api/v0/users/me/:
     get:
       operationId: users_me_retrieve
       description: User retrieve and update viewsets for the current user
       tags:
-        - users
+      - users
       security:
-        - {}
+      - {}
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-          description: ""
+                $ref: '#/components/schemas/User'
+          description: ''
 components:
   schemas:
     BasketItem:
@@ -1098,9 +1091,9 @@ components:
           type: integer
           readOnly: true
       required:
-        - basket
-        - id
-        - product
+      - basket
+      - id
+      - product
     BasketItemRequest:
       type: object
       description: BasketItem model serializer
@@ -1110,14 +1103,14 @@ components:
         product:
           type: integer
       required:
-        - basket
-        - product
+      - basket
+      - product
     BasketItemWithProduct:
       type: object
       description: Basket item model serializer with product information
       properties:
         product:
-          $ref: "#/components/schemas/Product"
+          $ref: '#/components/schemas/Product'
         id:
           type: integer
           readOnly: true
@@ -1141,14 +1134,14 @@ components:
           minimum: 0
         discount_applied:
           allOf:
-            - $ref: "#/components/schemas/SimpleDiscount"
+          - $ref: '#/components/schemas/SimpleDiscount'
           readOnly: true
       required:
-        - discount_applied
-        - discounted_price
-        - id
-        - price
-        - product
+      - discount_applied
+      - discounted_price
+      - id
+      - price
+      - product
     BasketWithProduct:
       type: object
       description: Basket model serializer with items and products
@@ -1159,11 +1152,11 @@ components:
         user:
           type: integer
         integrated_system:
-          $ref: "#/components/schemas/IntegratedSystem"
+          $ref: '#/components/schemas/IntegratedSystem'
         basket_items:
           type: array
           items:
-            $ref: "#/components/schemas/BasketItemWithProduct"
+            $ref: '#/components/schemas/BasketItemWithProduct'
         subtotal:
           type: number
           format: double
@@ -1175,21 +1168,21 @@ components:
           description: Get the tax for the basket
           readOnly: true
         tax_rate:
-          $ref: "#/components/schemas/TaxRate"
+          $ref: '#/components/schemas/TaxRate'
         total_price:
           type: number
           format: double
           description: Get the total price for the basket
           readOnly: true
       required:
-        - basket_items
-        - id
-        - integrated_system
-        - subtotal
-        - tax
-        - tax_rate
-        - total_price
-        - user
+      - basket_items
+      - id
+      - integrated_system
+      - subtotal
+      - tax
+      - tax_rate
+      - total_price
+      - user
     Company:
       type: object
       description: Serializer for companies.
@@ -1201,259 +1194,259 @@ components:
           type: string
           maxLength: 255
       required:
-        - id
-        - name
+      - id
+      - name
     CountryCodeEnum:
       enum:
-        - AF
-        - AX
-        - AL
-        - DZ
-        - AS
-        - AD
-        - AO
-        - AI
-        - AQ
-        - AG
-        - AR
-        - AM
-        - AW
-        - AU
-        - AT
-        - AZ
-        - BS
-        - BH
-        - BD
-        - BB
-        - BY
-        - BE
-        - BZ
-        - BJ
-        - BM
-        - BT
-        - BO
-        - BQ
-        - BA
-        - BW
-        - BV
-        - BR
-        - IO
-        - BN
-        - BG
-        - BF
-        - BI
-        - CV
-        - KH
-        - CM
-        - CA
-        - KY
-        - CF
-        - TD
-        - CL
-        - CN
-        - CX
-        - CC
-        - CO
-        - KM
-        - CG
-        - CD
-        - CK
-        - CR
-        - CI
-        - HR
-        - CU
-        - CW
-        - CY
-        - CZ
-        - DK
-        - DJ
-        - DM
-        - DO
-        - EC
-        - EG
-        - SV
-        - GQ
-        - ER
-        - EE
-        - SZ
-        - ET
-        - FK
-        - FO
-        - FJ
-        - FI
-        - FR
-        - GF
-        - PF
-        - TF
-        - GA
-        - GM
-        - GE
-        - DE
-        - GH
-        - GI
-        - GR
-        - GL
-        - GD
-        - GP
-        - GU
-        - GT
-        - GG
-        - GN
-        - GW
-        - GY
-        - HT
-        - HM
-        - VA
-        - HN
-        - HK
-        - HU
-        - IS
-        - IN
-        - ID
-        - IR
-        - IQ
-        - IE
-        - IM
-        - IL
-        - IT
-        - JM
-        - JP
-        - JE
-        - JO
-        - KZ
-        - KE
-        - KI
-        - KW
-        - KG
-        - LA
-        - LV
-        - LB
-        - LS
-        - LR
-        - LY
-        - LI
-        - LT
-        - LU
-        - MO
-        - MG
-        - MW
-        - MY
-        - MV
-        - ML
-        - MT
-        - MH
-        - MQ
-        - MR
-        - MU
-        - YT
-        - MX
-        - FM
-        - MD
-        - MC
-        - MN
-        - ME
-        - MS
-        - MA
-        - MZ
-        - MM
-        - NA
-        - NR
-        - NP
-        - NL
-        - NC
-        - NZ
-        - NI
-        - NE
-        - NG
-        - NU
-        - NF
-        - KP
-        - MK
-        - MP
-        - "NO"
-        - OM
-        - PK
-        - PW
-        - PS
-        - PA
-        - PG
-        - PY
-        - PE
-        - PH
-        - PN
-        - PL
-        - PT
-        - PR
-        - QA
-        - RE
-        - RO
-        - RU
-        - RW
-        - BL
-        - SH
-        - KN
-        - LC
-        - MF
-        - PM
-        - VC
-        - WS
-        - SM
-        - ST
-        - SA
-        - SN
-        - RS
-        - SC
-        - SL
-        - SG
-        - SX
-        - SK
-        - SI
-        - SB
-        - SO
-        - ZA
-        - GS
-        - KR
-        - SS
-        - ES
-        - LK
-        - SD
-        - SR
-        - SJ
-        - SE
-        - CH
-        - SY
-        - TW
-        - TJ
-        - TZ
-        - TH
-        - TL
-        - TG
-        - TK
-        - TO
-        - TT
-        - TN
-        - TR
-        - TM
-        - TC
-        - TV
-        - UG
-        - UA
-        - AE
-        - GB
-        - UM
-        - US
-        - UY
-        - UZ
-        - VU
-        - VE
-        - VN
-        - VG
-        - VI
-        - WF
-        - EH
-        - YE
-        - ZM
-        - ZW
+      - AF
+      - AX
+      - AL
+      - DZ
+      - AS
+      - AD
+      - AO
+      - AI
+      - AQ
+      - AG
+      - AR
+      - AM
+      - AW
+      - AU
+      - AT
+      - AZ
+      - BS
+      - BH
+      - BD
+      - BB
+      - BY
+      - BE
+      - BZ
+      - BJ
+      - BM
+      - BT
+      - BO
+      - BQ
+      - BA
+      - BW
+      - BV
+      - BR
+      - IO
+      - BN
+      - BG
+      - BF
+      - BI
+      - CV
+      - KH
+      - CM
+      - CA
+      - KY
+      - CF
+      - TD
+      - CL
+      - CN
+      - CX
+      - CC
+      - CO
+      - KM
+      - CG
+      - CD
+      - CK
+      - CR
+      - CI
+      - HR
+      - CU
+      - CW
+      - CY
+      - CZ
+      - DK
+      - DJ
+      - DM
+      - DO
+      - EC
+      - EG
+      - SV
+      - GQ
+      - ER
+      - EE
+      - SZ
+      - ET
+      - FK
+      - FO
+      - FJ
+      - FI
+      - FR
+      - GF
+      - PF
+      - TF
+      - GA
+      - GM
+      - GE
+      - DE
+      - GH
+      - GI
+      - GR
+      - GL
+      - GD
+      - GP
+      - GU
+      - GT
+      - GG
+      - GN
+      - GW
+      - GY
+      - HT
+      - HM
+      - VA
+      - HN
+      - HK
+      - HU
+      - IS
+      - IN
+      - ID
+      - IR
+      - IQ
+      - IE
+      - IM
+      - IL
+      - IT
+      - JM
+      - JP
+      - JE
+      - JO
+      - KZ
+      - KE
+      - KI
+      - KW
+      - KG
+      - LA
+      - LV
+      - LB
+      - LS
+      - LR
+      - LY
+      - LI
+      - LT
+      - LU
+      - MO
+      - MG
+      - MW
+      - MY
+      - MV
+      - ML
+      - MT
+      - MH
+      - MQ
+      - MR
+      - MU
+      - YT
+      - MX
+      - FM
+      - MD
+      - MC
+      - MN
+      - ME
+      - MS
+      - MA
+      - MZ
+      - MM
+      - NA
+      - NR
+      - NP
+      - NL
+      - NC
+      - NZ
+      - NI
+      - NE
+      - NG
+      - NU
+      - NF
+      - KP
+      - MK
+      - MP
+      - 'NO'
+      - OM
+      - PK
+      - PW
+      - PS
+      - PA
+      - PG
+      - PY
+      - PE
+      - PH
+      - PN
+      - PL
+      - PT
+      - PR
+      - QA
+      - RE
+      - RO
+      - RU
+      - RW
+      - BL
+      - SH
+      - KN
+      - LC
+      - MF
+      - PM
+      - VC
+      - WS
+      - SM
+      - ST
+      - SA
+      - SN
+      - RS
+      - SC
+      - SL
+      - SG
+      - SX
+      - SK
+      - SI
+      - SB
+      - SO
+      - ZA
+      - GS
+      - KR
+      - SS
+      - ES
+      - LK
+      - SD
+      - SR
+      - SJ
+      - SE
+      - CH
+      - SY
+      - TW
+      - TJ
+      - TZ
+      - TH
+      - TL
+      - TG
+      - TK
+      - TO
+      - TT
+      - TN
+      - TR
+      - TM
+      - TC
+      - TV
+      - UG
+      - UA
+      - AE
+      - GB
+      - UM
+      - US
+      - UY
+      - UZ
+      - VU
+      - VE
+      - VN
+      - VG
+      - VI
+      - WF
+      - EH
+      - YE
+      - ZM
+      - ZW
       type: string
       description: |-
         * `AF` - Afghanistan
@@ -1706,255 +1699,255 @@ components:
         * `ZM` - Zambia
         * `ZW` - Zimbabwe
       x-enum-descriptions:
-        - Afghanistan
-        - Åland Islands
-        - Albania
-        - Algeria
-        - American Samoa
-        - Andorra
-        - Angola
-        - Anguilla
-        - Antarctica
-        - Antigua and Barbuda
-        - Argentina
-        - Armenia
-        - Aruba
-        - Australia
-        - Austria
-        - Azerbaijan
-        - Bahamas
-        - Bahrain
-        - Bangladesh
-        - Barbados
-        - Belarus
-        - Belgium
-        - Belize
-        - Benin
-        - Bermuda
-        - Bhutan
-        - Bolivia
-        - Bonaire, Sint Eustatius and Saba
-        - Bosnia and Herzegovina
-        - Botswana
-        - Bouvet Island
-        - Brazil
-        - British Indian Ocean Territory
-        - Brunei
-        - Bulgaria
-        - Burkina Faso
-        - Burundi
-        - Cabo Verde
-        - Cambodia
-        - Cameroon
-        - Canada
-        - Cayman Islands
-        - Central African Republic
-        - Chad
-        - Chile
-        - China
-        - Christmas Island
-        - Cocos (Keeling) Islands
-        - Colombia
-        - Comoros
-        - Congo
-        - Congo (the Democratic Republic of the)
-        - Cook Islands
-        - Costa Rica
-        - Côte d'Ivoire
-        - Croatia
-        - Cuba
-        - Curaçao
-        - Cyprus
-        - Czechia
-        - Denmark
-        - Djibouti
-        - Dominica
-        - Dominican Republic
-        - Ecuador
-        - Egypt
-        - El Salvador
-        - Equatorial Guinea
-        - Eritrea
-        - Estonia
-        - Eswatini
-        - Ethiopia
-        - Falkland Islands (Malvinas)
-        - Faroe Islands
-        - Fiji
-        - Finland
-        - France
-        - French Guiana
-        - French Polynesia
-        - French Southern Territories
-        - Gabon
-        - Gambia
-        - Georgia
-        - Germany
-        - Ghana
-        - Gibraltar
-        - Greece
-        - Greenland
-        - Grenada
-        - Guadeloupe
-        - Guam
-        - Guatemala
-        - Guernsey
-        - Guinea
-        - Guinea-Bissau
-        - Guyana
-        - Haiti
-        - Heard Island and McDonald Islands
-        - Holy See
-        - Honduras
-        - Hong Kong
-        - Hungary
-        - Iceland
-        - India
-        - Indonesia
-        - Iran
-        - Iraq
-        - Ireland
-        - Isle of Man
-        - Israel
-        - Italy
-        - Jamaica
-        - Japan
-        - Jersey
-        - Jordan
-        - Kazakhstan
-        - Kenya
-        - Kiribati
-        - Kuwait
-        - Kyrgyzstan
-        - Laos
-        - Latvia
-        - Lebanon
-        - Lesotho
-        - Liberia
-        - Libya
-        - Liechtenstein
-        - Lithuania
-        - Luxembourg
-        - Macao
-        - Madagascar
-        - Malawi
-        - Malaysia
-        - Maldives
-        - Mali
-        - Malta
-        - Marshall Islands
-        - Martinique
-        - Mauritania
-        - Mauritius
-        - Mayotte
-        - Mexico
-        - Micronesia
-        - Moldova
-        - Monaco
-        - Mongolia
-        - Montenegro
-        - Montserrat
-        - Morocco
-        - Mozambique
-        - Myanmar
-        - Namibia
-        - Nauru
-        - Nepal
-        - Netherlands
-        - New Caledonia
-        - New Zealand
-        - Nicaragua
-        - Niger
-        - Nigeria
-        - Niue
-        - Norfolk Island
-        - North Korea
-        - North Macedonia
-        - Northern Mariana Islands
-        - Norway
-        - Oman
-        - Pakistan
-        - Palau
-        - Palestine, State of
-        - Panama
-        - Papua New Guinea
-        - Paraguay
-        - Peru
-        - Philippines
-        - Pitcairn
-        - Poland
-        - Portugal
-        - Puerto Rico
-        - Qatar
-        - Réunion
-        - Romania
-        - Russia
-        - Rwanda
-        - Saint Barthélemy
-        - Saint Helena, Ascension and Tristan da Cunha
-        - Saint Kitts and Nevis
-        - Saint Lucia
-        - Saint Martin (French part)
-        - Saint Pierre and Miquelon
-        - Saint Vincent and the Grenadines
-        - Samoa
-        - San Marino
-        - Sao Tome and Principe
-        - Saudi Arabia
-        - Senegal
-        - Serbia
-        - Seychelles
-        - Sierra Leone
-        - Singapore
-        - Sint Maarten (Dutch part)
-        - Slovakia
-        - Slovenia
-        - Solomon Islands
-        - Somalia
-        - South Africa
-        - South Georgia and the South Sandwich Islands
-        - South Korea
-        - South Sudan
-        - Spain
-        - Sri Lanka
-        - Sudan
-        - Suriname
-        - Svalbard and Jan Mayen
-        - Sweden
-        - Switzerland
-        - Syria
-        - Taiwan
-        - Tajikistan
-        - Tanzania
-        - Thailand
-        - Timor-Leste
-        - Togo
-        - Tokelau
-        - Tonga
-        - Trinidad and Tobago
-        - Tunisia
-        - Türkiye
-        - Turkmenistan
-        - Turks and Caicos Islands
-        - Tuvalu
-        - Uganda
-        - Ukraine
-        - United Arab Emirates
-        - United Kingdom
-        - United States Minor Outlying Islands
-        - United States of America
-        - Uruguay
-        - Uzbekistan
-        - Vanuatu
-        - Venezuela
-        - Vietnam
-        - Virgin Islands (British)
-        - Virgin Islands (U.S.)
-        - Wallis and Futuna
-        - Western Sahara
-        - Yemen
-        - Zambia
-        - Zimbabwe
+      - Afghanistan
+      - Åland Islands
+      - Albania
+      - Algeria
+      - American Samoa
+      - Andorra
+      - Angola
+      - Anguilla
+      - Antarctica
+      - Antigua and Barbuda
+      - Argentina
+      - Armenia
+      - Aruba
+      - Australia
+      - Austria
+      - Azerbaijan
+      - Bahamas
+      - Bahrain
+      - Bangladesh
+      - Barbados
+      - Belarus
+      - Belgium
+      - Belize
+      - Benin
+      - Bermuda
+      - Bhutan
+      - Bolivia
+      - Bonaire, Sint Eustatius and Saba
+      - Bosnia and Herzegovina
+      - Botswana
+      - Bouvet Island
+      - Brazil
+      - British Indian Ocean Territory
+      - Brunei
+      - Bulgaria
+      - Burkina Faso
+      - Burundi
+      - Cabo Verde
+      - Cambodia
+      - Cameroon
+      - Canada
+      - Cayman Islands
+      - Central African Republic
+      - Chad
+      - Chile
+      - China
+      - Christmas Island
+      - Cocos (Keeling) Islands
+      - Colombia
+      - Comoros
+      - Congo
+      - Congo (the Democratic Republic of the)
+      - Cook Islands
+      - Costa Rica
+      - Côte d'Ivoire
+      - Croatia
+      - Cuba
+      - Curaçao
+      - Cyprus
+      - Czechia
+      - Denmark
+      - Djibouti
+      - Dominica
+      - Dominican Republic
+      - Ecuador
+      - Egypt
+      - El Salvador
+      - Equatorial Guinea
+      - Eritrea
+      - Estonia
+      - Eswatini
+      - Ethiopia
+      - Falkland Islands (Malvinas)
+      - Faroe Islands
+      - Fiji
+      - Finland
+      - France
+      - French Guiana
+      - French Polynesia
+      - French Southern Territories
+      - Gabon
+      - Gambia
+      - Georgia
+      - Germany
+      - Ghana
+      - Gibraltar
+      - Greece
+      - Greenland
+      - Grenada
+      - Guadeloupe
+      - Guam
+      - Guatemala
+      - Guernsey
+      - Guinea
+      - Guinea-Bissau
+      - Guyana
+      - Haiti
+      - Heard Island and McDonald Islands
+      - Holy See
+      - Honduras
+      - Hong Kong
+      - Hungary
+      - Iceland
+      - India
+      - Indonesia
+      - Iran
+      - Iraq
+      - Ireland
+      - Isle of Man
+      - Israel
+      - Italy
+      - Jamaica
+      - Japan
+      - Jersey
+      - Jordan
+      - Kazakhstan
+      - Kenya
+      - Kiribati
+      - Kuwait
+      - Kyrgyzstan
+      - Laos
+      - Latvia
+      - Lebanon
+      - Lesotho
+      - Liberia
+      - Libya
+      - Liechtenstein
+      - Lithuania
+      - Luxembourg
+      - Macao
+      - Madagascar
+      - Malawi
+      - Malaysia
+      - Maldives
+      - Mali
+      - Malta
+      - Marshall Islands
+      - Martinique
+      - Mauritania
+      - Mauritius
+      - Mayotte
+      - Mexico
+      - Micronesia
+      - Moldova
+      - Monaco
+      - Mongolia
+      - Montenegro
+      - Montserrat
+      - Morocco
+      - Mozambique
+      - Myanmar
+      - Namibia
+      - Nauru
+      - Nepal
+      - Netherlands
+      - New Caledonia
+      - New Zealand
+      - Nicaragua
+      - Niger
+      - Nigeria
+      - Niue
+      - Norfolk Island
+      - North Korea
+      - North Macedonia
+      - Northern Mariana Islands
+      - Norway
+      - Oman
+      - Pakistan
+      - Palau
+      - Palestine, State of
+      - Panama
+      - Papua New Guinea
+      - Paraguay
+      - Peru
+      - Philippines
+      - Pitcairn
+      - Poland
+      - Portugal
+      - Puerto Rico
+      - Qatar
+      - Réunion
+      - Romania
+      - Russia
+      - Rwanda
+      - Saint Barthélemy
+      - Saint Helena, Ascension and Tristan da Cunha
+      - Saint Kitts and Nevis
+      - Saint Lucia
+      - Saint Martin (French part)
+      - Saint Pierre and Miquelon
+      - Saint Vincent and the Grenadines
+      - Samoa
+      - San Marino
+      - Sao Tome and Principe
+      - Saudi Arabia
+      - Senegal
+      - Serbia
+      - Seychelles
+      - Sierra Leone
+      - Singapore
+      - Sint Maarten (Dutch part)
+      - Slovakia
+      - Slovenia
+      - Solomon Islands
+      - Somalia
+      - South Africa
+      - South Georgia and the South Sandwich Islands
+      - South Korea
+      - South Sudan
+      - Spain
+      - Sri Lanka
+      - Sudan
+      - Suriname
+      - Svalbard and Jan Mayen
+      - Sweden
+      - Switzerland
+      - Syria
+      - Taiwan
+      - Tajikistan
+      - Tanzania
+      - Thailand
+      - Timor-Leste
+      - Togo
+      - Tokelau
+      - Tonga
+      - Trinidad and Tobago
+      - Tunisia
+      - Türkiye
+      - Turkmenistan
+      - Turks and Caicos Islands
+      - Tuvalu
+      - Uganda
+      - Ukraine
+      - United Arab Emirates
+      - United Kingdom
+      - United States Minor Outlying Islands
+      - United States of America
+      - Uruguay
+      - Uzbekistan
+      - Vanuatu
+      - Venezuela
+      - Vietnam
+      - Virgin Islands (British)
+      - Virgin Islands (U.S.)
+      - Wallis and Futuna
+      - Western Sahara
+      - Yemen
+      - Zambia
+      - Zimbabwe
     CreateBasketWithProductsRequest:
       type: object
       description: Serializer for creating a basket with products. (For OpenAPI spec.)
@@ -1965,17 +1958,17 @@ components:
         skus:
           type: array
           items:
-            $ref: "#/components/schemas/CreateBasketWithProductsSkuRequest"
+            $ref: '#/components/schemas/CreateBasketWithProductsSkuRequest'
         checkout:
           type: boolean
         discount_code:
           type: string
           minLength: 1
       required:
-        - checkout
-        - discount_code
-        - skus
-        - system_slug
+      - checkout
+      - discount_code
+      - skus
+      - system_slug
     CreateBasketWithProductsSkuRequest:
       type: object
       description: Defines the schema for a SKU in the CreateBasketWithProductsSerializer.
@@ -1987,8 +1980,8 @@ components:
           type: integer
           minimum: 1
       required:
-        - quantity
-        - sku
+      - quantity
+      - sku
     CreateFromOrderApiRequest:
       type: object
       description: Serializer for the create from order API.
@@ -2000,12 +1993,11 @@ components:
           items:
             type: integer
       required:
-        - lines
-        - order
+      - lines
+      - order
     CyberSourceCheckout:
       type: object
-      description:
-        Really basic serializer for the payload that we need to send to
+      description: Really basic serializer for the payload that we need to send to
         CyberSource.
       properties:
         payload:
@@ -2016,9 +2008,9 @@ components:
         method:
           type: string
       required:
-        - method
-        - payload
-        - url
+      - method
+      - payload
+      - url
     Discount:
       type: object
       description: Serializer for discounts.
@@ -2036,8 +2028,8 @@ components:
         payment_type:
           nullable: true
           oneOf:
-            - $ref: "#/components/schemas/PaymentTypeEnum"
-            - $ref: "#/components/schemas/NullEnum"
+          - $ref: '#/components/schemas/PaymentTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
         max_redemptions:
           type: integer
           maximum: 2147483647
@@ -2047,48 +2039,46 @@ components:
           type: string
           format: date-time
           nullable: true
-          description:
-            If set, this discount code will not be redeemable before this
+          description: If set, this discount code will not be redeemable before this
             date.
         expiration_date:
           type: string
           format: date-time
           nullable: true
-          description:
-            If set, this discount code will not be redeemable after this
+          description: If set, this discount code will not be redeemable after this
             date.
         integrated_system:
-          $ref: "#/components/schemas/IntegratedSystem"
+          $ref: '#/components/schemas/IntegratedSystem'
         product:
-          $ref: "#/components/schemas/Product"
+          $ref: '#/components/schemas/Product'
         assigned_users:
           type: array
           items:
-            $ref: "#/components/schemas/User"
+            $ref: '#/components/schemas/User'
         company:
-          $ref: "#/components/schemas/Company"
+          $ref: '#/components/schemas/Company'
       required:
-        - amount
-        - assigned_users
-        - company
-        - discount_code
-        - id
-        - integrated_system
-        - product
+      - amount
+      - assigned_users
+      - company
+      - discount_code
+      - id
+      - integrated_system
+      - product
     DiscountTypeEnum:
       enum:
-        - percent-off
-        - dollars-off
-        - fixed-price
+      - percent-off
+      - dollars-off
+      - fixed-price
       type: string
       description: |-
         * `percent-off` - percent-off
         * `dollars-off` - dollars-off
         * `fixed-price` - fixed-price
       x-enum-descriptions:
-        - percent-off
-        - dollars-off
-        - fixed-price
+      - percent-off
+      - dollars-off
+      - fixed-price
     IntegratedSystem:
       type: object
       description: Serializer for IntegratedSystem model.
@@ -2110,8 +2100,8 @@ components:
           format: uri
           maxLength: 200
       required:
-        - id
-        - name
+      - id
+      - name
     IntegratedSystemRequest:
       type: object
       description: Serializer for IntegratedSystem model.
@@ -2131,7 +2121,7 @@ components:
           format: uri
           maxLength: 200
       required:
-        - name
+      - name
     Line:
       type: object
       description: Serializes a line item for an order.
@@ -2156,14 +2146,14 @@ components:
           format: decimal
           pattern: ^-?\d{0,7}(?:\.\d{0,2})?$
         product:
-          $ref: "#/components/schemas/Product"
+          $ref: '#/components/schemas/Product'
       required:
-        - id
-        - item_description
-        - product
-        - quantity
-        - total_price
-        - unit_price
+      - id
+      - item_description
+      - product
+      - quantity
+      - total_price
+      - unit_price
     LineRequest:
       type: object
       description: Serializes a line item for an order.
@@ -2181,12 +2171,12 @@ components:
           format: decimal
           pattern: ^-?\d{0,7}(?:\.\d{0,2})?$
         product:
-          $ref: "#/components/schemas/ProductRequest"
+          $ref: '#/components/schemas/ProductRequest'
       required:
-        - product
-        - quantity
-        - total_price
-        - unit_price
+      - product
+      - quantity
+      - total_price
+      - unit_price
     Nested:
       type: object
       properties:
@@ -2208,14 +2198,14 @@ components:
         automatic:
           type: boolean
         discount_type:
-          $ref: "#/components/schemas/DiscountTypeEnum"
+          $ref: '#/components/schemas/DiscountTypeEnum'
         redemption_type:
-          $ref: "#/components/schemas/RedemptionTypeEnum"
+          $ref: '#/components/schemas/RedemptionTypeEnum'
         payment_type:
           nullable: true
           oneOf:
-            - $ref: "#/components/schemas/PaymentTypeEnum"
-            - $ref: "#/components/schemas/NullEnum"
+          - $ref: '#/components/schemas/PaymentTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
         max_redemptions:
           type: integer
           maximum: 2147483647
@@ -2228,15 +2218,13 @@ components:
           type: string
           format: date-time
           nullable: true
-          description:
-            If set, this discount code will not be redeemable before this
+          description: If set, this discount code will not be redeemable before this
             date.
         expiration_date:
           type: string
           format: date-time
           nullable: true
-          description:
-            If set, this discount code will not be redeemable after this
+          description: If set, this discount code will not be redeemable after this
             date.
         is_bulk:
           type: boolean
@@ -2261,13 +2249,13 @@ components:
             type: integer
             nullable: true
       required:
-        - amount
-        - created_on
-        - discount_code
-        - discount_type
-        - id
-        - redemption_type
-        - updated_on
+      - amount
+      - created_on
+      - discount_code
+      - discount_type
+      - id
+      - redemption_type
+      - updated_on
     NestedRequest:
       type: object
       properties:
@@ -2278,14 +2266,14 @@ components:
         automatic:
           type: boolean
         discount_type:
-          $ref: "#/components/schemas/DiscountTypeEnum"
+          $ref: '#/components/schemas/DiscountTypeEnum'
         redemption_type:
-          $ref: "#/components/schemas/RedemptionTypeEnum"
+          $ref: '#/components/schemas/RedemptionTypeEnum'
         payment_type:
           nullable: true
           oneOf:
-            - $ref: "#/components/schemas/PaymentTypeEnum"
-            - $ref: "#/components/schemas/NullEnum"
+          - $ref: '#/components/schemas/PaymentTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
         max_redemptions:
           type: integer
           maximum: 2147483647
@@ -2299,15 +2287,13 @@ components:
           type: string
           format: date-time
           nullable: true
-          description:
-            If set, this discount code will not be redeemable before this
+          description: If set, this discount code will not be redeemable before this
             date.
         expiration_date:
           type: string
           format: date-time
           nullable: true
-          description:
-            If set, this discount code will not be redeemable after this
+          description: If set, this discount code will not be redeemable after this
             date.
         is_bulk:
           type: boolean
@@ -2332,13 +2318,13 @@ components:
             type: integer
             nullable: true
       required:
-        - amount
-        - discount_code
-        - discount_type
-        - redemption_type
+      - amount
+      - discount_code
+      - discount_type
+      - redemption_type
     NullEnum:
       enum:
-        - null
+      - null
     Order:
       type: object
       description: Serializes an order.
@@ -2350,9 +2336,9 @@ components:
           type: string
           maxLength: 255
         state:
-          $ref: "#/components/schemas/StateEnum"
+          $ref: '#/components/schemas/StateEnum'
         purchaser:
-          $ref: "#/components/schemas/User"
+          $ref: '#/components/schemas/User'
         total_price_paid:
           type: string
           format: decimal
@@ -2360,11 +2346,11 @@ components:
         lines:
           type: array
           items:
-            $ref: "#/components/schemas/Line"
+            $ref: '#/components/schemas/Line'
         redeemed_discounts:
           type: array
           items:
-            $ref: "#/components/schemas/RedeemedDiscount"
+            $ref: '#/components/schemas/RedeemedDiscount'
         refunds:
           type: array
           items: {}
@@ -2382,21 +2368,21 @@ components:
         transactions:
           type: array
           items:
-            $ref: "#/components/schemas/Transaction"
+            $ref: '#/components/schemas/Transaction'
         street_address:
           allOf:
-            - $ref: "#/components/schemas/TransactionDataPurchaser"
+          - $ref: '#/components/schemas/TransactionDataPurchaser'
           readOnly: true
       required:
-        - created_on
-        - id
-        - lines
-        - purchaser
-        - redeemed_discounts
-        - refunds
-        - street_address
-        - total_price_paid
-        - transactions
+      - created_on
+      - id
+      - lines
+      - purchaser
+      - redeemed_discounts
+      - refunds
+      - street_address
+      - total_price_paid
+      - transactions
     OrderHistory:
       type: object
       description: Serializer for order history.
@@ -2405,7 +2391,7 @@ components:
           type: integer
           readOnly: true
         state:
-          $ref: "#/components/schemas/StateEnum"
+          $ref: '#/components/schemas/StateEnum'
         reference_number:
           type: string
           maxLength: 255
@@ -2418,7 +2404,7 @@ components:
         lines:
           type: array
           items:
-            $ref: "#/components/schemas/Line"
+            $ref: '#/components/schemas/Line'
         created_on:
           type: string
           format: date-time
@@ -2429,21 +2415,21 @@ components:
           readOnly: true
         discounts_applied:
           allOf:
-            - $ref: "#/components/schemas/SimpleDiscount"
+          - $ref: '#/components/schemas/SimpleDiscount'
           readOnly: true
         transactions:
           allOf:
-            - $ref: "#/components/schemas/Transaction"
+          - $ref: '#/components/schemas/Transaction'
           readOnly: true
       required:
-        - created_on
-        - discounts_applied
-        - id
-        - lines
-        - purchaser
-        - total_price_paid
-        - transactions
-        - updated_on
+      - created_on
+      - discounts_applied
+      - id
+      - lines
+      - purchaser
+      - total_price_paid
+      - transactions
+      - updated_on
     OrderRequest:
       type: object
       description: Serializes an order.
@@ -2452,9 +2438,9 @@ components:
           type: string
           maxLength: 255
         state:
-          $ref: "#/components/schemas/StateEnum"
+          $ref: '#/components/schemas/StateEnum'
         purchaser:
-          $ref: "#/components/schemas/UserRequest"
+          $ref: '#/components/schemas/UserRequest'
         total_price_paid:
           type: string
           format: decimal
@@ -2462,21 +2448,21 @@ components:
         lines:
           type: array
           items:
-            $ref: "#/components/schemas/LineRequest"
+            $ref: '#/components/schemas/LineRequest'
         transactions:
           type: array
           items:
-            $ref: "#/components/schemas/TransactionRequest"
+            $ref: '#/components/schemas/TransactionRequest'
       required:
-        - lines
-        - purchaser
-        - total_price_paid
-        - transactions
+      - lines
+      - purchaser
+      - total_price_paid
+      - transactions
     PaginatedBasketItemList:
       type: object
       required:
-        - count
-        - results
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -2494,12 +2480,12 @@ components:
         results:
           type: array
           items:
-            $ref: "#/components/schemas/BasketItem"
+            $ref: '#/components/schemas/BasketItem'
     PaginatedBasketWithProductList:
       type: object
       required:
-        - count
-        - results
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -2517,12 +2503,12 @@ components:
         results:
           type: array
           items:
-            $ref: "#/components/schemas/BasketWithProduct"
+            $ref: '#/components/schemas/BasketWithProduct'
     PaginatedIntegratedSystemList:
       type: object
       required:
-        - count
-        - results
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -2540,12 +2526,12 @@ components:
         results:
           type: array
           items:
-            $ref: "#/components/schemas/IntegratedSystem"
+            $ref: '#/components/schemas/IntegratedSystem'
     PaginatedOrderHistoryList:
       type: object
       required:
-        - count
-        - results
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -2563,12 +2549,12 @@ components:
         results:
           type: array
           items:
-            $ref: "#/components/schemas/OrderHistory"
+            $ref: '#/components/schemas/OrderHistory'
     PaginatedProductList:
       type: object
       required:
-        - count
-        - results
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -2586,12 +2572,12 @@ components:
         results:
           type: array
           items:
-            $ref: "#/components/schemas/Product"
+            $ref: '#/components/schemas/Product'
     PaginatedRequestLineList:
       type: object
       required:
-        - count
-        - results
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -2609,12 +2595,12 @@ components:
         results:
           type: array
           items:
-            $ref: "#/components/schemas/RequestLine"
+            $ref: '#/components/schemas/RequestLine'
     PaginatedRequestList:
       type: object
       required:
-        - count
-        - results
+      - count
+      - results
       properties:
         count:
           type: integer
@@ -2632,7 +2618,7 @@ components:
         results:
           type: array
           items:
-            $ref: "#/components/schemas/Request"
+            $ref: '#/components/schemas/Request'
     PatchedBasketItemRequest:
       type: object
       description: BasketItem model serializer
@@ -2690,8 +2676,7 @@ components:
           description: Price (decimal to two places)
         image_metadata:
           nullable: true
-          description:
-            Image metadata including URL, alt text, and description (in
+          description: Image metadata including URL, alt text, and description (in
             JSON).
         details_url:
           type: string
@@ -2707,8 +2692,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,15}(?:\.\d{0,5})?$
           nullable: true
-          description:
-            The amount refunded for this line item (may not be the full
+          description: The amount refunded for this line item (may not be the full
             amount charged).
         refund_request:
           type: integer
@@ -2726,9 +2710,9 @@ components:
         lines:
           type: array
           items:
-            $ref: "#/components/schemas/RequestLineRequest"
+            $ref: '#/components/schemas/RequestLineRequest'
         order:
-          $ref: "#/components/schemas/OrderRequest"
+          $ref: '#/components/schemas/OrderRequest'
         zendesk_ticket:
           type: string
           maxLength: 255
@@ -2736,14 +2720,14 @@ components:
           type: integer
     PaymentTypeEnum:
       enum:
-        - marketing
-        - sales
-        - financial-assistance
-        - customer-support
-        - staff
-        - legacy
-        - credit_card
-        - purchase_order
+      - marketing
+      - sales
+      - financial-assistance
+      - customer-support
+      - staff
+      - legacy
+      - credit_card
+      - purchase_order
       type: string
       description: |-
         * `marketing` - marketing
@@ -2755,14 +2739,14 @@ components:
         * `credit_card` - credit_card
         * `purchase_order` - purchase_order
       x-enum-descriptions:
-        - marketing
-        - sales
-        - financial-assistance
-        - customer-support
-        - staff
-        - legacy
-        - credit_card
-        - purchase_order
+      - marketing
+      - sales
+      - financial-assistance
+      - customer-support
+      - staff
+      - legacy
+      - credit_card
+      - purchase_order
     Product:
       type: object
       description: Serializer for Product model.
@@ -2797,8 +2781,7 @@ components:
           readOnly: true
         image_metadata:
           nullable: true
-          description:
-            Image metadata including URL, alt text, and description (in
+          description: Image metadata including URL, alt text, and description (in
             JSON).
         details_url:
           type: string
@@ -2806,13 +2789,13 @@ components:
           description: URL to the product details page.
           maxLength: 200
       required:
-        - deleted_by_cascade
-        - description
-        - id
-        - name
-        - price
-        - sku
-        - system
+      - deleted_by_cascade
+      - description
+      - id
+      - name
+      - price
+      - sku
+      - system
     ProductRequest:
       type: object
       description: Serializer for Product model.
@@ -2844,8 +2827,7 @@ components:
           description: Price (decimal to two places)
         image_metadata:
           nullable: true
-          description:
-            Image metadata including URL, alt text, and description (in
+          description: Image metadata including URL, alt text, and description (in
             JSON).
         details_url:
           type: string
@@ -2853,35 +2835,35 @@ components:
           description: URL to the product details page.
           maxLength: 200
       required:
-        - description
-        - name
-        - price
-        - sku
-        - system
+      - description
+      - name
+      - price
+      - sku
+      - system
     RedeemedDiscount:
       type: object
       description: DiscountRedemption model serializer
       properties:
         discount:
           allOf:
-            - $ref: "#/components/schemas/Nested"
+          - $ref: '#/components/schemas/Nested'
           readOnly: true
       required:
-        - discount
+      - discount
     RedemptionTypeEnum:
       enum:
-        - one-time
-        - one-time-per-user
-        - unlimited
+      - one-time
+      - one-time-per-user
+      - unlimited
       type: string
       description: |-
         * `one-time` - one-time
         * `one-time-per-user` - one-time-per-user
         * `unlimited` - unlimited
       x-enum-descriptions:
-        - one-time
-        - one-time-per-user
-        - unlimited
+      - one-time
+      - one-time-per-user
+      - unlimited
     Request:
       type: object
       description: Serializer for refund requests.
@@ -2892,9 +2874,9 @@ components:
         lines:
           type: array
           items:
-            $ref: "#/components/schemas/RequestLine"
+            $ref: '#/components/schemas/RequestLine'
         order:
-          $ref: "#/components/schemas/Order"
+          $ref: '#/components/schemas/Order'
         created_on:
           type: string
           format: date-time
@@ -2916,7 +2898,7 @@ components:
           nullable: true
         status:
           allOf:
-            - $ref: "#/components/schemas/StatusEnum"
+          - $ref: '#/components/schemas/StatusEnum'
           readOnly: true
         zendesk_ticket:
           type: string
@@ -2928,16 +2910,16 @@ components:
           readOnly: true
           nullable: true
       required:
-        - created_on
-        - id
-        - lines
-        - order
-        - processed_by
-        - processed_date
-        - requester
-        - status
-        - total_refunded
-        - updated_on
+      - created_on
+      - id
+      - lines
+      - order
+      - processed_by
+      - processed_date
+      - requester
+      - status
+      - total_refunded
+      - updated_on
     RequestLine:
       type: object
       description: Serializer for refund request lines.
@@ -2955,7 +2937,7 @@ components:
           readOnly: true
         status:
           allOf:
-            - $ref: "#/components/schemas/StatusEnum"
+          - $ref: '#/components/schemas/StatusEnum'
           readOnly: true
           description: |-
             The status of this line item.
@@ -2970,8 +2952,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,15}(?:\.\d{0,5})?$
           nullable: true
-          description:
-            The amount refunded for this line item (may not be the full
+          description: The amount refunded for this line item (may not be the full
             amount charged).
         refund_request:
           type: integer
@@ -2983,12 +2964,12 @@ components:
           items:
             type: integer
       required:
-        - created_on
-        - id
-        - line
-        - refund_request
-        - status
-        - updated_on
+      - created_on
+      - id
+      - line
+      - refund_request
+      - status
+      - updated_on
     RequestLineRequest:
       type: object
       description: Serializer for refund request lines.
@@ -2998,8 +2979,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,15}(?:\.\d{0,5})?$
           nullable: true
-          description:
-            The amount refunded for this line item (may not be the full
+          description: The amount refunded for this line item (may not be the full
             amount charged).
         refund_request:
           type: integer
@@ -3011,8 +2991,8 @@ components:
           items:
             type: integer
       required:
-        - line
-        - refund_request
+      - line
+      - refund_request
     RequestRequest:
       type: object
       description: Serializer for refund requests.
@@ -3020,18 +3000,18 @@ components:
         lines:
           type: array
           items:
-            $ref: "#/components/schemas/RequestLineRequest"
+            $ref: '#/components/schemas/RequestLineRequest'
         order:
-          $ref: "#/components/schemas/OrderRequest"
+          $ref: '#/components/schemas/OrderRequest'
         zendesk_ticket:
           type: string
           maxLength: 255
         requester:
           type: integer
       required:
-        - lines
-        - order
-        - requester
+      - lines
+      - order
+      - requester
     SimpleDiscount:
       type: object
       description: Simpler serializer for discounts.
@@ -3047,7 +3027,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
         discount_type:
-          $ref: "#/components/schemas/DiscountTypeEnum"
+          $ref: '#/components/schemas/DiscountTypeEnum'
         formatted_discount_amount:
           type: string
           description: |-
@@ -3056,20 +3036,20 @@ components:
             This quantizes percent discounts to whole numbers. This is probably fine.
           readOnly: true
       required:
-        - amount
-        - discount_code
-        - discount_type
-        - formatted_discount_amount
-        - id
+      - amount
+      - discount_code
+      - discount_type
+      - formatted_discount_amount
+      - id
     StateEnum:
       enum:
-        - pending
-        - fulfilled
-        - canceled
-        - refunded
-        - declined
-        - errored
-        - review
+      - pending
+      - fulfilled
+      - canceled
+      - refunded
+      - declined
+      - errored
+      - review
       type: string
       description: |-
         * `pending` - Pending
@@ -3080,20 +3060,20 @@ components:
         * `errored` - Errored
         * `review` - Review
       x-enum-descriptions:
-        - Pending
-        - Fulfilled
-        - Canceled
-        - Refunded
-        - Declined
-        - Errored
-        - Review
+      - Pending
+      - Fulfilled
+      - Canceled
+      - Refunded
+      - Declined
+      - Errored
+      - Review
     StatusEnum:
       enum:
-        - pending
-        - created
-        - denied
-        - approved
-        - failed
+      - pending
+      - created
+      - denied
+      - approved
+      - failed
       type: string
       description: |-
         * `pending` - pending
@@ -3102,11 +3082,11 @@ components:
         * `approved` - approved
         * `failed` - failed
       x-enum-descriptions:
-        - pending
-        - created
-        - denied
-        - approved
-        - failed
+      - pending
+      - created
+      - denied
+      - approved
+      - failed
     TaxRate:
       type: object
       description: TaxRate model serializer
@@ -3115,7 +3095,7 @@ components:
           type: integer
           readOnly: true
         country_code:
-          $ref: "#/components/schemas/CountryCodeEnum"
+          $ref: '#/components/schemas/CountryCodeEnum'
         tax_rate:
           type: string
           format: decimal
@@ -3124,8 +3104,8 @@ components:
           type: string
           maxLength: 100
       required:
-        - country_code
-        - id
+      - country_code
+      - id
     Transaction:
       type: object
       description: Serializer for transactions.
@@ -3147,14 +3127,17 @@ components:
         reason:
           type: string
         data: {}
+        order:
+          $ref: '#/components/schemas/TransactionOrder'
       required:
-        - amount
-        - created_on
-        - data
-        - reason
-        - transaction_id
-        - transaction_type
-        - updated_on
+      - amount
+      - created_on
+      - data
+      - order
+      - reason
+      - transaction_id
+      - transaction_type
+      - updated_on
     TransactionDataPurchaser:
       type: object
       description: Serializes a transaction's purchaser data.
@@ -3181,15 +3164,32 @@ components:
         company:
           type: string
       required:
-        - city
-        - company
-        - country
-        - email
-        - first_name
-        - last_name
-        - postal_code
-        - state_or_territory
-        - street_address
+      - city
+      - company
+      - country
+      - email
+      - first_name
+      - last_name
+      - postal_code
+      - state_or_territory
+      - street_address
+    TransactionOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        reference_number:
+          type: string
+          readOnly: true
+      required:
+      - created_on
+      - id
+      - reference_number
     TransactionRequest:
       type: object
       description: Serializer for transactions.
@@ -3215,13 +3215,13 @@ components:
           minLength: 1
         data: {}
       required:
-        - amount
-        - created_on
-        - data
-        - reason
-        - transaction_id
-        - transaction_type
-        - updated_on
+      - amount
+      - created_on
+      - data
+      - reason
+      - transaction_id
+      - transaction_type
+      - updated_on
     User:
       type: object
       description: Serializer for User model.
@@ -3251,9 +3251,9 @@ components:
           type: string
           maxLength: 255
       required:
-        - email
-        - id
-        - username
+      - email
+      - id
+      - username
     UserRequest:
       type: object
       description: Serializer for User model.
@@ -3276,4 +3276,4 @@ components:
           type: string
           maxLength: 255
       required:
-        - username
+      - username

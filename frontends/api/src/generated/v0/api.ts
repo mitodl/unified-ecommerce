@@ -3230,6 +3230,12 @@ export interface Transaction {
    * @memberof Transaction
    */
   data: any
+  /**
+   *
+   * @type {TransactionOrder}
+   * @memberof Transaction
+   */
+  order: TransactionOrder
 }
 /**
  * Serializes a transaction\'s purchaser data.
@@ -3291,6 +3297,31 @@ export interface TransactionDataPurchaser {
    * @memberof TransactionDataPurchaser
    */
   company: string
+}
+/**
+ *
+ * @export
+ * @interface TransactionOrder
+ */
+export interface TransactionOrder {
+  /**
+   *
+   * @type {number}
+   * @memberof TransactionOrder
+   */
+  id: number
+  /**
+   *
+   * @type {string}
+   * @memberof TransactionOrder
+   */
+  created_on: string
+  /**
+   *
+   * @type {string}
+   * @memberof TransactionOrder
+   */
+  reference_number: string
 }
 /**
  * Serializer for transactions.
