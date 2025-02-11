@@ -39,8 +39,29 @@ class RequestSerializer(serializers.ModelSerializer):
         )
 
 
+# API Request Serializers
+
+
 class CreateFromOrderApiSerializer(serializers.Serializer):
     """Serializer for the create from order API."""
 
     order = serializers.IntegerField()
     lines = serializers.ListField(child=serializers.IntegerField(), allow_empty=True)
+
+
+class ProcessRequestCodeLineSerializer(serializers.Serializer):
+    """Serializer for line items for a refund request."""
+
+    line = serializers.IntegerField()
+    refunded_amount = serializers.DecimalField(
+        max_digits=20, decimal_places=5, min_value=0
+    )
+
+
+class ProcessRequestCodeSerializer(serializers.Serializer):
+    """Serializer for the process request code API."""
+
+    email = serializers.EmailField()
+    code = serializers.CharField()
+    reason = serializers.CharField(allow_empty=True)
+    lines = ProcessRequestCodeLineSerializer(many=True)

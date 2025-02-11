@@ -10,11 +10,15 @@ from django.db import models
 from mitol.common.models import TimestampedModel
 
 from payments.models import Line, Order, Transaction
+from refunds.exceptions import RefundAlreadyCompleteError, RefundOrderImproperStateError
 from system_meta.models import IntegratedSystem
 from unified_ecommerce.constants import (
     REFUND_CODE_TYPE_CHOICES,
+    REFUND_STATUS_APPROVED,
     REFUND_STATUS_CHOICES,
     REFUND_STATUS_CREATED,
+    REFUND_STATUS_DENIED,
+    REFUND_STATUSES_PROCESSABLE,
 )
 from unified_ecommerce.plugin_manager import get_plugin_manager
 
@@ -90,6 +94,10 @@ class Request(TimestampedModel):
     )
 
     zendesk_ticket = models.CharField(max_length=255, blank=True, default="")
+    refund_reason = models.TextField(blank=True,
+        default="",
+        help_text="Reason for refund, supplied by the processing user."
+    )
 
     @property
     def total_requested(self):
@@ -103,6 +111,48 @@ class Request(TimestampedModel):
 
         return Decimal(sum(line.refunded_amount for line in self.lines.all()))
 
+    def _check_status_prerequisites(self):
+        """
+        Check the request and the order before refunding it.
+
+        Regardless of whether this is an approval or a denial, we should check
+        if the order is in a proper state to be refunded, and whether or not
+        the request itself is in a proper state for processing.
+        """
+
+        if self.status not in REFUND_STATUSES_PROCESSABLE:
+            msg = f"Request {self} must be in a processable state to process."
+            raise RefundAlreadyCompleteError(msg)
+
+        if self.order.state != Order.STATE.FULFILLED:
+            msg = (f"Order {self.order.reference_number} must be in fulfilled "
+                   "state to process.")
+            raise RefundOrderImproperStateError(msg)
+
+    def approve(self, reason: str, *, lines: list|None = None):
+        """Approve the request."""
+
+        self._check_status_prerequisites()
+
+        self.refund_reason = reason
+        self.save()
+
+        for line in (lines or self.lines.all()): # note: this ain't gonna work but it's EOD so here's a note for tomorrow
+            self.lines.filter(pk=line["line"]).update(
+                status=REFUND_STATUS_APPROVED,
+                refunded_amount=line["refunded_amount"],
+            )
+
+
+    def deny(self, reason: str):
+        """Deny the request."""
+
+        self._check_status_prerequisites()
+
+        self.status = REFUND_STATUS_DENIED
+        self.refund_reason = reason
+        self.save()
+
     def __str__(self):
         """Return a reasonable string representation of the request."""
 
@@ -113,6 +163,7 @@ class Request(TimestampedModel):
 
 
 class RequestProcessingCode(TimestampedModel):
+
     """
     Stores codes for approving/denying a request.
 
