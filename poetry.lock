@@ -1105,17 +1105,17 @@ Django = ">=3.2"
 
 [[package]]
 name = "django-filter"
-version = "23.5"
+version = "24.3"
 description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "django-filter-23.5.tar.gz", hash = "sha256:67583aa43b91fe8c49f74a832d95f4d8442be628fd4c6d65e9f811f5153a4e5c"},
-    {file = "django_filter-23.5-py3-none-any.whl", hash = "sha256:99122a201d83860aef4fe77758b69dda913e874cc5e0eaa50a86b0b18d708400"},
+    {file = "django_filter-24.3-py3-none-any.whl", hash = "sha256:c4852822928ce17fb699bcfccd644b3574f1a2d80aeb2b4ff4f16b02dd49dc64"},
+    {file = "django_filter-24.3.tar.gz", hash = "sha256:d8ccaf6732afd21ca0542f6733b11591030fa98669f8d15599b358e24a2cd9c3"},
 ]
 
 [package.dependencies]
-Django = ">=3.2"
+Django = ">=4.2"
 
 [[package]]
 name = "django-guardian"
@@ -4343,4 +4343,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.1"
-content-hash = "549bbbded3ae1f476ff3cf7cbb041a84cb8d262f198b44d04f91fec7707fb64d"
+content-hash = "cc8cc7afa21fb2fe5ca6a2a9baf96d10c6158ebe5e0e65f4049c94a16c2f8545"
