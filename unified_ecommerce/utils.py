@@ -394,48 +394,58 @@ def get_user_from_apisix_headers(request):
     if not decoded_headers:
         return None
 
-    (
-        email,
-        preferred_username,
-        given_name,
-        family_name,
-    ) = decoded_headers.values()
+    log.debug("decoded headers: %s", decoded_headers)
 
-    log.debug("get_user_from_apisix_headers: Authenticating %s", preferred_username)
+    email = decoded_headers.get("email", None)
+    global_id = decoded_headers.get("global_id", None)
+    username = decoded_headers.get("username", None)
+    given_name = decoded_headers.get("given_name", None)
+    family_name = decoded_headers.get("family_name", None)
+    name = decoded_headers.get("name", None)
 
-    user, created = User.objects.filter(username=preferred_username).get_or_create(
+    log.debug("get_user_from_apisix_headers: Authenticating %s", global_id)
+
+    user, created = User.objects.update_or_create(
+        global_id=global_id,
         defaults={
-            "username": preferred_username,
+            "global_id": global_id,
+            "username": username,
             "email": email,
             "first_name": given_name,
             "last_name": family_name,
-        }
+            "name": name,
+        },
     )
 
     if created:
         log.debug(
             "get_user_from_apisix_headers: User %s not found, created new",
-            preferred_username,
+            global_id,
         )
         user.set_unusable_password()
+        user.is_active = True
         user.save()
     else:
         log.debug(
             "get_user_from_apisix_headers: Found existing user for %s: %s",
-            preferred_username,
+            global_id,
             user,
         )
 
-        user.first_name = given_name
-        user.last_name = family_name
-        user.save()
+        if not user.is_active:
+            log.debug(
+                "get_user_from_apisix_headers: User %s is inactive",
+                global_id,
+            )
+            msg = "User is inactive"
+            raise KeyError(msg)
 
     profile_data = decode_apisix_headers(request, "authentication_userprofile")
 
     if profile_data:
         log.debug(
             "get_user_from_apisix_headers: Setting up additional profile for %s",
-            preferred_username,
+            global_id,
         )
 
         _, profile = UserProfile.objects.filter(user=user).get_or_create(

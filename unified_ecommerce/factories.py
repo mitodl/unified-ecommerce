@@ -3,19 +3,24 @@ Factory for Users
 """
 
 import ulid
-from django.contrib.auth.models import Group, User
-from factory import LazyFunction, RelatedFactory
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from factory import Faker, LazyFunction, RelatedFactory
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
+
+User = get_user_model()
 
 
 class UserFactory(DjangoModelFactory):
     """Factory for Users"""
 
+    global_id = Faker("uuid4")
     username = LazyFunction(lambda: ulid.new().str)
     email = FuzzyText(suffix="@example.com")
     first_name = FuzzyText()
     last_name = FuzzyText()
+    is_active = True
 
     profile = RelatedFactory("users.factories.UserProfileFactory", "user")
 

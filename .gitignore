@@ -140,3 +140,6 @@ generated-codes.csv
 
 # SQLite
 *.sqlite3
+
+# Manually-built ol-django packages
+mitol_django_*
