@@ -407,12 +407,15 @@ def start_checkout(request, system_slug: str):
 
     if (
         "country_blocked" in payload
-        or "no_checkout" in payload
         or "purchased_same_courserun" in payload
         or "purchased_non_upgradeable_courserun" in payload
         or "invalid_discounts" in payload
     ):
         return Response(payload["response"], status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    if "no_checkout" in payload:
+        # The user doesn't have to check out - we're done here.
+        return Response(payload, status=status.HTTP_201_CREATED)
 
     return Response(CyberSourceCheckoutSerializer(payload).data)
 
