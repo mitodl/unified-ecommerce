@@ -10,11 +10,12 @@ from drf_spectacular.utils import (
 )
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from payments.models import Order
 from refunds.api import create_request_from_order
+from refunds.exceptions import RefundAlreadyCompleteError
 from refunds.models import RequestLine, RequestProcessingCode
 from refunds.serializers.v0 import (
     CreateFromOrderApiSerializer,
@@ -86,20 +87,18 @@ def create_from_order(request):
 
 
 @extend_schema(
-    description=(
-        "Process a refund based on the code provided."
-    ),
+    description=("Process a refund based on the code provided."),
     methods=["POST"],
     request=ProcessRequestCodeSerializer,
     responses={
         201: RequestSerializer,
-        401: inline_serializer(fields={"error": str}),
+        401: inline_serializer(name="ErrorSerializer", fields={"error": str}),
     },
 )
 @api_view(["POST"])
 @permission_classes(
     [
-        IsAuthenticated,
+        AllowAny,
     ]
 )
 def accept_code(request):
@@ -111,6 +110,9 @@ def accept_code(request):
     form that requests their email address, an optional reason for refund, and
     a selector for the lines they wish to refund. This is the API that processes
     that request. (Users don't directly go to this endpoint.)
+
+    Because this is doesn't require authentication, we send opaque messages back
+    to the user. (This route will require special handling in APISIX.)
     """
 
     code = request.data.get("code", None)
@@ -120,21 +122,25 @@ def accept_code(request):
 
     if not code or not email:
         return Response(
-            { "error": "Provide a code and email." },
-            status=status.HTTP_400_BAD_REQUEST
+            {"error": "Provide a code and email."}, status=status.HTTP_400_BAD_REQUEST
         )
 
     try:
         with transaction.atomic():
-            code = RequestProcessingCode.objects.filter(
-                Q(approve_code=code) | Q(deny_code=code)
-            ).filter(email=email).filter(code_active=True).get()
+            code = (
+                RequestProcessingCode.objects.filter(
+                    Q(approve_code=code) | Q(deny_code=code)
+                )
+                .filter(email=email)
+                .filter(code_active=True)
+                .get()
+            )
 
             # If this pulled up OK, then immediately invalidate all the other
             # codes.
-            RequestProcessingCode.objects.filter(refund_request=code.refund_request).update(
-                code_active=False
-            )
+            RequestProcessingCode.objects.filter(
+                refund_request=code.refund_request
+            ).update(code_active=False)
     except RequestProcessingCode.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -142,19 +148,24 @@ def accept_code(request):
         # do something to approve the request
         try:
             code.refund_request.approve(reason, lines=lines)
-        except ValueError as e:
+        except RefundAlreadyCompleteError as e:
             log.exception(
                 "Refund failed: Attempted to accept code %s for completed request %s",
                 code,
                 code.refund_request,
             )
-            return Response(
-                { "error": str(e) },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     if code.deny_code == code:
         # do something to deny the request
-        pass
+        try:
+            code.refund_request.approve(reason, lines=lines)
+        except RefundAlreadyCompleteError as e:
+            log.exception(
+                "Refund failed: Attempted to accept code %s for completed request %s",
+                code,
+                code.refund_request,
+            )
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response(status=status.HTTP_200_OK)

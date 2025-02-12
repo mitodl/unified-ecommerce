@@ -7,6 +7,7 @@ from payments.hooks import basket_add as payments_basket_add
 from payments.hooks import post_sale as payments_post_sale
 from refunds import hookspecs as refunds_hookspecs
 from refunds.hooks.refund_created import RefundCreatedHooks
+from refunds.hooks.refund_denied import RefundDeniedHooks
 
 
 def get_plugin_manager():
@@ -21,6 +22,7 @@ def get_plugin_manager():
 
     pm.add_hookspecs(refunds_hookspecs)
     pm.register(RefundCreatedHooks())
+    pm.register(RefundDeniedHooks())
 
     pm.load_setuptools_entrypoints("unified_ecommerce")
     return pm

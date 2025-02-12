@@ -11,6 +11,7 @@ from mitol.common.models import TimestampedModel
 
 from payments.models import Line, Order, Transaction
 from refunds.exceptions import RefundAlreadyCompleteError, RefundOrderImproperStateError
+from refunds.tasks import queue_process_approved_refund
 from system_meta.models import IntegratedSystem
 from unified_ecommerce.constants import (
     REFUND_CODE_TYPE_CHOICES,
@@ -77,6 +78,7 @@ class Request(TimestampedModel):
         related_name="processed_refund_requests",
         null=True,
         blank=True,
+        help_text="The user who processed the request. (Usually blank.)",
     )
 
     total_refunded = models.DecimalField(
@@ -94,9 +96,10 @@ class Request(TimestampedModel):
     )
 
     zendesk_ticket = models.CharField(max_length=255, blank=True, default="")
-    refund_reason = models.TextField(blank=True,
+    refund_reason = models.TextField(
+        blank=True,
         default="",
-        help_text="Reason for refund, supplied by the processing user."
+        help_text="Reason for refund, supplied by the processing user.",
     )
 
     @property
@@ -125,24 +128,42 @@ class Request(TimestampedModel):
             raise RefundAlreadyCompleteError(msg)
 
         if self.order.state != Order.STATE.FULFILLED:
-            msg = (f"Order {self.order.reference_number} must be in fulfilled "
-                   "state to process.")
+            msg = (
+                f"Order {self.order.reference_number} must be in fulfilled "
+                "state to process."
+            )
             raise RefundOrderImproperStateError(msg)
 
-    def approve(self, reason: str, *, lines: list|None = None):
-        """Approve the request."""
+    def approve(self, reason: str, *, lines: list | None = None):
+        """
+        Approve the request.
+
+        Set the request status and the appropriate lines to "approved", then
+        queue a task to process the refund via CyberSource.
+        """
 
         self._check_status_prerequisites()
 
         self.refund_reason = reason
+        self.status = REFUND_STATUS_APPROVED
         self.save()
 
-        for line in (lines or self.lines.all()): # note: this ain't gonna work but it's EOD so here's a note for tomorrow
-            self.lines.filter(pk=line["line"]).update(
-                status=REFUND_STATUS_APPROVED,
-                refunded_amount=line["refunded_amount"],
-            )
+        if lines:
+            for line in lines:
+                self.lines.filter(pk=line["line"]).update(
+                    status=REFUND_STATUS_APPROVED,
+                    refunded_amount=line["refunded_amount"],
+                )
+        else:
+            for line in self.lines.all():
+                # total_price is a calculated field, can't use an F object
+                line.update(
+                    status=REFUND_STATUS_APPROVED,
+                    refunded_amount=line.line.total_price,
+                )
 
+        log.debug("Queueing refund processing for request %s", self.pk)
+        queue_process_approved_refund.delay(self.pk)
 
     def deny(self, reason: str):
         """Deny the request."""
@@ -152,6 +173,8 @@ class Request(TimestampedModel):
         self.status = REFUND_STATUS_DENIED
         self.refund_reason = reason
         self.save()
+
+        pm.hook.refund_denied(refund_id=self.pk)
 
     def __str__(self):
         """Return a reasonable string representation of the request."""
@@ -163,7 +186,6 @@ class Request(TimestampedModel):
 
 
 class RequestProcessingCode(TimestampedModel):
-
     """
     Stores codes for approving/denying a request.
 

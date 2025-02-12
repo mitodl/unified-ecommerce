@@ -1,5 +1,7 @@
 """Serializers for refund requests (v0)."""
 
+from decimal import Decimal
+
 from rest_framework import serializers
 
 from payments.serializers.v0 import OrderSerializer
@@ -54,7 +56,7 @@ class ProcessRequestCodeLineSerializer(serializers.Serializer):
 
     line = serializers.IntegerField()
     refunded_amount = serializers.DecimalField(
-        max_digits=20, decimal_places=5, min_value=0
+        max_digits=20, decimal_places=5, min_value=Decimal(0)
     )
 
 
@@ -63,5 +65,5 @@ class ProcessRequestCodeSerializer(serializers.Serializer):
 
     email = serializers.EmailField()
     code = serializers.CharField()
-    reason = serializers.CharField(allow_empty=True)
+    reason = serializers.CharField()
     lines = ProcessRequestCodeLineSerializer(many=True)
