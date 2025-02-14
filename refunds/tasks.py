@@ -29,7 +29,9 @@ def queue_refund_access_code_emails(request_id: int, batch: str) -> None:
 
 
 @app.task
-def queue_process_approved_refund(request_id: int) -> None:
+def queue_process_approved_refund(
+    request_id: int, *, auto_approved: bool = False
+) -> None:
     """Queue up the processing for an approved refund request."""
 
     from refunds.api import process_approved_refund
@@ -42,7 +44,7 @@ def queue_process_approved_refund(request_id: int) -> None:
 
     try:
         request = Request.objects.get(pk=request_id)
-        process_approved_refund(request)
+        process_approved_refund(request, auto_approved=auto_approved)
     except Request.DoesNotExist:
         log.exception("%s: Request %s not found", __name__, request_id)
     except RefundRequestImproperStateError:

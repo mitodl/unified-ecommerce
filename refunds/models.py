@@ -16,6 +16,7 @@ from system_meta.models import IntegratedSystem
 from unified_ecommerce.constants import (
     REFUND_CODE_TYPE_CHOICES,
     REFUND_STATUS_APPROVED,
+    REFUND_STATUS_APPROVED_COMPLETE,
     REFUND_STATUS_CHOICES,
     REFUND_STATUS_CREATED,
     REFUND_STATUS_DENIED,
@@ -134,7 +135,9 @@ class Request(TimestampedModel):
             )
             raise RefundOrderImproperStateError(msg)
 
-    def approve(self, reason: str, *, lines: list | None = None):
+    def approve(
+        self, reason: str, *, lines: list | None = None, auto_approved: bool = False
+    ):
         """
         Approve the request.
 
@@ -144,26 +147,31 @@ class Request(TimestampedModel):
 
         self._check_status_prerequisites()
 
+        set_status = REFUND_STATUS_APPROVED
+
+        if self.total_requested == Decimal(0) or auto_approved:
+            # This request was auto-approved for whatever reason (zero value, etc.)
+            set_status = REFUND_STATUS_APPROVED_COMPLETE
+
         self.refund_reason = reason
-        self.status = REFUND_STATUS_APPROVED
+        self.status = set_status
         self.save()
 
         if lines:
             for line in lines:
                 self.lines.filter(pk=line["line"]).update(
-                    status=REFUND_STATUS_APPROVED,
+                    status=set_status,
                     refunded_amount=line["refunded_amount"],
                 )
         else:
             for line in self.lines.all():
                 # total_price is a calculated field, can't use an F object
-                line.update(
-                    status=REFUND_STATUS_APPROVED,
-                    refunded_amount=line.line.total_price,
-                )
+                line.status = set_status
+                line.refunded_amount = line.line.total_price
+                line.save()
 
         log.debug("Queueing refund processing for request %s", self.pk)
-        queue_process_approved_refund.delay(self.pk)
+        queue_process_approved_refund.delay(self.pk, auto_approved=auto_approved)
 
     def deny(self, reason: str):
         """Deny the request."""
@@ -173,6 +181,7 @@ class Request(TimestampedModel):
         self.status = REFUND_STATUS_DENIED
         self.refund_reason = reason
         self.save()
+        self.lines.update(status=REFUND_STATUS_DENIED)
 
         pm.hook.refund_denied(refund_id=self.pk)
 

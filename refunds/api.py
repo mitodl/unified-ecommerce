@@ -1,6 +1,7 @@
 """API functions for refunds."""
 
 import logging
+from decimal import Decimal
 from uuid import uuid4
 
 from django.conf import settings
@@ -26,6 +27,7 @@ from unified_ecommerce.constants import (
     TRANSACTION_TYPE_REFUND,
 )
 from unified_ecommerce.plugin_manager import get_plugin_manager
+from unified_ecommerce.utils import now_in_utc
 
 pm = get_plugin_manager()
 log = logging.getLogger(__name__)
@@ -89,29 +91,30 @@ def create_request_from_order(
             RequestLine.objects.create(refund_request=request, line=line)
 
     pm.hook.refund_created(refund_id=request.pk)
+    request.refresh_from_db()
 
     return request
 
 
 @transaction.atomic
-def process_approved_refund(request: Request) -> None:
+def process_approved_refund(request: Request, *, auto_approved: bool = False) -> None:
     """
     Generate a CyberSource refund request for the approved lines in the refund request.
     """
 
-    if request.status != REFUND_STATUS_APPROVED:
+    if request.status != REFUND_STATUS_APPROVED and not auto_approved:
         msg = f"Request {request} must be approved to process."
         raise RefundRequestImproperStateError(msg)
 
     order = request.order
     order_recent_transaction = (
         order.transactions.filter(transaction_type=TRANSACTION_TYPE_PAYMENT)
-        .order_by("-created_at")
+        .order_by("-created_on")
         .first()
     )
 
     if not order_recent_transaction:
-        message = f"There is no associated transaction against order_id {order.id}"
+        message = f"No payment transactions exist for order_id {order.id}"
         log.error(message)
         return False, message
 
@@ -131,10 +134,25 @@ def process_approved_refund(request: Request) -> None:
 
     refund_amount = sum(line.refunded_amount for line in request.lines.all())
 
+    if refund_amount == Decimal(0):
+        # If we didn't refund anything, add a few bits of metadata and fire the
+        # issued hooks.
+        request.processed_date = now_in_utc()
+        request.status = REFUND_STATUS_APPROVED_COMPLETE
+        request.save()
+
+        for line in request.lines.all():
+            line.status = REFUND_STATUS_APPROVED_COMPLETE
+            line.save()
+
+        pm.hook.refund_issued(refund_id=request.id)
+
+        return True
+
     refund_dict = {
         "transaction_id": transaction_dict["transaction_id"],
-        "amount": refund_amount,
-        "currency": transaction_dict["req_currency"],
+        "req_amount": refund_amount,
+        "req_currency": transaction_dict["req_currency"],
     }
 
     log.debug("Refund request %s payload for CyberSource: %s", request, refund_dict)
@@ -154,13 +172,14 @@ def process_approved_refund(request: Request) -> None:
 
         transaction = order.transactions.create(
             transaction_type=TRANSACTION_TYPE_REFUND,
-            data=response.data,
-            state=response.state,
+            data=response.response_data,
             reason=request.refund_reason,
+            amount=response.response_data.get("refundAmountDetails", {}).get(
+                "refundAmount"
+            ),
         )
 
-        request.processed_date = transaction.created_at
-        request.processed_by = request.requester
+        request.processed_date = transaction.created_on
         request.status = REFUND_STATUS_APPROVED_COMPLETE
         request.save()
 
@@ -169,7 +188,7 @@ def process_approved_refund(request: Request) -> None:
             line.transactions.add(transaction)
             line.save()
 
-        pm.hook.refund_issued(request.id)
+        pm.hook.refund_issued(refund_id=request.id)
 
         return True
 
