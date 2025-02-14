@@ -34,6 +34,7 @@ class BasketItemFactory(DjangoModelFactory):
 
         model = models.BasketItem
 
+
 class OrderFactory(DjangoModelFactory):
     """Factory for Order"""
 
@@ -115,6 +116,7 @@ class DiscountFactory(DjangoModelFactory):
 
         model = models.Discount
 
+
 class CompanyFactory(DjangoModelFactory):
     """Factory for Company"""
 
@@ -125,6 +127,7 @@ class CompanyFactory(DjangoModelFactory):
 
         model = models.Company
 
+
 class BulkDiscountCollectionFactory(DjangoModelFactory):
     """Factory for BulkDiscountCollection"""
 
@@ -134,6 +137,7 @@ class BulkDiscountCollectionFactory(DjangoModelFactory):
         """Meta options for BulkDiscountCollectionFactory"""
 
         model = models.BulkDiscountCollection
+
 
 class RedeemedDiscountFactory(DjangoModelFactory):
     """Factory for RedeemedDiscount"""

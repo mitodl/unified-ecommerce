@@ -258,7 +258,9 @@ def process_cybersource_payment_response(
     return order.state
 
 
-def refund_order(*, order_id: int | None = None, reference_number: str | None = None, **kwargs):
+def refund_order(
+    *, order_id: int | None = None, reference_number: str | None = None, **kwargs
+):
     """
     Refund the specified order.
 
@@ -277,7 +279,10 @@ def refund_order(*, order_id: int | None = None, reference_number: str | None = 
     # Validate input
     if not any([order_id, reference_number]):
         log.error("Either order_id or reference_number is required to fetch the Order.")
-        return False, "Either order_id or reference_number is required to fetch the Order."
+        return (
+            False,
+            "Either order_id or reference_number is required to fetch the Order.",
+        )
 
     # Fetch the order
     try:
@@ -287,7 +292,9 @@ def refund_order(*, order_id: int | None = None, reference_number: str | None = 
             else FulfilledOrder.objects.get(pk=order_id)
         )
     except FulfilledOrder.DoesNotExist:
-        log.exception(f"Order with {'reference_number' if reference_number else 'order_id'} {reference_number or order_id} not found.")
+        log.exception(
+            f"Order with {'reference_number' if reference_number else 'order_id'} {reference_number or order_id} not found."
+        )
         raise
 
     # Validate order state
@@ -323,7 +330,9 @@ def refund_order(*, order_id: int | None = None, reference_number: str | None = 
     # Handle refund response
     if response.state not in REFUND_SUCCESS_STATES:
         log.error(f"There was an error with the Refund API request: {response.message}")
-        raise PaymentGatewayError(f"Payment gateway returned an error: {response.message}")
+        raise PaymentGatewayError(
+            f"Payment gateway returned an error: {response.message}"
+        )
 
     # Record successful refund
     order.refund(
@@ -471,11 +480,12 @@ def get_auto_apply_discounts_for_basket(basket_id: int) -> QuerySet[Discount]:
 
     return Discount.objects.filter(
         Q(product__in=products) | Q(product__isnull=True),
-        Q(integrated_system=basket.integrated_system) |
-        Q(integrated_system__isnull=True),
+        Q(integrated_system=basket.integrated_system)
+        | Q(integrated_system__isnull=True),
         Q(assigned_users=basket.user) | Q(assigned_users__isnull=True),
-        automatic=True
+        automatic=True,
     )
+
 
 def validate_discount_type(discount_type):
     """
@@ -491,6 +501,7 @@ def validate_discount_type(discount_type):
         error_message = f"Invalid discount type: {discount_type}."
         raise ValueError(error_message)
 
+
 def validate_payment_type(payment_type):
     """
     Validate the payment type.
@@ -504,6 +515,7 @@ def validate_payment_type(payment_type):
     if payment_type not in ALL_PAYMENT_TYPES:
         error_message = f"Payment type {payment_type} is not valid."
         raise ValueError(error_message)
+
 
 def validate_percent_off_amount(discount_type, amount):
     """
@@ -563,6 +575,7 @@ def generate_codes(count, prefix=None, codes=None):
         return [f"{prefix}{uuid.uuid4()}" for _ in range(count)]
     return [codes]
 
+
 def get_redemption_type(kwargs):
     """
     Get the redemption type.
@@ -582,6 +595,7 @@ def get_redemption_type(kwargs):
     ):
         return kwargs["redemption_type"]
     return REDEMPTION_TYPE_UNLIMITED
+
 
 def get_object_or_raise(model, identifier, missing_msg):
     """
@@ -606,6 +620,7 @@ def get_object_or_raise(model, identifier, missing_msg):
         return model.objects.get(slug=identifier)
     except ObjectDoesNotExist as err:
         raise ValueError(missing_msg) from err
+
 
 def get_users(users):
     """
@@ -633,6 +648,7 @@ def get_users(users):
             error_message = f"User {user_identifier} does not exist."
             raise ValueError(error_message) from None
     return user_list
+
 
 def generate_discount_code(**kwargs):
     """
@@ -671,9 +687,7 @@ def generate_discount_code(**kwargs):
     validate_prefix_for_batch(kwargs.get("count", 1), kwargs.get("prefix", ""))
 
     codes_to_generate = generate_codes(
-        kwargs.get("count", 1),
-        kwargs.get("prefix", ""),
-        kwargs.get("codes", "")
+        kwargs.get("count", 1), kwargs.get("prefix", ""), kwargs.get("codes", "")
     )
     redemption_type = get_redemption_type(kwargs)
     expiration_date = (
@@ -683,21 +697,33 @@ def generate_discount_code(**kwargs):
         parse_supplied_date(kwargs["activates"]) if kwargs.get("activates") else None
     )
 
-    integrated_system = get_object_or_raise(
-        IntegratedSystem,
-        kwargs["integrated_system"],
-        f"Integrated system {kwargs['integrated_system']} does not exist."
-    ) if kwargs.get("integrated_system") else None
+    integrated_system = (
+        get_object_or_raise(
+            IntegratedSystem,
+            kwargs["integrated_system"],
+            f"Integrated system {kwargs['integrated_system']} does not exist.",
+        )
+        if kwargs.get("integrated_system")
+        else None
+    )
 
-    product = get_object_or_raise(Product, kwargs["product"],
-                                    f"Product {kwargs['product']} does not exist."
-                                ) if kwargs.get("product") else None
+    product = (
+        get_object_or_raise(
+            Product, kwargs["product"], f"Product {kwargs['product']} does not exist."
+        )
+        if kwargs.get("product")
+        else None
+    )
 
     users = get_users(kwargs["users"]) if kwargs.get("users") else None
 
-    company = get_object_or_raise(Company, kwargs["company"],
-                                      f"Company {kwargs['company']} does not exist."
-                                  ) if kwargs.get("company") else None
+    company = (
+        get_object_or_raise(
+            Company, kwargs["company"], f"Company {kwargs['company']} does not exist."
+        )
+        if kwargs.get("company")
+        else None
+    )
 
     transaction_number = kwargs.get("transaction_number", "")
 
@@ -716,7 +742,9 @@ def generate_discount_code(**kwargs):
                 integrated_system=integrated_system,
                 product=product,
                 bulk_discount_collection=(
-                    BulkDiscountCollection.objects.get_or_create(prefix=kwargs.get("prefix"))[0]
+                    BulkDiscountCollection.objects.get_or_create(
+                        prefix=kwargs.get("prefix")
+                    )[0]
                     if kwargs.get("prefix")
                     else None
                 ),
@@ -786,15 +814,23 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     else:
         expiration_date = None
 
-    integrated_system = get_object_or_raise(
-        IntegratedSystem,
-        kwargs["integrated_system"],
-        f"Integrated system {kwargs['integrated_system']} does not exist."
-    ) if kwargs.get("integrated_system") else None
+    integrated_system = (
+        get_object_or_raise(
+            IntegratedSystem,
+            kwargs["integrated_system"],
+            f"Integrated system {kwargs['integrated_system']} does not exist.",
+        )
+        if kwargs.get("integrated_system")
+        else None
+    )
 
-    product = get_object_or_raise(Product, kwargs["product"],
-                                    f"Product {kwargs['product']} does not exist."
-                                ) if kwargs.get("product") else None
+    product = (
+        get_object_or_raise(
+            Product, kwargs["product"], f"Product {kwargs['product']} does not exist."
+        )
+        if kwargs.get("product")
+        else None
+    )
 
     users = get_users(kwargs["users"]) if kwargs.get("users") else None
 
@@ -913,8 +949,7 @@ def check_blocked_countries(basket, basket_item):
     log.debug("Checking blockages for user: %s", basket.user)
 
     if BlockedCountry.objects.filter(
-        country_code=basket.user_blockable_country_code,
-        product__in=[None, basket_item]
+        country_code=basket.user_blockable_country_code, product__in=[None, basket_item]
     ).exists():
         log.debug("User is blocked from purchasing the product.")
         message = (
