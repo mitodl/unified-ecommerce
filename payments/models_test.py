@@ -529,6 +529,7 @@ def test_order_tax_calculation_precision_check(user):
     assert order.lines.first().tax == tax_assessed
     assert order.lines.first().total_price == taxed_price
 
+
 def test_resolve_discount_version_current_version():
     """
     Test that the current version of a Discount instance is returned when no version is specified.
@@ -541,6 +542,7 @@ def test_resolve_discount_version_current_version():
 
     # Assert that the current version is returned
     assert result == discount
+
 
 def test_resolve_discount_version_specific_version():
     """
@@ -560,10 +562,13 @@ def test_resolve_discount_version_specific_version():
     version = versions.first()
 
     # Call the method with the specific version
-    result = models.Discount.resolve_discount_version(discount, discount_version=version)
+    result = models.Discount.resolve_discount_version(
+        discount, discount_version=version
+    )
 
     # Assert that the specific version is returned
     assert result.amount == 50
+
 
 def test_resolve_discount_version_no_versions():
     """
@@ -577,6 +582,7 @@ def test_resolve_discount_version_no_versions():
 
     # Assert that the current version is returned
     assert result == discount
+
 
 def test_resolve_discount_version_invalid_version():
     """
@@ -597,7 +603,9 @@ def test_resolve_discount_version_invalid_version():
 
     # Call the method with an invalid version
     with pytest.raises(TypeError) as exc_info:
-        models.Discount.resolve_discount_version(discount, discount_version="invalid_version")
+        models.Discount.resolve_discount_version(
+            discount, discount_version="invalid_version"
+        )
 
     # Assert the correct error message
     assert str(exc_info.value) == "Invalid product version specified"
