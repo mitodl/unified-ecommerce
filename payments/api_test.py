@@ -1282,6 +1282,7 @@ def test_check_blocked_countries_not_blocked_for_other_country():
 
     # No exception means the test passes
 
+
 def test_get_redemption_type_one_time():
     """
     Test that get_redemption_type returns the correct redemption type for one-time discounts
@@ -1289,12 +1290,14 @@ def test_get_redemption_type_one_time():
     kwargs = {"one_time": True}
     assert get_redemption_type(kwargs) == REDEMPTION_TYPE_ONE_TIME
 
+
 def test_get_redemption_type_once_per_user():
     """
     Test that get_redemption_type returns the correct redemption type for once-per-user discounts
     """
     kwargs = {"once_per_user": True}
     assert get_redemption_type(kwargs) == REDEMPTION_TYPE_ONE_TIME_PER_USER
+
 
 def test_get_redemption_type_specific_redemption_type():
     """
@@ -1309,6 +1312,7 @@ def test_get_redemption_type_specific_redemption_type():
     kwargs = {"redemption_type": REDEMPTION_TYPE_UNLIMITED}
     assert get_redemption_type(kwargs) == REDEMPTION_TYPE_UNLIMITED
 
+
 def test_get_redemption_type_invalid_redemption_type():
     """
     Test that get_redemption_type returns the default redemption type when an invalid redemption type is provided
@@ -1316,12 +1320,14 @@ def test_get_redemption_type_invalid_redemption_type():
     kwargs = {"redemption_type": "INVALID_TYPE"}
     assert get_redemption_type(kwargs) == REDEMPTION_TYPE_UNLIMITED
 
+
 def test_get_redemption_type_no_kwargs():
     """
     Test that get_redemption_type returns the default redemption type when no kwargs are provided
     """
     kwargs = {}
     assert get_redemption_type(kwargs) == REDEMPTION_TYPE_UNLIMITED
+
 
 def test_get_redemption_type_multiple_kwargs():
     """
@@ -1333,12 +1339,14 @@ def test_get_redemption_type_multiple_kwargs():
     kwargs = {"once_per_user": True, "redemption_type": REDEMPTION_TYPE_ONE_TIME}
     assert get_redemption_type(kwargs) == REDEMPTION_TYPE_ONE_TIME_PER_USER
 
+
 def test_get_redemption_type_unknown_redemption_type():
     """
     Test that get_redemption_type returns the default redemption type when an unknown redemption type is provided
     """
     kwargs = {"redemption_type": "UNKNOWN_TYPE"}
     assert get_redemption_type(kwargs) == REDEMPTION_TYPE_UNLIMITED
+
 
 def test_get_users_with_valid_ids():
     """
@@ -1353,6 +1361,7 @@ def test_get_users_with_valid_ids():
 
     # Assert that the correct users are returned
     assert result == [user1, user2]
+
 
 def test_get_users_with_valid_emails():
     """
@@ -1404,7 +1413,7 @@ def test_get_users_with_invalid_email():
     Test that get_users raises an error when an invalid user email is provided
     """
     # Create a test user
-    test_user  = UserFactory()
+    test_user = UserFactory()
 
     # Call the function with an invalid email
     invalid_email = "nonexistent@example.com"
