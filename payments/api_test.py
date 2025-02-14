@@ -23,6 +23,7 @@ from payments.api import (
     generate_checkout_payload,
     generate_discount_code,
     get_auto_apply_discounts_for_basket,
+    get_redemption_type,
     locate_customer_for_basket,
     process_cybersource_payment_response,
     process_post_sale_webhooks,
@@ -73,6 +74,8 @@ from unified_ecommerce.constants import (
     POST_SALE_SOURCE_BACKOFFICE,
     POST_SALE_SOURCE_REDIRECT,
     REDEMPTION_TYPE_ONE_TIME,
+    REDEMPTION_TYPE_ONE_TIME_PER_USER,
+    REDEMPTION_TYPE_UNLIMITED,
     TRANSACTION_TYPE_PAYMENT,
     TRANSACTION_TYPE_REFUND,
 )
@@ -1173,3 +1176,61 @@ def test_check_blocked_countries_not_blocked_for_other_country():
     check_blocked_countries(basket, product)
 
     # No exception means the test passes
+
+def test_get_redemption_type_one_time():
+    """
+    Test that get_redemption_type returns the correct redemption type for one-time discounts
+    """
+    kwargs = {"one_time": True}
+    assert get_redemption_type(kwargs) == REDEMPTION_TYPE_ONE_TIME
+
+def test_get_redemption_type_once_per_user():
+    """
+    Test that get_redemption_type returns the correct redemption type for once-per-user discounts
+    """
+    kwargs = {"once_per_user": True}
+    assert get_redemption_type(kwargs) == REDEMPTION_TYPE_ONE_TIME_PER_USER
+
+def test_get_redemption_type_specific_redemption_type():
+    """
+    Test that get_redemption_type returns the correct redemption type when a specific redemption type is provided
+    """
+    kwargs = {"redemption_type": REDEMPTION_TYPE_ONE_TIME}
+    assert get_redemption_type(kwargs) == REDEMPTION_TYPE_ONE_TIME
+
+    kwargs = {"redemption_type": REDEMPTION_TYPE_ONE_TIME_PER_USER}
+    assert get_redemption_type(kwargs) == REDEMPTION_TYPE_ONE_TIME_PER_USER
+
+    kwargs = {"redemption_type": REDEMPTION_TYPE_UNLIMITED}
+    assert get_redemption_type(kwargs) == REDEMPTION_TYPE_UNLIMITED
+
+def test_get_redemption_type_invalid_redemption_type():
+    """
+    Test that get_redemption_type returns the default redemption type when an invalid redemption type is provided
+    """
+    kwargs = {"redemption_type": "INVALID_TYPE"}
+    assert get_redemption_type(kwargs) == REDEMPTION_TYPE_UNLIMITED
+
+def test_get_redemption_type_no_kwargs():
+    """
+    Test that get_redemption_type returns the default redemption type when no kwargs are provided
+    """
+    kwargs = {}
+    assert get_redemption_type(kwargs) == REDEMPTION_TYPE_UNLIMITED
+
+def test_get_redemption_type_multiple_kwargs():
+    """
+    Test that get_redemption_type returns the correct redemption type when multiple kwargs are provided
+    """
+    kwargs = {"one_time": True, "once_per_user": True}
+    assert get_redemption_type(kwargs) == REDEMPTION_TYPE_ONE_TIME
+
+    kwargs = {"once_per_user": True, "redemption_type": REDEMPTION_TYPE_ONE_TIME}
+    assert get_redemption_type(kwargs) == REDEMPTION_TYPE_ONE_TIME_PER_USER
+
+def test_get_redemption_type_unknown_redemption_type():
+    """
+    Test that get_redemption_type returns the default redemption type when an unknown redemption type is provided
+    """
+    kwargs = {"redemption_type": "UNKNOWN_TYPE"}
+    assert get_redemption_type(kwargs) == REDEMPTION_TYPE_UNLIMITED
