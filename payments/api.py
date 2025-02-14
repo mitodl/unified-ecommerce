@@ -294,7 +294,7 @@ def refund_order(
     except FulfilledOrder.DoesNotExist:
         log.exception(
             "Order with %s %s not found.",
-            'reference_number' if reference_number else 'order_id',
+            "reference_number" if reference_number else "order_id",
             reference_number or order_id,
         )
         raise
@@ -329,7 +329,9 @@ def refund_order(
 
     # Handle refund response
     if response.state not in REFUND_SUCCESS_STATES:
-        log.error("There was an error with the Refund API request: %s", response.message)
+        log.error(
+            "There was an error with the Refund API request: %s", response.message
+        )
         error_message = f"Payment gateway returned an error: {response.message}"
         raise PaymentGatewayError(error_message)
 

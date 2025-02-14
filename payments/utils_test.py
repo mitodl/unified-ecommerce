@@ -1,10 +1,10 @@
 """Tests for utility functions in payments."""
 
-import pytz
 import pytest
+import pytz
+from dateutil import parser
 
 from payments import models, utils
-from dateutil import parser
 from system_meta.factories import ProductFactory
 from unified_ecommerce.constants import (
     DISCOUNT_TYPE_DOLLARS_OFF,
@@ -40,6 +40,7 @@ def test_product_price_with_discount(discount_type):
     if discount_type == DISCOUNT_TYPE_FIXED_PRICE:
         assert utils.product_price_with_discount(discount, product) == 10
 
+
 def test_parse_supplied_date_with_timezone():
     """
     Test that the supplied date string is parsed correctly when it includes timezone information.
@@ -51,6 +52,7 @@ def test_parse_supplied_date_with_timezone():
     # Expected result: timezone should be converted to TIME_ZONE
     expected = parser.parse("2023-10-15T07:30:00").replace(tzinfo=pytz.timezone("UTC"))
     assert result == expected
+
 
 def test_parse_supplied_date_without_timezone():
     """
@@ -64,6 +66,7 @@ def test_parse_supplied_date_without_timezone():
     expected = parser.parse("2023-10-15T12:30:00").replace(tzinfo=pytz.timezone("UTC"))
     assert result == expected
 
+
 def test_parse_supplied_date_with_invalid_date():
     """
     Test that an invalid date string raises a ValueError.
@@ -73,6 +76,7 @@ def test_parse_supplied_date_with_invalid_date():
     with pytest.raises(ValueError):  # noqa: PT011
         utils.parse_supplied_date(datearg)
 
+
 def test_parse_supplied_date_with_empty_string():
     """
     Test that an empty date string raises a ValueError.
@@ -81,6 +85,7 @@ def test_parse_supplied_date_with_empty_string():
     datearg = ""
     with pytest.raises(ValueError):  # noqa: PT011
         utils.parse_supplied_date(datearg)
+
 
 def test_parse_supplied_date_with_only_date():
     """
@@ -93,6 +98,7 @@ def test_parse_supplied_date_with_only_date():
     # Expected result: time should default to midnight, timezone set to TIME_ZONE
     expected = parser.parse("2023-10-15T00:00:00").replace(tzinfo=pytz.timezone("UTC"))
     assert result == expected
+
 
 def test_parse_supplied_date_with_different_timezone():
     """
