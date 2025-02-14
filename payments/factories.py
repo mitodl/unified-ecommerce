@@ -1,7 +1,7 @@
 """Test factories for payments"""
 
 import faker
-from factory import SubFactory, fuzzy
+from factory import SubFactory, fuzzy, RelatedFactoryList
 from factory.django import DjangoModelFactory
 
 from payments import models
@@ -110,6 +110,8 @@ class DiscountFactory(DjangoModelFactory):
     )
     discount_type = fuzzy.FuzzyChoice(["dollars-off", "percent-off", "fixed-price"])
     discount_code = FAKE.unique.word()
+    integrated_system = SubFactory(IntegratedSystemFactory)
+    product = SubFactory(ProductFactory)
 
     class Meta:
         """Meta options for DiscountFactory"""

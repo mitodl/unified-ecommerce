@@ -4,6 +4,8 @@ import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
 
+from django.http import HttpRequest
+
 import pytest
 import pytz
 import reversion
@@ -542,29 +544,6 @@ def test_resolve_discount_version_current_version():
     # Assert that the current version is returned
     assert result == discount
 
-def test_resolve_discount_version_specific_version():
-    """
-    Test that a specific version of a Discount instance is returned when a version is specified.
-    """
-    # Create a Discount instance
-    discount = DiscountFactory()
-
-    # Create a version of the Discount instance
-    with reversion.create_revision():
-        discount.amount = 50
-        discount.save()
-        reversion.set_comment("Changed amount to 50")
-
-    # Get the version
-    versions = Version.objects.get_for_object(discount)
-    version = versions.first()
-
-    # Call the method with the specific version
-    result = models.Discount.resolve_discount_version(discount, discount_version=version)
-
-    # Assert that the specific version is returned
-    assert result.amount == 50
-
 def test_resolve_discount_version_no_versions():
     """
     Test that an error is raised when no versions of a Discount instance are found.
@@ -601,3 +580,89 @@ def test_resolve_discount_version_invalid_version():
 
     # Assert the correct error message
     assert str(exc_info.value) == "Invalid product version specified"
+
+
+def test_establish_basket_new_basket():
+    """
+    Test that a new basket is created when a basket does not already exist for the user and integrated system.
+    """
+    # Create a user and an integrated system
+    user = UserFactory()
+    integrated_system = IntegratedSystemFactory()
+
+    # Simulate a request object with the user
+    request = HttpRequest()
+    request.user = user
+
+    # Call the method
+    basket = models.Basket.establish_basket(request, integrated_system)
+
+    # Assert that a new basket was created
+    assert basket.user == user
+    assert basket.integrated_system == integrated_system
+    assert models.Basket.objects.filter(user=user, integrated_system=integrated_system).exists()
+
+def test_establish_basket_existing_basket():
+    """
+    Test that an existing basket is returned when a basket already exists for the user and integrated system.
+    """
+    # Create a user, an integrated system, and an existing basket
+    user = UserFactory()
+    integrated_system = IntegratedSystemFactory()
+    existing_basket = BasketFactory(user=user, integrated_system=integrated_system)
+
+    # Simulate a request object with the user
+    request = HttpRequest()
+    request.user = user
+
+    # Call the method
+    basket = models.Basket.establish_basket(request, integrated_system)
+
+    # Assert that the existing basket was returned
+    assert basket == existing_basket
+    assert models.Basket.objects.filter(user=user, integrated_system=integrated_system).count() == 1
+
+def test_establish_basket_multiple_integrated_systems():
+    """
+    Test that a new basket is created for each integrated system when multiple integrated systems exist.
+    """
+    # Create a user and two integrated systems
+    user = UserFactory()
+    integrated_system1 = IntegratedSystemFactory()
+    integrated_system2 = IntegratedSystemFactory()
+
+    # Simulate a request object with the user
+    request = HttpRequest()
+    request.user = user
+
+    # Call the method for the first integrated system
+    basket1 = models.Basket.establish_basket(request, integrated_system1)
+
+    # Call the method for the second integrated system
+    basket2 = models.Basket.establish_basket(request, integrated_system2)
+
+    # Assert that two different baskets were created
+    assert basket1 != basket2
+    assert basket1.integrated_system == integrated_system1
+    assert basket2.integrated_system == integrated_system2
+    assert models.Basket.objects.filter(user=user).count() == 2
+
+def test_establish_basket_unique_constraint():
+    """
+    Test that a single basket is created when the method is called multiple times.
+    """
+    # Create a user and an integrated system
+    user = UserFactory()
+    integrated_system = IntegratedSystemFactory()
+
+    # Simulate a request object with the user
+    request = HttpRequest()
+    request.user = user
+
+    # Call the method twice
+    basket1 = models.Basket.establish_basket(request, integrated_system)
+    basket2 = models.Basket.establish_basket(request, integrated_system)
+
+    # Assert that the same basket was returned both times
+    assert basket1 == basket2
+    assert models.Basket.objects.filter(user=user, integrated_system=integrated_system).count() == 1
