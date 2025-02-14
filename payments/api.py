@@ -536,6 +536,7 @@ def validate_percent_off_amount(discount_type, amount):
         )
         raise ValueError(error_message)
 
+
 def validate_prefix_for_batch(count, prefix):
     """
     Validate the prefix for a batch of discount codes.
@@ -559,6 +560,7 @@ def validate_prefix_for_batch(count, prefix):
         )
         raise ValueError(message)
 
+
 def generate_codes(count, prefix=None, codes=None):
     """
     Generate a list of discount codes.
@@ -581,7 +583,7 @@ def get_redemption_type(kwargs):
     Get the redemption type.
 
     Args:
-        kwargs (): The keyword arguments passed to the function. 
+        kwargs (): The keyword arguments passed to the function.
         one_time, once_per_user, and redemption_type are the valid arguments.
 
     """
