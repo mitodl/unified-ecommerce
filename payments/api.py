@@ -293,13 +293,15 @@ def refund_order(
         )
     except FulfilledOrder.DoesNotExist:
         log.exception(
-            f"Order with {'reference_number' if reference_number else 'order_id'} {reference_number or order_id} not found."
+            "Order with %s %s not found.",
+            'reference_number' if reference_number else 'order_id',
+            reference_number or order_id,
         )
         raise
 
     # Validate order state
     if order.state != Order.STATE.FULFILLED:
-        log.error(f"Order with order_id {order.id} is not in fulfilled state.")
+        log.error("Order with order_id %s is not in fulfilled state.", order.id)
         return False, f"Order with order_id {order.id} is not in fulfilled state."
 
     # Fetch the most recent transaction
@@ -310,9 +312,7 @@ def refund_order(
 
     # Check for PayPal payment
     if "paypal_token" in order_recent_transaction.data:
-        raise PaypalRefundError(
-            f"PayPal: Order {order.reference_number} contains a PayPal transaction. Please contact Finance to refund this order."
-        )
+        raise PaypalRefundError(order.reference_number)
 
     # Prepare refund request
     transaction_dict = order_recent_transaction.data
@@ -329,10 +329,9 @@ def refund_order(
 
     # Handle refund response
     if response.state not in REFUND_SUCCESS_STATES:
-        log.error(f"There was an error with the Refund API request: {response.message}")
-        raise PaymentGatewayError(
-            f"Payment gateway returned an error: {response.message}"
-        )
+        log.error("There was an error with the Refund API request: %s", response.message)
+        error_message = f"Payment gateway returned an error: {response.message}"
+        raise PaymentGatewayError(error_message)
 
     # Record successful refund
     order.refund(
@@ -356,14 +355,16 @@ def send_post_sale_webhook(system_id, order_id, source):
     system_webhook_url = system.webhook_url
     if not system.webhook_url:
         log.warning(
-            "send_post_sale_webhook: No webhook URL set for system %s, skipping for order %s",
+            "send_post_sale_webhook: No webhook URL set for system %s, "
+            "skipping for order %s",
             system.slug,
             order.reference_number,
         )
         return
 
     log.info(
-        "send_post_sale_webhook: Calling webhook endpoint %s for order %s with source %s",
+        "send_post_sale_webhook: Calling webhook endpoint %s for order %s "
+        "with source %s",
         system.webhook_url,
         order.reference_number,
         source,

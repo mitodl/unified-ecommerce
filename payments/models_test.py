@@ -14,6 +14,7 @@ from payments import models
 from payments.factories import (
     BasketFactory,
     BasketItemFactory,
+    DiscountFactory,
     LineFactory,
     OrderFactory,
     TaxRateFactory,
@@ -527,3 +528,76 @@ def test_order_tax_calculation_precision_check(user):
     assert order.tax == quantize_decimal(tax_assessed)
     assert order.lines.first().tax == tax_assessed
     assert order.lines.first().total_price == taxed_price
+
+def test_resolve_discount_version_current_version():
+    """
+    Test that the current version of a Discount instance is returned when no version is specified.
+    """
+    # Create a Discount instance
+    discount = DiscountFactory()
+
+    # Call the method with discount_version=None (current version)
+    result = models.Discount.resolve_discount_version(discount, discount_version=None)
+
+    # Assert that the current version is returned
+    assert result == discount
+
+def test_resolve_discount_version_specific_version():
+    """
+    Test that a specific version of a Discount instance is returned when a version is specified.
+    """
+    # Create a Discount instance
+    discount = DiscountFactory()
+
+    # Create a version of the Discount instance
+    with reversion.create_revision():
+        discount.amount = 50
+        discount.save()
+        reversion.set_comment("Changed amount to 50")
+
+    # Get the version
+    versions = Version.objects.get_for_object(discount)
+    version = versions.first()
+
+    # Call the method with the specific version
+    result = models.Discount.resolve_discount_version(discount, discount_version=version)
+
+    # Assert that the specific version is returned
+    assert result.amount == 50
+
+def test_resolve_discount_version_no_versions():
+    """
+    Test that an error is raised when no versions of a Discount instance are found.
+    """
+    # Create a Discount instance
+    discount = DiscountFactory()
+
+    # Call the method with discount_version=None (current version)
+    result = models.Discount.resolve_discount_version(discount, discount_version=None)
+
+    # Assert that the current version is returned
+    assert result == discount
+
+def test_resolve_discount_version_invalid_version():
+    """
+    Test that an error is raised when an invalid version is specified.
+    """
+    # Create a Discount instance
+    discount = DiscountFactory()
+
+    # Create a version of the Discount instance
+    with reversion.create_revision():
+        discount.amount = 50
+        discount.save()
+        reversion.set_comment("Changed amount to 50")
+
+    # Get the version
+    versions = Version.objects.get_for_object(discount)
+    version = versions.first()
+
+    # Call the method with an invalid version
+    with pytest.raises(TypeError) as exc_info:
+        models.Discount.resolve_discount_version(discount, discount_version="invalid_version")
+
+    # Assert the correct error message
+    assert str(exc_info.value) == "Invalid product version specified"
