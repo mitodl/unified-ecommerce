@@ -34,12 +34,12 @@ class BasketItemFactory(DjangoModelFactory):
 
         model = models.BasketItem
 
-
 class OrderFactory(DjangoModelFactory):
     """Factory for Order"""
 
     total_price_paid = fuzzy.FuzzyDecimal(10.00, 10.00)
     purchaser = SubFactory(UserFactory)
+    reference_number = FAKE.unique.word()
 
     class Meta:
         """Meta options for BasketFactory"""
@@ -114,3 +114,35 @@ class DiscountFactory(DjangoModelFactory):
         """Meta options for DiscountFactory"""
 
         model = models.Discount
+
+class CompanyFactory(DjangoModelFactory):
+    """Factory for Company"""
+
+    name = FAKE.unique.company()
+
+    class Meta:
+        """Meta options for CompanyFactory"""
+
+        model = models.Company
+
+class BulkDiscountCollectionFactory(DjangoModelFactory):
+    """Factory for BulkDiscountCollection"""
+
+    prefix = FAKE.unique.word()
+
+    class Meta:
+        """Meta options for BulkDiscountCollectionFactory"""
+
+        model = models.BulkDiscountCollection
+
+class RedeemedDiscountFactory(DjangoModelFactory):
+    """Factory for RedeemedDiscount"""
+
+    discount = SubFactory(DiscountFactory)
+    order = SubFactory(OrderFactory)
+    user = SubFactory(UserFactory)
+
+    class Meta:
+        """Meta options for RedeemedDiscountFactory"""
+
+        model = models.RedeemedDiscount

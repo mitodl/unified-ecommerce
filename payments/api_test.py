@@ -1,7 +1,12 @@
 """Tests for Ecommerce api"""
 
+from datetime import datetime, UTC
+from decimal import Decimal
 import random
 import uuid
+from payments.dataclasses import CustomerLocationMetadata
+
+from django.http import HttpRequest
 
 import pytest
 import reversion
@@ -11,27 +16,36 @@ from django.urls import reverse
 from factory import Faker, fuzzy
 from mitol.payment_gateway.api import PaymentGateway, ProcessorResponse
 from reversion.models import Version
+from django.core.exceptions import ObjectDoesNotExist
 
 from payments.api import (
-    check_and_process_pending_orders_for_resolution,
+    check_blocked_countries,
     generate_checkout_payload,
+    generate_discount_code,
     get_auto_apply_discounts_for_basket,
+    locate_customer_for_basket,
     process_cybersource_payment_response,
     process_post_sale_webhooks,
     refund_order,
+    send_post_sale_webhook,
     send_pre_sale_webhook,
+    update_discount_codes,
 )
 from payments.constants import (
     PAYMENT_HOOK_ACTION_POST_SALE,
     PAYMENT_HOOK_ACTION_PRE_SALE,
 )
-from payments.exceptions import PaymentGatewayError, PaypalRefundError
+from payments.exceptions import PaymentGatewayError, PaypalRefundError, ProductBlockedError
 from payments.factories import (
     BasketFactory,
     BasketItemFactory,
+    BlockedCountryFactory,
+    BulkDiscountCollectionFactory,
+    CompanyFactory,
     DiscountFactory,
     LineFactory,
     OrderFactory,
+    RedeemedDiscountFactory,
     TransactionFactory,
 )
 from payments.models import (
@@ -49,12 +63,16 @@ from payments.serializers.v0 import (
     WebhookBasketAction,
     WebhookOrder,
 )
-from system_meta.factories import ProductFactory
+from system_meta.factories import IntegratedSystemFactory, ProductFactory
 from system_meta.models import IntegratedSystem
 from unified_ecommerce.constants import (
+    ALL_DISCOUNT_TYPES,
+    ALL_PAYMENT_TYPES,
     DISCOUNT_TYPE_DOLLARS_OFF,
+    DISCOUNT_TYPE_PERCENT_OFF,
     POST_SALE_SOURCE_BACKOFFICE,
     POST_SALE_SOURCE_REDIRECT,
+    REDEMPTION_TYPE_ONE_TIME,
     TRANSACTION_TYPE_PAYMENT,
     TRANSACTION_TYPE_REFUND,
 )
@@ -155,10 +173,10 @@ def _payment_gateway_settings():
 
 
 def test_cybersource_refund_no_order():
-    """Test that refund_order throws FulfilledOrder.DoesNotExist exception when the order doesn't exist"""
+    """Test that refund_order throws FulfilledOrder.DoesNotExist exception when the order doesn"t exist"""
 
     with pytest.raises(FulfilledOrder.DoesNotExist):
-        refund_order(order_id=1)  # Caling refund with random Id
+        refund_order(order_id=1)  # Calling refund with random Id
 
 
 def create_basket(user, products):
@@ -501,103 +519,6 @@ def test_process_cybersource_payment_decline_response(
     order.refresh_from_db()
 
 
-@pytest.mark.parametrize("test_type", [None, "fail", "empty"])
-def test_check_and_process_pending_orders_for_resolution(mocker, test_type):
-    """
-    Tests the pending order check. test_type can be:
-    - None - there's an order and it was found
-    - fail - there's an order but the payment failed (failed status in CyberSource)
-    - empty - order isn't pending
-    """
-    order = OrderFactory.create(state=Order.STATE.PENDING)
-
-    test_payload = {
-        "utf8": "",
-        "message": "Request was processed successfully.",
-        "decision": "100",
-        "auth_code": "888888",
-        "auth_time": "2023-02-09T20:06:51Z",
-        "signature": "",
-        "req_amount": "999",
-        "req_locale": "en-us",
-        "auth_amount": "999",
-        "reason_code": "100",
-        "req_currency": "USD",
-        "auth_avs_code": "X",
-        "auth_response": "100",
-        "req_card_type": "",
-        "request_token": "",
-        "card_type_name": "",
-        "req_access_key": "",
-        "req_item_0_sku": "60-2",
-        "req_profile_id": "2BA30484-75E7-4C99-A7D4-8BD7ADE4552D",
-        "transaction_id": "6759732112426719104003",
-        "req_card_number": "",
-        "req_consumer_id": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
-        "req_item_0_code": "60",
-        "req_item_0_name": "course-v1:edX+E2E-101+course",
-        "signed_date_time": "2023-02-09T20:06:51Z",
-        "auth_avs_code_raw": "I1",
-        "auth_trans_ref_no": "123456789619999",
-        "bill_trans_ref_no": "123456789619999",
-        "req_bill_to_email": "testlearner@odl.local",
-        "req_payment_method": "card",
-        "signed_field_names": "",
-        "req_bill_to_surname": "LEARNER",
-        "req_item_0_quantity": 1,
-        "req_line_item_count": 1,
-        "req_bill_to_forename": "TEST",
-        "req_card_expiry_date": "02-2025",
-        "req_reference_number": f"{order.reference_number}",
-        "req_transaction_type": "sale",
-        "req_transaction_uuid": "",
-        "req_item_0_tax_amount": "0",
-        "req_item_0_unit_price": "999",
-        "req_customer_ip_address": "172.19.0.8",
-        "req_bill_to_address_city": "Tallahasseeeeeeee",
-        "req_bill_to_address_line1": "555 123 Place",
-        "req_bill_to_address_state": "FL",
-        "req_merchant_defined_data1": "1",
-        "req_bill_to_address_country": "US",
-        "req_bill_to_address_postal_code": "81992",
-        "req_override_custom_cancel_page": "https://rc.mitxonline.mit.edu/checkout/result/",
-        "req_override_custom_receipt_page": "https://rc.mitxonline.mit.edu/checkout/result/",
-        "req_card_type_selection_indicator": "001",
-    }
-
-    retval = {}
-
-    if test_type == "fail":
-        test_payload["reason_code"] = "999"
-
-    if test_type == "empty":
-        order.state = Order.STATE.CANCELED
-        order.save()
-        order.refresh_from_db()
-
-    if test_type is None or test_type == "fail":
-        retval = {f"{order.reference_number}": test_payload}
-
-    mocked_gateway_func = mocker.patch(
-        "mitol.payment_gateway.api.CyberSourcePaymentGateway.find_and_get_transactions",
-        return_value=retval,
-    )
-
-    (fulfilled, cancelled, errored) = check_and_process_pending_orders_for_resolution()
-
-    if test_type == "empty":
-        assert not mocked_gateway_func.called
-        assert (fulfilled, cancelled, errored) == (0, 0, 0)
-    elif test_type == "fail":
-        order.refresh_from_db()
-        assert order.state == Order.STATE.CANCELED
-        assert (fulfilled, cancelled, errored) == (0, 1, 0)
-    else:
-        order.refresh_from_db()
-        assert order.state == Order.STATE.FULFILLED
-        assert (fulfilled, cancelled, errored) == (1, 0, 0)
-
-
 @pytest.mark.parametrize(
     "source", [POST_SALE_SOURCE_BACKOFFICE, POST_SALE_SOURCE_REDIRECT]
 )
@@ -708,7 +629,7 @@ def test_post_sale_webhook_multisystem(mocker, fulfilled_complete_order, source)
 def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_system():
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
-    when it exists for the basket's integrated system.
+    when it exists for the basket"s integrated system.
     """
     basket = BasketFactory.create()
     auto_discount = Discount.objects.create(
@@ -725,7 +646,7 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_
 def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product():
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
-    when it exists for the basket's - basket item - product.
+    when it exists for the basket"s - basket item - product.
     """
     basket_item = BasketItemFactory.create()
     auto_discount = Discount.objects.create(
@@ -742,7 +663,7 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product():
 def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user():
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
-    when it exists for the basket's user.
+    when it exists for the basket"s user.
     """
     basket = BasketFactory.create()
     auto_discount = Discount.objects.create(
@@ -758,7 +679,7 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user():
 def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_user_product_system():
     """
     Test that get_auto_apply_discount_for_basket returns multiple auto discount
-    when they exist for the basket's - basket item - product, basket's user, and basket's integrated system.
+    when they exist for the basket"s - basket item - product, basket"s user, and basket"s integrated system.
     """
     basket_item = BasketItemFactory.create()
     user_discount = DiscountFactory.create(
@@ -817,3 +738,438 @@ def test_get_auto_apply_discount_for_basket_no_auto_discount_exists():
 
     discount = get_auto_apply_discounts_for_basket(basket_item.basket.id)
     assert discount.count() == 0
+
+@pytest.mark.parametrize(
+    "source", ["backoffice", "redirect"]
+)
+def test_send_post_sale_webhook_success(mocker, source):
+    """Test sending the post-sale webhook successfully."""
+
+    # Mock Order
+    order = OrderFactory(reference_number="ORDER123")
+
+    order_user = order.purchaser
+
+    # Mock IntegratedSystem
+    system = IntegratedSystemFactory(webhook_url="https://example.com/webhook", slug = "system_slug", api_key = "test_api_key")
+
+    # Mock dispatch_webhook.delay
+    mocked_task = mocker.patch("payments.tasks.dispatch_webhook.delay")
+
+    # Mock logger
+    mock_logger = mocker.patch("payments.api.log")
+
+    # Execute
+    send_post_sale_webhook(system.id, order.id, source)
+
+    # Assert
+    mock_logger.info.assert_called_once_with(
+        "send_post_sale_webhook: Calling webhook endpoint %s for order %s with source %s",
+        "https://example.com/webhook",
+        "ORDER123",
+        source,
+    )
+    mocked_task.assert_called_once_with("https://example.com/webhook", {"system_key": "test_api_key", "type": "postsale", "user": {"id": order_user.id, "global_id": order_user.global_id, "username": order_user.username, "email": order_user.email, "first_name": order_user.first_name, "last_name": order_user.last_name, "name": ""}, "data": {"reference_number": "ORDER123", "total_price_paid": "10.00", "state": order.state, "lines": [], "order": order.id}, "system_slug": "system_slug"})
+
+@pytest.mark.parametrize(
+    "source", ["backoffice", "redirect"]
+)
+def test_send_post_sale_webhook_order_not_found(source):
+    """Test sending the post-sale webhook when the order does not exist."""
+
+    # Mock Order to raise ObjectDoesNotExist
+    order = OrderFactory(reference_number="ORDER123")
+
+    # Mock IntegratedSystem
+    system = IntegratedSystemFactory()
+
+    # Execute and Assert
+    with pytest.raises(ObjectDoesNotExist):
+        send_post_sale_webhook(system.id, order.id + 1, source)  # Use a non-existent order ID
+
+@pytest.mark.parametrize(
+    "source", ["backoffice", "redirect"]
+)
+def test_send_post_sale_webhook_system_not_found(source):
+    """Test sending the post-sale webhook when the system does not exist."""
+
+    # Mock Order
+    order = OrderFactory(reference_number="ORDER123")
+
+    # Execute and Assert
+    with pytest.raises(ObjectDoesNotExist):
+        send_post_sale_webhook(999, order.id, source)  # Use a non-existent system ID
+
+def test_generate_discount_code_single():
+    """
+    Test generating a single discount code
+    """
+    # Setup
+    user = UserFactory()
+    company = CompanyFactory()
+    product = ProductFactory()
+    integrated_system = IntegratedSystemFactory()
+
+    # Test
+    codes = generate_discount_code(
+        discount_type=DISCOUNT_TYPE_PERCENT_OFF,
+        payment_type="credit_card",
+        amount=Decimal("20.00"),
+        codes="ABC123",
+        count=1,
+        users=[user.id],
+        company=company.id,
+        product=product.id,
+        integrated_system=integrated_system.slug,
+        activates="2023-01-01",
+        expires="2023-12-31"
+    )
+
+    # Assert
+    assert len(codes) == 1
+    code = codes[0]
+    assert code.discount_type == DISCOUNT_TYPE_PERCENT_OFF
+    assert code.payment_type == "credit_card"
+    assert code.amount == Decimal("20.00")
+    assert code.discount_code == "ABC123"
+    assert code.expiration_date == datetime(2023, 12, 31, 0, 0, tzinfo=UTC)
+    assert code.activation_date == datetime(2023, 1, 1, 0, 0, tzinfo=UTC)
+    assert code.company == company
+    assert code.product == product
+    assert code.integrated_system == integrated_system
+
+def test_generate_discount_code_batch():
+    """
+    Test generating a batch of discount codes
+    """
+    # Setup
+    prefix = "BATCH"
+
+    # Test
+    codes = generate_discount_code(
+        discount_type=DISCOUNT_TYPE_PERCENT_OFF,
+        payment_type="credit_card",
+        amount=Decimal("10.00"),
+        count=5,
+        prefix=prefix
+    )
+
+    # Assert
+    assert len(codes) == 5
+    for code in codes:
+        assert code.discount_type == DISCOUNT_TYPE_PERCENT_OFF
+        assert code.payment_type == "credit_card"
+        assert code.amount == Decimal("10.00")
+        assert code.discount_code.startswith(prefix)
+
+def test_generate_discount_code_invalid_discount_type():
+    """
+    Test generating a discount code with an invalid discount type
+    """
+    with pytest.raises(ValueError) as excinfo:  # noqa: PT011
+        generate_discount_code(
+            discount_type="invalid_type",
+            payment_type="credit_card",
+            amount=Decimal("10.00")
+        )
+    assert "Invalid discount type" in str(excinfo.value)
+
+def test_generate_discount_code_invalid_payment_type():
+    """
+    Test generating a discount code with an invalid payment type
+    """
+    with pytest.raises(ValueError) as excinfo:  # noqa: PT011
+        generate_discount_code(
+            discount_type=DISCOUNT_TYPE_PERCENT_OFF,
+            payment_type="invalid_type",
+            amount=Decimal("10.00"))
+    assert "Payment type invalid_type is not valid" in str(excinfo.value)
+
+def test_generate_discount_code_invalid_percent_amount():
+    """
+    Test generating a discount code with an invalid percent amount
+    """
+    with pytest.raises(ValueError) as excinfo:  # noqa: PT011
+        generate_discount_code(
+            discount_type=DISCOUNT_TYPE_PERCENT_OFF,
+            payment_type="credit_card",
+            amount=Decimal("150.00"))
+    assert "Discount amount 150.00 not valid for discount type percent-off" in str(excinfo.value)
+
+def test_generate_discount_code_missing_prefix_for_batch():
+    """
+    Test generating a batch of discount codes without a prefix
+    """
+    with pytest.raises(ValueError) as excinfo:  # noqa: PT011
+        generate_discount_code(
+            discount_type=DISCOUNT_TYPE_PERCENT_OFF,
+            payment_type="credit_card",
+            amount=Decimal("10.00"),
+            count=2)
+    assert "You must specify a prefix to create a batch of codes" in str(excinfo.value)
+
+def test_generate_discount_code_prefix_too_long():
+    """
+    Test generating a discount code with a prefix that is too long
+    """
+    with pytest.raises(ValueError) as excinfo:  # noqa: PT011
+        generate_discount_code(
+            discount_type=DISCOUNT_TYPE_PERCENT_OFF,
+            payment_type="credit_card",
+            amount=Decimal("10.00"),
+            count=2,
+            prefix="a" * 64)
+    assert "Prefix aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa is 64 - prefixes must be 63 characters or less" in str(excinfo.value)
+
+def test_update_discount_codes_with_valid_discount_type():
+    """
+    Test updating discount codes with a valid discount type
+    """
+    discount = DiscountFactory()
+    updated_count = update_discount_codes(discount_codes=[discount.discount_code], discount_type=ALL_DISCOUNT_TYPES[0])
+    assert updated_count == 1
+    discount.refresh_from_db()
+    assert discount.discount_type == ALL_DISCOUNT_TYPES[0]
+
+def test_update_discount_codes_with_invalid_discount_type():
+    """
+    Test updating discount codes with an invalid discount type
+    """
+    discount = DiscountFactory()
+    with pytest.raises(ValueError) as excinfo:
+        update_discount_codes(discount_codes=[discount.discount_code], discount_type="INVALID_TYPE")
+    assert "Invalid discount type: INVALID_TYPE." in str(excinfo.value)
+
+@pytest.mark.django_db
+def test_update_discount_codes_with_valid_payment_type():
+    """
+    Test updating discount codes with a valid payment type
+    """
+    discount = DiscountFactory()
+    updated_count = update_discount_codes(discount_codes=[discount.discount_code], payment_type=ALL_PAYMENT_TYPES[0])
+    assert updated_count == 1
+    discount.refresh_from_db()
+    assert discount.payment_type == ALL_PAYMENT_TYPES[0]
+
+@pytest.mark.django_db
+def test_update_discount_codes_with_invalid_payment_type():
+    """
+    Test updating discount codes with an invalid payment type
+    """
+    discount = DiscountFactory()
+    with pytest.raises(ValueError) as excinfo:
+        update_discount_codes(discount_codes=[discount.discount_code], payment_type="INVALID_TYPE")
+    assert "Payment type INVALID_TYPE is not valid." in str(excinfo.value)
+
+@pytest.mark.django_db
+def test_update_discount_codes_with_amount():
+    """
+    Test updating discount codes with an amount
+    """
+    discount = DiscountFactory()
+    updated_count = update_discount_codes(discount_codes=[discount.discount_code], amount="20.00")
+    assert updated_count == 1
+    discount.refresh_from_db()
+    assert discount.amount == Decimal("20.00")
+
+@pytest.mark.django_db
+def test_update_discount_codes_with_activates_and_expires():
+    """
+    Test updating discount codes with activation and expiration dates
+    """
+    discount = DiscountFactory()
+    activates = "2023-01-01"
+    expires = "2023-12-31"
+    updated_count = update_discount_codes(discount_codes=[discount.discount_code], activates=activates, expires=expires)
+    assert updated_count == 1
+    discount.refresh_from_db()
+    assert discount.activation_date == datetime(2023, 1, 1, 0, 0, tzinfo=UTC)
+    assert discount.expiration_date == datetime(2023, 12, 31, 0, 0, tzinfo=UTC)
+
+@pytest.mark.django_db
+def test_update_discount_codes_with_integrated_system():
+    """
+    Test updating discount codes with an integrated system
+    """
+    discount = DiscountFactory()
+    integrated_system = IntegratedSystemFactory()
+    updated_count = update_discount_codes(discount_codes=[discount.discount_code], integrated_system=integrated_system.slug)
+    assert updated_count == 1
+    discount.refresh_from_db()
+    assert discount.integrated_system == integrated_system
+
+@pytest.mark.django_db
+def test_update_discount_codes_with_product():
+    """
+    Test updating discount codes with a product
+    """
+    discount = DiscountFactory()
+    product = ProductFactory()
+    updated_count = update_discount_codes(discount_codes=[discount.discount_code], product=product.id)
+    assert updated_count == 1
+    discount.refresh_from_db()
+    assert discount.product == product
+
+@pytest.mark.django_db
+def test_update_discount_codes_with_users():
+    """
+    Test updating discount codes with users
+    """
+    discount = DiscountFactory()
+    users = UserFactory.create_batch(3)
+    user_emails = [user.email for user in users]
+    updated_count = update_discount_codes(discount_codes=[discount.discount_code], users=user_emails)
+    assert updated_count == 1
+    discount.refresh_from_db()
+    assert set(discount.assigned_users.all()) == set(users)
+
+@pytest.mark.django_db
+def test_update_discount_codes_with_clear_users():
+    """
+    Test updating discount codes by clearing the assigned users
+    """
+    discount = DiscountFactory()
+    users = UserFactory.create_batch(2)
+    discount.assigned_users.set(users)
+    updated_count = update_discount_codes(discount_codes=[discount.discount_code], clear_users=True)
+    assert updated_count == 1
+    discount.refresh_from_db()
+    assert discount.assigned_users.count() == 0
+
+@pytest.mark.django_db
+def test_update_discount_codes_with_prefix():
+    """
+    Test updating discount codes with a prefix
+    """
+    bulk_collection = BulkDiscountCollectionFactory()
+    discounts = []
+    discounts.append(DiscountFactory(discount_code="ABC1", bulk_discount_collection=bulk_collection, amount="10.00"))
+    discounts.append(DiscountFactory(discount_code="ABC2", bulk_discount_collection=bulk_collection, amount="10.00"))
+    discounts.append(DiscountFactory(discount_code="ABC3", bulk_discount_collection=bulk_collection, amount="10.00"))
+    updated_count = update_discount_codes(prefix=bulk_collection.prefix, amount="15.00")
+    assert updated_count == 3
+    for discount in discounts:
+        discount.refresh_from_db()
+        assert discount.amount == Decimal("15.00")
+
+@pytest.mark.django_db
+def test_update_discount_codes_exclude_redeemed_discounts():
+    """
+    Test updating discount codes with a prefix
+    """
+    discount = DiscountFactory(redemption_type=REDEMPTION_TYPE_ONE_TIME)
+    RedeemedDiscountFactory(discount=discount)
+    updated_count = update_discount_codes(discount_codes=[discount.discount_code], amount="10.00")
+    assert updated_count == 0
+    discount.refresh_from_db()
+    assert discount.amount != Decimal("10.00")
+
+def test_locate_customer_for_basket_sets_customer_location(mocker):
+    """
+    Test that locate_customer_for_basket sets the customer location
+    """
+    test_user = UserFactory()
+    product = ProductFactory()
+    basket = BasketFactory(user=test_user)
+    request = HttpRequest()
+    request.user = test_user
+    # Mock dependencies
+    mock_determine_user_location = mocker.patch(
+        "payments.api.determine_user_location",
+        side_effect=["BlockedCountryLocation", "TaxCountryLocation"],
+    )
+    mock_get_flagged_countries = mocker.patch(
+        "payments.api.get_flagged_countries",
+        side_effect=[{"BlockedCountry"}, {"TaxCountry"}],
+    )
+    mock_get_client_ip = mocker.patch(
+        "payments.api.get_client_ip",
+        return_value="127.0.0.1",
+    )
+    mock_basket_save = mocker.patch.object(basket, "save")
+    mock_basket_set_customer_location = mocker.patch.object(basket, "set_customer_location")
+
+    # Call the function
+    locate_customer_for_basket(request, basket, product)
+
+    # Assertions
+    mock_get_client_ip.assert_called_once_with(request)
+    mock_get_flagged_countries.assert_any_call("tax")
+    mock_determine_user_location.assert_any_call(
+        request,
+        {"BlockedCountry"},
+    )
+    mock_determine_user_location.assert_any_call(
+        request,
+        {"TaxCountry"},
+    )
+    test = CustomerLocationMetadata(location_block="BlockedCountryLocation", location_tax="TaxCountryLocation")
+    mock_basket_set_customer_location.assert_any_call(test)
+    mock_basket_save.assert_called_once()
+
+def test_locate_customer_for_basket_logs_debug_info(mocker, caplog):
+    """
+    Test that locate_customer_for_basket logs debug information
+    """
+    test_user = UserFactory()
+    product = ProductFactory()
+    basket = BasketFactory(user=test_user)
+    request = HttpRequest()
+    request.user = test_user
+    # Mock dependencies
+    mocker.patch("payments.api.determine_user_location", return_value="SomeLocation")
+    mocker.patch("payments.api.get_flagged_countries", return_value=set())
+    mocker.patch("payments.api.get_client_ip", return_value="127.0.0.1")
+    mocker.patch.object(basket, "save")
+    mocker.patch.object(basket, "set_customer_location")
+
+    # Call the function
+    with caplog.at_level("DEBUG"):
+        locate_customer_for_basket(request, basket, product)
+
+    # Assert logs
+    assert "locate_customer_for_basket: running for" in caplog.text
+    assert str(request.user) in caplog.text
+    assert "127.0.0.1" in caplog.text
+
+
+def test_check_blocked_countries_blocked_for_country():
+    """
+    Test that ProductBlockedError is raised when the product is blocked for the user's country.
+    """
+    # Create test data
+    test_user = UserFactory()
+    test_user.profile.country_code = "US"
+    test_user.save()
+    product = ProductFactory()
+    basket = BasketFactory(user=test_user, user_blockable_country_code="US")
+
+    # Block the product for the user's country
+    BlockedCountryFactory(country_code="US", product=product)
+
+    # Call the function and expect an exception
+    with pytest.raises(ProductBlockedError) as exc_info:
+        check_blocked_countries(basket, product)
+
+    # Verify the error message
+    assert str(exc_info.value) == f"Product {product} blocked in country US"
+
+
+def test_check_blocked_countries_not_blocked_for_other_country():
+    """
+    Test that no exception is raised when the product is blocked for another country but not the user's country.
+    """
+    # Create test data
+    test_user = UserFactory()  # User is in Canada
+    test_user.profile.country_code = "CA" # User is in Canada
+    test_user.save()
+    product = ProductFactory()
+    basket = BasketFactory(user=test_user)
+
+    # Block the product for a different country (US)
+    BlockedCountryFactory(country_code="US", product=product)
+
+    # Call the function
+    check_blocked_countries(basket, product)
+
+    # No exception means the test passes
