@@ -1450,6 +1450,7 @@ def test_get_users_with_string_ids():
     # Assert that the correct user is returned
     assert result == [test_user]
 
+
 def test_check_taxable_with_taxable_country():
     """
     Test that check_taxable applies a tax rate when the user's country code has a TaxRate.
@@ -1470,6 +1471,7 @@ def test_check_taxable_with_taxable_country():
     # Assert that the tax rate was applied to the basket
     assert basket.tax_rate == taxrate
 
+
 def test_check_taxable_with_non_taxable_country():
     """
     Test that check_taxable does not apply a tax rate when the user's country code does not have a TaxRate.
@@ -1486,6 +1488,7 @@ def test_check_taxable_with_non_taxable_country():
 
     # Assert that no tax rate was applied to the basket
     assert basket.tax_rate is None
+
 
 def test_check_taxable_with_multiple_tax_rates():
     """
@@ -1509,6 +1512,7 @@ def test_check_taxable_with_multiple_tax_rates():
     # Assert that the first matching tax rate was applied to the basket
     assert basket.tax_rate == taxrate1
 
+
 def test_check_taxable_with_no_tax_rates():
     """
     Test that check_taxable does not apply a tax rate when the user's country code has no TaxRate.
@@ -1525,6 +1529,7 @@ def test_check_taxable_with_no_tax_rates():
 
     # Assert that no tax rate was applied to the basket
     assert basket.tax_rate is None
+
 
 def test_check_taxable_with_empty_country_code():
     """
