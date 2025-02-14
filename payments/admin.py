@@ -9,6 +9,30 @@ from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
 from payments import models
 
 
+class BasketItemInline(admin.TabularInline):
+    """Inline editor for lines"""
+
+    model = models.BasketItem
+    list_display = [
+        "product",
+        "quantity",
+        "base_price",
+        "discounted_price",
+        "tax_money",
+        "total_price",
+    ]
+    readonly_fields = [
+        "product",
+        "quantity",
+        "base_price",
+        "discounted_price",
+        "tax_money",
+        "total_price",
+    ]
+    min_num = 0
+    extra = 0
+
+
 @admin.register(models.Basket)
 class BasketAdmin(VersionAdmin):
     """Admin for Basket"""
@@ -17,6 +41,9 @@ class BasketAdmin(VersionAdmin):
     search_fields = ["user__email", "user__username"]
     list_display = ["id", "user"]
     raw_id_fields = ("user",)
+    inlines = [
+        BasketItemInline,
+    ]
 
 
 @admin.register(models.BasketItem)
