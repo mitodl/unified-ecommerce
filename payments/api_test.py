@@ -18,6 +18,7 @@ from reversion.models import Version
 
 from payments.api import (
     check_blocked_countries,
+    check_taxable,
     generate_checkout_payload,
     generate_discount_code,
     get_auto_apply_discounts_for_basket,
@@ -51,6 +52,7 @@ from payments.factories import (
     LineFactory,
     OrderFactory,
     RedeemedDiscountFactory,
+    TaxRateFactory,
     TransactionFactory,
 )
 from payments.models import (
@@ -1438,3 +1440,95 @@ def test_get_users_with_string_ids():
 
     # Assert that the correct user is returned
     assert result == [test_user]
+
+def test_check_taxable_with_taxable_country():
+    """
+    Test that check_taxable applies a tax rate when the user's country code has a TaxRate.
+    """
+    # Create a TaxRate for a specific country code
+    country_code = "US"
+    taxrate = TaxRateFactory(country_code=country_code)
+
+    # Create a Basket with a user whose country code matches the TaxRate
+    basket = BasketFactory(user_blockable_country_code=country_code)
+
+    # Call the function
+    check_taxable(basket)
+
+    # Refresh the basket instance from the database
+    basket.refresh_from_db()
+
+    # Assert that the tax rate was applied to the basket
+    assert basket.tax_rate == taxrate
+
+def test_check_taxable_with_non_taxable_country():
+    """
+    Test that check_taxable does not apply a tax rate when the user's country code does not have a TaxRate.
+    """
+    # Create a Basket with a user whose country code does not have a TaxRate
+    country_code = "CA"
+    basket = BasketFactory(user_blockable_country_code=country_code)
+
+    # Call the function
+    check_taxable(basket)
+
+    # Refresh the basket instance from the database
+    basket.refresh_from_db()
+
+    # Assert that no tax rate was applied to the basket
+    assert basket.tax_rate is None
+
+def test_check_taxable_with_multiple_tax_rates():
+    """
+    Test that check_taxable applies the first matching tax rate to the basket when multiple TaxRate instances exist for the same country code.
+    """
+    # Create multiple TaxRate instances for the same country code
+    country_code1 = "AB"
+    country_code2 = "UK"
+    taxrate1 = TaxRateFactory(country_code=country_code1)
+    taxrate2 = TaxRateFactory(country_code=country_code2)
+
+    # Create a Basket with a user whose country code matches the TaxRate
+    basket = BasketFactory(user_blockable_country_code=country_code1)
+
+    # Call the function
+    check_taxable(basket)
+
+    # Refresh the basket instance from the database
+    basket.refresh_from_db()
+
+    # Assert that the first matching tax rate was applied to the basket
+    assert basket.tax_rate == taxrate1
+
+def test_check_taxable_with_no_tax_rates():
+    """
+    Test that check_taxable does not apply a tax rate when the user's country code has no TaxRate.
+    """
+    # Create a Basket with a user whose country code has no TaxRate
+    country_code = "FR"
+    basket = BasketFactory(user_blockable_country_code=country_code)
+
+    # Call the function
+    check_taxable(basket)
+
+    # Refresh the basket instance from the database
+    basket.refresh_from_db()
+
+    # Assert that no tax rate was applied to the basket
+    assert basket.tax_rate is None
+
+def test_check_taxable_with_empty_country_code():
+    """
+    Test that check_taxable does not apply a tax rate when the user's country code is empty.
+    """
+    # Create a Basket with an empty country code
+    basket = BasketFactory(user_blockable_country_code="")
+
+    # Call the function
+    check_taxable(basket)
+
+    # Refresh the basket instance from the database
+    basket.refresh_from_db()
+
+    # Assert that no tax rate was applied to the basket
+    assert basket.tax_rate is None
