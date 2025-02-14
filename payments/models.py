@@ -814,7 +814,8 @@ class Order(TimestampedModel):
     def __str__(self):
         """Generate a string representation of the order"""
         return (
-            f"{self.state.capitalize()} Order for {self.purchaser.username}"
+            f"{self.state.capitalize()} Order #{self.reference_number}"
+            f" for {self.purchaser.username}"
             f" ({self.purchaser.email})"
         )
 
