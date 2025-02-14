@@ -1,7 +1,7 @@
 """Test factories for payments"""
 
 import faker
-from factory import SubFactory, fuzzy, RelatedFactoryList
+from factory import SubFactory, fuzzy
 from factory.django import DjangoModelFactory
 
 from payments import models
