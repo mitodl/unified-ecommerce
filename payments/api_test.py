@@ -24,6 +24,7 @@ from payments.api import (
     generate_discount_code,
     get_auto_apply_discounts_for_basket,
     get_redemption_type,
+    get_users,
     locate_customer_for_basket,
     process_cybersource_payment_response,
     process_post_sale_webhooks,
@@ -1234,3 +1235,102 @@ def test_get_redemption_type_unknown_redemption_type():
     """
     kwargs = {"redemption_type": "UNKNOWN_TYPE"}
     assert get_redemption_type(kwargs) == REDEMPTION_TYPE_UNLIMITED
+
+def test_get_users_with_valid_ids():
+    """
+    Test that get_users returns the correct users when valid user IDs are provided
+    """
+    # Create test users using UserFactory
+    user1 = UserFactory()
+    user2 = UserFactory()
+
+    # Call the function with valid user IDs
+    result = get_users([user1.id, user2.id])
+
+    # Assert that the correct users are returned
+    assert result == [user1, user2]
+
+def test_get_users_with_valid_emails():
+    """
+    Test that get_users returns the correct users when valid user emails are provided
+    """
+    # Create test users using UserFactory
+    user1 = UserFactory()
+    user2 = UserFactory()
+
+    # Call the function with valid user emails
+    result = get_users([user1.email, user2.email])
+
+    # Assert that the correct users are returned
+    assert result == [user1, user2]
+
+
+def test_get_users_with_mixed_identifiers():
+    """
+    Test that get_users returns the correct users when a mix of IDs and emails are provided
+    """
+    # Create test users using UserFactory
+    user1 = UserFactory()
+    user2 = UserFactory()
+
+    # Call the function with a mix of IDs and emails
+    result = get_users([user1.id, user2.email])
+
+    # Assert that the correct users are returned
+    assert result == [user1, user2]
+
+
+def test_get_users_with_invalid_id():
+    """
+    Test that get_users raises an error when an invalid user ID is provided
+    """
+    # Create a test user
+    test_user = UserFactory()
+
+    # Call the function with an invalid ID
+    with pytest.raises(ValueError) as exc_info:  # noqa: PT011
+        get_users([test_user.id + 1])  # Assuming this ID does not exist
+
+    # Assert the correct error message
+    assert str(exc_info.value) == f"User {test_user.id + 1} does not exist."
+
+
+def test_get_users_with_invalid_email():
+    """
+    Test that get_users raises an error when an invalid user email is provided
+    """
+    # Create a test user
+    test_user  = UserFactory()
+
+    # Call the function with an invalid email
+    invalid_email = "nonexistent@example.com"
+    with pytest.raises(ValueError) as exc_info:  # noqa: PT011
+        get_users([invalid_email])
+
+    # Assert the correct error message
+    assert str(exc_info.value) == f"User {invalid_email} does not exist."
+
+
+def test_get_users_with_empty_list():
+    """
+    Test that get_users returns an empty list when an empty list is provided
+    """
+    # Call the function with an empty list
+    result = get_users([])
+
+    # Assert that the result is an empty list
+    assert result == []
+
+
+def test_get_users_with_string_ids():
+    """
+    Test that get_users returns the correct users when string representations of user IDs are provided
+    """
+    # Create a test user
+    test_user = UserFactory()
+
+    # Call the function with a string representation of the ID
+    result = get_users([str(test_user.id)])
+
+    # Assert that the correct user is returned
+    assert result == [test_user]

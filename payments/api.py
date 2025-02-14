@@ -478,55 +478,160 @@ def get_auto_apply_discounts_for_basket(basket_id: int) -> QuerySet[Discount]:
     )
 
 def validate_discount_type(discount_type):
+    """
+    Validate the discount type.
+
+    Args:
+        discount_type (str): The discount type to validate.
+
+    Raises:
+        ValueError: If the discount type is not valid.
+    """
     if discount_type not in ALL_DISCOUNT_TYPES:
-        raise ValueError(f"Invalid discount type: {discount_type}.")
+        error_message = f"Invalid discount type: {discount_type}."
+        raise ValueError(error_message)
 
 def validate_payment_type(payment_type):
+    """
+    Validate the payment type.
+
+    Args:
+        payment_type (str): The payment type to validate.
+
+    Raises:
+        ValueError: If the payment type is not valid.
+    """
     if payment_type not in ALL_PAYMENT_TYPES:
-        raise ValueError(f"Payment type {payment_type} is not valid.")
+        error_message = f"Payment type {payment_type} is not valid."
+        raise ValueError(error_message)
 
 def validate_percent_off_amount(discount_type, amount):
-    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and amount > 100:
-        raise ValueError(f"Discount amount {amount} not valid for discount type {DISCOUNT_TYPE_PERCENT_OFF}.")
+    """
+    Validate the percent off amount.
+
+    Args:
+        discount_type (str): discount type.
+        amount (int): discount amount.
+
+    Raises:
+        ValueError: If the discount amount is not valid for the discount type.
+    """
+    MAX_PERCENT_OFF_AMOUNT = 100
+    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and amount > MAX_PERCENT_OFF_AMOUNT:
+        error_message = (
+            f"Discount amount {amount} not valid for discount type "
+            f"{DISCOUNT_TYPE_PERCENT_OFF}."
+        )
+        raise ValueError(error_message)
 
 def validate_prefix_for_batch(count, prefix):
+    """
+    Validate the prefix for a batch of discount codes.
+
+    Args:
+        count (int): The number of codes to create.
+        prefix (str): The prefix to append to the codes.
+
+    Raises:
+        ValueError: If the prefix is not valid for a batch of codes.
+        ValueError: If the prefix is too long.
+    """
+    MAX_PREFIX_LENGTH = 63
     if count > 1 and not prefix:
-        raise ValueError("You must specify a prefix to create a batch of codes.")
-    if prefix and len(prefix) > 63:
-        raise ValueError(f"Prefix {prefix} is {len(prefix)} - prefixes must be 63 characters or less.")
+        error_message = "You must specify a prefix to create a batch of codes."
+        raise ValueError(error_message)
+    if prefix and len(prefix) > MAX_PREFIX_LENGTH:
+        message = (
+            f"Prefix {prefix} is {len(prefix)} - prefixes must be "
+            "63 characters or less."
+        )
+        raise ValueError(message)
 
 def generate_codes(count, prefix=None, codes=None):
+    """
+    Generate a list of discount codes.
+
+    Args:
+        count (int): The number of codes to create.
+        prefix (str, optional): The prefix to append to the codes. Defaults to None.
+        codes (str, optional): The codes to create. Defaults to None.
+
+    Returns:
+        list(str): The generated codes.
+    """
     if count > 1:
         return [f"{prefix}{uuid.uuid4()}" for _ in range(count)]
     return [codes]
 
 def get_redemption_type(kwargs):
+    """
+    Get the redemption type.
+
+    Args:
+        kwargs (): The keyword arguments passed to the function. 
+        one_time, once_per_user, and redemption_type are the valid arguments.
+
+    """
     if kwargs.get("one_time"):
         return REDEMPTION_TYPE_ONE_TIME
     if kwargs.get("once_per_user"):
         return REDEMPTION_TYPE_ONE_TIME_PER_USER
-    if "redemption_type" in kwargs and kwargs["redemption_type"] in ALL_REDEMPTION_TYPES:
+    if (
+        "redemption_type" in kwargs
+        and kwargs["redemption_type"] in ALL_REDEMPTION_TYPES
+    ):
         return kwargs["redemption_type"]
     return REDEMPTION_TYPE_UNLIMITED
 
 def get_object_or_raise(model, identifier, missing_msg):
+    """
+    Get an object from the model, or raise an error if it doesn't exist.
+
+    Args:
+        model (Model): The model to get the object from.
+        identifier (): The identifier of the object.
+        missing_msg (str): The message to raise if the object doesn't exist.
+
+    Raises:
+        ValueError: If the object doesn't exist.
+
+    Returns:
+        Model: The object from the model.
+    """
     try:
-        if isinstance(identifier, int) or (isinstance(identifier, str) and identifier.isdigit()):
+        if isinstance(identifier, int) or (
+            isinstance(identifier, str) and identifier.isdigit()
+        ):
             return model.objects.get(pk=identifier)
         return model.objects.get(slug=identifier)
-    except ObjectDoesNotExist:
-        raise ValueError(missing_msg)
+    except ObjectDoesNotExist as err:
+        raise ValueError(missing_msg) from err
 
 def get_users(users):
+    """
+    Get a list of users from the user identifiers.
+
+    Args:
+        users (str): The user identifiers.
+
+    Raises:
+        ValueError: If the user doesn't exist.
+
+    Returns:
+        User: The list of users.
+    """
     user_list = []
     for user_identifier in users:
         try:
-            if isinstance(user_identifier, int) or (isinstance(user_identifier, str) and user_identifier.isdigit()):
+            if isinstance(user_identifier, int) or (
+                isinstance(user_identifier, str) and user_identifier.isdigit()
+            ):
                 user_list.append(User.objects.get(pk=user_identifier))
             else:
                 user_list.append(User.objects.get(email=user_identifier))
         except ObjectDoesNotExist:
-            raise ValueError(f"User {user_identifier} does not exist.")
+            error_message = f"User {user_identifier} does not exist."
+            raise ValueError(error_message) from None
     return user_list
 
 def generate_discount_code(**kwargs):
