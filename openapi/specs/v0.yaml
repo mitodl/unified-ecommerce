@@ -2716,6 +2716,9 @@ components:
         zendesk_ticket:
           type: string
           maxLength: 255
+        refund_reason:
+          type: string
+          description: Reason for refund, supplied by the processing user.
         requester:
           type: integer
     PaymentTypeEnum:
@@ -2903,12 +2906,16 @@ components:
         zendesk_ticket:
           type: string
           maxLength: 255
+        refund_reason:
+          type: string
+          description: Reason for refund, supplied by the processing user.
         requester:
           type: integer
         processed_by:
           type: integer
           readOnly: true
           nullable: true
+          description: The user who processed the request. (Usually blank.)
       required:
       - created_on
       - id
@@ -2946,6 +2953,7 @@ components:
             * `created` - created
             * `denied` - denied
             * `approved` - approved
+            * `approved-complete` - approved-complete
             * `failed` - failed
         refunded_amount:
           type: string
@@ -3006,6 +3014,9 @@ components:
         zendesk_ticket:
           type: string
           maxLength: 255
+        refund_reason:
+          type: string
+          description: Reason for refund, supplied by the processing user.
         requester:
           type: integer
       required:
@@ -3073,6 +3084,7 @@ components:
       - created
       - denied
       - approved
+      - approved-complete
       - failed
       type: string
       description: |-
@@ -3080,12 +3092,14 @@ components:
         * `created` - created
         * `denied` - denied
         * `approved` - approved
+        * `approved-complete` - approved-complete
         * `failed` - failed
       x-enum-descriptions:
       - pending
       - created
       - denied
       - approved
+      - approved-complete
       - failed
     TaxRate:
       type: object
