@@ -841,7 +841,7 @@ def test_generate_discount_code_single():
     Test generating a single discount code
     """
     # Setup
-    user = UserFactory()
+    test_user = UserFactory()
     company = CompanyFactory()
     product = ProductFactory()
     integrated_system = IntegratedSystemFactory()
@@ -853,7 +853,7 @@ def test_generate_discount_code_single():
         amount=Decimal("20.00"),
         codes="ABC123",
         count=1,
-        users=[user.id],
+        users=[test_user.id],
         company=company.id,
         product=product.id,
         integrated_system=integrated_system.slug,
@@ -904,7 +904,7 @@ def test_generate_discount_code_invalid_discount_type():
     """
     Test generating a discount code with an invalid discount type
     """
-    with pytest.raises(ValueError) as excinfo:  # noqa: PT011
+    with pytest.raises(ValueError, match="Invalid discount type") as excinfo:
         generate_discount_code(
             discount_type="invalid_type",
             payment_type="credit_card",
@@ -917,7 +917,7 @@ def test_generate_discount_code_invalid_payment_type():
     """
     Test generating a discount code with an invalid payment type
     """
-    with pytest.raises(ValueError) as excinfo:  # noqa: PT011
+    with pytest.raises(ValueError, match="Invalid discount type") as excinfo:
         generate_discount_code(
             discount_type=DISCOUNT_TYPE_PERCENT_OFF,
             payment_type="invalid_type",
@@ -930,7 +930,7 @@ def test_generate_discount_code_invalid_percent_amount():
     """
     Test generating a discount code with an invalid percent amount
     """
-    with pytest.raises(ValueError) as excinfo:  # noqa: PT011
+    with pytest.raises(ValueError, match="Payment type invalid_type is not valid") as excinfo:
         generate_discount_code(
             discount_type=DISCOUNT_TYPE_PERCENT_OFF,
             payment_type="credit_card",
@@ -991,14 +991,13 @@ def test_update_discount_codes_with_invalid_discount_type():
     Test updating discount codes with an invalid discount type
     """
     discount = DiscountFactory()
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="Invalid discount type") as excinfo:
         update_discount_codes(
             discount_codes=[discount.discount_code], discount_type="INVALID_TYPE"
         )
     assert "Invalid discount type: INVALID_TYPE." in str(excinfo.value)
 
 
-@pytest.mark.django_db()
 def test_update_discount_codes_with_valid_payment_type():
     """
     Test updating discount codes with a valid payment type
@@ -1012,20 +1011,18 @@ def test_update_discount_codes_with_valid_payment_type():
     assert discount.payment_type == ALL_PAYMENT_TYPES[0]
 
 
-@pytest.mark.django_db()
 def test_update_discount_codes_with_invalid_payment_type():
     """
     Test updating discount codes with an invalid payment type
     """
     discount = DiscountFactory()
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="Invalid discount type") as excinfo:
         update_discount_codes(
             discount_codes=[discount.discount_code], payment_type="INVALID_TYPE"
         )
     assert "Payment type INVALID_TYPE is not valid." in str(excinfo.value)
 
 
-@pytest.mark.django_db()
 def test_update_discount_codes_with_amount():
     """
     Test updating discount codes with an amount
@@ -1039,7 +1036,6 @@ def test_update_discount_codes_with_amount():
     assert discount.amount == Decimal("20.00")
 
 
-@pytest.mark.django_db()
 def test_update_discount_codes_with_activates_and_expires():
     """
     Test updating discount codes with activation and expiration dates
@@ -1056,7 +1052,6 @@ def test_update_discount_codes_with_activates_and_expires():
     assert discount.expiration_date == datetime(2023, 12, 31, 0, 0, tzinfo=UTC)
 
 
-@pytest.mark.django_db()
 def test_update_discount_codes_with_integrated_system():
     """
     Test updating discount codes with an integrated system
@@ -1072,7 +1067,6 @@ def test_update_discount_codes_with_integrated_system():
     assert discount.integrated_system == integrated_system
 
 
-@pytest.mark.django_db()
 def test_update_discount_codes_with_product():
     """
     Test updating discount codes with a product
@@ -1087,7 +1081,6 @@ def test_update_discount_codes_with_product():
     assert discount.product == product
 
 
-@pytest.mark.django_db()
 def test_update_discount_codes_with_users():
     """
     Test updating discount codes with users
@@ -1103,7 +1096,6 @@ def test_update_discount_codes_with_users():
     assert set(discount.assigned_users.all()) == set(users)
 
 
-@pytest.mark.django_db()
 def test_update_discount_codes_with_clear_users():
     """
     Test updating discount codes by clearing the assigned users
@@ -1119,7 +1111,6 @@ def test_update_discount_codes_with_clear_users():
     assert discount.assigned_users.count() == 0
 
 
-@pytest.mark.django_db()
 def test_update_discount_codes_with_prefix():
     """
     Test updating discount codes with a prefix
@@ -1154,7 +1145,6 @@ def test_update_discount_codes_with_prefix():
         assert discount.amount == Decimal("15.00")
 
 
-@pytest.mark.django_db()
 def test_update_discount_codes_exclude_redeemed_discounts():
     """
     Test updating discount codes with a prefix
@@ -1415,7 +1405,7 @@ def test_get_users_with_invalid_email():
     Test that get_users raises an error when an invalid user email is provided
     """
     # Create a test user
-    test_user = UserFactory()
+    UserFactory()
 
     # Call the function with an invalid email
     invalid_email = "nonexistent@example.com"
@@ -1498,7 +1488,7 @@ def test_check_taxable_with_multiple_tax_rates():
     country_code1 = "AB"
     country_code2 = "UK"
     taxrate1 = TaxRateFactory(country_code=country_code1)
-    taxrate2 = TaxRateFactory(country_code=country_code2)
+    TaxRateFactory(country_code=country_code2)
 
     # Create a Basket with a user whose country code matches the TaxRate
     basket = BasketFactory(user_blockable_country_code=country_code1)

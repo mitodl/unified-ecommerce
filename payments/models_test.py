@@ -4,11 +4,10 @@ import uuid
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from django.http import HttpRequest
-
 import pytest
 import pytz
 import reversion
+from django.http import HttpRequest
 from mitol.payment_gateway.payment_utils import quantize_decimal
 from reversion.models import Version
 
@@ -545,6 +544,7 @@ def test_resolve_discount_version_current_version():
     # Assert that the current version is returned
     assert result == discount
 
+
 def test_resolve_discount_version_no_versions():
     """
     Test that an error is raised when no versions of a Discount instance are found.
@@ -574,7 +574,7 @@ def test_resolve_discount_version_invalid_version():
 
     # Get the version
     versions = Version.objects.get_for_object(discount)
-    version = versions.first()
+    versions.first()
 
     # Call the method with an invalid version
     with pytest.raises(TypeError) as exc_info:
@@ -604,7 +604,10 @@ def test_establish_basket_new_basket():
     # Assert that a new basket was created
     assert basket.user == user
     assert basket.integrated_system == integrated_system
-    assert models.Basket.objects.filter(user=user, integrated_system=integrated_system).exists()
+    assert models.Basket.objects.filter(
+        user=user, integrated_system=integrated_system
+    ).exists()
+
 
 def test_establish_basket_existing_basket():
     """
@@ -624,7 +627,13 @@ def test_establish_basket_existing_basket():
 
     # Assert that the existing basket was returned
     assert basket == existing_basket
-    assert models.Basket.objects.filter(user=user, integrated_system=integrated_system).count() == 1
+    assert (
+        models.Basket.objects.filter(
+            user=user, integrated_system=integrated_system
+        ).count()
+        == 1
+    )
+
 
 def test_establish_basket_multiple_integrated_systems():
     """
@@ -651,6 +660,7 @@ def test_establish_basket_multiple_integrated_systems():
     assert basket2.integrated_system == integrated_system2
     assert models.Basket.objects.filter(user=user).count() == 2
 
+
 def test_establish_basket_unique_constraint():
     """
     Test that a single basket is created when the method is called multiple times.
@@ -669,4 +679,9 @@ def test_establish_basket_unique_constraint():
 
     # Assert that the same basket was returned both times
     assert basket1 == basket2
-    assert models.Basket.objects.filter(user=user, integrated_system=integrated_system).count() == 1
+    assert (
+        models.Basket.objects.filter(
+            user=user, integrated_system=integrated_system
+        ).count()
+        == 1
+    )
