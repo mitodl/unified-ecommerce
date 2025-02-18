@@ -917,7 +917,9 @@ def test_generate_discount_code_invalid_payment_type():
     """
     Test generating a discount code with an invalid payment type
     """
-    with pytest.raises(ValueError, match="Invalid discount type") as excinfo:
+    with pytest.raises(
+        ValueError, match="Payment type invalid_type is not valid"
+    ) as excinfo:
         generate_discount_code(
             discount_type=DISCOUNT_TYPE_PERCENT_OFF,
             payment_type="invalid_type",
@@ -930,7 +932,10 @@ def test_generate_discount_code_invalid_percent_amount():
     """
     Test generating a discount code with an invalid percent amount
     """
-    with pytest.raises(ValueError, match="Payment type invalid_type is not valid") as excinfo:
+    with pytest.raises(
+        ValueError,
+        match="Discount amount 150.00 not valid for discount type percent-off",
+    ) as excinfo:
         generate_discount_code(
             discount_type=DISCOUNT_TYPE_PERCENT_OFF,
             payment_type="credit_card",
@@ -1016,7 +1021,9 @@ def test_update_discount_codes_with_invalid_payment_type():
     Test updating discount codes with an invalid payment type
     """
     discount = DiscountFactory()
-    with pytest.raises(ValueError, match="Invalid discount type") as excinfo:
+    with pytest.raises(
+        ValueError, match="Payment type INVALID_TYPE is not valid."
+    ) as excinfo:
         update_discount_codes(
             discount_codes=[discount.discount_code], payment_type="INVALID_TYPE"
         )
@@ -1264,7 +1271,7 @@ def test_check_blocked_countries_not_blocked_for_other_country():
     test_user.profile.country_code = "CA"  # User is in Canada
     test_user.save()
     product = ProductFactory()
-    basket = BasketFactory(user=test_user)
+    basket = BasketFactory(user=test_user, integrated_system=product.system)
 
     # Block the product for a different country (US)
     BlockedCountryFactory(country_code="US", product=product)

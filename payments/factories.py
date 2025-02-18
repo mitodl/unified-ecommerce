@@ -110,8 +110,6 @@ class DiscountFactory(DjangoModelFactory):
     )
     discount_type = fuzzy.FuzzyChoice(["dollars-off", "percent-off", "fixed-price"])
     discount_code = FAKE.unique.word()
-    integrated_system = SubFactory(IntegratedSystemFactory)
-    product = SubFactory(ProductFactory)
 
     class Meta:
         """Meta options for DiscountFactory"""

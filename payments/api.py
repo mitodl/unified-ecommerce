@@ -312,7 +312,11 @@ def refund_order(
 
     # Check for PayPal payment
     if "paypal_token" in order_recent_transaction.data:
-        raise PaypalRefundError(order.reference_number)
+        msg = (
+            f"PayPal: Order {order.reference_number} contains a PayPal"
+            "transaction. Please contact Finance to refund this order."
+        )
+        raise PaypalRefundError(msg)
 
     # Prepare refund request
     transaction_dict = order_recent_transaction.data
