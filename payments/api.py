@@ -62,10 +62,8 @@ from unified_ecommerce.constants import (
     REDEMPTION_TYPE_ONE_TIME_PER_USER,
     REDEMPTION_TYPE_UNLIMITED,
     REFUND_SUCCESS_STATES,
-    USER_MSG_TYPE_PAYMENT_ACCEPTED_NOVALUE,
     ZERO_PAYMENT_DATA,
 )
-from unified_ecommerce.utils import redirect_with_user_message
 from users.api import determine_user_location, get_flagged_countries
 
 log = logging.getLogger(__name__)
@@ -76,12 +74,12 @@ def generate_checkout_payload(request, system):
     """Generate the payload to send to the payment gateway."""
     basket = Basket.establish_basket(request, system)
 
+    log.debug("established basket has %s lines", basket.basket_items.count())
+
     # Notes for future implementation: this used to check for
-    # * ~~Blocked products (by country)~~ (now handled in the basket_add hook)
     # * Re-purchases of the same product
     # * Purchasing a product that is expired
     # These are all cleared for now, but will need to go back here later.
-    # For completeness, this is also where discounts were checked for validity.
 
     order = PendingOrder.create_from_basket(basket)
     total_price = 0
@@ -121,13 +119,6 @@ def generate_checkout_payload(request, system):
             )
             return {
                 "no_checkout": True,
-                "response": redirect_with_user_message(
-                    reverse("cart"),
-                    {
-                        "type": USER_MSG_TYPE_PAYMENT_ACCEPTED_NOVALUE,
-                        "run": order.lines.first().purchased_object.course.title,
-                    },
-                ),
             }
 
     callback_uri = request.build_absolute_uri(reverse("v0:checkout-result-callback"))

@@ -41,6 +41,7 @@ class OrderFactory(DjangoModelFactory):
     total_price_paid = fuzzy.FuzzyDecimal(10.00, 10.00)
     purchaser = SubFactory(UserFactory)
     reference_number = FAKE.unique.word()
+    integrated_system = SubFactory(IntegratedSystemFactory)
 
     class Meta:
         """Meta options for BasketFactory"""

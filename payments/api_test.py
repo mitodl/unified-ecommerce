@@ -594,6 +594,10 @@ def test_pre_sale_webhook(mocker, user, products):
 def test_post_sale_webhook_multisystem(mocker, fulfilled_complete_order, source):
     """Test fire the post-sale webhook with an order with lines from >1 system."""
 
+    # Create an integrated system out of band to make sure this is actually
+    # getting called correctly.
+    _ = IntegratedSystemFactory.create()
+
     with reversion.create_revision():
         product = ProductFactory.create()
 
@@ -617,6 +621,9 @@ def test_post_sale_webhook_multisystem(mocker, fulfilled_complete_order, source)
                 if line.product.system.slug == system.slug
             ],
         )
+
+        if len(order_info.lines) == 0:
+            continue
 
         webhook_data = WebhookBase(
             type=PAYMENT_HOOK_ACTION_POST_SALE,
