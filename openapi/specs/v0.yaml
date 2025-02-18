@@ -750,6 +750,325 @@ paths:
               schema:
                 $ref: "#/components/schemas/OrderHistory"
           description: ""
+  /api/v0/refunds/create_from_order:
+    post:
+      operationId: refunds_create_from_order_create
+      description:
+        Create a refund from an existing order, optionally specifying which
+        lines to refund.
+      tags:
+        - refunds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFromOrderApiRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CreateFromOrderApiRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CreateFromOrderApiRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Request"
+          description: ""
+  /api/v0/refunds/lines/:
+    get:
+      operationId: refunds_lines_list
+      description: API endpoint for line items.
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          description: Number of results to return per page.
+          schema:
+            type: integer
+        - name: offset
+          required: false
+          in: query
+          description: The initial index from which to return the results.
+          schema:
+            type: integer
+      tags:
+        - refunds
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedRequestLineList"
+          description: ""
+    post:
+      operationId: refunds_lines_create
+      description: API endpoint for line items.
+      tags:
+        - refunds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestLineRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/RequestLineRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/RequestLineRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestLine"
+          description: ""
+  /api/v0/refunds/lines/{id}/:
+    get:
+      operationId: refunds_lines_retrieve
+      description: API endpoint for line items.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this request line.
+          required: true
+      tags:
+        - refunds
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestLine"
+          description: ""
+    put:
+      operationId: refunds_lines_update
+      description: API endpoint for line items.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this request line.
+          required: true
+      tags:
+        - refunds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestLineRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/RequestLineRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/RequestLineRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestLine"
+          description: ""
+    patch:
+      operationId: refunds_lines_partial_update
+      description: API endpoint for line items.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this request line.
+          required: true
+      tags:
+        - refunds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchedRequestLineRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PatchedRequestLineRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PatchedRequestLineRequest"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestLine"
+          description: ""
+    delete:
+      operationId: refunds_lines_destroy
+      description: API endpoint for line items.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this request line.
+          required: true
+      tags:
+        - refunds
+      responses:
+        "204":
+          description: No response body
+  /api/v0/refunds/requests/:
+    get:
+      operationId: refunds_requests_list
+      description: API endpoint for refund requests.
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          description: Number of results to return per page.
+          schema:
+            type: integer
+        - name: offset
+          required: false
+          in: query
+          description: The initial index from which to return the results.
+          schema:
+            type: integer
+      tags:
+        - refunds
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedRequestList"
+          description: ""
+    post:
+      operationId: refunds_requests_create
+      description: API endpoint for refund requests.
+      tags:
+        - refunds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/RequestRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/RequestRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Request"
+          description: ""
+  /api/v0/refunds/requests/{id}/:
+    get:
+      operationId: refunds_requests_retrieve
+      description: API endpoint for refund requests.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this request line.
+          required: true
+      tags:
+        - refunds
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Request"
+          description: ""
+    put:
+      operationId: refunds_requests_update
+      description: API endpoint for refund requests.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this request line.
+          required: true
+      tags:
+        - refunds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/RequestRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/RequestRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Request"
+          description: ""
+    patch:
+      operationId: refunds_requests_partial_update
+      description: API endpoint for refund requests.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this request line.
+          required: true
+      tags:
+        - refunds
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchedRequestRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/PatchedRequestRequest"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/PatchedRequestRequest"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Request"
+          description: ""
+    delete:
+      operationId: refunds_requests_destroy
+      description: API endpoint for refund requests.
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          description: A unique integer value identifying this request line.
+          required: true
+      tags:
+        - refunds
+      responses:
+        "204":
+          description: No response body
   /api/v0/users/me/:
     get:
       operationId: users_me_retrieve
@@ -1670,6 +1989,19 @@ components:
       required:
         - quantity
         - sku
+    CreateFromOrderApiRequest:
+      type: object
+      description: Serializer for the create from order API.
+      properties:
+        order:
+          type: integer
+        lines:
+          type: array
+          items:
+            type: integer
+      required:
+        - lines
+        - order
     CyberSourceCheckout:
       type: object
       description:
@@ -1832,9 +2164,239 @@ components:
         - quantity
         - total_price
         - unit_price
+    LineRequest:
+      type: object
+      description: Serializes a line item for an order.
+      properties:
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,2})?$
+        total_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,2})?$
+        product:
+          $ref: "#/components/schemas/ProductRequest"
+      required:
+        - product
+        - quantity
+        - total_price
+        - unit_price
+    Nested:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_on:
+          type: string
+          format: date-time
+          readOnly: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+        automatic:
+          type: boolean
+        discount_type:
+          $ref: "#/components/schemas/DiscountTypeEnum"
+        redemption_type:
+          $ref: "#/components/schemas/RedemptionTypeEnum"
+        payment_type:
+          nullable: true
+          oneOf:
+            - $ref: "#/components/schemas/PaymentTypeEnum"
+            - $ref: "#/components/schemas/NullEnum"
+        max_redemptions:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        discount_code:
+          type: string
+          maxLength: 100
+        activation_date:
+          type: string
+          format: date-time
+          nullable: true
+          description:
+            If set, this discount code will not be redeemable before this
+            date.
+        expiration_date:
+          type: string
+          format: date-time
+          nullable: true
+          description:
+            If set, this discount code will not be redeemable after this
+            date.
+        is_bulk:
+          type: boolean
+        transaction_number:
+          type: string
+          maxLength: 255
+        integrated_system:
+          type: integer
+          nullable: true
+        product:
+          type: integer
+          nullable: true
+        bulk_discount_collection:
+          type: integer
+          nullable: true
+        company:
+          type: integer
+          nullable: true
+        assigned_users:
+          type: array
+          items:
+            type: integer
+            nullable: true
+      required:
+        - amount
+        - created_on
+        - discount_code
+        - discount_type
+        - id
+        - redemption_type
+        - updated_on
+    NestedRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,18}(?:\.\d{0,2})?$
+        automatic:
+          type: boolean
+        discount_type:
+          $ref: "#/components/schemas/DiscountTypeEnum"
+        redemption_type:
+          $ref: "#/components/schemas/RedemptionTypeEnum"
+        payment_type:
+          nullable: true
+          oneOf:
+            - $ref: "#/components/schemas/PaymentTypeEnum"
+            - $ref: "#/components/schemas/NullEnum"
+        max_redemptions:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        discount_code:
+          type: string
+          minLength: 1
+          maxLength: 100
+        activation_date:
+          type: string
+          format: date-time
+          nullable: true
+          description:
+            If set, this discount code will not be redeemable before this
+            date.
+        expiration_date:
+          type: string
+          format: date-time
+          nullable: true
+          description:
+            If set, this discount code will not be redeemable after this
+            date.
+        is_bulk:
+          type: boolean
+        transaction_number:
+          type: string
+          maxLength: 255
+        integrated_system:
+          type: integer
+          nullable: true
+        product:
+          type: integer
+          nullable: true
+        bulk_discount_collection:
+          type: integer
+          nullable: true
+        company:
+          type: integer
+          nullable: true
+        assigned_users:
+          type: array
+          items:
+            type: integer
+            nullable: true
+      required:
+        - amount
+        - discount_code
+        - discount_type
+        - redemption_type
     NullEnum:
       enum:
         - null
+    Order:
+      type: object
+      description: Serializes an order.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference_number:
+          type: string
+          maxLength: 255
+        state:
+          $ref: "#/components/schemas/StateEnum"
+        purchaser:
+          $ref: "#/components/schemas/User"
+        total_price_paid:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,5})?$
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/Line"
+        redeemed_discounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/RedeemedDiscount"
+        refunds:
+          type: array
+          items: {}
+          description: |-
+            Return refunds for the order.
+
+            Returns an empty set for now, don't have that set up yet really. In
+            MITx Online this returned _transactions_ that were refunds, so we want
+            to return the requests that we're now collecting.
+          readOnly: true
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        street_address:
+          allOf:
+            - $ref: "#/components/schemas/TransactionDataPurchaser"
+          readOnly: true
+      required:
+        - created_on
+        - id
+        - lines
+        - purchaser
+        - redeemed_discounts
+        - refunds
+        - street_address
+        - total_price_paid
+        - transactions
     OrderHistory:
       type: object
       description: Serializer for order history.
@@ -1882,6 +2444,34 @@ components:
         - total_price_paid
         - transactions
         - updated_on
+    OrderRequest:
+      type: object
+      description: Serializes an order.
+      properties:
+        reference_number:
+          type: string
+          maxLength: 255
+        state:
+          $ref: "#/components/schemas/StateEnum"
+        purchaser:
+          $ref: "#/components/schemas/UserRequest"
+        total_price_paid:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,5})?$
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/LineRequest"
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransactionRequest"
+      required:
+        - lines
+        - purchaser
+        - total_price_paid
+        - transactions
     PaginatedBasketItemList:
       type: object
       required:
@@ -1997,6 +2587,52 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Product"
+    PaginatedRequestLineList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequestLine"
+    PaginatedRequestList:
+      type: object
+      required:
+        - count
+        - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/Request"
     PatchedBasketItemRequest:
       type: object
       description: BasketItem model serializer
@@ -2062,6 +2698,42 @@ components:
           format: uri
           description: URL to the product details page.
           maxLength: 200
+    PatchedRequestLineRequest:
+      type: object
+      description: Serializer for refund request lines.
+      properties:
+        refunded_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,5})?$
+          nullable: true
+          description:
+            The amount refunded for this line item (may not be the full
+            amount charged).
+        refund_request:
+          type: integer
+        line:
+          type: integer
+          description: The individual line item to refund.
+        transactions:
+          type: array
+          items:
+            type: integer
+    PatchedRequestRequest:
+      type: object
+      description: Serializer for refund requests.
+      properties:
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequestLineRequest"
+        order:
+          $ref: "#/components/schemas/OrderRequest"
+        zendesk_ticket:
+          type: string
+          maxLength: 255
+        requester:
+          type: integer
     PaymentTypeEnum:
       enum:
         - marketing
@@ -2186,6 +2858,180 @@ components:
         - price
         - sku
         - system
+    RedeemedDiscount:
+      type: object
+      description: DiscountRedemption model serializer
+      properties:
+        discount:
+          allOf:
+            - $ref: "#/components/schemas/Nested"
+          readOnly: true
+      required:
+        - discount
+    RedemptionTypeEnum:
+      enum:
+        - one-time
+        - one-time-per-user
+        - unlimited
+      type: string
+      description: |-
+        * `one-time` - one-time
+        * `one-time-per-user` - one-time-per-user
+        * `unlimited` - unlimited
+      x-enum-descriptions:
+        - one-time
+        - one-time-per-user
+        - unlimited
+    Request:
+      type: object
+      description: Serializer for refund requests.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequestLine"
+        order:
+          $ref: "#/components/schemas/Order"
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_on:
+          type: string
+          format: date-time
+          readOnly: true
+        processed_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        total_refunded:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,5})?$
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+            - $ref: "#/components/schemas/StatusEnum"
+          readOnly: true
+        zendesk_ticket:
+          type: string
+          maxLength: 255
+        requester:
+          type: integer
+        processed_by:
+          type: integer
+          readOnly: true
+          nullable: true
+      required:
+        - created_on
+        - id
+        - lines
+        - order
+        - processed_by
+        - processed_date
+        - requester
+        - status
+        - total_refunded
+        - updated_on
+    RequestLine:
+      type: object
+      description: Serializer for refund request lines.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_on:
+          type: string
+          format: date-time
+          readOnly: true
+        status:
+          allOf:
+            - $ref: "#/components/schemas/StatusEnum"
+          readOnly: true
+          description: |-
+            The status of this line item.
+
+            * `pending` - pending
+            * `created` - created
+            * `denied` - denied
+            * `approved` - approved
+            * `failed` - failed
+        refunded_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,5})?$
+          nullable: true
+          description:
+            The amount refunded for this line item (may not be the full
+            amount charged).
+        refund_request:
+          type: integer
+        line:
+          type: integer
+          description: The individual line item to refund.
+        transactions:
+          type: array
+          items:
+            type: integer
+      required:
+        - created_on
+        - id
+        - line
+        - refund_request
+        - status
+        - updated_on
+    RequestLineRequest:
+      type: object
+      description: Serializer for refund request lines.
+      properties:
+        refunded_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,15}(?:\.\d{0,5})?$
+          nullable: true
+          description:
+            The amount refunded for this line item (may not be the full
+            amount charged).
+        refund_request:
+          type: integer
+        line:
+          type: integer
+          description: The individual line item to refund.
+        transactions:
+          type: array
+          items:
+            type: integer
+      required:
+        - line
+        - refund_request
+    RequestRequest:
+      type: object
+      description: Serializer for refund requests.
+      properties:
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequestLineRequest"
+        order:
+          $ref: "#/components/schemas/OrderRequest"
+        zendesk_ticket:
+          type: string
+          maxLength: 255
+        requester:
+          type: integer
+      required:
+        - lines
+        - order
+        - requester
     SimpleDiscount:
       type: object
       description: Simpler serializer for discounts.
@@ -2241,6 +3087,26 @@ components:
         - Declined
         - Errored
         - Review
+    StatusEnum:
+      enum:
+        - pending
+        - created
+        - denied
+        - approved
+        - failed
+      type: string
+      description: |-
+        * `pending` - pending
+        * `created` - created
+        * `denied` - denied
+        * `approved` - approved
+        * `failed` - failed
+      x-enum-descriptions:
+        - pending
+        - created
+        - denied
+        - approved
+        - failed
     TaxRate:
       type: object
       description: TaxRate model serializer
@@ -2289,6 +3155,73 @@ components:
         - transaction_id
         - transaction_type
         - updated_on
+    TransactionDataPurchaser:
+      type: object
+      description: Serializes a transaction's purchaser data.
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        country:
+          type: string
+        email:
+          type: string
+          format: email
+        street_address:
+          type: array
+          items:
+            type: string
+        city:
+          type: string
+        state_or_territory:
+          type: string
+        postal_code:
+          type: string
+        company:
+          type: string
+      required:
+        - city
+        - company
+        - country
+        - email
+        - first_name
+        - last_name
+        - postal_code
+        - state_or_territory
+        - street_address
+    TransactionRequest:
+      type: object
+      description: Serializer for transactions.
+      properties:
+        transaction_id:
+          type: string
+          minLength: 1
+        transaction_type:
+          type: string
+          minLength: 1
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,7}(?:\.\d{0,2})?$
+        created_on:
+          type: string
+          format: date-time
+        updated_on:
+          type: string
+          format: date-time
+        reason:
+          type: string
+          minLength: 1
+        data: {}
+      required:
+        - amount
+        - created_on
+        - data
+        - reason
+        - transaction_id
+        - transaction_type
+        - updated_on
     User:
       type: object
       description: Serializer for User model.
@@ -2320,4 +3253,27 @@ components:
       required:
         - email
         - id
+        - username
+    UserRequest:
+      type: object
+      description: Serializer for User model.
+      properties:
+        global_id:
+          type: string
+          description: The SSO ID (usually a Keycloak UUID) for the user.
+          maxLength: 255
+        username:
+          type: string
+          minLength: 1
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 255
+        last_name:
+          type: string
+          maxLength: 255
+        name:
+          type: string
+          maxLength: 255
+      required:
         - username
