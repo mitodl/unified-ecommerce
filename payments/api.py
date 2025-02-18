@@ -957,9 +957,13 @@ def check_blocked_countries(basket, basket_item):
     """
     log.debug("Checking blockages for user: %s", basket.user)
 
-    if BlockedCountry.objects.filter(
-        country_code=basket.user_blockable_country_code, product__in=[None, basket_item]
-    ).exists():
+    if (
+        BlockedCountry.objects.filter(
+            country_code=basket.user_blockable_country_code,
+        )
+        .filter(Q(product__isnull=True) | Q(product=basket_item))
+        .exists()
+    ):
         log.debug("User is blocked from purchasing the product.")
         message = (
             f"Product {basket_item} blocked in country "
