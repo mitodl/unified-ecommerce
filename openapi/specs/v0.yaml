@@ -3092,6 +3092,7 @@ components:
       - created
       - denied
       - approved
+      - approved-complete
       - failed
 >>>>>>> 2f7ec95 (Add refunds app, dependencies)
       type: string
@@ -3115,6 +3116,7 @@ components:
       - created
       - denied
       - approved
+      - approved-complete
       - failed
 >>>>>>> 2f7ec95 (Add refunds app, dependencies)
     TaxRate:
