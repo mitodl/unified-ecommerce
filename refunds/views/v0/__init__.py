@@ -148,24 +148,30 @@ def accept_code(request):
         # do something to approve the request
         try:
             code.refund_request.approve(reason, lines=lines)
-        except RefundAlreadyCompleteError as e:
+        except RefundAlreadyCompleteError:
             log.exception(
                 "Refund failed: Attempted to accept code %s for completed request %s",
                 code,
                 code.refund_request,
             )
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Code supplied is for a completed request"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     if code.deny_code == code:
         # do something to deny the request
         try:
             code.refund_request.approve(reason, lines=lines)
-        except RefundAlreadyCompleteError as e:
+        except RefundAlreadyCompleteError:
             log.exception(
                 "Refund failed: Attempted to accept code %s for completed request %s",
                 code,
                 code.refund_request,
             )
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Code supplied is for a completed request"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     return Response(status=status.HTTP_200_OK)
