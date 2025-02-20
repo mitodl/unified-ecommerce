@@ -7,6 +7,7 @@ from decimal import Decimal
 import pytest
 import pytz
 import reversion
+from django.http import HttpRequest
 from mitol.payment_gateway.payment_utils import quantize_decimal
 from reversion.models import Version
 
@@ -14,6 +15,7 @@ from payments import models
 from payments.factories import (
     BasketFactory,
     BasketItemFactory,
+    DiscountFactory,
     LineFactory,
     OrderFactory,
     TaxRateFactory,
@@ -527,3 +529,159 @@ def test_order_tax_calculation_precision_check(user):
     assert order.tax == quantize_decimal(tax_assessed)
     assert order.lines.first().tax == tax_assessed
     assert order.lines.first().total_price == taxed_price
+
+
+def test_resolve_discount_version_current_version():
+    """
+    Test that the current version of a Discount instance is returned when no version is specified.
+    """
+    # Create a Discount instance
+    discount = DiscountFactory()
+
+    # Call the method with discount_version=None (current version)
+    result = models.Discount.resolve_discount_version(discount, discount_version=None)
+
+    # Assert that the current version is returned
+    assert result == discount
+
+
+def test_resolve_discount_version_no_versions():
+    """
+    Test that an error is raised when no versions of a Discount instance are found.
+    """
+    # Create a Discount instance
+    discount = DiscountFactory()
+
+    # Call the method with discount_version=None (current version)
+    result = models.Discount.resolve_discount_version(discount, discount_version=None)
+
+    # Assert that the current version is returned
+    assert result == discount
+
+
+def test_resolve_discount_version_invalid_version():
+    """
+    Test that an error is raised when an invalid version is specified.
+    """
+    # Create a Discount instance
+    discount = DiscountFactory()
+
+    # Create a version of the Discount instance
+    with reversion.create_revision():
+        discount.amount = 50
+        discount.save()
+        reversion.set_comment("Changed amount to 50")
+
+    # Get the version
+    versions = Version.objects.get_for_object(discount)
+    versions.first()
+
+    # Call the method with an invalid version
+    with pytest.raises(TypeError) as exc_info:
+        models.Discount.resolve_discount_version(
+            discount, discount_version="invalid_version"
+        )
+
+    # Assert the correct error message
+    assert str(exc_info.value) == "Invalid product version specified"
+
+
+def test_establish_basket_new_basket():
+    """
+    Test that a new basket is created when a basket does not already exist for the user and integrated system.
+    """
+    # Create a user and an integrated system
+    user = UserFactory()
+    integrated_system = IntegratedSystemFactory()
+
+    # Simulate a request object with the user
+    request = HttpRequest()
+    request.user = user
+
+    # Call the method
+    basket = models.Basket.establish_basket(request, integrated_system)
+
+    # Assert that a new basket was created
+    assert basket.user == user
+    assert basket.integrated_system == integrated_system
+    assert models.Basket.objects.filter(
+        user=user, integrated_system=integrated_system
+    ).exists()
+
+
+def test_establish_basket_existing_basket():
+    """
+    Test that an existing basket is returned when a basket already exists for the user and integrated system.
+    """
+    # Create a user, an integrated system, and an existing basket
+    user = UserFactory()
+    integrated_system = IntegratedSystemFactory()
+    existing_basket = BasketFactory(user=user, integrated_system=integrated_system)
+
+    # Simulate a request object with the user
+    request = HttpRequest()
+    request.user = user
+
+    # Call the method
+    basket = models.Basket.establish_basket(request, integrated_system)
+
+    # Assert that the existing basket was returned
+    assert basket == existing_basket
+    assert (
+        models.Basket.objects.filter(
+            user=user, integrated_system=integrated_system
+        ).count()
+        == 1
+    )
+
+
+def test_establish_basket_multiple_integrated_systems():
+    """
+    Test that a new basket is created for each integrated system when multiple integrated systems exist.
+    """
+    # Create a user and two integrated systems
+    user = UserFactory()
+    integrated_system1 = IntegratedSystemFactory()
+    integrated_system2 = IntegratedSystemFactory()
+
+    # Simulate a request object with the user
+    request = HttpRequest()
+    request.user = user
+
+    # Call the method for the first integrated system
+    basket1 = models.Basket.establish_basket(request, integrated_system1)
+
+    # Call the method for the second integrated system
+    basket2 = models.Basket.establish_basket(request, integrated_system2)
+
+    # Assert that two different baskets were created
+    assert basket1 != basket2
+    assert basket1.integrated_system == integrated_system1
+    assert basket2.integrated_system == integrated_system2
+    assert models.Basket.objects.filter(user=user).count() == 2
+
+
+def test_establish_basket_unique_constraint():
+    """
+    Test that a single basket is created when the method is called multiple times.
+    """
+    # Create a user and an integrated system
+    user = UserFactory()
+    integrated_system = IntegratedSystemFactory()
+
+    # Simulate a request object with the user
+    request = HttpRequest()
+    request.user = user
+
+    # Call the method twice
+    basket1 = models.Basket.establish_basket(request, integrated_system)
+    basket2 = models.Basket.establish_basket(request, integrated_system)
+
+    # Assert that the same basket was returned both times
+    assert basket1 == basket2
+    assert (
+        models.Basket.objects.filter(
+            user=user, integrated_system=integrated_system
+        ).count()
+        == 1
+    )

@@ -7,7 +7,7 @@ from decimal import Decimal
 import reversion
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db import transaction
 from django.db.models import Q, QuerySet
 from django.urls import reverse
@@ -176,92 +176,77 @@ def process_cybersource_payment_response(
     Returns:
         Order.state
     """
-
     if not PaymentGateway.validate_processor_response(
         settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, request
     ):
-        msg = "Could not validate response from the payment processor."
-        raise PermissionDenied(msg)
+        error_message = "Could not validate response from the payment processor."
+        raise PermissionDenied(error_message)
 
     processor_response = PaymentGateway.get_formatted_response(
         settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, request
     )
-
-    reason_code = processor_response.response_code
+    reason_code = (
+        int(processor_response.response_code)
+        if (
+            processor_response.response_code
+            and processor_response.response_code.isdigit()
+        )
+        else None
+    )
     transaction_id = processor_response.transaction_id
-    if reason_code and reason_code.isdigit():
-        reason_code = int(reason_code)
+
+    # Log transaction status
+    if reason_code is not None:
         message = (
-            "Transaction was not successful. "
-            "Transaction ID:%s  Reason Code:%d  Message:%s"
+            f"Transaction ID: {transaction_id}, Reason Code: {reason_code}, "
+            f"Message: {processor_response.message}"
         )
         if reason_code in CYBERSOURCE_ERROR_CODES:
-            # Log the errors as errors, so they make Sentry logs.
-            log.error(message, transaction_id, reason_code, processor_response.message)
+            log.error("Transaction was not successful. %s", message)
         elif reason_code not in CYBERSOURCE_ACCEPT_CODES:
-            # These may be declines or reviews - only log in debug mode.
-            log.debug(message, transaction_id, reason_code, processor_response.message)
+            log.debug("Transaction was not successful. %s", message)
 
-    return_message = ""
+    # Handle processor response states
+    state_handlers = {
+        ProcessorResponse.STATE_DECLINED: order.decline,
+        ProcessorResponse.STATE_ERROR: order.errored,
+        ProcessorResponse.STATE_CANCELLED: order.cancel,
+        ProcessorResponse.STATE_REVIEW: order.cancel,
+        ProcessorResponse.STATE_ACCEPTED: lambda: fulfill_completed_order(
+            order,
+            request.POST,
+            Basket.objects.filter(user=order.purchaser).first(),
+            source,
+        ),
+    }
 
-    if processor_response.state == ProcessorResponse.STATE_DECLINED:
-        # Transaction declined for some reason
-        # This probably means the order needed to go through the process
-        # again so maybe tell the user to do a thing.
-        msg = f"Transaction declined: {processor_response.message}"
-        log.debug(msg)
-        order.decline()
-        return_message = order.state
-    elif processor_response.state == ProcessorResponse.STATE_ERROR:
-        # Error - something went wrong with the request
-        msg = f"Error happened submitting the transaction: {processor_response.message}"
-        log.debug(msg)
-        order.errored()
-        return_message = order.state
-    elif processor_response.state in [
-        ProcessorResponse.STATE_CANCELLED,
-        ProcessorResponse.STATE_REVIEW,
-    ]:
-        # Transaction cancelled or reviewed
-        # Transaction could be cancelled for reasons that don't necessarily
-        # mean that the entire order is invalid, so we'll do nothing with
-        # the order here (other than set it to Cancelled).
-        # Transaction could be
-        msg = f"Transaction cancelled/reviewed: {processor_response.message}"
-        log.debug(msg)
-        order.cancel()
-        return_message = order.state
-
-    elif (
-        processor_response.state == ProcessorResponse.STATE_ACCEPTED
-        or reason_code == CYBERSOURCE_REASON_CODE_SUCCESS
-    ):
-        # It actually worked here
-        basket = Basket.objects.filter(user=order.purchaser).first()
-        try:
-            msg = f"Transaction accepted!: {processor_response.message}"
-            log.debug(msg)
-            fulfill_completed_order(order, request.POST, basket, source)
-        except ValidationError:
-            msg = (
-                "Missing transaction id from transaction response: "
-                f"{processor_response.message}"
-            )
-            log.debug(msg)
-            raise
-
-        return_message = order.state
-    else:
-        msg = (
-            f"Unknown state {processor_response.state} found: transaction ID"
-            f"{transaction_id}, reason code {reason_code}, response message"
-            f" {processor_response.message}"
+    if processor_response.state in state_handlers:
+        log.debug(
+            "Transaction %s: %s",
+            processor_response.state.lower(),
+            processor_response.message,
         )
-        log.error(msg)
+        state_handlers[processor_response.state]()
+    elif reason_code == CYBERSOURCE_REASON_CODE_SUCCESS:
+        log.debug("Transaction accepted!: %s", processor_response.message)
+        fulfill_completed_order(
+            order,
+            request.POST,
+            Basket.objects.filter(user=order.purchaser).first(),
+            source,
+        )
+    else:
+        log.error(
+            "Unknown state %s found: transaction ID %s, reason code %s, "
+            "response message %s",
+            processor_response.state,
+            transaction_id,
+            reason_code,
+            processor_response.message,
+        )
         order.cancel()
-        return_message = order.state
 
-    return return_message
+    return order.state
 
 
 def refund_order(
@@ -282,161 +267,76 @@ def refund_order(
         tuple of (bool, str) : A boolean identifying if an order refund was
         successful, and the error message (if there is one)
     """
-    refund_amount = kwargs.get("refund_amount")
-    refund_reason = kwargs.get("refund_reason", "")
-    message = ""
-    if reference_number is not None:
-        order = FulfilledOrder.objects.get(reference_number=reference_number)
-    elif order_id is not None:
-        order = FulfilledOrder.objects.get(pk=order_id)
-    else:
-        message = "Either order_id or reference_number is required to fetch the Order."
-        log.error(message)
-        return False, message
+    # Validate input
+    if not any([order_id, reference_number]):
+        log.error("Either order_id or reference_number is required to fetch the Order.")
+        return (
+            False,
+            "Either order_id or reference_number is required to fetch the Order.",
+        )
+
+    # Fetch the order
+    try:
+        order = (
+            FulfilledOrder.objects.get(reference_number=reference_number)
+            if reference_number
+            else FulfilledOrder.objects.get(pk=order_id)
+        )
+    except FulfilledOrder.DoesNotExist:
+        log.exception(
+            "Order with %s %s not found.",
+            "reference_number" if reference_number else "order_id",
+            reference_number or order_id,
+        )
+        raise
+
+    # Validate order state
     if order.state != Order.STATE.FULFILLED:
-        message = f"Order with order_id {order.id} is not in fulfilled state."
-        log.error(message)
-        return False, message
+        log.error("Order with order_id %s is not in fulfilled state.", order.id)
+        return False, f"Order with order_id {order.id} is not in fulfilled state."
 
+    # Fetch the most recent transaction
     order_recent_transaction = order.transactions.first()
-
     if not order_recent_transaction:
-        message = f"There is no associated transaction against order_id {order.id}"
-        log.error(message)
-        return False, message
+        log.error("There is no associated transaction against order_id %s", order.id)
+        return False, f"There is no associated transaction against order_id {order.id}"
 
-    transaction_dict = order_recent_transaction.data
-
-    # Check for a PayPal payment - if there's one, we can't process it
-    if "paypal_token" in transaction_dict:
+    # Check for PayPal payment
+    if "paypal_token" in order_recent_transaction.data:
         msg = (
             f"PayPal: Order {order.reference_number} contains a PayPal"
             "transaction. Please contact Finance to refund this order."
         )
         raise PaypalRefundError(msg)
 
-    # The refund amount can be different then the payment amount, so we override
-    # that before PaymentGateway processing.
-    # e.g. While refunding order from Django Admin we can select custom amount.
-    if refund_amount:
-        transaction_dict["req_amount"] = refund_amount
+    # Prepare refund request
+    transaction_dict = order_recent_transaction.data
+    if "refund_amount" in kwargs:
+        transaction_dict["req_amount"] = kwargs["refund_amount"]
 
+    # Process refund
     refund_gateway_request = PaymentGateway.create_refund_request(
         settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, transaction_dict
     )
-
     response = PaymentGateway.start_refund(
-        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY,
-        refund_gateway_request,
+        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY, refund_gateway_request
     )
 
-    if response.state in REFUND_SUCCESS_STATES:
-        # Record refund transaction with PaymentGateway's refund response
-        order.refund(
-            api_response_data=response.response_data,
-            amount=transaction_dict["req_amount"],
-            reason=refund_reason,
-        )
-    else:
+    # Handle refund response
+    if response.state not in REFUND_SUCCESS_STATES:
         log.error(
-            "There was an error with the Refund API request %s",
-            response.message,
+            "There was an error with the Refund API request: %s", response.message
         )
-        # PaymentGateway didn't raise an exception and instead gave a
-        # Response but the response status was not success so we manually
-        # rollback the transaction in this case.
-        msg = f"Payment gateway returned an error: {response.message}"
-        raise PaymentGatewayError(msg)
+        error_message = f"Payment gateway returned an error: {response.message}"
+        raise PaymentGatewayError(error_message)
 
-    return True, message
-
-
-def check_and_process_pending_orders_for_resolution(refnos=None):
-    """
-    Check pending orders for resolution. By default, this will pull all the
-    pending orders that are in the system.
-
-    Args:
-    - refnos (list or None): check specific reference numbers
-    Returns:
-    - Tuple of counts: fulfilled count, cancelled count, error count
-
-    """
-
-    gateway = PaymentGateway.get_gateway_class(
-        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY
+    # Record successful refund
+    order.refund(
+        api_response_data=response.response_data,
+        amount=transaction_dict["req_amount"],
+        reason=kwargs.get("refund_reason", ""),
     )
-
-    if refnos is not None:
-        pending_orders = PendingOrder.objects.filter(
-            state=PendingOrder.STATE.PENDING, reference_number__in=refnos
-        ).values_list("reference_number", flat=True)
-    else:
-        pending_orders = PendingOrder.objects.filter(
-            state=PendingOrder.STATE.PENDING
-        ).values_list("reference_number", flat=True)
-
-    if len(pending_orders) == 0:
-        return (0, 0, 0)
-
-    msg = f"Resolving {len(pending_orders)} orders"
-    log.info(msg)
-
-    results = gateway.find_and_get_transactions(pending_orders)
-
-    if len(results.keys()) == 0:
-        msg = "No orders found to resolve."
-        log.info(msg)
-        return (0, 0, 0)
-
-    fulfilled_count = cancel_count = error_count = 0
-
-    for result in results:
-        payload = results[result]
-        if int(payload["reason_code"]) == CYBERSOURCE_REASON_CODE_SUCCESS:
-            try:
-                order = PendingOrder.objects.filter(
-                    state=PendingOrder.STATE.PENDING,
-                    reference_number=payload["req_reference_number"],
-                ).get()
-
-                order.fulfill(payload)
-                fulfilled_count += 1
-
-                msg = f"Fulfilled order {order.reference_number}."
-                log.info(msg)
-            except Exception as e:
-                msg = (
-                    "Couldn't process pending order for fulfillment "
-                    f"{payload['req_reference_number']}: {e!s}"
-                )
-                log.exception(msg)
-                error_count += 1
-        else:
-            try:
-                order = PendingOrder.objects.filter(
-                    state=PendingOrder.STATE.PENDING,
-                    reference_number=payload["req_reference_number"],
-                ).get()
-
-                order.cancel()
-                order.transactions.create(
-                    transaction_id=payload["transaction_id"],
-                    amount=order.total_price_paid,
-                    data=payload,
-                    reason=f"Cancelled due to processor code {payload['reason_code']}",
-                )
-                order.save()
-                cancel_count += 1
-
-                msg = f"Cancelled order {order.reference_number}."
-                log.info(msg)
-            except Exception:
-                msg = "Couldn't process pending order for cancellation %s"
-                log.exception(msg, payload["req_reference_number"])
-                error_count += 1
-
-    return (fulfilled_count, cancel_count, error_count)
+    return True, ""
 
 
 def send_post_sale_webhook(system_id, order_id, source):
@@ -450,26 +350,22 @@ def send_post_sale_webhook(system_id, order_id, source):
     system = IntegratedSystem.objects.get(pk=system_id)
 
     system_webhook_url = system.webhook_url
-    if system_webhook_url:
-        log.info(
-            (
-                "send_post_sale_webhook: Calling webhook endpoint %s for order %s "
-                "with source %s"
-            ),
-            system_webhook_url,
-            order.reference_number,
-            source,
-        )
-    else:
+    if not system.webhook_url:
         log.warning(
-            (
-                "send_post_sale_webhook: No webhook URL set for system %s, skipping"
-                "for order %s"
-            ),
+            "send_post_sale_webhook: No webhook URL set for system %s, "
+            "skipping for order %s",
             system.slug,
             order.reference_number,
         )
         return
+
+    log.info(
+        "send_post_sale_webhook: Calling webhook endpoint %s for order %s "
+        "with source %s",
+        system.webhook_url,
+        order.reference_number,
+        source,
+    )
 
     order_info = WebhookOrder(
         order=order,
@@ -504,13 +400,12 @@ def process_post_sale_webhooks(order_id, source):
         pk=order_id
     )
 
-    systems = [
-        product.system
-        for product in [
-            line.product_version._object_version.object  # noqa: SLF001
-            for line in order.lines.all()
-        ]
-    ]
+    # Extract unique systems from the order lines
+    systems = {
+        line.product_version._object_version.object.system  # noqa: SLF001
+        for line in order.lines.all()
+        if line.product_version and line.product_version._object_version  # noqa: SLF001
+    }
 
     for system in systems:
         if not system.webhook_url:
@@ -579,20 +474,183 @@ def get_auto_apply_discounts_for_basket(basket_id: int) -> QuerySet[Discount]:
         QuerySet: The auto-apply discounts that can be applied to the basket.
     """
     basket = Basket.objects.get(pk=basket_id)
-    return (
-        Discount.objects.filter(
-            Q(product__in=basket.get_products()) | Q(product__isnull=True)
-        )
-        .filter(
-            Q(integrated_system=basket.integrated_system)
-            | Q(integrated_system__isnull=True)
-        )
-        .filter(Q(assigned_users=basket.user) | Q(assigned_users__isnull=True))
-        .filter(automatic=True)
+    products = basket.get_products()
+
+    return Discount.objects.filter(
+        Q(product__in=products) | Q(product__isnull=True),
+        Q(integrated_system=basket.integrated_system)
+        | Q(integrated_system__isnull=True),
+        Q(assigned_users=basket.user) | Q(assigned_users__isnull=True),
+        automatic=True,
     )
 
 
-def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
+def validate_discount_type(discount_type):
+    """
+    Validate the discount type.
+
+    Args:
+        discount_type (str): The discount type to validate.
+
+    Raises:
+        ValueError: If the discount type is not valid.
+    """
+    if discount_type not in ALL_DISCOUNT_TYPES:
+        error_message = f"Invalid discount type: {discount_type}."
+        raise ValueError(error_message)
+
+
+def validate_payment_type(payment_type):
+    """
+    Validate the payment type.
+
+    Args:
+        payment_type (str): The payment type to validate.
+
+    Raises:
+        ValueError: If the payment type is not valid.
+    """
+    if payment_type not in ALL_PAYMENT_TYPES:
+        error_message = f"Payment type {payment_type} is not valid."
+        raise ValueError(error_message)
+
+
+def validate_percent_off_amount(discount_type, amount):
+    """
+    Validate the percent off amount.
+
+    Args:
+        discount_type (str): discount type.
+        amount (int): discount amount.
+
+    Raises:
+        ValueError: If the discount amount is not valid for the discount type.
+    """
+    MAX_PERCENT_OFF_AMOUNT = 100
+    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and amount > MAX_PERCENT_OFF_AMOUNT:
+        error_message = (
+            f"Discount amount {amount} not valid for discount type "
+            f"{DISCOUNT_TYPE_PERCENT_OFF}."
+        )
+        raise ValueError(error_message)
+
+
+def validate_prefix_for_batch(count, prefix):
+    """
+    Validate the prefix for a batch of discount codes.
+
+    Args:
+        count (int): The number of codes to create.
+        prefix (str): The prefix to append to the codes.
+
+    Raises:
+        ValueError: If the prefix is not valid for a batch of codes.
+        ValueError: If the prefix is too long.
+    """
+    MAX_PREFIX_LENGTH = 63
+    if count > 1 and not prefix:
+        error_message = "You must specify a prefix to create a batch of codes."
+        raise ValueError(error_message)
+    if prefix and len(prefix) > MAX_PREFIX_LENGTH:
+        message = (
+            f"Prefix {prefix} is {len(prefix)} - prefixes must be "
+            "63 characters or less."
+        )
+        raise ValueError(message)
+
+
+def generate_codes(count, prefix=None, codes=None):
+    """
+    Generate a list of discount codes.
+
+    Args:
+        count (int): The number of codes to create.
+        prefix (str, optional): The prefix to append to the codes. Defaults to None.
+        codes (str, optional): The codes to create. Defaults to None.
+
+    Returns:
+        list(str): The generated codes.
+    """
+    if count > 1:
+        return [f"{prefix}{uuid.uuid4()}" for _ in range(count)]
+    return [codes]
+
+
+def get_redemption_type(kwargs):
+    """
+    Get the redemption type.
+
+    Args:
+        kwargs (): The keyword arguments passed to the function.
+        one_time, once_per_user, and redemption_type are the valid arguments.
+
+    """
+    if kwargs.get("one_time"):
+        return REDEMPTION_TYPE_ONE_TIME
+    if kwargs.get("once_per_user"):
+        return REDEMPTION_TYPE_ONE_TIME_PER_USER
+    if (
+        "redemption_type" in kwargs
+        and kwargs["redemption_type"] in ALL_REDEMPTION_TYPES
+    ):
+        return kwargs["redemption_type"]
+    return REDEMPTION_TYPE_UNLIMITED
+
+
+def get_object_or_raise(model, identifier, missing_msg):
+    """
+    Get an object from the model, or raise an error if it doesn't exist.
+
+    Args:
+        model (Model): The model to get the object from.
+        identifier (): The identifier of the object.
+        missing_msg (str): The message to raise if the object doesn't exist.
+
+    Raises:
+        ValueError: If the object doesn't exist.
+
+    Returns:
+        Model: The object from the model.
+    """
+    try:
+        if isinstance(identifier, int) or (
+            isinstance(identifier, str) and identifier.isdigit()
+        ):
+            return model.objects.get(pk=identifier)
+        return model.objects.get(slug=identifier)
+    except ObjectDoesNotExist as err:
+        raise ValueError(missing_msg) from err
+
+
+def get_users(users):
+    """
+    Get a list of users from the user identifiers.
+
+    Args:
+        users (str): The user identifiers.
+
+    Raises:
+        ValueError: If the user doesn't exist.
+
+    Returns:
+        User: The list of users.
+    """
+    user_list = []
+    for user_identifier in users:
+        try:
+            if isinstance(user_identifier, int) or (
+                isinstance(user_identifier, str) and user_identifier.isdigit()
+            ):
+                user_list.append(User.objects.get(pk=user_identifier))
+            else:
+                user_list.append(User.objects.get(email=user_identifier))
+        except ObjectDoesNotExist:
+            error_message = f"User {user_identifier} does not exist."
+            raise ValueError(error_message) from None
+    return user_list
+
+
+def generate_discount_code(**kwargs):
     """
     Generate a discount code (or a batch of discount codes) as specified by the
     arguments passed.
@@ -623,165 +681,79 @@ def generate_discount_code(**kwargs):  # noqa: C901, PLR0912, PLR0915
       code, type, amount, expiration_date
 
     """
-    codes_to_generate = []
-    discount_type = kwargs["discount_type"]
-    redemption_type = REDEMPTION_TYPE_UNLIMITED
-    payment_type = kwargs["payment_type"]
-    amount = Decimal(kwargs["amount"])
-    bulk_discount_collection = None
-    if kwargs["discount_type"] not in ALL_DISCOUNT_TYPES:
-        raise ValueError(f"Invalid discount type: {kwargs['discount_type']}.")  # noqa: EM102, TRY003
+    validate_discount_type(kwargs["discount_type"])
+    validate_payment_type(kwargs["payment_type"])
+    validate_percent_off_amount(kwargs["discount_type"], Decimal(kwargs["amount"]))
+    validate_prefix_for_batch(kwargs.get("count", 1), kwargs.get("prefix", ""))
 
-    if payment_type not in ALL_PAYMENT_TYPES:
-        raise ValueError(f"Payment type {payment_type} is not valid.")  # noqa: EM102, TRY003
+    codes_to_generate = generate_codes(
+        kwargs.get("count", 1), kwargs.get("prefix", ""), kwargs.get("codes", "")
+    )
+    redemption_type = get_redemption_type(kwargs)
+    expiration_date = (
+        parse_supplied_date(kwargs["expires"]) if kwargs.get("expires") else None
+    )
+    activation_date = (
+        parse_supplied_date(kwargs["activates"]) if kwargs.get("activates") else None
+    )
 
-    if kwargs["discount_type"] == DISCOUNT_TYPE_PERCENT_OFF and amount > 100:  # noqa: PLR2004
-        message = (
-            f"Discount amount {amount} not valid for discount type "
-            f"{DISCOUNT_TYPE_PERCENT_OFF}."
+    integrated_system = (
+        get_object_or_raise(
+            IntegratedSystem,
+            kwargs["integrated_system"],
+            f"Integrated system {kwargs['integrated_system']} does not exist.",
         )
-        raise ValueError(message)
+        if kwargs.get("integrated_system")
+        else None
+    )
 
-    if kwargs["count"] > 1 and "prefix" not in kwargs:
-        raise ValueError("You must specify a prefix to create a batch of codes.")  # noqa: EM101, TRY003
-
-    if kwargs["count"] > 1:
-        prefix = kwargs["prefix"]
-        if prefix:
-            # upped the discount code limit to 100 characters - this used to be 13 (50 - 37 for the UUID)  # noqa: E501
-            if len(prefix) > 63:  # noqa: PLR2004
-                raise ValueError(  # noqa: TRY003
-                    f"Prefix {prefix} is {len(prefix)} - prefixes must be 63 characters or less."  # noqa: E501, EM102
-                )
-            bulk_discount_collection, _ = BulkDiscountCollection.objects.get_or_create(
-                prefix=prefix
-            )
-
-        for i in range(kwargs["count"]):  # noqa: B007
-            generated_uuid = uuid.uuid4()
-            code = f"{prefix}{generated_uuid}"
-
-            codes_to_generate.append(code)
-    else:
-        codes_to_generate = kwargs["codes"]
-
-    if kwargs.get("one_time"):
-        redemption_type = REDEMPTION_TYPE_ONE_TIME
-
-    if kwargs.get("once_per_user"):
-        redemption_type = REDEMPTION_TYPE_ONE_TIME_PER_USER
-
-    if (
-        "redemption_type" in kwargs
-        and kwargs["redemption_type"] in ALL_REDEMPTION_TYPES
-    ):
-        redemption_type = kwargs["redemption_type"]
-
-    if "expires" in kwargs and kwargs["expires"] is not None:
-        expiration_date = parse_supplied_date(kwargs["expires"])
-    else:
-        expiration_date = None
-
-    if "activates" in kwargs and kwargs["activates"] is not None:
-        activation_date = parse_supplied_date(kwargs["activates"])
-    else:
-        activation_date = None
-
-    if "integrated_system" in kwargs and kwargs["integrated_system"] is not None:
-        # Try to get the integrated system via ID or slug.  Raise an exception if it doesn't exist.  # noqa: E501
-        # check if integrated_system is an integer or a slug
-        integrated_system_missing_msg = (
-            f"Integrated system {kwargs['integrated_system']} does not exist."
+    product = (
+        get_object_or_raise(
+            Product, kwargs["product"], f"Product {kwargs['product']} does not exist."
         )
-        if kwargs["integrated_system"].isdigit():
-            try:
-                integrated_system = IntegratedSystem.objects.get(
-                    pk=kwargs["integrated_system"]
-                )
-            except IntegratedSystem.DoesNotExist:
-                raise ValueError(integrated_system_missing_msg)  # noqa: B904
-        else:
-            try:
-                integrated_system = IntegratedSystem.objects.get(
-                    slug=kwargs["integrated_system"]
-                )
-            except IntegratedSystem.DoesNotExist:
-                raise ValueError(integrated_system_missing_msg)  # noqa: B904
-    else:
-        integrated_system = None
+        if kwargs.get("product")
+        else None
+    )
 
-    if "product" in kwargs and kwargs["product"] is not None:
-        # Try to get the product via ID or SKU.  Raise an exception if it doesn't exist.
-        product_missing_msg = f"Product {kwargs['product']} does not exist."
-        if kwargs["product"].isdigit():
-            try:
-                product = Product.objects.get(pk=kwargs["product"])
-            except Product.DoesNotExist:
-                raise ValueError(product_missing_msg)  # noqa: B904
-        else:
-            try:
-                product = Product.objects.get(sku=kwargs["product"])
-            except Product.DoesNotExist:
-                raise ValueError(product_missing_msg)  # noqa: B904
-    else:
-        product = None
+    users = get_users(kwargs["users"]) if kwargs.get("users") else None
 
-    if "users" in kwargs and kwargs["users"] is not None:
-        # Try to get the users via ID or email.  Raise an exception if it doesn't exist.
-        users = []
-        user_missing_msg = "User %s does not exist."
-        for user_identifier in kwargs["users"]:
-            if user_identifier.isdigit():
-                try:
-                    users.append(User.objects.get(pk=user_identifier))
-                except User.DoesNotExist:
-                    raise ValueError(user_missing_msg % user_identifier)  # noqa: B904
-            else:
-                try:
-                    user = User.objects.get(email=user_identifier)
-                    users.append(user)
-                except User.DoesNotExist:
-                    raise ValueError(user_missing_msg % user_identifier)  # noqa: B904
-    else:
-        users = None
+    company = (
+        get_object_or_raise(
+            Company, kwargs["company"], f"Company {kwargs['company']} does not exist."
+        )
+        if kwargs.get("company")
+        else None
+    )
 
-    if "company" in kwargs and kwargs["company"] is not None:
-        try:
-            company = Company.objects.get(pk=kwargs["company"])
-        except Company.DoesNotExist:
-            error_message = f"Company {kwargs['company']} does not exist."
-            raise ValueError(error_message) from None
-    else:
-        company = None
-
-    if "transaction_number" in kwargs and kwargs["transaction_number"] is not None:
-        transaction_number = kwargs["transaction_number"]
-    else:
-        transaction_number = None
+    transaction_number = kwargs.get("transaction_number", "")
 
     generated_codes = []
-
-    for code_to_generate in codes_to_generate:
+    for code in codes_to_generate:
         with reversion.create_revision():
             discount = Discount.objects.create(
-                discount_type=discount_type,
+                discount_type=kwargs["discount_type"],
                 redemption_type=redemption_type,
-                payment_type=payment_type,
+                payment_type=kwargs["payment_type"],
                 expiration_date=expiration_date,
                 activation_date=activation_date,
-                discount_code=code_to_generate,
-                amount=amount,
+                discount_code=code,
+                amount=Decimal(kwargs["amount"]),
                 is_bulk=True,
                 integrated_system=integrated_system,
                 product=product,
-                bulk_discount_collection=bulk_discount_collection,
+                bulk_discount_collection=(
+                    BulkDiscountCollection.objects.get_or_create(
+                        prefix=kwargs.get("prefix")
+                    )[0]
+                    if kwargs.get("prefix")
+                    else None
+                ),
                 company=company,
                 transaction_number=transaction_number,
             )
-        if users:
-            discount.assigned_users.set(users)
-
-        generated_codes.append(discount)
+            if users:
+                discount.assigned_users.set(users)
+            generated_codes.append(discount)
 
     return generated_codes
 
@@ -814,31 +786,21 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     * Number of discounts updated
 
     """
-    discount_codes_to_update = kwargs["discount_codes"]
     if kwargs.get("discount_type"):
-        if kwargs["discount_type"] not in ALL_DISCOUNT_TYPES:
-            error_message = f"Discount type {kwargs['discount_type']} is not valid."
-            raise ValueError(error_message)
-        else:
-            discount_type = kwargs["discount_type"]
+        validate_discount_type(kwargs["discount_type"])
+        discount_type = kwargs["discount_type"]
+        if kwargs.get("amount"):
+            validate_percent_off_amount(discount_type, Decimal(kwargs["amount"]))
     else:
         discount_type = None
 
     if kwargs.get("payment_type"):
-        if kwargs["payment_type"] not in ALL_PAYMENT_TYPES:
-            error_message = f"Payment type {kwargs['payment_type']} is not valid."
-            raise ValueError(error_message)
-        else:
-            payment_type = kwargs["payment_type"]
+        validate_payment_type(kwargs["payment_type"])
+        payment_type = kwargs["payment_type"]
     else:
         payment_type = None
 
-    if kwargs.get("one_time"):
-        redemption_type = REDEMPTION_TYPE_ONE_TIME
-    elif kwargs.get("one_time_per_user"):
-        redemption_type = REDEMPTION_TYPE_ONE_TIME_PER_USER
-    else:
-        redemption_type = REDEMPTION_TYPE_UNLIMITED
+    redemption_type = get_redemption_type(kwargs)
 
     amount = Decimal(kwargs["amount"]) if kwargs.get("amount") else None
 
@@ -852,72 +814,28 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
     else:
         expiration_date = None
 
-    if kwargs.get("integrated_system"):
-        # Try to get the integrated system via ID or slug.
-        # Raise an exception if it doesn't exist.
-        integrated_system_missing_msg = (
-            f"Integrated system {kwargs['integrated_system']} does not exist."
+    integrated_system = (
+        get_object_or_raise(
+            IntegratedSystem,
+            kwargs["integrated_system"],
+            f"Integrated system {kwargs['integrated_system']} does not exist.",
         )
-        if kwargs["integrated_system"].isdigit():
-            try:
-                integrated_system = IntegratedSystem.objects.get(
-                    pk=kwargs["integrated_system"]
-                )
-            except IntegratedSystem.DoesNotExist:
-                raise ValueError(integrated_system_missing_msg)  # noqa: B904
-        else:
-            try:
-                integrated_system = IntegratedSystem.objects.get(
-                    slug=kwargs["integrated_system"]
-                )
-            except IntegratedSystem.DoesNotExist:
-                raise ValueError(integrated_system_missing_msg)  # noqa: B904
-    else:
-        integrated_system = None
+        if kwargs.get("integrated_system")
+        else None
+    )
 
-    if kwargs.get("product"):
-        if kwargs.get("clear_products"):
-            error_message = "Cannot clear and set products at the same time."
-            raise ValueError(error_message)
-        # Try to get the product via ID or SKU.  Raise an exception if it doesn't exist.
-        product_missing_msg = f"Product {kwargs['product']} does not exist."
-        if kwargs["product"].isdigit():
-            try:
-                product = Product.objects.get(pk=kwargs["product"])
-            except Product.DoesNotExist:
-                raise ValueError(product_missing_msg)  # noqa: B904
-        else:
-            try:
-                product = Product.objects.get(sku=kwargs["product"])
-            except Product.DoesNotExist:
-                raise ValueError(product_missing_msg)  # noqa: B904
-    else:
-        product = None
+    product = (
+        get_object_or_raise(
+            Product, kwargs["product"], f"Product {kwargs['product']} does not exist."
+        )
+        if kwargs.get("product")
+        else None
+    )
 
-    if kwargs.get("users"):
-        if kwargs.get("clear_users"):
-            error_message = "Cannot clear and set users at the same time."
-            raise ValueError(error_message)
-        # Try to get the users via ID or email.  Raise an exception if it doesn't exist.
-        users = []
-        user_missing_msg = "User %s does not exist."
-        for user_identifier in kwargs["users"]:
-            if user_identifier.isdigit():
-                try:
-                    users.append(User.objects.get(pk=user_identifier))
-                except User.DoesNotExist:
-                    raise ValueError(user_missing_msg % user_identifier)  # noqa: B904
-            else:
-                try:
-                    user = User.objects.get(email=user_identifier)
-                    users.append(user)
-                except User.DoesNotExist:
-                    raise ValueError(user_missing_msg % user)  # noqa: B904
-    else:
-        users = None
+    users = get_users(kwargs["users"]) if kwargs.get("users") else None
 
     if kwargs.get("prefix"):
-        prefix = kwargs["prefix"]
+        prefix = kwargs.get("prefix")
         bulk_discount_collection = BulkDiscountCollection.objects.filter(
             prefix=prefix
         ).first()
@@ -928,6 +846,7 @@ def update_discount_codes(**kwargs):  # noqa: C901, PLR0912, PLR0915
             raise ValueError(error_message)
         discounts_to_update = bulk_discount_collection.discounts.all()
     else:
+        discount_codes_to_update = kwargs.get("discount_codes", [])
         discounts_to_update = Discount.objects.filter(
             discount_code__in=discount_codes_to_update
         )
@@ -1018,60 +937,49 @@ def locate_customer_for_basket(request, basket, basket_item):
 
 def check_blocked_countries(basket, basket_item):
     """
-    Check to see if the product is blocked for this customer.
-
-    We should have the customer's location stored, so now perform the check
-    to see if the product is blocked or not. If it is, we raise an exception
-    to stop the process.
-
-    Try this one first so we can kick the user out if they're blocked.
+    Check if the product is blocked for the customer based on their location.
+    Raises ProductBlockedError if the product is blocked.
 
     Args:
-    - basket (Basket): the current basket
-    - basket_item (Product): the item to add to the basket
-    Returns:
-    - None
+    - basket (Basket): The current basket.
+    - basket_item (Product): The item to add to the basket.
     Raises:
-    - ProductBlockedError: if the customer is blocked
+    - ProductBlockedError: If the customer is blocked from purchasing the product.
     """
+    log.debug("Checking blockages for user: %s", basket.user)
 
-    log.debug("check_blocked_countries: checking for blockages for %s", basket.user)
-
-    blocked_qset = BlockedCountry.objects.filter(
-        country_code=basket.user_blockable_country_code
-    ).filter(Q(product__isnull=True) | Q(product=basket_item))
-
-    if blocked_qset.exists():
-        log.debug("check_blocked_countries: user is blocked")
-        errmsg = "Product %s blocked from purchase in country %s"
-        raise ProductBlockedError(
-            errmsg, basket_item, basket.user_blockable_country_code
+    if (
+        BlockedCountry.objects.filter(
+            country_code=basket.user_blockable_country_code,
         )
+        .filter(Q(product__isnull=True) | Q(product=basket_item))
+        .exists()
+    ):
+        log.debug("User is blocked from purchasing the product.")
+        message = (
+            f"Product {basket_item} blocked in country "
+            f"{basket.user_blockable_country_code}"
+        )
+        raise ProductBlockedError(message)
 
 
 def check_taxable(basket):
     """
-    Check to see if the product is taxable for this customer.
-
-    We don't consider particular items taxable or not but we may want to
-    change that in the future. (Maybe one day we'll sell gift cards or
-    something!) So, this really applies to the basket - if there's an
-    applicable rate, then we tack it on to the basket.
+    Check if the basket is taxable based on the user's country code.
+    If taxable, apply the tax rate to the basket.
 
     Args:
     - basket (Basket): the current basket
     Returns:
     - None
     """
-
     log.debug("check_taxable: checking for tax for %s", basket.user)
 
-    taxable_qset = TaxRate.objects.filter(
+    taxrate = TaxRate.objects.filter(
         country_code=basket.user_blockable_country_code
-    )
+    ).first()
 
-    if taxable_qset.exists():
-        taxrate = taxable_qset.first()
+    if taxrate:
         basket.tax_rate = taxrate
         basket.save()
         log.debug("check_taxable: charging the tax for %s", taxrate)
