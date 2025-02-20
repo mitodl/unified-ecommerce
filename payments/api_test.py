@@ -645,7 +645,7 @@ def test_post_sale_webhook_multisystem(mocker, fulfilled_complete_order, source)
 def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_system():
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
-    when it exists for the basket"s integrated system.
+    when it exists for the basket's integrated system.
     """
     basket = BasketFactory.create()
     auto_discount = Discount.objects.create(
@@ -662,7 +662,7 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_integrated_
 def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product():
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
-    when it exists for the basket"s - basket item - product.
+    when it exists for the basket's - basket item - product.
     """
     basket_item = BasketItemFactory.create()
     auto_discount = Discount.objects.create(
@@ -679,7 +679,7 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_product():
 def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user():
     """
     Test that get_auto_apply_discount_for_basket returns the auto discount
-    when it exists for the basket"s user.
+    when it exists for the basket's user.
     """
     basket = BasketFactory.create()
     auto_discount = Discount.objects.create(
@@ -695,7 +695,7 @@ def test_get_auto_apply_discount_for_basket_auto_discount_exists_for_user():
 def test_get_auto_apply_discount_for_basket_multiple_auto_discount_exists_for_user_product_system():
     """
     Test that get_auto_apply_discount_for_basket returns multiple auto discount
-    when they exist for the basket"s - basket item - product, basket"s user, and basket"s integrated system.
+    when they exist for the basket's - basket item - product, basket's user, and basket's integrated system.
     """
     basket_item = BasketItemFactory.create()
     user_discount = DiscountFactory.create(
