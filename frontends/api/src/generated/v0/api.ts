@@ -2606,6 +2606,12 @@ export interface PatchedRequestRequest {
    */
   zendesk_ticket?: string
   /**
+   * Reason for refund, supplied by the processing user.
+   * @type {string}
+   * @memberof PatchedRequestRequest
+   */
+  refund_reason?: string
+  /**
    *
    * @type {number}
    * @memberof PatchedRequestRequest
@@ -2893,13 +2899,19 @@ export interface Request {
    */
   zendesk_ticket?: string
   /**
+   * Reason for refund, supplied by the processing user.
+   * @type {string}
+   * @memberof Request
+   */
+  refund_reason?: string
+  /**
    *
    * @type {number}
    * @memberof Request
    */
   requester: number
   /**
-   *
+   * The user who processed the request. (Usually blank.)
    * @type {number}
    * @memberof Request
    */
@@ -3018,6 +3030,12 @@ export interface RequestRequest {
    */
   zendesk_ticket?: string
   /**
+   * Reason for refund, supplied by the processing user.
+   * @type {string}
+   * @memberof RequestRequest
+   */
+  refund_reason?: string
+  /**
    *
    * @type {number}
    * @memberof RequestRequest
@@ -3112,7 +3130,7 @@ export const StateEnum = {
 export type StateEnum = (typeof StateEnum)[keyof typeof StateEnum]
 
 /**
- * * `pending` - pending * `created` - created * `denied` - denied * `approved` - approved * `failed` - failed
+ * * `pending` - pending * `created` - created * `denied` - denied * `approved` - approved * `approved-complete` - approved-complete * `failed` - failed
  * @export
  * @enum {string}
  */
@@ -3122,6 +3140,7 @@ export const StatusEnumDescriptions = {
   created: "created",
   denied: "denied",
   approved: "approved",
+  "approved-complete": "approved-complete",
   failed: "failed",
 } as const
 
@@ -3142,6 +3161,10 @@ export const StatusEnum = {
    * approved
    */
   Approved: "approved",
+  /**
+   * approved-complete
+   */
+  ApprovedComplete: "approved-complete",
   /**
    * failed
    */
@@ -3230,6 +3253,12 @@ export interface Transaction {
    * @memberof Transaction
    */
   data: any
+  /**
+   *
+   * @type {TransactionOrder}
+   * @memberof Transaction
+   */
+  order: TransactionOrder
 }
 /**
  * Serializes a transaction\'s purchaser data.
@@ -3291,6 +3320,31 @@ export interface TransactionDataPurchaser {
    * @memberof TransactionDataPurchaser
    */
   company: string
+}
+/**
+ *
+ * @export
+ * @interface TransactionOrder
+ */
+export interface TransactionOrder {
+  /**
+   *
+   * @type {number}
+   * @memberof TransactionOrder
+   */
+  id: number
+  /**
+   *
+   * @type {string}
+   * @memberof TransactionOrder
+   */
+  created_on: string
+  /**
+   *
+   * @type {string}
+   * @memberof TransactionOrder
+   */
+  reference_number: string
 }
 /**
  * Serializer for transactions.

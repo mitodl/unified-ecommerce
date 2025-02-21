@@ -92,3 +92,15 @@ def admin_drf_client(admin_user):
     client = APIClient()
     client.force_authenticate(user=admin_user)
     return client
+
+
+@pytest.fixture(autouse=True)
+def mock_learn_api_metadata_updater(mocker):
+    """Mock out the call to update products from the Learn API"""
+
+    return {
+        "update_product_metadata": mocker.patch(
+            "system_meta.api.update_product_metadata"
+        ),
+        "update_products_task": mocker.patch("system_meta.tasks.update_products.delay"),
+    }

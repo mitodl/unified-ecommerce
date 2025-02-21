@@ -2732,6 +2732,9 @@ components:
         zendesk_ticket:
           type: string
           maxLength: 255
+        refund_reason:
+          type: string
+          description: Reason for refund, supplied by the processing user.
         requester:
           type: integer
     PaymentTypeEnum:
@@ -2921,12 +2924,16 @@ components:
         zendesk_ticket:
           type: string
           maxLength: 255
+        refund_reason:
+          type: string
+          description: Reason for refund, supplied by the processing user.
         requester:
           type: integer
         processed_by:
           type: integer
           readOnly: true
           nullable: true
+          description: The user who processed the request. (Usually blank.)
       required:
         - created_on
         - id
@@ -2964,6 +2971,7 @@ components:
             * `created` - created
             * `denied` - denied
             * `approved` - approved
+            * `approved-complete` - approved-complete
             * `failed` - failed
         refunded_amount:
           type: string
@@ -3026,6 +3034,9 @@ components:
         zendesk_ticket:
           type: string
           maxLength: 255
+        refund_reason:
+          type: string
+          description: Reason for refund, supplied by the processing user.
         requester:
           type: integer
       required:
@@ -3093,6 +3104,7 @@ components:
         - created
         - denied
         - approved
+        - approved-complete
         - failed
       type: string
       description: |-
@@ -3100,12 +3112,14 @@ components:
         * `created` - created
         * `denied` - denied
         * `approved` - approved
+        * `approved-complete` - approved-complete
         * `failed` - failed
       x-enum-descriptions:
         - pending
         - created
         - denied
         - approved
+        - approved-complete
         - failed
     TaxRate:
       type: object
@@ -3147,10 +3161,13 @@ components:
         reason:
           type: string
         data: {}
+        order:
+          $ref: "#/components/schemas/TransactionOrder"
       required:
         - amount
         - created_on
         - data
+        - order
         - reason
         - transaction_id
         - transaction_type
@@ -3190,6 +3207,23 @@ components:
         - postal_code
         - state_or_territory
         - street_address
+    TransactionOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        reference_number:
+          type: string
+          readOnly: true
+      required:
+        - created_on
+        - id
+        - reference_number
     TransactionRequest:
       type: object
       description: Serializer for transactions.

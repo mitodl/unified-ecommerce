@@ -303,6 +303,7 @@ class TransactionSerializer(serializers.Serializer):
     updated_on = serializers.DateTimeField()
     reason = serializers.CharField()
     data = serializers.JSONField()
+    order = TransactionOrderSerializer()
 
     class Meta:
         """Meta options for TransactionSerializer"""
@@ -315,7 +316,9 @@ class TransactionSerializer(serializers.Serializer):
             "updated_on",
             "reason",
             "data",
+            "order",
         ]
+        read_only_fields = fields
         model = Transaction
 
 

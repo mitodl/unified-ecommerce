@@ -10,11 +10,17 @@ from django.db import models
 from mitol.common.models import TimestampedModel
 
 from payments.models import Line, Order, Transaction
+from refunds.exceptions import RefundAlreadyCompleteError, RefundOrderImproperStateError
+from refunds.tasks import queue_process_approved_refund
 from system_meta.models import IntegratedSystem
 from unified_ecommerce.constants import (
     REFUND_CODE_TYPE_CHOICES,
+    REFUND_STATUS_APPROVED,
+    REFUND_STATUS_APPROVED_COMPLETE,
     REFUND_STATUS_CHOICES,
     REFUND_STATUS_CREATED,
+    REFUND_STATUS_DENIED,
+    REFUND_STATUSES_PROCESSABLE,
 )
 from unified_ecommerce.plugin_manager import get_plugin_manager
 
@@ -73,6 +79,7 @@ class Request(TimestampedModel):
         related_name="processed_refund_requests",
         null=True,
         blank=True,
+        help_text="The user who processed the request. (Usually blank.)",
     )
 
     total_refunded = models.DecimalField(
@@ -90,6 +97,11 @@ class Request(TimestampedModel):
     )
 
     zendesk_ticket = models.CharField(max_length=255, blank=True, default="")
+    refund_reason = models.TextField(
+        blank=True,
+        default="",
+        help_text="Reason for refund, supplied by the processing user.",
+    )
 
     @property
     def total_requested(self):
@@ -102,6 +114,76 @@ class Request(TimestampedModel):
         """Return the total approved amount, pulled from the line items."""
 
         return Decimal(sum(line.refunded_amount for line in self.lines.all()))
+
+    def _check_status_prerequisites(self):
+        """
+        Check the request and the order before refunding it.
+
+        Regardless of whether this is an approval or a denial, we should check
+        if the order is in a proper state to be refunded, and whether or not
+        the request itself is in a proper state for processing.
+        """
+
+        if self.status not in REFUND_STATUSES_PROCESSABLE:
+            msg = f"Request {self} must be in a processable state to process."
+            raise RefundAlreadyCompleteError(msg)
+
+        if self.order.state != Order.STATE.FULFILLED:
+            msg = (
+                f"Order {self.order.reference_number} must be in fulfilled "
+                "state to process."
+            )
+            raise RefundOrderImproperStateError(msg)
+
+    def approve(
+        self, reason: str, *, lines: list | None = None, auto_approved: bool = False
+    ):
+        """
+        Approve the request.
+
+        Set the request status and the appropriate lines to "approved", then
+        queue a task to process the refund via CyberSource.
+        """
+
+        self._check_status_prerequisites()
+
+        set_status = REFUND_STATUS_APPROVED
+
+        if self.total_requested == Decimal(0) or auto_approved:
+            # This request was auto-approved for whatever reason (zero value, etc.)
+            set_status = REFUND_STATUS_APPROVED_COMPLETE
+
+        self.refund_reason = reason
+        self.status = set_status
+        self.save()
+
+        if lines:
+            for line in lines:
+                self.lines.filter(pk=line["line"]).update(
+                    status=set_status,
+                    refunded_amount=line["refunded_amount"],
+                )
+        else:
+            for line in self.lines.all():
+                # total_price is a calculated field, can't use an F object
+                line.status = set_status
+                line.refunded_amount = line.line.total_price
+                line.save()
+
+        log.debug("Queueing refund processing for request %s", self.pk)
+        queue_process_approved_refund.delay(self.pk, auto_approved=auto_approved)
+
+    def deny(self, reason: str):
+        """Deny the request."""
+
+        self._check_status_prerequisites()
+
+        self.status = REFUND_STATUS_DENIED
+        self.refund_reason = reason
+        self.save()
+        self.lines.update(status=REFUND_STATUS_DENIED)
+
+        pm.hook.refund_denied(refund_id=self.pk)
 
     def __str__(self):
         """Return a reasonable string representation of the request."""
