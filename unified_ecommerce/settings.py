@@ -21,6 +21,8 @@ from urllib.parse import urljoin
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 from mitol.common.envs import get_bool, get_int, get_string, import_settings_modules
+from mitol.google_sheets.settings.google_sheets import *  # noqa: F403
+from mitol.google_sheets_refunds.settings.google_sheets_refunds import *  # noqa: F403
 
 from openapi.settings_spectacular import open_spectacular_settings
 from unified_ecommerce.envs import get_list_of_str
@@ -96,6 +98,8 @@ INSTALLED_APPS = [
     "django_countries",
     "mitol.geoip",
     "django_extensions",
+    "mitol.google_sheets.apps.GoogleSheetsApp",
+    "mitol.google_sheets_refunds.apps.GoogleSheetsRefundsApp",
     # Application modules
     "unified_ecommerce",
     "users",
@@ -526,3 +530,13 @@ KEYCLOAK_ADMIN_URL = get_string("KEYCLOAK_ADMIN_URL", False)  # noqa: FBT003
 KEYCLOAK_ADMIN_SECURE = get_bool("KEYCLOAK_ADMIN_SECURE", True)  # noqa: FBT003
 
 SPECTACULAR_SETTINGS = open_spectacular_settings
+
+# Google Sheets Processing settings
+
+MITOL_GOOGLE_SHEETS_REFUNDS_PLUGINS = [
+    "refunds.sheets_plugin.GoogleSheetsRefundsPlugin"
+]
+GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
+    "GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE",
+    None,
+)

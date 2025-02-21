@@ -473,6 +473,13 @@ class WebhookOrderDataSerializer(DataclassSerializer):
     )
     state = serializers.CharField(source="order.state")
     lines = LineSerializer(many=True)
+    refunds = serializers.SerializerMethodField()
+
+    def get_refunds(self, instance):
+        """Return refunds for the order."""
+        from refunds.serializers.v0 import RequestSerializer
+
+        return RequestSerializer(instance.order.refund_requests.all(), many=True).data
 
     class Meta:
         """Meta options for WebhookOrderDataSerializer"""

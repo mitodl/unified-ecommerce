@@ -4,6 +4,8 @@ import logging
 
 import pluggy
 
+from unified_ecommerce.constants import POST_SALE_SOURCE_REFUND
+
 hookimpl = pluggy.HookimplMarker("unified_ecommerce")
 log = logging.getLogger(__name__)
 
@@ -33,3 +35,20 @@ class RefundIssuedHooks:
 
         log.debug("refund_issued hook update_google_sheets called: %s", refund_id)
         update_google_sheets(refund_id)
+
+    @hookimpl(specname="refund_issued", trylast=True)
+    def send_webhooks(self, refund_id):
+        """
+        Send webhooks for the refund request.
+
+        This sends the same data that is sent when an order is completed, so it
+        reuses the same calls as purchases.
+        """
+
+        from payments.api import process_post_sale_webhooks
+        from refunds.models import Request
+
+        request = Request.objects.get(pk=refund_id)
+
+        log.debug("refund_issued hook send_webhooks called: %s", refund_id)
+        process_post_sale_webhooks(request.order_id, POST_SALE_SOURCE_REFUND)

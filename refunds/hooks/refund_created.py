@@ -74,6 +74,4 @@ class RefundCreatedHooks:
                 "refund_created auto_approve_refund: auto-approving %s (zero value)",
                 request,
             )
-            request.approve(
-                "Auto-approved zero-value refund request.", auto_approved=True
-            )
+            request.approve("Auto-approved zero-value refund request.")
