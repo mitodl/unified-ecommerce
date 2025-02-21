@@ -1316,7 +1316,7 @@ class Transaction(TimestampedModel):
     """A transaction on an order, generally a payment but can also cover refunds"""
 
     # Per CyberSourse, Request ID should be 22 digits
-    transaction_id = models.CharField(max_length=255)
+    transaction_id = models.CharField(max_length=255, unique=True)
 
     order = models.ForeignKey(
         "payments.Order", on_delete=models.CASCADE, related_name="transactions"
