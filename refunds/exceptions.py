@@ -46,3 +46,12 @@ class RefundTransactionFailedError(Exception):
         """Initialize the exception."""
 
         super().__init__(*args)
+
+
+class RefundSheetPreflightFailedError(Exception):
+    """Raised if the Google Sheets preflight check failed for the row."""
+
+    def __init__(self, *args: object) -> None:
+        """Initialize the exception."""
+
+        super().__init__(*args)

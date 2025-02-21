@@ -76,8 +76,8 @@ You'll need an integrated system and product for that system to be able to do mu
 
 Alternatively, you can create them manually:
 
-* Create an integrated system: `./manage.py add_system <name> -d <description> -s <slug`
-* Create a product: `./manage.py manage_product add -s <system slug> --sku <an SKU> --name <name> --description <description> --price <price>`
+- Create an integrated system: `./manage.py add_system <name> -d <description> -s <slug`
+- Create a product: `./manage.py manage_product add -s <system slug> --sku <an SKU> --name <name> --description <description> --price <price>`
 
 The `add_system` command will generate an API key for the system's use. You can add as many systems as you wish.
 
@@ -102,11 +102,11 @@ APISIX checks these files for changes _every second_ - you're supposed to add `#
 
 The three files in here control different things:
 
-| File | Use |
-|---|---|
+| File          | Use                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------- |
 | `config.yaml` | APISIX service configuration - TCP ports, deployment settings, plugin loading, SSL, etc. |
-| `apisix.yaml` | Data for the service - **routes**, **upstreams**, clients, plugin configs, etc. |
-| `debug.yaml` | Debugging settings. |
+| `apisix.yaml` | Data for the service - **routes**, **upstreams**, clients, plugin configs, etc.          |
+| `debug.yaml`  | Debugging settings.                                                                      |
 
 The two files most likely to need to change are `apisix.yaml`, which controls routing to the underlying service, and `debug.yaml`, which allows you to configure debug logging for APISIX and its plugins.
 
@@ -153,6 +153,17 @@ Described below are some setup steps that are not strictly necessary for running
 ### Interstitial Debug Mode
 
 You can set `MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG` to control whether or not the checkout interstitial page displays additional data and waits to submit or not. By default, this tracks the `DEBUG` setting (so it should be off in production, and on in local testing).
+
+### Google Sheets Processing
+
+The system can process refund requests that come in through a Google Sheet (i.e., in the way that they do in MITx Online).
+
+The setup for this is best described in the `ol-django` apps that are the backbone of this integration:
+
+- `google_sheets`: https://github.com/mitodl/ol-django/blob/main/src/google_sheets/README.md
+- `google_sheets_refunds`: https://github.com/mitodl/ol-django/blob/main/src/google_sheets_refunds/README.md
+
+The _tl;dr_ is that you'll need to get a copy of the existing refunds sheet (or set one up yourself), get OAuth2 credentials established in Google to access the sheet, then run through the OAuth2 workflow so that the app can get to the sheet (which will require `ngrok` or similar).
 
 ### Webhook Retry
 
