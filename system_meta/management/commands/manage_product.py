@@ -143,13 +143,15 @@ class Command(BaseCommand):
         table.field_names = ["Active", "SKU", "System", "Description", "Price"]
         table.add_rows(
             [
-                product.is_active,
-                product.sku,
-                product.system.name,
-                product.description,
-                product.price,
+                [
+                    product.is_active,
+                    product.sku,
+                    product.system.name,
+                    product.description,
+                    product.price,
+                ]
+                for product in products
             ]
-            for product in products
         )
 
         self.stdout.write(table.get_string())
