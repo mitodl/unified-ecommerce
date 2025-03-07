@@ -59,7 +59,7 @@ static3 = "^0.7.0"
 tldextract = "^5.1.1"
 toolz = "^0.12.0"
 ulid-py = "^1.1.0"
-urllib3 = "^1.25.10"
+urllib3 = "^2.0.0"
 uwsgi = "^2.0.21"
 wrapt = "^1.16.0"
 social-auth-core = {extras = ["openidconnect"], version = "^4.4.2"}
