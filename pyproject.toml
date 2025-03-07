@@ -84,8 +84,8 @@ mitol-django-geoip = ">=2024.11.05"
 py-moneyed = "^3.0"
 django-extensions = "^3.2.3"
 djangorestframework-api-key = "^3.0.0"
-mitol-django-google-sheets = "^2025.2.4"
-mitol-django-google-sheets-refunds = "^2025.2.3"
+mitol-django-google-sheets = "^2025.2.27"
+mitol-django-google-sheets-refunds = "^2025.2.27"
 
 [tool.poetry.group.dev.dependencies]
 bpython = "^0.25"

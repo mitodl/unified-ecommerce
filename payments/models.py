@@ -31,6 +31,7 @@ from unified_ecommerce.constants import (
     PAYMENT_TYPES,
     POST_SALE_SOURCE_REDIRECT,
     REDEMPTION_TYPES,
+    REFUND_STATUS_APPROVED,
     TRANSACTION_TYPE_PAYMENT,
     TRANSACTION_TYPE_REFUND,
     TRANSACTION_TYPES,
@@ -712,7 +713,7 @@ class Order(TimestampedModel):
     def save(self, *args, **kwargs):
         """Save the order."""
 
-        log.info("Saving order %s", self.id)
+        log.debug("Saving order %s", self.id)
 
         # initial save in order to get primary key for new order
         super().save(*args, **kwargs)
@@ -722,7 +723,7 @@ class Order(TimestampedModel):
 
         # if we don't have a generated reference number, we generate one and save again
         if self.reference_number is None or len(self.reference_number) == 0:
-            log.info("Generating reference number for order %s", self.id)
+            log.debug("Generating reference number for order %s", self.id)
             self.reference_number = self._generate_reference_number()
             super().save(*args, **kwargs)
 
@@ -738,6 +739,11 @@ class Order(TimestampedModel):
     def is_fulfilled(self):
         """Return if the order is fulfilled"""
         return self.state == Order.STATE.FULFILLED
+
+    @property
+    def is_refunded(self):
+        """Return if the order has been refunded (at all)"""
+        return self.refund_requests.count()
 
     @property
     def tax(self):
@@ -759,6 +765,22 @@ class Order(TimestampedModel):
             sum([line.base_price - line.discounted_price for line in self.lines.all()])
         )
 
+    @property
+    def refunded_amount(self):
+        """Return the total refunded amount for the order"""
+
+        return quantize_decimal(
+            sum(
+                [
+                    line.refunded_amount
+                    for req in self.refund_requests.filter(
+                        status=REFUND_STATUS_APPROVED
+                    ).all()
+                    for line in req.lines.all()
+                ]
+            )
+        )
+
     def fulfill(self, payment_data, source=POST_SALE_SOURCE_REDIRECT):
         """Fufill the order."""
         # record the transaction
@@ -770,12 +792,6 @@ class Order(TimestampedModel):
 
             # trigger post-sale events
             self.handle_post_sale(source=source)
-
-            self.state = Order.STATE.FULFILLED
-            self.save()
-
-            # send the receipt emails
-            self.send_ecommerce_order_receipt()
         except Exception as e:  # pylint: disable=broad-except
             log.exception(
                 "Error occurred fulfilling order %s", self.reference_number, exc_info=e
@@ -860,16 +876,9 @@ class Order(TimestampedModel):
         courseruns enrollments and stuff.
         """
 
-        log.info("Running post-sale events")
+        log.debug("Running post-sale events for %s", self)
 
         pm.hook.post_sale(order_id=self.id, source=source)
-
-    def send_ecommerce_order_receipt(self):
-        """
-        Send the receipt email.
-
-        TODO: add email
-        """
 
     def delete_redeemed_discounts(self):
         """Delete redeemed discounts"""

@@ -8,15 +8,20 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import transaction
+from mitol.google_sheets.utils import ResultType
+from mitol.google_sheets_refunds.utils import RefundRequestRow
 from mitol.payment_gateway.api import PaymentGateway
 
 from payments.models import Line, Order
 from refunds.exceptions import (
+    RefundOrderImproperStateError,
     RefundOrderPaymentTypeUnsupportedError,
     RefundRequestImproperStateError,
+    RefundSheetPreflightFailedError,
     RefundTransactionFailedError,
 )
 from refunds.models import Request, RequestLine, RequestProcessingCode, RequestRecipient
+from system_meta.models import Product
 from unified_ecommerce.celery import app
 from unified_ecommerce.constants import (
     CYBERSOURCE_REFUND_SUCCESS_STATES,
@@ -74,13 +79,17 @@ def create_request_access_codes(request: Request) -> None:
 
 
 def create_request_from_order(
-    requester: AbstractBaseUser, order: Order, *, lines: list[Line] | None = None
+    requester: AbstractBaseUser,
+    order: Order,
+    *,
+    lines: list[Line] | None = None,
+    skip_event: bool = False,
 ) -> Request:
     """Create a refund request from an order."""
 
     if order.state != Order.STATE.FULFILLED:
         msg = "Order must be fulfilled to create a refund request."
-        raise ValueError(msg)
+        raise RefundOrderImproperStateError(msg)
 
     request = Request.objects.create(order=order, requester=requester)
 
@@ -90,19 +99,22 @@ def create_request_from_order(
         if line.order == order:
             RequestLine.objects.create(refund_request=request, line=line)
 
-    pm.hook.refund_created(refund_id=request.pk)
+    if not skip_event:
+        # If we're processing a refund from Google Sheets, we don't want to fire
+        # these.
+        pm.hook.refund_created(refund_id=request.pk)
     request.refresh_from_db()
 
     return request
 
 
 @transaction.atomic
-def process_approved_refund(request: Request, *, auto_approved: bool = False) -> None:
+def process_approved_refund(request: Request) -> None:
     """
     Generate a CyberSource refund request for the approved lines in the refund request.
     """
 
-    if request.status != REFUND_STATUS_APPROVED and not auto_approved:
+    if request.status != REFUND_STATUS_APPROVED:
         msg = f"Request {request} must be approved to process."
         raise RefundRequestImproperStateError(msg)
 
@@ -145,13 +157,16 @@ def process_approved_refund(request: Request, *, auto_approved: bool = False) ->
             line.status = REFUND_STATUS_APPROVED_COMPLETE
             line.save()
 
+        order.state = Order.STATE.REFUNDED
+        order.save()
+
         pm.hook.refund_issued(refund_id=request.id)
 
         return True
 
     refund_dict = {
         "transaction_id": transaction_dict["transaction_id"],
-        "req_amount": refund_amount,
+        "req_amount": str(refund_amount),
         "req_currency": transaction_dict["req_currency"],
     }
 
@@ -171,6 +186,7 @@ def process_approved_refund(request: Request, *, auto_approved: bool = False) ->
         log.info("Refund request %s successfully processed", request)
 
         transaction = order.transactions.create(
+            transaction_id=response.transaction_id,
             transaction_type=TRANSACTION_TYPE_REFUND,
             data=response.response_data,
             reason=request.refund_reason,
@@ -188,6 +204,9 @@ def process_approved_refund(request: Request, *, auto_approved: bool = False) ->
             line.transactions.add(transaction)
             line.save()
 
+        order.state = Order.STATE.REFUNDED
+        order.save()
+
         pm.hook.refund_issued(refund_id=request.id)
 
         return True
@@ -197,3 +216,99 @@ def process_approved_refund(request: Request, *, auto_approved: bool = False) ->
     request.save()
 
     raise RefundTransactionFailedError(msg)
+
+
+def _preflight_gsheet_request_row(row: RefundRequestRow) -> tuple[Order, Line]:
+    """
+    Run pre-flight check for the refund request.
+
+    This includes making sure the product being refunded is on the order and
+    that the total price of the line is not $0.00.
+    """
+
+    order = Order.objects.get(reference_number=row.order_ref_num)
+
+    try:
+        product = Product.all_objects.get(sku=row.product_id)
+        line = order.lines.filter(product_version__object_id=str(product.id)).get()
+    except Product.DoesNotExist:
+        message = (
+            f"Order {order.reference_number} does not contain a line "
+            f"with SKU {row.product_id}"
+        )
+        log.exception(message)
+        raise RefundSheetPreflightFailedError(message) from None
+
+    if line.total_price == Decimal(0):
+        message = (
+            f"Order {order.reference_number} line {line} has a "
+            "total price of $0.00; can't process"
+        )
+        log.error(message)
+        raise RefundSheetPreflightFailedError(message)
+
+    return (
+        order,
+        line,
+    )
+
+
+def process_gsheet_request_row(row: RefundRequestRow) -> tuple[ResultType, str | None]:
+    """
+    Process the refund request row that was seen in Google Sheets.
+
+    If we've hit this, the row is ready to be refunded. The logic that filters
+    out rows that aren't ready is in the ol-django google_sheets_refunds app.
+
+    Args:
+    - row (RefundRequestRow): The row to process.
+    Returns:
+    tuple of:
+        - ResultType: The result of the processing.
+        - str|None: An error message if the processing failed.
+    """
+
+    try:
+        order, line = _preflight_gsheet_request_row(row)
+    except RefundSheetPreflightFailedError as e:
+        return ResultType.FAILED, str(e)
+
+    log.debug("process_gsheet_request_row: processing order %s", order.reference_number)
+
+    try:
+        request = create_request_from_order(
+            order.purchaser, order, skip_event=True, lines=[line]
+        )
+        request.save()
+    except RefundOrderImproperStateError:
+        log.exception(
+            "Order %s must be in fulfilled state to process", order.reference_number
+        )
+        return ResultType.FAILED, "Order must be in fulfilled state to process."
+
+    log.debug("process_gsheet_request_row: created request %s", request.pk)
+
+    try:
+        log.debug("process_gsheet_request_row: approving request %s", request.pk)
+        request.approve("Approved via Google Sheets", skip_process_delay=True)
+    except RefundRequestImproperStateError:
+        log.exception("Request %s is in an improper state", request.pk)
+        return ResultType.FAILED, "Request is in an improper state."
+    except RefundOrderPaymentTypeUnsupportedError:
+        log.exception(
+            "Order %s for request %s is a PayPal order; can't process",
+            order.reference_number,
+            request.pk,
+        )
+        return (
+            ResultType.FAILED,
+            f"Order {order.reference_number} contains a PayPal payment; can't process.",
+        )
+    except RefundTransactionFailedError as e:
+        log.exception("Request %s transaction failed to process: %s", request.pk, e.msg)
+        return (
+            ResultType.FAILED,
+            f"Transaction failed to process: {e.msg}",
+        )
+
+    return (ResultType.PROCESSED, "Processed successfully")
