@@ -22,27 +22,38 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import include, path, re_path
 
-urlpatterns = [
-    path("", include("cart.urls")),
-    path("auth/", include("django.contrib.auth.urls")),
-    path("admin/", admin.site.urls),
-    path("hijack/", include("hijack.urls")),
-    # OAuth2 Paths
-    path("o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
-    # App Paths
-    re_path(r"", include("openapi.urls")),
-    # Private Paths
-    re_path(
-        r"^_/v0/booted/",
-        lambda request: HttpResponse("ok", content_type="text/plain"),  # noqa: ARG005
-    ),
-    re_path(r"^_/v0/meta/", include("system_meta.private_urls")),
-    # API Paths
-    re_path(r"", include("payments.urls")),
-    re_path(r"", include("system_meta.urls")),
-    re_path(r"", include("users.urls")),
-    re_path(r"", include("refunds.urls")),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns = (
+    [
+        path("", include("cart.urls")),
+        path("auth/", include("django.contrib.auth.urls")),
+        path("admin/", admin.site.urls),
+        path("hijack/", include("hijack.urls")),
+        # OAuth2 Paths
+        path("o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
+        # App Paths
+        re_path(r"", include("openapi.urls")),
+        # Private Paths
+        re_path(
+            r"^_/v0/booted/",
+            lambda request: HttpResponse("ok", content_type="text/plain"),  # noqa: ARG005
+        ),
+        re_path(r"^_/v0/meta/", include("system_meta.private_urls")),
+        # API Paths
+        re_path(r"", include("payments.urls")),
+        re_path(r"", include("system_meta.urls")),
+        re_path(r"", include("users.urls")),
+        re_path(r"", include("refunds.urls")),
+        path("", include("mitol.google_sheets.urls")),
+        re_path(
+            r"",
+            lambda request: HttpResponse(  # noqa: ARG005
+                '<html><head><meta name="google-site-verification" content="'
+                f'{settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE}" /></head></html>'
+            ),
+        ),
+    ]
+    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+)
 
 if settings.DEBUG:
     import debug_toolbar  # pylint: disable=wrong-import-position, wrong-import-order

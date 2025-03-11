@@ -807,6 +807,7 @@ def test_send_post_sale_webhook_success(mocker, source):
                 "total_price_paid": "10.00",
                 "state": order.state,
                 "lines": [],
+                "refunds": [],
                 "order": order.id,
             },
             "system_slug": "system_slug",

@@ -16,7 +16,6 @@ from system_meta.models import IntegratedSystem
 from unified_ecommerce.constants import (
     REFUND_CODE_TYPE_CHOICES,
     REFUND_STATUS_APPROVED,
-    REFUND_STATUS_APPROVED_COMPLETE,
     REFUND_STATUS_CHOICES,
     REFUND_STATUS_CREATED,
     REFUND_STATUS_DENIED,
@@ -136,7 +135,11 @@ class Request(TimestampedModel):
             raise RefundOrderImproperStateError(msg)
 
     def approve(
-        self, reason: str, *, lines: list | None = None, auto_approved: bool = False
+        self,
+        reason: str,
+        *,
+        lines: list | None = None,
+        skip_process_delay: bool = False,
     ):
         """
         Approve the request.
@@ -147,31 +150,32 @@ class Request(TimestampedModel):
 
         self._check_status_prerequisites()
 
-        set_status = REFUND_STATUS_APPROVED
-
-        if self.total_requested == Decimal(0) or auto_approved:
-            # This request was auto-approved for whatever reason (zero value, etc.)
-            set_status = REFUND_STATUS_APPROVED_COMPLETE
-
         self.refund_reason = reason
-        self.status = set_status
+        self.status = REFUND_STATUS_APPROVED
         self.save()
 
         if lines:
             for line in lines:
                 self.lines.filter(pk=line["line"]).update(
-                    status=set_status,
+                    status=REFUND_STATUS_APPROVED,
                     refunded_amount=line["refunded_amount"],
                 )
         else:
             for line in self.lines.all():
                 # total_price is a calculated field, can't use an F object
-                line.status = set_status
+                line.status = REFUND_STATUS_APPROVED
                 line.refunded_amount = line.line.total_price
                 line.save()
 
-        log.debug("Queueing refund processing for request %s", self.pk)
-        queue_process_approved_refund.delay(self.pk, auto_approved=auto_approved)
+        if skip_process_delay:
+            # If we're processing a refund from Google Sheets, we don't want to
+            # delay the transaction, since we need to write back to the sheet
+            # if it fails or succeeds.
+            log.debug("Running refund processing for request %s", self.pk)
+            queue_process_approved_refund(self.pk, reraise=True)
+        else:
+            log.debug("Queueing refund processing for request %s", self.pk)
+            queue_process_approved_refund.delay(self.pk)
 
     def deny(self, reason: str):
         """Deny the request."""
