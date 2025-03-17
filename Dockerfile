@@ -56,7 +56,7 @@ RUN chown -R mitodl:mitodl /src
 
 # Store current Git hash, for release management
 USER mitodl
-RUN sh scripts/get-hash.sh
+RUN /bin/sh scripts/get-hash.sh
 
 EXPOSE 8073
 ENV PORT=8073
