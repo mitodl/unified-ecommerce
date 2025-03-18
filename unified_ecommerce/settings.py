@@ -23,6 +23,7 @@ from django.core.exceptions import ImproperlyConfigured
 from mitol.common.envs import get_bool, get_int, get_string, import_settings_modules
 from mitol.google_sheets.settings.google_sheets import *  # noqa: F403
 from mitol.google_sheets_refunds.settings.google_sheets_refunds import *  # noqa: F403
+from mitol.olposthog.settings.olposthog import *  # noqa: F403
 
 from openapi.settings_spectacular import open_spectacular_settings
 from unified_ecommerce.envs import get_list_of_str
@@ -391,6 +392,10 @@ CACHES = {
         "LOCATION": CELERY_BROKER_URL,  # noqa: F405
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
     },
+    "durable": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "durable_cache",
+    },
 }
 
 # JWT authentication settings
@@ -541,7 +546,3 @@ GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
     "GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE",
     None,
 )
-
-# PostHog integration settings
-
-import_settings_modules("mitol.olposthog.settings")
