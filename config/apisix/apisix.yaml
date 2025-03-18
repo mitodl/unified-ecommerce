@@ -21,13 +21,7 @@ routes:
           set:
             Referrer-Policy: "origin"
     uris:
-    - "/api/*"
-    - "/_/*"
-    - "/logged_out/*"
-    - "/auth/*"
-    - "/static/*"
-    - "/favicon.ico"
-    - "/checkout/*"
+      - "/*"
   - id: 2
     name: "ue-default"
     desc: "Wildcard route for the rest of the system - authentication required"
@@ -57,10 +51,10 @@ routes:
           set:
             Referrer-Policy: "origin"
     uris:
-    - "/cart/*"
-    - "/admin/*"
-    - "/establish_session/*"
-    - "/logout"
+      - "/cart/*"
+      - "/admin/*"
+      - "/establish_session/*"
+      - "/logout"
   - id: 3
     name: "ue-logout-redirect"
     desc: "Strip trailing slash from logout redirect."
@@ -70,5 +64,4 @@ routes:
     plugins:
       redirect:
         uri: "/logout"
-
 #END

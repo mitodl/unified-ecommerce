@@ -1,5 +1,5 @@
-FROM python:3.12.1
-LABEL maintainer "ODL DevOps <mitx-devops@mit.edu>"
+FROM python:3.13.2
+LABEL maintainer="ODL DevOps <mitx-devops@mit.edu>"
 
 # Add package files, install updated node and pip
 WORKDIR /tmp
@@ -52,9 +52,12 @@ USER root
 COPY . /src
 WORKDIR /src
 RUN mkdir /src/staticfiles
+RUN chown -R mitodl:mitodl /src
 
+# Store current Git hash, for release management
 USER mitodl
+RUN /bin/sh scripts/get-hash.sh
 
 EXPOSE 8073
-ENV PORT 8073
-CMD uwsgi uwsgi.ini
+ENV PORT=8073
+CMD ["uwsgi", "uwsgi.ini"]

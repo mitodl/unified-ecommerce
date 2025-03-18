@@ -31,6 +31,7 @@ from unified_ecommerce.constants import (
     PAYMENT_TYPES,
     POST_SALE_SOURCE_REDIRECT,
     REDEMPTION_TYPES,
+    REFUND_STATUS_APPROVED,
     TRANSACTION_TYPE_PAYMENT,
     TRANSACTION_TYPE_REFUND,
     TRANSACTION_TYPES,
@@ -654,6 +655,13 @@ class Order(TimestampedModel):
         ]
 
     state = models.CharField(default=STATE.PENDING, choices=STATE.choices)
+    integrated_system = models.ForeignKey(
+        IntegratedSystem,
+        on_delete=models.PROTECT,
+        related_name="+",
+        null=True,
+        blank=True,
+    )
     purchaser = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -705,7 +713,7 @@ class Order(TimestampedModel):
     def save(self, *args, **kwargs):
         """Save the order."""
 
-        log.info("Saving order %s", self.id)
+        log.debug("Saving order %s", self.id)
 
         # initial save in order to get primary key for new order
         super().save(*args, **kwargs)
@@ -715,7 +723,7 @@ class Order(TimestampedModel):
 
         # if we don't have a generated reference number, we generate one and save again
         if self.reference_number is None or len(self.reference_number) == 0:
-            log.info("Generating reference number for order %s", self.id)
+            log.debug("Generating reference number for order %s", self.id)
             self.reference_number = self._generate_reference_number()
             super().save(*args, **kwargs)
 
@@ -731,6 +739,11 @@ class Order(TimestampedModel):
     def is_fulfilled(self):
         """Return if the order is fulfilled"""
         return self.state == Order.STATE.FULFILLED
+
+    @property
+    def is_refunded(self):
+        """Return if the order has been refunded (at all)"""
+        return self.refund_requests.count()
 
     @property
     def tax(self):
@@ -752,6 +765,22 @@ class Order(TimestampedModel):
             sum([line.base_price - line.discounted_price for line in self.lines.all()])
         )
 
+    @property
+    def refunded_amount(self):
+        """Return the total refunded amount for the order"""
+
+        return quantize_decimal(
+            sum(
+                [
+                    line.refunded_amount
+                    for req in self.refund_requests.filter(
+                        status=REFUND_STATUS_APPROVED
+                    ).all()
+                    for line in req.lines.all()
+                ]
+            )
+        )
+
     def fulfill(self, payment_data, source=POST_SALE_SOURCE_REDIRECT):
         """Fufill the order."""
         # record the transaction
@@ -763,12 +792,6 @@ class Order(TimestampedModel):
 
             # trigger post-sale events
             self.handle_post_sale(source=source)
-
-            self.state = Order.STATE.FULFILLED
-            self.save()
-
-            # send the receipt emails
-            self.send_ecommerce_order_receipt()
         except Exception as e:  # pylint: disable=broad-except
             log.exception(
                 "Error occurred fulfilling order %s", self.reference_number, exc_info=e
@@ -807,7 +830,8 @@ class Order(TimestampedModel):
     def __str__(self):
         """Generate a string representation of the order"""
         return (
-            f"{self.state.capitalize()} Order for {self.purchaser.username}"
+            f"{self.state.capitalize()} Order #{self.reference_number}"
+            f" for {self.purchaser.username}"
             f" ({self.purchaser.email})"
         )
 
@@ -852,16 +876,9 @@ class Order(TimestampedModel):
         courseruns enrollments and stuff.
         """
 
-        log.info("Running post-sale events")
+        log.debug("Running post-sale events for %s", self)
 
         pm.hook.post_sale(order_id=self.id, source=source)
-
-    def send_ecommerce_order_receipt(self):
-        """
-        Send the receipt email.
-
-        TODO: add email
-        """
 
     def delete_redeemed_discounts(self):
         """Delete redeemed discounts"""
@@ -870,6 +887,40 @@ class Order(TimestampedModel):
 
 class PendingOrder(Order):
     """An order that is pending payment"""
+
+    def _process_basket_products(self, basket):
+        """Process the basket products."""
+
+        products = basket.get_products()
+        # Get the details from each Product.
+        product_versions = [
+            Version.objects.get_for_object(product).first() for product in products
+        ]
+
+        if len(product_versions) == 0:
+            log.error(
+                (
+                    "PendingOrder._get_or_create: %s products are there "
+                    "but no versions?"
+                ),
+                len(products),
+            )
+            msg = "No product versions found"
+            raise ValidationError(msg)
+
+        if len(product_versions) != len(products):
+            log.error(
+                (
+                    "PendingOrder._get_or_create: %s products are there "
+                    "but only %s versions?"
+                ),
+                len(products),
+                len(product_versions),
+            )
+            msg = "Product versions don't match lines added"
+            raise ValidationError(msg)
+
+        return product_versions
 
     @transaction.atomic
     def _get_or_create(self, basket: Basket):
@@ -887,88 +938,77 @@ class PendingOrder(Order):
         Returns:
             PendingOrder: the retrieved or created PendingOrder.
         """
-        try:
-            products = basket.get_products()
-            # Get the details from each Product.
-            product_versions = [
-                Version.objects.get_for_object(product).first() for product in products
-            ]
+        product_versions = self._process_basket_products(self, basket)
 
-            # Get or create a PendingOrder
-            # TODO: we prefetched the discounts here
-            orders = Order.objects.select_for_update().filter(
-                lines__product_version__in=product_versions,
+        # Get or create a PendingOrder
+        orders = Order.objects.select_for_update().filter(
+            lines__product_version__in=product_versions,
+            state=Order.STATE.PENDING,
+            purchaser=basket.user,
+            integrated_system=basket.integrated_system,
+        )
+        # Previously, multiple PendingOrders could be created for a single user
+        # for the same product, if multiple exist, grab the first.
+        if orders:
+            order = orders.first()
+            # TODO: this should clear discounts from the order here
+
+            order.refresh_from_db()
+        else:
+            order = Order.objects.create(
                 state=Order.STATE.PENDING,
                 purchaser=basket.user,
+                integrated_system=basket.integrated_system,
+                total_price_paid=0,
             )
-            # Previously, multiple PendingOrders could be created for a single user
-            # for the same product, if multiple exist, grab the first.
-            if orders:
-                order = orders.first()
-                # TODO: this should clear discounts from the order here
 
-                order.refresh_from_db()
-            else:
-                order = Order.objects.create(
-                    state=Order.STATE.PENDING,
-                    purchaser=basket.user,
-                    total_price_paid=0,
-                )
+        # TODO: Apply any discounts to the PendingOrder
 
-            # TODO: Apply any discounts to the PendingOrder
+        # Manually set these so that we get updated data if it changes
+        # (this re-uses a PendingOrder if it exists, so it might now be wrong)
+        order.tax_rate = basket.tax_rate
+        order.purchaser_ip = basket.user_ip
+        order.purchaser_taxable_country_code = (
+            basket.user_taxable_country_code if basket.user_taxable_country_code else ""
+        )
+        order.purchaser_taxable_geolocation_type = basket.user_taxable_geolocation_type
+        order.purchaser_blockable_country_code = (
+            basket.user_blockable_country_code
+            if basket.user_blockable_country_code
+            else ""
+        )
+        order.purchaser_blockable_geolocation_type = (
+            basket.user_blockable_geolocation_type
+        )
+        order.save()
 
-            # Manually set these so that we get updated data if it changes
-            # (this re-uses a PendingOrder if it exists, so it might now be wrong)
-            order.tax_rate = basket.tax_rate
-            order.purchaser_ip = basket.user_ip
-            order.purchaser_taxable_country_code = (
-                basket.user_taxable_country_code
-                if basket.user_taxable_country_code
-                else ""
+        # Create or get Line for each product.
+        # Calculate the Order total based on Lines and discount.
+        total = Decimal(0)
+        used_discounts = []
+        for product_version in product_versions:
+            basket_item = basket.basket_items.get(
+                product=product_version.field_dict["id"]
             )
-            order.purchaser_taxable_geolocation_type = (
-                basket.user_taxable_geolocation_type
+            line, created = order.lines.get_or_create(
+                order=order,
+                product_version=product_version,
+                defaults={
+                    "quantity": 1,
+                    "discounted_price": basket_item.discounted_price,
+                },
             )
-            order.purchaser_blockable_country_code = (
-                basket.user_blockable_country_code
-                if basket.user_blockable_country_code
-                else ""
+            used_discounts.append(basket_item.best_discount_for_item_from_basket)
+            total += line.total_price_money
+            log.debug(
+                "%s line %s product %s",
+                ("Created" if created else "Updated"),
+                line,
+                product_version.field_dict["sku"],
             )
-            order.purchaser_blockable_geolocation_type = (
-                basket.user_blockable_geolocation_type
-            )
-            order.save()
+            line.save()
 
-            # Create or get Line for each product.
-            # Calculate the Order total based on Lines and discount.
-            total = Decimal(0)
-            used_discounts = []
-            for product_version in product_versions:
-                basket_item = basket.basket_items.get(
-                    product=product_version.field_dict["id"]
-                )
-                line, created = order.lines.get_or_create(
-                    order=order,
-                    product_version=product_version,
-                    defaults={
-                        "quantity": 1,
-                        "discounted_price": basket_item.discounted_price,
-                    },
-                )
-                used_discounts.append(basket_item.best_discount_for_item_from_basket)
-                total += line.total_price_money
-                log.debug(
-                    "%s line %s product %s",
-                    ("Created" if created else "Updated"),
-                    line,
-                    product_version.field_dict["sku"],
-                )
-                line.save()
-
-            order.total_price_paid = total
-
-        except Exception:  # pylint: disable=broad-except  # noqa: BLE001
-            order.state = Order.STATE.ERRORED
+        order.total_price_paid = total
 
         order.save()
 
@@ -1258,6 +1298,14 @@ class Line(TimestampedModel):
             Product.all_objects.get(pk=self.product_version.field_dict["id"]),
             self.product_version,
         )
+
+    @staticmethod
+    def from_product(product: Product, **kwargs):
+        """Create a Line for the most recent version of the product."""
+
+        kwargs["product_version"] = Version.objects.get_for_object(product).first()
+
+        return Line(**kwargs)
 
     def __str__(self):
         """Return string version of the line."""
