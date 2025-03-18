@@ -100,13 +100,14 @@ INSTALLED_APPS = [
     "django_extensions",
     "mitol.google_sheets.apps.GoogleSheetsApp",
     "mitol.google_sheets_refunds.apps.GoogleSheetsRefundsApp",
+    "mitol.payment_gateway.apps.PaymentGatewayApp",
+    "mitol.olposthog.apps.OlPosthog",
     # Application modules
     "unified_ecommerce",
     "users",
     "system_meta",
     "payments",
     "cart",
-    "mitol.payment_gateway.apps.PaymentGatewayApp",
     "openapi",
     "refunds",
 ]
@@ -540,3 +541,7 @@ GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE = get_string(
     "GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE",
     None,
 )
+
+# PostHog integration settings
+
+import_settings_modules("mitol.olposthog.settings")
