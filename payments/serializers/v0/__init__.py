@@ -542,6 +542,32 @@ class WebhookBaseSerializer(DataclassSerializer):
         model = Line
 
 
+class TransactionSerializer(serializers.Serializer):
+    """Serializer for transactions."""
+
+    transaction_id = serializers.CharField()
+    transaction_type = serializers.CharField()
+    amount = serializers.DecimalField(max_digits=9, decimal_places=2)
+    created_on = serializers.DateTimeField()
+    updated_on = serializers.DateTimeField()
+    reason = serializers.CharField()
+    data = serializers.JSONField()
+
+    class Meta:
+        """Meta options for TransactionSerializer"""
+
+        fields = [
+            "transaction_id",
+            "transaction_type",
+            "amount",
+            "created_on",
+            "updated_on",
+            "reason",
+            "data",
+        ]
+        model = Transaction
+
+
 class OrderHistorySerializer(serializers.ModelSerializer):
     """Serializer for order history."""
 
