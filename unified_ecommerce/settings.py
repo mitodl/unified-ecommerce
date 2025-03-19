@@ -20,6 +20,7 @@ from urllib.parse import urljoin
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
+from mitol.apigateway.settings import *  # noqa: F403
 from mitol.common.envs import get_bool, get_int, get_string, import_settings_modules
 from mitol.google_sheets.settings.google_sheets import *  # noqa: F403
 from mitol.google_sheets_refunds.settings.google_sheets_refunds import *  # noqa: F403
@@ -30,7 +31,7 @@ from unified_ecommerce.sentry import init_sentry
 from unified_ecommerce.settings_celery import *  # noqa: F403
 from unified_ecommerce.settings_pluggy import *  # noqa: F403
 
-VERSION = "0.0.0"
+VERSION = "0.0.1"
 
 log = logging.getLogger()
 
@@ -82,7 +83,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_api_key",
     "corsheaders",
-    # "webpack_loader",
     "anymail",
     "hijack",
     "hijack.contrib.admin",
@@ -100,13 +100,14 @@ INSTALLED_APPS = [
     "django_extensions",
     "mitol.google_sheets.apps.GoogleSheetsApp",
     "mitol.google_sheets_refunds.apps.GoogleSheetsRefundsApp",
+    "mitol.payment_gateway.apps.PaymentGatewayApp",
+    "mitol.apigateway.apps.ApigatewayApp",
     # Application modules
     "unified_ecommerce",
     "users",
     "system_meta",
     "payments",
     "cart",
-    "mitol.payment_gateway.apps.PaymentGatewayApp",
     "openapi",
     "refunds",
 ]
@@ -117,7 +118,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "unified_ecommerce.middleware.ApisixUserMiddleware",
+    "mitol.apigateway.middleware.ApisixUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -216,6 +217,7 @@ USE_TZ = True
 AUTHENTICATION_BACKENDS = [
     # "authentication.backends.ol_open_id_connect.OlOpenIdConnectAuth",
     # the following needs to stay here to allow login of local users
+    "mitol.apigateway.backends.ApisixRemoteUserBackend",
     "django.contrib.auth.backends.ModelBackend",
     "guardian.backends.ObjectPermissionBackend",
 ]
