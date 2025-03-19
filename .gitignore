@@ -143,3 +143,6 @@ generated-codes.csv
 
 # Manually-built ol-django packages
 mitol_django_*
+
+# Release management hash
+hash.txt

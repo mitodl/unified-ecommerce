@@ -25,6 +25,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "system_meta.tasks.update_products",
         "schedule": crontab(hour=0, minute=0),  # Runs every day at midnight
     },
+    "process-google-sheets-requests": {
+        "task": "refunds.tasks.process_google_sheets_requests",
+        "schedule": crontab(minute="0", hour="*/6"),
+    },
 }
 
 CELERY_TASK_SERIALIZER = "json"
