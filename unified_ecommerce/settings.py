@@ -23,6 +23,7 @@ from django.core.exceptions import ImproperlyConfigured
 from mitol.common.envs import get_bool, get_int, get_string, import_settings_modules
 from mitol.google_sheets.settings.google_sheets import *  # noqa: F403
 from mitol.google_sheets_refunds.settings.google_sheets_refunds import *  # noqa: F403
+from mitol.olposthog.settings.olposthog import *  # noqa: F403
 
 from openapi.settings_spectacular import open_spectacular_settings
 from unified_ecommerce.envs import get_list_of_str
@@ -100,13 +101,14 @@ INSTALLED_APPS = [
     "django_extensions",
     "mitol.google_sheets.apps.GoogleSheetsApp",
     "mitol.google_sheets_refunds.apps.GoogleSheetsRefundsApp",
+    "mitol.payment_gateway.apps.PaymentGatewayApp",
+    "mitol.olposthog.apps.OlPosthog",
     # Application modules
     "unified_ecommerce",
     "users",
     "system_meta",
     "payments",
     "cart",
-    "mitol.payment_gateway.apps.PaymentGatewayApp",
     "openapi",
     "refunds",
 ]
@@ -389,6 +391,10 @@ CACHES = {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": CELERY_BROKER_URL,  # noqa: F405
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+    },
+    "durable": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "durable_cache",
     },
 }
 
