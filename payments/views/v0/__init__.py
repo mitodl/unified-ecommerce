@@ -199,8 +199,7 @@ def _create_basket_from_product(
 
 @extend_schema(
     description=(
-        "Creates or updates a basket for the current user, "
-        "adding the selected product."
+        "Creates or updates a basket for the current user, adding the selected product."
     ),
     methods=["POST"],
     request=None,
@@ -251,8 +250,7 @@ def create_basket_from_product_with_discount(
 
 @extend_schema(
     description=(
-        "Creates or updates a basket for the current user, "
-        "adding the selected product."
+        "Creates or updates a basket for the current user, adding the selected product."
     ),
     methods=["POST"],
     responses=BasketWithProductSerializer,
