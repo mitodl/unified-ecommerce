@@ -133,7 +133,8 @@ config/keycloak/tls/tls.crt
 config/keycloak/tls/tls.key
 
 # Docker Compose override
-docker-compose.override.yml
+# changed to a * so you can more easily disable it and have it still be ignored
+docker-compose.override*
 
 # Bulk discount csv
 generated-codes.csv
@@ -146,3 +147,6 @@ mitol_django_*
 
 # Release management hash
 hash.txt
+
+# GeoLite database imports
+GeoLite2*
