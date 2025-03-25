@@ -9,19 +9,9 @@ fi
 ##################################################
 # Generate OpenAPI Schema
 ##################################################
-docker compose run --no-deps --rm web \
+docker compose run --no-deps --rm -e MITOL_APP_PATH_PREFIX=commerce web \
 	./manage.py generate_openapi_spec
 
-##################################################
-# Generate API Client
-##################################################
+npx prettier --write openapi/specs/**/*.yaml
 
-GENERATOR_VERSION=v7.2.0
-
-docker run --rm -v "${PWD}:/local" -w /local openapitools/openapi-generator-cli:${GENERATOR_VERSION} \
-	generate -c scripts/openapi-configs/typescript-axios-v0.yaml
-
-# We expect pre-commit to exit with a non-zero status since it is reformatting
-# the generated code.
-git ls-files frontends/api/src/generated | xargs pre-commit run --files ||
-	echo "OpenAPI generation complete."
+echo "OpenAPI generation complete."

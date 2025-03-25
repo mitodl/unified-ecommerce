@@ -149,6 +149,7 @@ LOGOUT_URL = "/logout"
 LOGOUT_REDIRECT_URL = "/logged_out/"
 
 ROOT_URLCONF = "unified_ecommerce.urls"
+MITOL_APP_PATH_PREFIX = get_string("MITOL_APP_PATH_PREFIX", "commerce")
 
 TEMPLATES = [
     {

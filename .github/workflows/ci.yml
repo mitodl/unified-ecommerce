@@ -80,6 +80,7 @@ jobs:
           MITOL_UE_JWT_SECRET: ""
           MITOL_UE_USE_S3: "False"
           MITOL_UE_DB_DISABLE_SSL: "True"
+          MITOL_APP_PATH_PREFIX: "commerce"
 
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574 # v5.4.0
