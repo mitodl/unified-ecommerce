@@ -172,6 +172,10 @@ paths:
           schema:
             type: integer
         - in: query
+          name: sku
+          schema:
+            type: string
+        - in: query
           name: system__slug
           schema:
             type: string

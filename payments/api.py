@@ -675,6 +675,7 @@ def generate_discount_code(**kwargs):
     * prefix - prefix to append to the codes (max 63 characters)
     * company - ID of the company to associate with the discount
     * transaction_number - transaction number to associate with the discount
+    * automatic - boolean; discount is automatically applied
 
     Returns:
     * List of generated codes, with the following fields:
@@ -696,6 +697,8 @@ def generate_discount_code(**kwargs):
     activation_date = (
         parse_supplied_date(kwargs["activates"]) if kwargs.get("activates") else None
     )
+
+    automatic = kwargs.get("automatic", False)
 
     integrated_system = (
         get_object_or_raise(
@@ -750,6 +753,7 @@ def generate_discount_code(**kwargs):
                 ),
                 company=company,
                 transaction_number=transaction_number,
+                automatic=automatic,
             )
             if users:
                 discount.assigned_users.set(users)

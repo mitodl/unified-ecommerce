@@ -57,6 +57,7 @@ class ProductViewSet(AuthVariegatedModelViewSet):
     filterset_fields = [
         "name",
         "system__slug",
+        "sku",
     ]
     permission_classes = [
         IsAdminUserOrReadOnly,
