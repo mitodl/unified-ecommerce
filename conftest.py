@@ -2,6 +2,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from django.conf import settings
 
 from fixtures.common import *  # noqa: F403
 from fixtures.users import *  # noqa: F403
@@ -42,3 +43,10 @@ def prevent_requests(mocker, request):  # noqa: PT004
         autospec=True,
         side_effect=DoNotUseRequestException,
     )
+
+
+@pytest.fixture(autouse=True)
+def _fix_prefix_for_testing():
+    """Fix the API path prefix for testing - it should be empty"""
+
+    settings.MITOL_APP_PATH_PREFIX = ""
