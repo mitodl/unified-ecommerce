@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.0.3
+Version 0.0.3 (Released March 27, 2025)
 -------------
 
 - Update RELEASE.rst
@@ -37,7 +37,7 @@ Version 0.0.3
 - Add API to bulk-add SKUs to a basket, optionally with a discount (#194)
 - Removing a bunch of stuff that is unnecessary and/or shouldn't have been committed (#195)
 
-Version 0.0.0
+Version 0.0.0 (Released January 13, 2025)
 -------------
 
 - Initial release.
