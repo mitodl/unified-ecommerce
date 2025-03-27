@@ -18,6 +18,13 @@ class LoggedOutView(TemplateView):
 
     template_name = "logged_out.html"
 
+    def get_context_data(self, **kwargs):
+        """Add the login URL to the context."""
+        return {
+            **super().get_context_data(**kwargs),
+            "frontend_url": settings.MITOL_UE_PAYMENT_BASKET_CHOOSER,
+        }
+
 
 class CurrentUserRetrieveViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """User retrieve and update viewsets for the current user"""

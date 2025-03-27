@@ -22,7 +22,9 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import include, path, re_path
 
-urlpatterns = (
+from unified_ecommerce.utils import prefix_url_patterns
+
+base_urlpatterns = (
     [
         path("", include("cart.urls")),
         path("auth/", include("django.contrib.auth.urls")),
@@ -58,4 +60,6 @@ urlpatterns = (
 if settings.DEBUG:
     import debug_toolbar  # pylint: disable=wrong-import-position, wrong-import-order
 
-    urlpatterns += [re_path(r"^__debug__/", include(debug_toolbar.urls))]
+    base_urlpatterns += [re_path(r"^__debug__/", include(debug_toolbar.urls))]
+
+urlpatterns = prefix_url_patterns(base_urlpatterns)

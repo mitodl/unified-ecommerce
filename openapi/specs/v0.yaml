@@ -4,9 +4,9 @@ info:
   version: 0.0.1 (v0)
   description: MIT public API
 paths:
-  /api/v0/meta/integrated_system/:
+  /commerce/api/v0/meta/integrated_system/:
     get:
-      operationId: meta_integrated_system_list
+      operationId: commerce_api_v0_meta_integrated_system_list
       description: Viewset for IntegratedSystem model.
       parameters:
         - name: limit
@@ -22,7 +22,7 @@ paths:
           schema:
             type: integer
       tags:
-        - meta
+        - commerce
       responses:
         "200":
           content:
@@ -31,10 +31,10 @@ paths:
                 $ref: "#/components/schemas/PaginatedIntegratedSystemList"
           description: ""
     post:
-      operationId: meta_integrated_system_create
+      operationId: commerce_api_v0_meta_integrated_system_create
       description: Viewset for IntegratedSystem model.
       tags:
-        - meta
+        - commerce
       requestBody:
         content:
           application/json:
@@ -54,9 +54,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/IntegratedSystem"
           description: ""
-  /api/v0/meta/integrated_system/{id}/:
+  /commerce/api/v0/meta/integrated_system/{id}/:
     get:
-      operationId: meta_integrated_system_retrieve
+      operationId: commerce_api_v0_meta_integrated_system_retrieve
       description: Viewset for IntegratedSystem model.
       parameters:
         - in: path
@@ -66,7 +66,7 @@ paths:
           description: A unique integer value identifying this integrated system.
           required: true
       tags:
-        - meta
+        - commerce
       responses:
         "200":
           content:
@@ -75,7 +75,7 @@ paths:
                 $ref: "#/components/schemas/IntegratedSystem"
           description: ""
     put:
-      operationId: meta_integrated_system_update
+      operationId: commerce_api_v0_meta_integrated_system_update
       description: Viewset for IntegratedSystem model.
       parameters:
         - in: path
@@ -85,7 +85,7 @@ paths:
           description: A unique integer value identifying this integrated system.
           required: true
       tags:
-        - meta
+        - commerce
       requestBody:
         content:
           application/json:
@@ -106,7 +106,7 @@ paths:
                 $ref: "#/components/schemas/IntegratedSystem"
           description: ""
     patch:
-      operationId: meta_integrated_system_partial_update
+      operationId: commerce_api_v0_meta_integrated_system_partial_update
       description: Viewset for IntegratedSystem model.
       parameters:
         - in: path
@@ -116,7 +116,7 @@ paths:
           description: A unique integer value identifying this integrated system.
           required: true
       tags:
-        - meta
+        - commerce
       requestBody:
         content:
           application/json:
@@ -136,7 +136,7 @@ paths:
                 $ref: "#/components/schemas/IntegratedSystem"
           description: ""
     delete:
-      operationId: meta_integrated_system_destroy
+      operationId: commerce_api_v0_meta_integrated_system_destroy
       description: Viewset for IntegratedSystem model.
       parameters:
         - in: path
@@ -146,13 +146,13 @@ paths:
           description: A unique integer value identifying this integrated system.
           required: true
       tags:
-        - meta
+        - commerce
       responses:
         "204":
           description: No response body
-  /api/v0/meta/product/:
+  /commerce/api/v0/meta/product/:
     get:
-      operationId: meta_product_list
+      operationId: commerce_api_v0_meta_product_list
       description: Viewset for Product model.
       parameters:
         - name: limit
@@ -180,7 +180,7 @@ paths:
           schema:
             type: string
       tags:
-        - meta
+        - commerce
       responses:
         "200":
           content:
@@ -189,10 +189,10 @@ paths:
                 $ref: "#/components/schemas/PaginatedProductList"
           description: ""
     post:
-      operationId: meta_product_create
+      operationId: commerce_api_v0_meta_product_create
       description: Viewset for Product model.
       tags:
-        - meta
+        - commerce
       requestBody:
         content:
           application/json:
@@ -212,9 +212,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Product"
           description: ""
-  /api/v0/meta/product/{id}/:
+  /commerce/api/v0/meta/product/{id}/:
     get:
-      operationId: meta_product_retrieve
+      operationId: commerce_api_v0_meta_product_retrieve
       description: Viewset for Product model.
       parameters:
         - in: path
@@ -224,7 +224,7 @@ paths:
           description: A unique integer value identifying this product.
           required: true
       tags:
-        - meta
+        - commerce
       responses:
         "200":
           content:
@@ -233,7 +233,7 @@ paths:
                 $ref: "#/components/schemas/Product"
           description: ""
     put:
-      operationId: meta_product_update
+      operationId: commerce_api_v0_meta_product_update
       description: Viewset for Product model.
       parameters:
         - in: path
@@ -243,7 +243,7 @@ paths:
           description: A unique integer value identifying this product.
           required: true
       tags:
-        - meta
+        - commerce
       requestBody:
         content:
           application/json:
@@ -264,7 +264,7 @@ paths:
                 $ref: "#/components/schemas/Product"
           description: ""
     patch:
-      operationId: meta_product_partial_update
+      operationId: commerce_api_v0_meta_product_partial_update
       description: Viewset for Product model.
       parameters:
         - in: path
@@ -274,7 +274,7 @@ paths:
           description: A unique integer value identifying this product.
           required: true
       tags:
-        - meta
+        - commerce
       requestBody:
         content:
           application/json:
@@ -294,7 +294,7 @@ paths:
                 $ref: "#/components/schemas/Product"
           description: ""
     delete:
-      operationId: meta_product_destroy
+      operationId: commerce_api_v0_meta_product_destroy
       description: Viewset for Product model.
       parameters:
         - in: path
@@ -304,13 +304,13 @@ paths:
           description: A unique integer value identifying this product.
           required: true
       tags:
-        - meta
+        - commerce
       responses:
         "204":
           description: No response body
-  /api/v0/meta/product/preload/{system_slug}/{sku}/:
+  /commerce/api/v0/meta/product/preload/{system_slug}/{sku}/:
     get:
-      operationId: meta_product_preload_retrieve
+      operationId: commerce_api_v0_meta_product_preload_retrieve
       description:
         Pre-loads the product metadata for a given SKU, even if the SKU
         doesn't exist yet.
@@ -328,7 +328,7 @@ paths:
             pattern: ^[^/]+$
           required: true
       tags:
-        - meta
+        - commerce
       responses:
         "200":
           content:
@@ -336,9 +336,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Product"
           description: ""
-  /api/v0/payments/basketitems/:
+  /commerce/api/v0/payments/basketitems/:
     get:
-      operationId: payments_basketitems_list
+      operationId: commerce_api_v0_payments_basketitems_list
       description: Returns the basket items for the current user.
       parameters:
         - name: limit
@@ -354,7 +354,7 @@ paths:
           schema:
             type: integer
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -363,10 +363,10 @@ paths:
                 $ref: "#/components/schemas/PaginatedBasketItemList"
           description: ""
     post:
-      operationId: payments_basketitems_create
+      operationId: commerce_api_v0_payments_basketitems_create
       description: ViewSet for handling BasketItem operations.
       tags:
-        - payments
+        - commerce
       requestBody:
         content:
           application/json:
@@ -386,9 +386,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/BasketItem"
           description: ""
-  /api/v0/payments/basketitems/{id}/:
+  /commerce/api/v0/payments/basketitems/{id}/:
     get:
-      operationId: payments_basketitems_retrieve
+      operationId: commerce_api_v0_payments_basketitems_retrieve
       description: Returns the basket items for the current user.
       parameters:
         - in: path
@@ -398,7 +398,7 @@ paths:
           description: A unique integer value identifying this basket item.
           required: true
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -407,7 +407,7 @@ paths:
                 $ref: "#/components/schemas/BasketItem"
           description: ""
     put:
-      operationId: payments_basketitems_update
+      operationId: commerce_api_v0_payments_basketitems_update
       description: ViewSet for handling BasketItem operations.
       parameters:
         - in: path
@@ -417,7 +417,7 @@ paths:
           description: A unique integer value identifying this basket item.
           required: true
       tags:
-        - payments
+        - commerce
       requestBody:
         content:
           application/json:
@@ -438,7 +438,7 @@ paths:
                 $ref: "#/components/schemas/BasketItem"
           description: ""
     patch:
-      operationId: payments_basketitems_partial_update
+      operationId: commerce_api_v0_payments_basketitems_partial_update
       description: ViewSet for handling BasketItem operations.
       parameters:
         - in: path
@@ -448,7 +448,7 @@ paths:
           description: A unique integer value identifying this basket item.
           required: true
       tags:
-        - payments
+        - commerce
       requestBody:
         content:
           application/json:
@@ -468,7 +468,7 @@ paths:
                 $ref: "#/components/schemas/BasketItem"
           description: ""
     delete:
-      operationId: payments_basketitems_destroy
+      operationId: commerce_api_v0_payments_basketitems_destroy
       description: ViewSet for handling BasketItem operations.
       parameters:
         - in: path
@@ -478,13 +478,13 @@ paths:
           description: A unique integer value identifying this basket item.
           required: true
       tags:
-        - payments
+        - commerce
       responses:
         "204":
           description: No response body
-  /api/v0/payments/baskets/:
+  /commerce/api/v0/payments/baskets/:
     get:
-      operationId: payments_baskets_list
+      operationId: commerce_api_v0_payments_baskets_list
       description: Retrives the current user's baskets, one per system.
       parameters:
         - in: query
@@ -504,7 +504,7 @@ paths:
           schema:
             type: integer
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -512,9 +512,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaginatedBasketWithProductList"
           description: ""
-  /api/v0/payments/baskets/{id}/:
+  /commerce/api/v0/payments/baskets/{id}/:
     get:
-      operationId: payments_baskets_retrieve
+      operationId: commerce_api_v0_payments_baskets_retrieve
       description: Retrieve a basket for the current user.
       parameters:
         - in: path
@@ -523,7 +523,7 @@ paths:
             type: integer
           required: true
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -531,9 +531,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/BasketWithProduct"
           description: ""
-  /api/v0/payments/baskets/add_discount/{system_slug}/:
+  /commerce/api/v0/payments/baskets/add_discount/{system_slug}/:
     post:
-      operationId: payments_baskets_add_discount_create
+      operationId: commerce_api_v0_payments_baskets_add_discount_create
       description:
         Creates or updates a basket for the current user, adding the discount
         if valid.
@@ -549,7 +549,7 @@ paths:
             type: string
           required: true
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -557,9 +557,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/BasketWithProduct"
           description: ""
-  /api/v0/payments/baskets/clear/{system_slug}/:
+  /commerce/api/v0/payments/baskets/clear/{system_slug}/:
     delete:
-      operationId: payments_baskets_clear_destroy
+      operationId: commerce_api_v0_payments_baskets_clear_destroy
       description: Clears the basket for the current user.
       parameters:
         - in: path
@@ -568,13 +568,13 @@ paths:
             type: string
           required: true
       tags:
-        - payments
+        - commerce
       responses:
         "204":
           description: No response body
-  /api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/:
+  /commerce/api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/:
     post:
-      operationId: payments_baskets_create_from_product_create
+      operationId: commerce_api_v0_payments_baskets_create_from_product_create
       description:
         Creates or updates a basket for the current user, adding the selected
         product.
@@ -590,7 +590,7 @@ paths:
             type: string
           required: true
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -598,7 +598,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/BasketWithProduct"
           description: ""
-  /api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/{discount_code}/:
+  /commerce/api/v0/payments/baskets/create_from_product/{system_slug}/{sku}/{discount_code}/:
     post:
       operationId: create_basket_from_product_with_discount
       description:
@@ -621,7 +621,7 @@ paths:
             type: string
           required: true
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -629,14 +629,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/BasketWithProduct"
           description: ""
-  /api/v0/payments/baskets/create_with_products/:
+  /commerce/api/v0/payments/baskets/create_with_products/:
     post:
-      operationId: payments_baskets_create_with_products_create
+      operationId: commerce_api_v0_payments_baskets_create_with_products_create
       description:
         Creates or updates a basket for the current user, adding the selected
         product.
       tags:
-        - payments
+        - commerce
       requestBody:
         content:
           application/json:
@@ -656,9 +656,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/BasketWithProduct"
           description: ""
-  /api/v0/payments/baskets/for_system/{system_slug}/:
+  /commerce/api/v0/payments/baskets/for_system/{system_slug}/:
     get:
-      operationId: payments_baskets_for_system_retrieve
+      operationId: commerce_api_v0_payments_baskets_for_system_retrieve
       description: Returns or creates a basket for the current user and system.
       parameters:
         - in: path
@@ -667,7 +667,7 @@ paths:
             type: string
           required: true
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -675,9 +675,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/BasketWithProduct"
           description: ""
-  /api/v0/payments/checkout/{system_slug}/:
+  /commerce/api/v0/payments/checkout/{system_slug}/:
     post:
-      operationId: payments_checkout_create
+      operationId: commerce_api_v0_payments_checkout_create
       description:
         Generates and returns the form payload for the current basket for
         the specified system, which can be used to start the checkout process.
@@ -688,7 +688,7 @@ paths:
             type: string
           required: true
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -696,12 +696,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/CyberSourceCheckout"
           description: ""
-  /api/v0/payments/discounts/:
+  /commerce/api/v0/payments/discounts/:
     post:
-      operationId: payments_discounts_create
+      operationId: commerce_api_v0_payments_discounts_create
       description: Create a discount.
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -709,9 +709,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Discount"
           description: ""
-  /api/v0/payments/orders/history/:
+  /commerce/api/v0/payments/orders/history/:
     get:
-      operationId: payments_orders_history_list
+      operationId: commerce_api_v0_payments_orders_history_list
       description: Retrives the current user's completed orders.
       parameters:
         - name: limit
@@ -727,7 +727,7 @@ paths:
           schema:
             type: integer
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -735,9 +735,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaginatedOrderHistoryList"
           description: ""
-  /api/v0/payments/orders/history/{id}/:
+  /commerce/api/v0/payments/orders/history/{id}/:
     get:
-      operationId: payments_orders_history_retrieve
+      operationId: commerce_api_v0_payments_orders_history_retrieve
       description: Retrieve a completed order for the current user.
       parameters:
         - in: path
@@ -746,7 +746,7 @@ paths:
             type: integer
           required: true
       tags:
-        - payments
+        - commerce
       responses:
         "200":
           content:
@@ -754,14 +754,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/OrderHistory"
           description: ""
-  /api/v0/refunds/create_from_order:
+  /commerce/api/v0/refunds/create_from_order:
     post:
-      operationId: refunds_create_from_order_create
+      operationId: commerce_api_v0_refunds_create_from_order_create
       description:
         Create a refund from an existing order, optionally specifying which
         lines to refund.
       tags:
-        - refunds
+        - commerce
       requestBody:
         content:
           application/json:
@@ -781,9 +781,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Request"
           description: ""
-  /api/v0/refunds/lines/:
+  /commerce/api/v0/refunds/lines/:
     get:
-      operationId: refunds_lines_list
+      operationId: commerce_api_v0_refunds_lines_list
       description: API endpoint for line items.
       parameters:
         - name: limit
@@ -799,7 +799,7 @@ paths:
           schema:
             type: integer
       tags:
-        - refunds
+        - commerce
       responses:
         "200":
           content:
@@ -808,10 +808,10 @@ paths:
                 $ref: "#/components/schemas/PaginatedRequestLineList"
           description: ""
     post:
-      operationId: refunds_lines_create
+      operationId: commerce_api_v0_refunds_lines_create
       description: API endpoint for line items.
       tags:
-        - refunds
+        - commerce
       requestBody:
         content:
           application/json:
@@ -831,9 +831,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/RequestLine"
           description: ""
-  /api/v0/refunds/lines/{id}/:
+  /commerce/api/v0/refunds/lines/{id}/:
     get:
-      operationId: refunds_lines_retrieve
+      operationId: commerce_api_v0_refunds_lines_retrieve
       description: API endpoint for line items.
       parameters:
         - in: path
@@ -843,7 +843,7 @@ paths:
           description: A unique integer value identifying this request line.
           required: true
       tags:
-        - refunds
+        - commerce
       responses:
         "200":
           content:
@@ -852,7 +852,7 @@ paths:
                 $ref: "#/components/schemas/RequestLine"
           description: ""
     put:
-      operationId: refunds_lines_update
+      operationId: commerce_api_v0_refunds_lines_update
       description: API endpoint for line items.
       parameters:
         - in: path
@@ -862,7 +862,7 @@ paths:
           description: A unique integer value identifying this request line.
           required: true
       tags:
-        - refunds
+        - commerce
       requestBody:
         content:
           application/json:
@@ -883,7 +883,7 @@ paths:
                 $ref: "#/components/schemas/RequestLine"
           description: ""
     patch:
-      operationId: refunds_lines_partial_update
+      operationId: commerce_api_v0_refunds_lines_partial_update
       description: API endpoint for line items.
       parameters:
         - in: path
@@ -893,7 +893,7 @@ paths:
           description: A unique integer value identifying this request line.
           required: true
       tags:
-        - refunds
+        - commerce
       requestBody:
         content:
           application/json:
@@ -913,7 +913,7 @@ paths:
                 $ref: "#/components/schemas/RequestLine"
           description: ""
     delete:
-      operationId: refunds_lines_destroy
+      operationId: commerce_api_v0_refunds_lines_destroy
       description: API endpoint for line items.
       parameters:
         - in: path
@@ -923,13 +923,13 @@ paths:
           description: A unique integer value identifying this request line.
           required: true
       tags:
-        - refunds
+        - commerce
       responses:
         "204":
           description: No response body
-  /api/v0/refunds/requests/:
+  /commerce/api/v0/refunds/requests/:
     get:
-      operationId: refunds_requests_list
+      operationId: commerce_api_v0_refunds_requests_list
       description: API endpoint for refund requests.
       parameters:
         - name: limit
@@ -945,7 +945,7 @@ paths:
           schema:
             type: integer
       tags:
-        - refunds
+        - commerce
       responses:
         "200":
           content:
@@ -954,10 +954,10 @@ paths:
                 $ref: "#/components/schemas/PaginatedRequestList"
           description: ""
     post:
-      operationId: refunds_requests_create
+      operationId: commerce_api_v0_refunds_requests_create
       description: API endpoint for refund requests.
       tags:
-        - refunds
+        - commerce
       requestBody:
         content:
           application/json:
@@ -977,9 +977,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/Request"
           description: ""
-  /api/v0/refunds/requests/{id}/:
+  /commerce/api/v0/refunds/requests/{id}/:
     get:
-      operationId: refunds_requests_retrieve
+      operationId: commerce_api_v0_refunds_requests_retrieve
       description: API endpoint for refund requests.
       parameters:
         - in: path
@@ -989,7 +989,7 @@ paths:
           description: A unique integer value identifying this request line.
           required: true
       tags:
-        - refunds
+        - commerce
       responses:
         "200":
           content:
@@ -998,7 +998,7 @@ paths:
                 $ref: "#/components/schemas/Request"
           description: ""
     put:
-      operationId: refunds_requests_update
+      operationId: commerce_api_v0_refunds_requests_update
       description: API endpoint for refund requests.
       parameters:
         - in: path
@@ -1008,7 +1008,7 @@ paths:
           description: A unique integer value identifying this request line.
           required: true
       tags:
-        - refunds
+        - commerce
       requestBody:
         content:
           application/json:
@@ -1029,7 +1029,7 @@ paths:
                 $ref: "#/components/schemas/Request"
           description: ""
     patch:
-      operationId: refunds_requests_partial_update
+      operationId: commerce_api_v0_refunds_requests_partial_update
       description: API endpoint for refund requests.
       parameters:
         - in: path
@@ -1039,7 +1039,7 @@ paths:
           description: A unique integer value identifying this request line.
           required: true
       tags:
-        - refunds
+        - commerce
       requestBody:
         content:
           application/json:
@@ -1059,7 +1059,7 @@ paths:
                 $ref: "#/components/schemas/Request"
           description: ""
     delete:
-      operationId: refunds_requests_destroy
+      operationId: commerce_api_v0_refunds_requests_destroy
       description: API endpoint for refund requests.
       parameters:
         - in: path
@@ -1069,16 +1069,16 @@ paths:
           description: A unique integer value identifying this request line.
           required: true
       tags:
-        - refunds
+        - commerce
       responses:
         "204":
           description: No response body
-  /api/v0/users/me/:
+  /commerce/api/v0/users/me/:
     get:
-      operationId: users_me_retrieve
+      operationId: commerce_api_v0_users_me_retrieve
       description: User retrieve and update viewsets for the current user
       tags:
-        - users
+        - commerce
       security:
         - {}
       responses:

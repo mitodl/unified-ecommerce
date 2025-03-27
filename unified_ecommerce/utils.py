@@ -14,6 +14,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.http import HttpResponseRedirect
+from django.urls.conf import URLPattern, URLResolver
 from mitol.common.utils.datetime import now_in_utc
 
 from unified_ecommerce.constants import USER_MSG_COOKIE_MAX_AGE, USER_MSG_COOKIE_NAME
@@ -478,3 +479,20 @@ def parse_readable_id(readable_id: str) -> tuple[str, str]:
         run = None
 
     return resource, run
+
+
+# This is a temporary add - getting this into mitol-django-common is in progress
+# Adding it manually here so we can have the prefixed URLs work in CI/QA now
+def prefix_url_patterns(
+    urlpatterns: list[URLPattern],
+) -> Union[tuple[URLResolver], list[URLPattern]]:
+    """Add a prefix to all current app urlpatterns"""
+    from django.urls import include, path
+
+    if settings.MITOL_APP_PATH_PREFIX:
+        return (
+            path(
+                f"{settings.MITOL_APP_PATH_PREFIX.rstrip('/')}/", include(urlpatterns)
+            ),
+        )
+    return urlpatterns

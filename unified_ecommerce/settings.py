@@ -149,6 +149,7 @@ LOGOUT_URL = "/logout"
 LOGOUT_REDIRECT_URL = "/logged_out/"
 
 ROOT_URLCONF = "unified_ecommerce.urls"
+MITOL_APP_PATH_PREFIX = get_string("MITOL_APP_PATH_PREFIX", "commerce")
 
 TEMPLATES = [
     {
@@ -527,13 +528,6 @@ MITOL_UE_PAYMENT_BASKET_CHOOSER = get_string(
 MITOL_LEARN_API_URL = get_string(name="MITOL_LEARN_API_URL", default="")
 
 import_settings_modules("mitol.payment_gateway.settings.cybersource")
-
-# Keycloak API settings
-KEYCLOAK_ADMIN_CLIENT_ID = get_string("KEYCLOAK_ADMIN_CLIENT_ID", False)  # noqa: FBT003
-KEYCLOAK_ADMIN_CLIENT_SECRET = get_string("KEYCLOAK_ADMIN_CLIENT_SECRET", False)  # noqa: FBT003
-KEYCLOAK_REALM = get_string("KEYCLOAK_REALM", False)  # noqa: FBT003
-KEYCLOAK_ADMIN_URL = get_string("KEYCLOAK_ADMIN_URL", False)  # noqa: FBT003
-KEYCLOAK_ADMIN_SECURE = get_bool("KEYCLOAK_ADMIN_SECURE", True)  # noqa: FBT003
 
 SPECTACULAR_SETTINGS = open_spectacular_settings
 
