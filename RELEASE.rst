@@ -35,4 +35,3 @@ Version 0.0.3
 - fix(deps): update dependency django to v4.2.18 [security] (#197)
 - Add API to bulk-add SKUs to a basket, optionally with a discount (#194)
 - Removing a bunch of stuff that is unnecessary and/or shouldn't have been committed (#195)
-
