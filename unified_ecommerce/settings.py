@@ -31,7 +31,7 @@ from unified_ecommerce.sentry import init_sentry
 from unified_ecommerce.settings_celery import *  # noqa: F403
 from unified_ecommerce.settings_pluggy import *  # noqa: F403
 
-VERSION = "0.0.0"
+VERSION = "0.0.3"
 
 log = logging.getLogger()
 
