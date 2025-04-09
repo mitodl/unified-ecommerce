@@ -6,8 +6,8 @@ upstreams:
 
 routes:
   - id: 1
-    name: "ue-unauth"
-    desc: "Unauthenticated routes, including assets and checkout callback API"
+    name: "ue-api"
+    desc: "Regular routes, including assets and checkout callback API"
     priority: 1
     upstream_id: 1
     plugins:
@@ -37,8 +37,8 @@ routes:
     uris:
       - "/*"
   - id: 2
-    name: "ue-default"
-    desc: "Wildcard route for the rest of the system - authentication required"
+    name: "ue-authreq"
+    desc: "Routes that require authentication (admin, login/logout, etc.)"
     priority: 10
     upstream_id: 1
     plugins:
@@ -65,9 +65,9 @@ routes:
           set:
             Referrer-Policy: "origin"
     uris:
-      - "/commerce/cart/*"
-      - "/commerce/admin/*"
-      - "/commerce/establish_session/*"
+      - "/cart/*"
+      - "/admin/*"
+      - "/establish_session/*"
       - "/logout"
   - id: 3
     name: "ue-logout-redirect"

@@ -119,3 +119,7 @@ class UserProfile(TimestampedModel):
     )
 
     country_code = CountryField()
+    email_optin = models.BooleanField(
+        default=False,
+        help_text="User has opted in to receive email notifications",
+    )

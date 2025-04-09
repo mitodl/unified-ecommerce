@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import include, path, re_path
+from mitol.apigateway.views import ApiGatewayLogoutView
 
 from unified_ecommerce.utils import prefix_url_patterns
 
@@ -53,6 +54,7 @@ base_urlpatterns = (
                 f'{settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE}" /></head></html>'
             ),
         ),
+        path("logout/", ApiGatewayLogoutView.as_view(), name="logout"),
     ]
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 )
