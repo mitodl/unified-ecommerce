@@ -3165,10 +3165,13 @@ components:
         reason:
           type: string
         data: {}
+        order:
+          $ref: "#/components/schemas/TransactionOrder"
       required:
         - amount
         - created_on
         - data
+        - order
         - reason
         - transaction_id
         - transaction_type
@@ -3208,6 +3211,23 @@ components:
         - postal_code
         - state_or_territory
         - street_address
+    TransactionOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        created_on:
+          type: string
+          format: date-time
+          readOnly: true
+        reference_number:
+          type: string
+          readOnly: true
+      required:
+        - created_on
+        - id
+        - reference_number
     TransactionRequest:
       type: object
       description: Serializer for transactions.
