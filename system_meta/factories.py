@@ -1,12 +1,15 @@
 """Factories for the system_meta app."""
 
+import faker
 import reversion
-from factory import Faker, SubFactory
+from factory import Faker, LazyAttribute, SubFactory
 from factory.django import DjangoModelFactory
 from reversion.models import Version
 
 from system_meta.models import IntegratedSystem, Product
 from unified_ecommerce.factories import InactiveDjangoModelFactory
+
+FAKE = faker.Faker()
 
 
 class IntegratedSystemFactory(DjangoModelFactory):
@@ -17,10 +20,10 @@ class IntegratedSystemFactory(DjangoModelFactory):
 
         model = IntegratedSystem
 
-    name = Faker("company")
-    description = Faker("text")
-    api_key = Faker("md5")
-    webhook_url = Faker("url")
+    name = LazyAttribute(lambda obj: FAKE.unique.company())  # noqa: ARG005
+    description = FAKE.text()
+    api_key = FAKE.md5()
+    webhook_url = FAKE.url()
 
 
 class ActiveIntegratedSystemFactory(IntegratedSystemFactory):
