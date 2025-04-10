@@ -4,6 +4,7 @@ import abc
 import datetime
 import json
 import traceback
+from base64 import b64encode
 from contextlib import contextmanager
 from unittest.mock import Mock
 
@@ -726,3 +727,20 @@ class AuthVariegatedModelViewSetTest(BaseViewSetTest):
             assert response.status_code == 403
 
         return response
+
+
+def create_xuserinfo_header(user):
+    """Create an X_USERINFO header, so we can fake out auth properly."""
+
+    return {
+        "X_USERINFO": b64encode(
+            json.dumps(
+                {
+                    "sub": user.global_id,
+                    "preferred_username": user.username,
+                    "email": user.email,
+                    "name": f"{user.first_name} {user.last_name}",
+                }
+            ).encode()
+        )
+    }

@@ -1,5 +1,6 @@
 """Views for the users app."""
 
+import logging
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -11,6 +12,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from system_meta.models import IntegratedSystem
 from unified_ecommerce.serializers import UserSerializer
+
+log = logging.getLogger(__name__)
 
 
 class LoggedOutView(TemplateView):
@@ -73,5 +76,7 @@ def establish_session(request):
                 )
             except IntegratedSystem.DoesNotExist:
                 return redirect(settings.MITOL_UE_PAYMENT_BASKET_CHOOSER)
+
+    log.debug("sending user to %s", next_url)
 
     return redirect(next_url)

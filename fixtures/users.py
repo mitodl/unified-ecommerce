@@ -12,8 +12,7 @@ from unified_ecommerce.factories import UserFactory
 
 
 @pytest.fixture()
-def user(db):  # noqa: ARG001
-    """Create a user"""
+def user(db):  # noqa: ARG001    """Create a user"""
     return UserFactory.create()
 
 

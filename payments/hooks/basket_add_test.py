@@ -16,6 +16,7 @@ from payments.factories import (
     ProductFactory,
     TaxRateFactory,
 )
+from unified_ecommerce.test_utils import create_xuserinfo_header
 
 pytestmark = [pytest.mark.django_db]
 FAKE = faker.Faker()
@@ -49,7 +50,7 @@ def user_client_and_basket():
 
     basket = BasketFactory.create()
 
-    user_client = APIClient()
+    user_client = APIClient(headers=create_xuserinfo_header(basket.user))
     user_client.force_login(basket.user)
 
     return user_client, basket

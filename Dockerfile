@@ -33,6 +33,9 @@ RUN pip install "poetry==$POETRY_VERSION"
 
 COPY pyproject.toml /src
 COPY poetry.lock /src
+# Gets any locally-build ol-django packages
+# You can then add these to the pyproject and they should build in successfully.
+COPY mitol_django_*.gz /src
 RUN chown -R mitodl:mitodl /src
 RUN mkdir ${VIRTUAL_ENV} && chown -R mitodl:mitodl ${VIRTUAL_ENV}
 

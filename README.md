@@ -33,14 +33,46 @@ If you don't have a Keycloak instance set up, or if you want to test with a know
 
 The following settings must be configured before running the app:
 
+#### App Settings
+
 - `MITOL_UE_HOSTNAME`
 
   Sets the hostname required by webpack for building the frontend. Should likely be whatever you set
-  the host to in your /etc/hosts or the hostname that you're accessing it from. Likely `ue.odl.local`.
+  the host to in your /etc/hosts or the hostname that you're accessing it from. Likely `api.pay.odl.local`.
 
 - `SECRET_KEY`
 
   Sets the Django secret for the application. This just needs to be a random string.
+
+- `MITOL_UE_COOKIE_NAME`
+
+  The name to use for the cookie for the app. A good choice is something like `mitolpay-local`.
+
+- `MITOL_USE_COOKIE_DOMAIN`
+
+  The domain to use for the cookie - for local development, use a pretty generic one like `odl.local`.
+
+- `MITOL_UE_PAYMENT_BASKET_ROOT`
+
+  The root URL for the basket page. This defaults to `/cart/` (which is the cart test mule app), but if you're testing the actual frontend, this needs to be set to go there (i.e. `http://pay.odl.local:8072/`). Make sure this has a `/` appended since it is used to _generate_ URLs.
+
+- `MITOL_UE_PAYMENT_BASKET_CHOOSER`
+
+  The URL for an optional "chooser" page. If the `establish_session` call happens without a valid system slug, the user gets sent here so they can choose which cart they want to see. This is usually set to the same as the basket root above.
+
+- `MITOL_UE_PAYMENT_INTERSTITIAL_DEBUG`
+
+  Set to True to get a debug screen when you check out. This gives you an easy way to see the payload that's being sent to CyberSource, and the ability to cancel sending it.
+
+- `MITOL_LEARN_API_URL`
+
+  The URL to use for the Learn API. UE will pull product data from the API here. This can be handy for local testing (to get real products/prices) - if you want to use production, set to `https://api.learn.mit.edu/api/v1/`.
+
+#### APISIX Configuration
+
+- `APISIX_SESSION_SECRET_KEY`
+
+  The secret key that APISIX will use to encode session data. This has a reasonable default, but if you do specify this, make sure the key you specify is _at least_ 16 characters long and is not numeric. (It can contain numbers but if you just put in 12345.. it will complain.)
 
 - `KEYCLOAK_REALM`
 
@@ -58,17 +90,12 @@ The following settings must be configured before running the app:
 
   The client secret for the OIDC client. No default - you will need to get this from the Keycloak admin, even if you're using the pack-in Keycloak instance.
 
-- `MITOL_UE_PAYMENT_BASKET_ROOT`
+#### Other Settings
 
-  The root URL for the basket page. This defaults to `/cart/` (which is the cart test mule app), but if you're testing the actual frontend, this needs to be set to go there (i.e. `http://learn.odl.local:8062/cart/`). Make sure this has a `/` appended since it is used to _generate_ a URL.
-
-- `MITOL_UE_PAYMENT_BASKET_CHOOSER`
-
-  The URL for an optional "chooser" page. If the `establish_session` call happens without a valid system slug, the user gets sent here so they can choose which cart they want to see.
-
-- `APISIX_SESSION_SECRET_KEY`
-
-  The secret key that APISIX will use to encode session data. This has a reasonable default, but if you do specify this, make sure the key you specify is _at least_ 16 characters long and is not numeric. (It can contain numbers but if you just put in 12345.. it will complain.)
+- **CyberSource**: You'll need to get CyberSource settings to make this app actually work. These can be pulled out of another _CI or RC_ app. _Do not_ pull these from a production app - the non-prod ones use test accounts that won't make real charges on the submitted card. See also the documentation in ol-django's payment_gateway app for info.
+- **Google Sheets**: The app can pull refund request from Google Sheets. If you want this functionality to work, check out the documentation in ol-django for `google_sheets` and `google_sheets_refunds`. See also the section later about this.
+  - If you want to set this up, you'll need to expose the app to the Internet. You may need to update your CORS, CSRF, and allowed hosts settings so your Internet-accessible domain is in the list.
+- **Path prefix routing**: In the deployed instances, we route requests to the app using a path prefix. The app includes support for prepending a prefix to its routes if you want to do this without setting up rewrites in APISIX. Set `MITOL_APP_PATH_PREFIX` to enable this.
 
 ### Loading and Accessing Data
 
@@ -116,13 +143,17 @@ Note that, since APISIX is run in "decoupled"/"standalone" mode, you _cannot_ us
 
 If you're getting 404 errors for all routes, make sure you've set the session key as noted above, and watch the logs for the `api` container. Debug mode is turned on so you should see errors on startup if it's unable to parse the routes file (`apisix.yaml`).
 
+The configuration should be generic enough that it should work across the board. Don't commit changes to these files unless you really need to.
+
 ## Code Generation
 
-Unified Ecommerce uses [drf-spectacular](https://drf-spectacular.readthedocs.io/en/latest/) to generate an OpenAPI spec from Django views. Additionally, we use [OpenAPITools/openapi-generator](https://github.com/OpenAPITools/openapi-generator) to generate Typescript declarations and an API Client. These generated files are checked into source control; CI checks that they are up-to-date. To regenerate these files, run
+Unified Ecommerce uses [drf-spectacular](https://drf-spectacular.readthedocs.io/en/latest/) to generate an OpenAPI spec from Django views. The generated spec is checked into source control; CI checks that it are up-to-date. To regenerate these files, run
 
 ```bash
 ./scripts/generate_openapi.sh
 ```
+
+> The actual API client is built separately.
 
 ## Committing & Formatting
 
