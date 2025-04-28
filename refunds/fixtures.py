@@ -13,7 +13,7 @@ from system_meta.factories import IntegratedSystemFactory, ProductFactory
 FAKE = faker.Faker()
 
 
-@pytest.fixture()
+@pytest.fixture
 def completed_order(user, integrated_system):
     """Create a completed order."""
 

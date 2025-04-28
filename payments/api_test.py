@@ -91,13 +91,13 @@ from unified_ecommerce.test_utils import generate_mocked_request
 pytestmark = [pytest.mark.django_db]
 
 
-@pytest.fixture()
+@pytest.fixture
 def fulfilled_order():
     """Fixture for creating a fulfilled order"""
     return OrderFactory.create(state=Order.STATE.FULFILLED)
 
 
-@pytest.fixture()
+@pytest.fixture
 def fulfilled_transaction(fulfilled_order):
     """Fixture to creating a fulfilled transaction"""
     payment_amount = 10.00
@@ -115,7 +115,7 @@ def fulfilled_transaction(fulfilled_order):
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def fulfilled_paypal_transaction(fulfilled_order):
     """Fixture to creating a fulfilled transaction"""
     payment_amount = 10.00
@@ -141,7 +141,7 @@ def fulfilled_paypal_transaction(fulfilled_order):
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def fulfilled_complete_order():
     """Create a fulfilled order with line items."""
 
@@ -160,14 +160,14 @@ def fulfilled_complete_order():
     return order
 
 
-@pytest.fixture()
+@pytest.fixture
 def products():
     """Create products"""
     with reversion.create_revision():
         return ProductFactory.create_batch(5)
 
 
-@pytest.fixture()
+@pytest.fixture
 def user(db):
     """Create a user"""
     return UserFactory.create()
