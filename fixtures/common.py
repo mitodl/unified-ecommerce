@@ -86,7 +86,7 @@ def mocked_responses():
         yield rsps
 
 
-@pytest.fixture  # noqa: PT001
+@pytest.fixture
 def admin_drf_client(admin_user):
     """DRF API test client with admin user"""
     client = APIClient()
