@@ -22,13 +22,13 @@ pytestmark = [pytest.mark.django_db]
 FAKE = faker.Faker()
 
 
-@pytest.fixture
+@pytest.fixture()  # noqa: PT001, RUF100
 def basket():
     """Create a basket."""
     return BasketFactory.create()
 
 
-@pytest.fixture
+@pytest.fixture()  # noqa: PT001, RUF100
 def maxmimd_resolvable_ip():
     """Create an IP, and then make sure there are mappings for it."""
 
@@ -44,7 +44,7 @@ def maxmimd_resolvable_ip():
     )
 
 
-@pytest.fixture
+@pytest.fixture()  # noqa: PT001, RUF100
 def user_client_and_basket():
     """Create a basket, and a user client with the basket's user."""
 
@@ -80,7 +80,7 @@ def mock_basket_add_hook_steps(mocker, exceptfor: str | None = None):
     }
 
 
-@pytest.fixture
+@pytest.fixture()  # noqa: PT001, RUF100
 def basket_add_hook_steps(mocker):
     """Mock the steps in the basket_add hook."""
 

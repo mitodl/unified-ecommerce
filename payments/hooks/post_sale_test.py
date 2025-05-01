@@ -11,7 +11,7 @@ from system_meta.factories import ProductFactory
 pytestmark = [pytest.mark.django_db]
 
 
-@pytest.fixture
+@pytest.fixture()  # noqa: PT001, RUF100
 def pending_complete_order():
     """Create a pending order with line items."""
 

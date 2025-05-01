@@ -1,5 +1,4 @@
 """User fixtures"""
-#ruff: noqa: RUF100
 
 # pylint: disable=unused-argument, redefined-outer-name
 from io import BytesIO
@@ -12,7 +11,7 @@ from rest_framework_jwt.settings import api_settings
 from unified_ecommerce.factories import UserFactory
 
 
-@pytest.fixture()  # noqa: PT001
+@pytest.fixture()  # noqa: PT001, RUF100
 def user(db):  # noqa: ARG001    """Create a user"""
     return UserFactory.create()
 
