@@ -1,5 +1,5 @@
 """User fixtures"""
-#ruff: noqa: RUF100
+# ruff: noqa: RUF100
 
 # pylint: disable=unused-argument, redefined-outer-name
 from io import BytesIO
