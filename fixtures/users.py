@@ -16,20 +16,20 @@ def user(db):  # noqa: ARG001    """Create a user"""
     return UserFactory.create()
 
 
-@pytest.fixture()  # noqa: PT001
+@pytest.fixture()  # noqa: PT001, RUF100
 def staff_user(db):  # noqa: ARG001
     """Create a staff user"""
     return UserFactory.create(is_staff=True)
 
 
-@pytest.fixture()  # noqa: PT001
+@pytest.fixture()  # noqa: PT001, RUF100
 def logged_in_user(client, user):
     """Log the user in and yield the user object"""
     client.force_login(user)
     return user
 
 
-@pytest.fixture()  # noqa: PT001
+@pytest.fixture()  # noqa: PT001, RUF100
 def logged_in_profile(client):
     """Add a Profile and logged-in User"""
     user = UserFactory.create(username="george")
@@ -37,7 +37,7 @@ def logged_in_profile(client):
     return user.profile
 
 
-@pytest.fixture()  # noqa: PT001
+@pytest.fixture()  # noqa: PT001, RUF100
 def jwt_token(db, user, client, rf, settings):  # noqa: ARG001
     """Creates a JWT token for a regular user"""  # noqa: D401
     jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
@@ -49,7 +49,7 @@ def jwt_token(db, user, client, rf, settings):  # noqa: ARG001
     return token
 
 
-@pytest.fixture()  # noqa: PT001
+@pytest.fixture()  # noqa: PT001, RUF100
 def client(db):  # noqa: ARG001
     """
     Similar to the builtin client but this provides the DRF client instead of the Django test client.
@@ -57,7 +57,7 @@ def client(db):  # noqa: ARG001
     return APIClient()
 
 
-@pytest.fixture()  # noqa: PT001
+@pytest.fixture()  # noqa: PT001, RUF100
 def user_client(user):
     """Version of the client that is authenticated with the user"""
     client = APIClient()
@@ -65,7 +65,7 @@ def user_client(user):
     return client
 
 
-@pytest.fixture()  # noqa: PT001
+@pytest.fixture()  # noqa: PT001, RUF100
 def staff_client(staff_user):
     """Version of the client that is authenticated with the staff_user"""
     client = APIClient()
@@ -73,7 +73,7 @@ def staff_client(staff_user):
     return client
 
 
-@pytest.fixture()  # noqa: PT001
+@pytest.fixture()  # noqa: PT001, RUF100
 def profile_image():
     """Create a PNG image"""
     image_file = BytesIO()
