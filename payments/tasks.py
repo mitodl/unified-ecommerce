@@ -53,10 +53,7 @@ def dispatch_webhook(system_webhook_url, webhook_data, attempt_count=0):
 
         if attempt_count == settings.MITOL_UE_WEBHOOK_RETRY_MAX:
             log.exception(
-                (
-                    "Hit the retry max (%s) for webhook URL %s for event %s, "
-                    "giving up"
-                ),
+                ("Hit the retry max (%s) for webhook URL %s for event %s, giving up"),
                 attempt_count,
                 webhook_dataclass,
                 exc_info=e,

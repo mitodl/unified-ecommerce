@@ -899,10 +899,7 @@ class PendingOrder(Order):
 
         if len(product_versions) == 0:
             log.error(
-                (
-                    "PendingOrder._get_or_create: %s products are there "
-                    "but no versions?"
-                ),
+                ("PendingOrder._get_or_create: %s products are there but no versions?"),
                 len(products),
             )
             msg = "No product versions found"

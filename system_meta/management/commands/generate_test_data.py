@@ -59,7 +59,7 @@ def fake_courseware_id(courseware_type: str, **kwargs) -> str:
     courseware_type = courseware_type.lower()
     optional_third_digit = random.randint(0, 9) if fake.boolean() else ""
     optional_run_tag = (
-        f"+{random.randint(1,3)}T{fake.date_this_decade().year}"
+        f"+{random.randint(1, 3)}T{fake.date_this_decade().year}"
         if kwargs.get("include_run_tag", False)
         else ""
     )

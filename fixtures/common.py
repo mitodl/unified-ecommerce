@@ -14,13 +14,13 @@ from urllib3.exceptions import InsecureRequestWarning
 
 
 @pytest.fixture(autouse=True)
-def silence_factory_logging():  # noqa: PT004
+def _silence_factory_logging():
     """Only show factory errors"""
     logging.getLogger("factory").setLevel(logging.ERROR)
 
 
 @pytest.fixture(autouse=True)
-def warnings_as_errors():  # noqa: PT004
+def _warnings_as_errors():
     """
     Convert warnings to errors. This should only affect unit tests, letting pylint and other plugins
     raise DeprecationWarnings without erroring.
@@ -49,13 +49,13 @@ def warnings_as_errors():  # noqa: PT004
         warnings.resetwarnings()
 
 
-@pytest.fixture()
-def randomness():  # noqa: PT004
+@pytest.fixture()  # noqa: PT001, RUF100
+def _randomness():
     """Ensure a fixed seed for factoryboy"""
     factory.fuzzy.reseed_random("happy little clouds")
 
 
-@pytest.fixture()
+@pytest.fixture()  # noqa: PT001, RUF100
 def mocked_celery(mocker):
     """Mock object that patches certain celery functions"""
     exception_class = TabError
@@ -73,20 +73,20 @@ def mocked_celery(mocker):
     )
 
 
-@pytest.fixture()
+@pytest.fixture()  # noqa: PT001, RUF100
 def mock_context(mocker, user):
     """Mock context for serializers"""
     return {"request": mocker.Mock(user=user)}
 
 
-@pytest.fixture()
+@pytest.fixture()  # noqa: PT001, RUF100
 def mocked_responses():
     """Mock responses fixture"""
     with responses.RequestsMock() as rsps:
         yield rsps
 
 
-@pytest.fixture()
+@pytest.fixture()  # noqa: PT001, RUF100
 def admin_drf_client(admin_user):
     """DRF API test client with admin user"""
     client = APIClient()
