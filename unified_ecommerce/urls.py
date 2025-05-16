@@ -45,6 +45,7 @@ base_urlpatterns = [
     re_path(r"", include("system_meta.urls")),
     re_path(r"", include("users.urls")),
     re_path(r"", include("refunds.urls")),
+    re_path(r"^health/", include("health_check.urls")),
     path("", include("mitol.google_sheets.urls")),
     re_path(
         r"",
