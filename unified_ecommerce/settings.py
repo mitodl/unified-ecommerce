@@ -62,6 +62,12 @@ DEBUG = get_bool(name="DEBUG", default=False)
 ALLOWED_HOSTS = ["*"]
 
 SECURE_SSL_REDIRECT = get_bool("MITOL_UE_SECURE_SSL_REDIRECT", True)  # noqa: FBT003
+SECURE_REDIRECT_EXEMPT = [
+    "^health/startup/$",
+    "^health/liveness/$",
+    "^health/readiness/$",
+    "^health/full/$",
+]
 
 SITE_ID = 1
 SITE_BASE_URL = get_string("MITOL_UE_BASE_URL", None)
@@ -112,6 +118,12 @@ INSTALLED_APPS = [
     "cart",
     "openapi",
     "refunds",
+    "health_check",
+    "health_check.cache",
+    "health_check.contrib.migrations",
+    "health_check.contrib.celery_ping",
+    "health_check.contrib.redis",
+    "health_check.contrib.db_heartbeat",
 ]
 
 MIDDLEWARE = [
@@ -126,6 +138,39 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "hijack.middleware.HijackUserMiddleware",
 ]
+
+HEALTH_CHECK = {
+    "SUBSETS": {
+        # The 'startup' subset includes checks that must pass before the application can
+        # start.
+        "startup": [
+            "MigrationsHealthCheck",  # Ensures database migrations are applied.
+            "CacheBackend",  # Verifies the cache backend is operational.
+            "RedisHealthCheck",  # Confirms Redis is reachable and functional.
+            "DatabaseHeartBeatCheck",  # Checks the database connection is alive.
+        ],
+        # The 'liveness' subset includes checks to determine if the application is
+        # running.
+        "liveness": ["DatabaseHeartBeatCheck"],  # Minimal check to ensure the app is
+        # alive.
+        # The 'readiness' subset includes checks to determine if the application is
+        # ready to serve requests.
+        "readiness": [
+            "CacheBackend",  # Ensures the cache is ready for use.
+            "RedisHealthCheck",  # Confirms Redis is ready for use.
+            "DatabaseHeartBeatCheck",  # Verifies the database is ready for queries.
+        ],
+        # The 'full' subset includes all available health checks for a comprehensive
+        # status report.
+        "full": [
+            "MigrationsHealthCheck",  # Ensures database migrations are applied.
+            "CacheBackend",  # Verifies the cache backend is operational.
+            "RedisHealthCheck",  # Confirms Redis is reachable and functional.
+            "DatabaseHeartBeatCheck",  # Checks the database connection is alive.
+            "CeleryPingHealthCheck",  # Verifies Celery workers are responsive.
+        ],
+    }
+}
 
 AUTH_USER_MODEL = "users.User"
 
@@ -294,10 +339,6 @@ LOG_LEVEL = get_string("MITOL_UE_LOG_LEVEL", "INFO")
 DJANGO_LOG_LEVEL = get_string("DJANGO_LOG_LEVEL", "INFO")
 OS_LOG_LEVEL = get_string("OS_LOG_LEVEL", "INFO")
 
-# For logging to a remote syslog host
-LOG_HOST = get_string("MITOL_UE_LOG_HOST", "localhost")
-LOG_HOST_PORT = get_int("MITOL_UE_LOG_HOST_PORT", 514)
-
 HOSTNAME = platform.node().split(".")[0]
 
 # nplusone profiler logger configuration
@@ -324,13 +365,6 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        "syslog": {
-            "level": LOG_LEVEL,
-            "class": "logging.handlers.SysLogHandler",
-            "facility": "local7",
-            "formatter": "verbose",
-            "address": (LOG_HOST, LOG_HOST_PORT),
-        },
         "mail_admins": {
             "level": "ERROR",
             "filters": ["require_debug_false"],
@@ -341,7 +375,7 @@ LOGGING = {
         "django": {
             "propagate": True,
             "level": DJANGO_LOG_LEVEL,
-            "handlers": ["console", "syslog"],
+            "handlers": ["console"],
         },
         "django.request": {
             "handlers": ["mail_admins"],
@@ -352,11 +386,10 @@ LOGGING = {
         "nplusone": {"handlers": ["console"], "level": "ERROR"},
         "boto3": {"handlers": ["console"], "level": "ERROR"},
     },
-    "root": {"handlers": ["console", "syslog"], "level": LOG_LEVEL},
+    "root": {"handlers": ["console"], "level": LOG_LEVEL},
 }
 
 STATUS_TOKEN = get_string("STATUS_TOKEN", "")
-HEALTH_CHECK = ["CELERY", "REDIS", "POSTGRES"]
 
 MEDIA_ROOT = get_string("MEDIA_ROOT", "/var/media/")
 MEDIA_URL = "/media/"
@@ -378,6 +411,7 @@ if MITOL_UE_USE_S3:
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     AWS_DEFAULT_ACL = "public-read"
 
+REDIS_URL = get_string("REDIS_URL", None)
 # django cache back-ends
 CACHES = {
     "default": {
@@ -390,7 +424,7 @@ CACHES = {
     },
     "redis": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": CELERY_BROKER_URL,  # noqa: F405
+        "LOCATION": REDIS_URL,
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
     },
     "durable": {
