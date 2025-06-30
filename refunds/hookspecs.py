@@ -1,5 +1,4 @@
 """Hookspecs for refunds."""
-# ruff: noqa: ARG001
 
 import pluggy
 
