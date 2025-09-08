@@ -2,7 +2,6 @@
 As described in
 http://celery.readthedocs.org/en/latest/django/first-steps-with-django.html
 """
-# ruff: noqa: E402
 
 import os
 
