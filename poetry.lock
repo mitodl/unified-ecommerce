@@ -1589,17 +1589,17 @@ doc = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-spelling"]
 
 [[package]]
 name = "faker"
-version = "21.0.1"
+version = "37.12.0"
 description = "Faker is a Python package that generates fake data for you."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "Faker-21.0.1-py3-none-any.whl", hash = "sha256:0afc67ec898a2d71842a3456e9302620ebc35fab6ad4f3829693fdf151fa4a3a"},
-    {file = "Faker-21.0.1.tar.gz", hash = "sha256:bb404bba449b87e6b54a8c50b4602765e9c1a42eaf48abfceb025e42fed01608"},
+    {file = "faker-37.12.0-py3-none-any.whl", hash = "sha256:afe7ccc038da92f2fbae30d8e16d19d91e92e242f8401ce9caf44de892bab4c4"},
+    {file = "faker-37.12.0.tar.gz", hash = "sha256:7505e59a7e02fa9010f06c3e1e92f8250d4cfbb30632296140c2d6dbef09b0fa"},
 ]
 
 [package.dependencies]
-python-dateutil = ">=2.4"
+tzdata = "*"
 
 [[package]]
 name = "fancycompleter"
@@ -4688,4 +4688,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.13.2"
-content-hash = "4450cade315650f7268b3cc58ff6131a53caef03d0ce76d9fb6d7f64f76e3b56"
+content-hash = "cabd6a33523dcf3ef16d5cff95847c83d9c73f40c7a3fa5dd177d57e82713285"
