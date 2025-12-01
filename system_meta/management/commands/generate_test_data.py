@@ -5,7 +5,7 @@ products each.
 Ignoring A003 because "help" is valid for argparse.
 Ignoring S311 because it's complaining about the faker package.
 """
-# ruff: noqa: A003, S311
+# ruff: noqa: S311
 
 import random
 import uuid

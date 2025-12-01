@@ -127,7 +127,7 @@ def get_user_basket_for_system(request, system_slug: str):
 
 
 def _create_basket_from_product(
-    request, system_slug: str, sku: str, discount_code: Optional[str] = None
+    request, system_slug: str, sku: str, discount_code: str | None = None
 ):
     """
     Create a new basket item from a product for the currently logged in user. Reuse
@@ -241,7 +241,7 @@ def create_basket_from_product(request, system_slug: str, sku: str):
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def create_basket_from_product_with_discount(
-    request, system_slug: str, sku: str, discount_code: Optional[str] = None
+    request, system_slug: str, sku: str, discount_code: str | None = None
 ):
     """Run _create_basket_from_product with the discount code."""
 

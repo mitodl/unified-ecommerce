@@ -8,7 +8,6 @@ Return codes:
 
 Ignoring A003 because "help" is valid for argparse.
 """
-# ruff: noqa: A003
 
 from django.core.management import BaseCommand, CommandError
 
