@@ -1,14 +1,13 @@
 """Tasks for the system_meta app."""
 
 import logging
-from typing import Optional
 
 import requests
 from celery import shared_task
 
 
 @shared_task
-def update_products(product_id: Optional[int] = None):
+def update_products(product_id: int | None = None):
     """
     Update product metadata from the Learn API.
 

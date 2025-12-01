@@ -1,5 +1,4 @@
 """Hookspecs for the payments app."""
-# ruff: noqa: ARG001
 
 import pluggy
 
