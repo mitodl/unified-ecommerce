@@ -1210,13 +1210,13 @@ async-rq = ["django-rq (>=0.6.0)"]
 
 [[package]]
 name = "django-ipware"
-version = "6.0.5"
+version = "7.0.1"
 description = "A Django application to retrieve user's IP address"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "django-ipware-6.0.5.tar.gz", hash = "sha256:b39e27403287d6beb0513e694024017dba58d129fd410a1014ac8a1584e73fce"},
-    {file = "django_ipware-6.0.5-py2.py3-none-any.whl", hash = "sha256:a4b73de9a58af9aaa08710da689fb87e39ec470f8df6dc7ee9f8e2d3e0cdef6a"},
+    {file = "django-ipware-7.0.1.tar.gz", hash = "sha256:d9ec43d2bf7cdf216fed8d494a084deb5761a54860a53b2e74346a4f384cff47"},
+    {file = "django_ipware-7.0.1-py2.py3-none-any.whl", hash = "sha256:db16bbee920f661ae7f678e4270460c85850f03c6761a4eaeb489bdc91f64709"},
 ]
 
 [package.dependencies]
@@ -4688,4 +4688,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.13.2"
-content-hash = "4450cade315650f7268b3cc58ff6131a53caef03d0ce76d9fb6d7f64f76e3b56"
+content-hash = "25d0de6f9c94bdad60eaf65dea64dee4e463523abf93a49a62519721de9865fc"
