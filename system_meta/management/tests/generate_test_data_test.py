@@ -1,5 +1,4 @@
 """Tests for the manage_product command"""
-# ruff: noqa: W605
 
 import re
 from io import StringIO

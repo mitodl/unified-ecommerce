@@ -1,5 +1,4 @@
 """Constants for ecommerce."""
-# ruff: noqa: ERA001
 
 from mitol.payment_gateway.api import ProcessorResponse
 
